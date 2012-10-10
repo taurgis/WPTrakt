@@ -22,25 +22,6 @@ namespace WPtrakt
             InitializeComponent();
             DataContext = App.MyShowsViewModel;
             this.Loaded += new RoutedEventHandler(MyShowsPage_Loaded);
-
-            Color themebackground = (Color)Application.Current.Resources["PhoneForegroundColor"];
-
-            if (themebackground.ToString() == "#FFFFFFFF")
-            {
-                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/EmptyPanoramaBackground.png", UriKind.Relative));
-                ImageBrush imageBrush = new ImageBrush();
-                imageBrush.ImageSource = bitmapImage;
-
-                this.MyShowsPanorama.Background = imageBrush;
-            }
-            else
-            {
-                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/EmptyPanoramaBackgroundWhite.png", UriKind.Relative));
-                ImageBrush imageBrush = new ImageBrush();
-                imageBrush.ImageSource = bitmapImage;
-
-                this.MyShowsPanorama.Background = imageBrush;
-            }  
         }
 
         private void MyShowsPage_Loaded(object sender, RoutedEventArgs e)

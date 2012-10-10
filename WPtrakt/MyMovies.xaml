@@ -10,7 +10,7 @@
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
     xmlns:local="clr-namespace:WPtrakt"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
@@ -20,6 +20,9 @@
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Name="MyMoviesPanorama">
+            <controls:Panorama.Background>
+                <ImageBrush ImageSource="Images/EmptyPanoramaBackground.png"/>
+            </controls:Panorama.Background>
             <controls:PanoramaItem Margin="0 -50" Orientation="Horizontal">
                 <!--Double line list with image placeholder and text wrapping-->
                 <StackPanel>
@@ -66,4 +69,10 @@
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
+
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
+             <shell:ApplicationBarIconButton IconUri="Images/appbar.refresh.rest.png" Text="Refresh" Click="ApplicationBarIconButton_Click" />
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>

@@ -49,6 +49,23 @@ namespace WPtrakt.Controllers
             return traktObject;
         }
 
+        public static void saveObjectInMainFolder(Object theObject, Type type, String fileName)
+        {
+            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+               
+                using (var isoFileStream = isoStore.CreateFile(fileName))
+                {
+                    DataContractJsonSerializer ser = new DataContractJsonSerializer(type);
+
+                    ser.WriteObject(isoFileStream, theObject);
+
+                    isoFileStream.Close();
+                }
+
+            }
+        }
+
 
         public static TraktObject LoadObject(String file, Type type)
         {  
@@ -58,6 +75,20 @@ namespace WPtrakt.Controllers
                 {
                     var ser = new DataContractJsonSerializer(type);
                    return (TraktObject)ser.ReadObject(stream);
+                }
+
+            }
+        }
+
+
+        public static Object LoadObjectFromMain(String file, Type type)
+        {
+            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                using (IsolatedStorageFileStream stream = isoStore.OpenFile(file, FileMode.Open))
+                {
+                    var ser = new DataContractJsonSerializer(type);
+                    return ser.ReadObject(stream);
                 }
 
             }

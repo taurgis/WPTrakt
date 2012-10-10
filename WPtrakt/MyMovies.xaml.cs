@@ -6,6 +6,7 @@ using Clarity.Phone.Controls;
 using Microsoft.Phone.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.IO.IsolatedStorage;
 
 namespace WPtrakt
 {
@@ -16,25 +17,6 @@ namespace WPtrakt
             InitializeComponent();
             DataContext = App.MyMoviesViewModel;
             this.Loaded += new RoutedEventHandler(MyMoviesPage_Loaded);
-
-            Color themebackground = (Color)Application.Current.Resources["PhoneForegroundColor"];
-
-            if (themebackground.ToString() == "#FFFFFFFF")
-            {
-                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/EmptyPanoramaBackground.png", UriKind.Relative));
-                ImageBrush imageBrush = new ImageBrush();
-                imageBrush.ImageSource = bitmapImage;
-
-                this.MyMoviesPanorama.Background = imageBrush;
-            }
-            else
-            {
-                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/EmptyPanoramaBackgroundWhite.png", UriKind.Relative));
-                ImageBrush imageBrush = new ImageBrush();
-                imageBrush.ImageSource = bitmapImage;
-
-                this.MyMoviesPanorama.Background = imageBrush;
-            }  
         }
 
         private void MyMoviesPage_Loaded(object sender, RoutedEventArgs e)
@@ -78,6 +60,13 @@ namespace WPtrakt
         }
 
         #endregion
+
+        private void ApplicationBarIconButton_Click(object sender, EventArgs e)
+        {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("mymovies.json");
+ 
+            App.MyMoviesViewModel.LoadData();
+        }
     }
 
     public class MovieNameSelector : IQuickJumpGridSelector

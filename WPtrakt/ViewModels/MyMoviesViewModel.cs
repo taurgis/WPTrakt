@@ -11,6 +11,7 @@ using System.Threading;
 using WPtrakt.Model;
 using VPtrakt.Controllers;
 using WPtrakt.Controllers;
+using System.IO.IsolatedStorage;
 
 namespace WPtrakt
 {
@@ -93,11 +94,48 @@ namespace WPtrakt
 
         public void LoadData()
         {
+            this.MovieItems = new ObservableCollection<ListItemViewModel>();
+            RefreshMyMoviesView();
+            String fileName ="mymovies.json";
+            if (StorageController.doesFileExist(fileName))
+            {
+                if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime("mymovies.json")).Days < 1)
+                {
+
+                    TraktMovie[] myMovies = (TraktMovie[])StorageController.LoadObjectFromMain(fileName, typeof(TraktMovie[]));
+
+                    ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                    foreach (TraktMovie movie in myMovies)
+                    {
+                        tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                    }
+
+                    if (tempItems.Count == 0)
+                    {
+                        tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                    }
+
+                    UpdateMyMovieView(tempItems);
+                }
+                else
+                    CallMyMoviesService();
+               
+            }
+            else
+            {
+                CallMyMoviesService();
+            }
+
+            
+
+            this.IsDataLoaded = true;
+        }
+
+        private void CallMyMoviesService()
+        {
             var trendingClient = new WebClient();
             trendingClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMoviesStringCompleted);
             trendingClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/library/movies/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-
-            this.IsDataLoaded = true;
         }
 
         void client_UploadMoviesStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -111,7 +149,7 @@ namespace WPtrakt
                     //parse into jsonser
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
                     TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
-
+                    StorageController.saveObjectInMainFolder(obj, typeof(TraktMovie[]), "mymovies.json");
                     foreach (TraktMovie movie in obj)
                     {
                         tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
@@ -121,16 +159,26 @@ namespace WPtrakt
                     {
                         tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
                     }
-
-                    this.MovieItems = tempItems;
-                    NotifyPropertyChanged("MovieItems");
-                    NotifyPropertyChanged("LoadingStatusMovies");
+                    UpdateMyMovieView(tempItems);
                 }
             }
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+        }
+
+        private void UpdateMyMovieView(ObservableCollection<ListItemViewModel> tempItems)
+        {
+
+            this.MovieItems = tempItems;
+            RefreshMyMoviesView();
+        }
+
+        private void RefreshMyMoviesView()
+        {
+            NotifyPropertyChanged("MovieItems");
+            NotifyPropertyChanged("LoadingStatusMovies");
         }
 
         public void LoadSuggestData()

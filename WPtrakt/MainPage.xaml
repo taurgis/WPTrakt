@@ -19,7 +19,9 @@
     <Grid x:Name="LayoutRoot" >
         <!--Panorama control-->
         <controls:Panorama IsEnabled="{Binding PanoramaEnabled}" Name="MainPanorama" Title=" " Margin="0,0,0,-39">
-         
+            <controls:Panorama.Background>
+                <ImageBrush ImageSource="Images/PanoramaBackground.png"/>
+            </controls:Panorama.Background>
 
             <!--Panorama item one-->
             <controls:PanoramaItem Header="Profile" Margin="0 -50">
