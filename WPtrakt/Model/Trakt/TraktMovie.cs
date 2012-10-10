@@ -14,7 +14,7 @@ using VPtrakt.Model.Trakt;
 namespace WPtrakt.Model.Trakt
 {
     [DataContract]
-    public class TraktMovie
+    public class TraktMovie : TraktObject
     {
         [DataMember(Name = "title")]
         public String Title { get; set; }
@@ -69,6 +69,22 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "rating")]
         public String MyRating { get; set; }
+
+        public static String getFolderStatic()
+        {
+            return "movie";
+        }
+
+
+        public override String getFolder()
+        {
+            return "movie";
+        }
+
+        public override String getIdentifier()
+        {
+            return this.imdb_id;
+        }
     }
 }
 /*

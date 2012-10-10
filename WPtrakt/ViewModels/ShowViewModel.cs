@@ -295,16 +295,37 @@ namespace WPtrakt
 
         public void LoadData(String tvdb)
         {
-            var showClient = new WebClient();
+           
             if(currentSeason == 0)
              currentSeason = 1;
             this._tvdb = tvdb;
-            showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShowStringCompleted);
-            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/summary.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb), AppUser.createJsonStringForAuthentication());
+
+            String fileName = TraktShow.getFolderStatic() + "/" + tvdb + ".json";
+            if (StorageController.doesFileExist(fileName))
+            {
+                TraktShow show = (TraktShow)StorageController.LoadObject(fileName, typeof(TraktShow));
+                if ((DateTime.Now - show.DownloadTime).Days < 1)
+                {
+                    UpdateShowView(show);
+                }
+                else
+                    CallShowService(tvdb);
+            }
+            else
+            {
+                CallShowService(tvdb);
+            }
 
             var seasonClient = new WebClient();
             seasonClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadSeasonsStringCompleted);
             seasonClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/seasons.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb));
+        }
+
+        private void CallShowService(String tvdb)
+        {
+            var showClient = new WebClient();
+            showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShowStringCompleted);
+            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/summary.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb), AppUser.createJsonStringForAuthentication());
         }
 
         void client_UploadShowStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -317,25 +338,8 @@ namespace WPtrakt
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktShow));
                     TraktShow show = (TraktShow)ser.ReadObject(ms);
-                    _name = show.Title;
-                    _fanart = show.Images.Fanart;
-                    _genres = show.Genres;
-                    _imdb = show.imdb_id;
-                    _overview = show.Overview;
-                    _runtime = show.Runtime.ToString();
-                    _certification = show.Certification;
-                    _year = show.year.ToString();
-                    NotifyPropertyChanged("Name");
-                    NotifyPropertyChanged("Fanart");
-                    NotifyPropertyChanged("GenreString");
-                    NotifyPropertyChanged("Overview");
-                    NotifyPropertyChanged("Certification");
-                    NotifyPropertyChanged("Year");
-                    NotifyPropertyChanged("Runtime");
-                    NotifyPropertyChanged("LoadingStatusShow");
-                    NotifyPropertyChanged("DetailVisibility");
-
-                    LoadBackgroundImage();
+                    StorageController.saveObject(show, typeof(TraktShow));
+                    UpdateShowView(show);
                     IsDataLoaded = true;
                 }
             }
@@ -343,6 +347,29 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+        }
+
+        private void UpdateShowView(TraktShow show)
+        {
+            _name = show.Title;
+            _fanart = show.Images.Fanart;
+            _genres = show.Genres;
+            _imdb = show.imdb_id;
+            _overview = show.Overview;
+            _runtime = show.Runtime.ToString();
+            _certification = show.Certification;
+            _year = show.year.ToString();
+            NotifyPropertyChanged("Name");
+            NotifyPropertyChanged("Fanart");
+            NotifyPropertyChanged("GenreString");
+            NotifyPropertyChanged("Overview");
+            NotifyPropertyChanged("Certification");
+            NotifyPropertyChanged("Year");
+            NotifyPropertyChanged("Runtime");
+            NotifyPropertyChanged("LoadingStatusShow");
+            NotifyPropertyChanged("DetailVisibility");
+
+            LoadBackgroundImage();
         }
 
         void client_DownloadSeasonsStringCompleted(object sender, DownloadStringCompletedEventArgs e)

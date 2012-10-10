@@ -13,7 +13,7 @@ using System.Runtime.Serialization;
 namespace WPtrakt.Model.Trakt
 {
     [DataContract]
-    public class TraktShow
+    public class TraktShow : TraktObject
     {
         [DataMember(Name = "title")]
         public String Title { get; set; }
@@ -62,6 +62,21 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "genres")]
         public String[] Genres { get; set; }
+
+        public static String getFolderStatic()
+        {
+            return "show";
+        }
+
+        public override String getFolder()
+        {
+            return "show";
+        }
+
+        public override String getIdentifier()
+        {
+            return this.tvdb_id;
+        }
     }
 }
 /*

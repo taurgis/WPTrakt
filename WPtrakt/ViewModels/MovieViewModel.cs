@@ -1,25 +1,15 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
-using System.IO;
-using System.IO.IsolatedStorage;
-using System.Windows.Media.Imaging;
-using WPtrakt.Controllers;
 using System.Collections.ObjectModel;
-using System.Text;
+using System.ComponentModel;
+using System.IO;
+using System.Net;
 using System.Runtime.Serialization.Json;
-using WPtrakt.Model.Trakt;
-using WPtrakt.Model;
+using System.Text;
+using System.Windows.Media.Imaging;
 using VPtrakt.Controllers;
+using WPtrakt.Controllers;
+using WPtrakt.Model;
+using WPtrakt.Model.Trakt;
 
 namespace WPtrakt
 {
@@ -388,6 +378,25 @@ namespace WPtrakt
 
         public void LoadData(String imdbId)
         {
+            String fileName= TraktMovie.getFolderStatic() + "/" + imdbId + ".json";
+            if (StorageController.doesFileExist(fileName))
+            {
+                TraktMovie movie = (TraktMovie)StorageController.LoadObject(fileName, typeof(TraktMovie));
+                if ((DateTime.Now - movie.DownloadTime).Days < 1)
+                {
+                    UpdateMovieView(movie);
+                }
+                else
+                    CallMovieService(imdbId);
+            }
+            else
+            {
+               CallMovieService(imdbId);
+            }
+        }
+
+        private void CallMovieService(String imdbId)
+        {
             var movieClient = new WebClient();
             this._imdb = imdbId;
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
@@ -404,31 +413,9 @@ namespace WPtrakt
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie));
                     TraktMovie movie = (TraktMovie)ser.ReadObject(ms);
-                    _name = movie.Title;
-                    _fanart = movie.Images.Fanart;
-                    _genres = movie.Genres;
-                    _overview = movie.Overview;
-                    _runtime = movie.Runtime.ToString();
-                    _certification = movie.Certification;
-                    _year = movie.year.ToString();
-                    _InWatchlist = movie.InWatchlist;
-                    _rating = movie.Ratings.Percentage;
-                    _votes = movie.Ratings.Votes;
-                    _myRating = movie.MyRating;
-                    _myRatingAdvanced = movie.MyRatingAdvanced;
-                    _watched = movie.Watched;
-
-                    NotifyPropertyChanged("Name");
-                    NotifyPropertyChanged("Fanart");
-                    NotifyPropertyChanged("GenreString");
-                    NotifyPropertyChanged("Overview");
-                    NotifyPropertyChanged("Certification");
-                    NotifyPropertyChanged("Year");
-                    NotifyPropertyChanged("Runtime");
-                    NotifyPropertyChanged("LoadingStatusMovie");
-                    NotifyPropertyChanged("DetailVisibility");
-                    NotifyPropertyChanged("RatingString");
-                    LoadBackgroundImage();
+                    StorageController.saveObject(movie, typeof(TraktMovie));
+                    UpdateMovieView(movie);
+                 
                     IsDataLoaded = true;
                 }
             }
@@ -436,6 +423,36 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+        }
+
+        private void UpdateMovieView(TraktMovie movie)
+        {
+            _name = movie.Title;
+            _fanart = movie.Images.Fanart;
+            _genres = movie.Genres;
+            _overview = movie.Overview;
+            _runtime = movie.Runtime.ToString();
+            _certification = movie.Certification;
+            _year = movie.year.ToString();
+            _InWatchlist = movie.InWatchlist;
+            _rating = movie.Ratings.Percentage;
+            _votes = movie.Ratings.Votes;
+            _myRating = movie.MyRating;
+            _myRatingAdvanced = movie.MyRatingAdvanced;
+            _watched = movie.Watched;
+
+            NotifyPropertyChanged("Name");
+            NotifyPropertyChanged("Fanart");
+            NotifyPropertyChanged("GenreString");
+            NotifyPropertyChanged("Overview");
+            NotifyPropertyChanged("Certification");
+            NotifyPropertyChanged("Year");
+            NotifyPropertyChanged("Runtime");
+            NotifyPropertyChanged("LoadingStatusMovie");
+            NotifyPropertyChanged("DetailVisibility");
+            NotifyPropertyChanged("RatingString");
+
+            LoadBackgroundImage();
         }
 
         public void LoadShoutData(String imdbId)
