@@ -72,7 +72,7 @@ namespace WPtrakt
         {
             ApplicationBar appBar = new ApplicationBar();
 
-            previousSeason = new ApplicationBarIconButton(new Uri("appbar.back.rest.png", UriKind.Relative));
+            previousSeason = new ApplicationBarIconButton(new Uri("Images/appbar.back.rest.png", UriKind.Relative));
             previousSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeBack);
             previousSeason.Text = "Previous";
 
@@ -83,7 +83,7 @@ namespace WPtrakt
 
             appBar.Buttons.Add(previousSeason);
 
-            nextSeason = new ApplicationBarIconButton(new Uri("appbar.next.rest.png", UriKind.Relative));
+            nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
             nextSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeForward);
 
             if (App.ShowViewModel.currentSeason == App.ShowViewModel.numberOfSeasons)

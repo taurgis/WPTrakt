@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using WPtrakt.Model;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace WPtrakt
 {
@@ -17,24 +17,7 @@ namespace WPtrakt
             DataContext = App.ViewModel;
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
 
-            Color themebackground = (Color)Application.Current.Resources["PhoneForegroundColor"];
-
-            if (themebackground.ToString() == "#FFFFFFFF")
-            {
-                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/PanoramaBackground.png", UriKind.Relative));
-                ImageBrush imageBrush = new ImageBrush();
-                imageBrush.ImageSource = bitmapImage;
-
-                this.MainPanorama.Background = imageBrush;
-            }
-            else
-            {
-                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/PanoramaBackgroundWhite.png", UriKind.Relative));
-                ImageBrush imageBrush = new ImageBrush();
-                imageBrush.ImageSource = bitmapImage;
-
-                this.MainPanorama.Background = imageBrush;
-            }  
+            LoadBackgroundBasedOnTheme(); 
         }
         
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -56,6 +39,32 @@ namespace WPtrakt
                 {
                     App.ViewModel.LoadData();
                 }
+            }
+        }
+
+        /// <summary>
+        ///   Load the main view background image based on the base theme (White or Black). If not, the text
+        ///   would become unreadable on some places.
+        /// </summary>
+        private void LoadBackgroundBasedOnTheme()
+        {
+            Color themebackground = (Color)Application.Current.Resources["PhoneForegroundColor"];
+
+            if (themebackground.ToString() == "#FFFFFFFF")
+            {
+                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/PanoramaBackground.png", UriKind.Relative));
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = bitmapImage;
+
+                this.MainPanorama.Background = imageBrush;
+            }
+            else
+            {
+                BitmapImage bitmapImage = new BitmapImage(new Uri("Images/PanoramaBackgroundWhite.png", UriKind.Relative));
+                ImageBrush imageBrush = new ImageBrush();
+                imageBrush.ImageSource = bitmapImage;
+
+                this.MainPanorama.Background = imageBrush;
             }
         }
 

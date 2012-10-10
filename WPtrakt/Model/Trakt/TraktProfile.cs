@@ -13,7 +13,7 @@ using System.Runtime.Serialization;
 namespace WPtrakt.Model.Trakt
 {
     [DataContract]
-    public class TraktProfile
+    public class TraktProfile : TraktObject
     {
         [DataMember(Name = "username")]
         public String Username { get; set; }
