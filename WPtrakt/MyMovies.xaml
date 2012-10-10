@@ -1,0 +1,69 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="WPtrakt.MyMovies"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
+    xmlns:local="clr-namespace:WPtrakt"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress">
+
+    <!--LayoutRoot contains the root grid where all other page content is placed-->
+    <Grid x:Name="LayoutRoot">
+        <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Name="MyMoviesPanorama">
+            <controls:PanoramaItem Margin="0 -50" Orientation="Horizontal">
+                <!--Double line list with image placeholder and text wrapping-->
+                <StackPanel>
+                    <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusMovies}" Name="progressBar" IsIndeterminate="True" />
+                    <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovies}"/>
+                    <cc:QuickJumpGrid DataSource="{Binding MovieItems}"
+                                  IsAlphaNumeric="True"
+                                  Margin="12,0,0,0" Height="640" Width="Auto"  MaxWidth="880">
+                        <cc:QuickJumpGrid.QuickJumpGridSelector>
+                            <local:MovieNameSelector />
+                        </cc:QuickJumpGrid.QuickJumpGridSelector>
+                        <cc:QuickJumpGrid.ItemTemplate>
+                            <DataTemplate>
+                                <Canvas Margin="0,6,0,6" Height="103" Tap="Canvas_Tap">
+                                    <!--<Image Source="{Binding ThumbImage}" Width="61" Height="91"/>-->
+                                    <StackPanel VerticalAlignment="Top" Orientation="Vertical">
+                                        <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </StackPanel>
+                                </Canvas>
+                            </DataTemplate>
+                        </cc:QuickJumpGrid.ItemTemplate>
+                    </cc:QuickJumpGrid>
+                </StackPanel>
+            </controls:PanoramaItem>
+            <controls:PanoramaItem Margin="0 -50" Header="Suggestions" Visibility="{Binding SuggestionsVisibility}" Orientation="Horizontal">
+                <StackPanel>
+                   <ListBox  Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Height="519" Width="700">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <toolkit:WrapPanel ItemWidth="138" ItemHeight="203"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding MediumImage}" Margin="5 5 5 5" Width="138" Height="203" Tap="Image_Tap" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ProgressBar  HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSuggestions}" Name="progressBarSuggest" IsIndeterminate="True" />
+
+                </StackPanel>
+            </controls:PanoramaItem>
+        </controls:Panorama>
+    </Grid>
+</phone:PhoneApplicationPage>
