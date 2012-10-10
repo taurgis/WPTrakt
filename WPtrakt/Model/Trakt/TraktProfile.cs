@@ -44,5 +44,21 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "watched")]
         public TraktWatched[] Watched {get; set;}
+
+
+        public static String getFolderStatic()
+        {
+            return "profile";
+        }
+
+        public override String getFolder()
+        {
+            return "profile";
+        }
+
+        public override String getIdentifier()
+        {
+            return this.Username;
+        }
     }
 }

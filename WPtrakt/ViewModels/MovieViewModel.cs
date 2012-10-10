@@ -479,7 +479,7 @@ namespace WPtrakt
         {
             String fileName = this._imdb + "background" + ".jpg";
 
-            if (ImageController.doesImageFileExist(fileName))
+            if (StorageController.doesFileExist(fileName))
             {
                 _backgroundImage = ImageController.getImageFromStorage(fileName);
                 NotifyPropertyChanged("BackgroundImage");

@@ -263,7 +263,7 @@ namespace WPtrakt
                             NotifyPropertyChanged("SuggestItems");
                         });
 
-                        if (ImageController.doesImageFileExist(show.imdb_id + "medium" + ".jpg"))
+                        if (StorageController.doesFileExist(show.imdb_id + "medium" + ".jpg"))
                             Thread.Sleep(500);
                         else
                             Thread.Sleep(1000);

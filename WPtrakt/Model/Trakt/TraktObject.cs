@@ -17,5 +17,16 @@ namespace WPtrakt.Model.Trakt
     {
         [DataMember(Name = "DownloadTime")]
         public DateTime DownloadTime { get; set; }
+
+
+        public virtual  String getFolder()
+        {
+            return "";
+        }
+
+        public virtual  String getIdentifier()
+        {
+            return "";
+        }
     }
 }

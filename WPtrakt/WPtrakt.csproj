@@ -69,6 +69,7 @@
     </Compile>
     <Compile Include="Controllers\ErrorManager.cs" />
     <Compile Include="Controllers\ImageController.cs" />
+    <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
     <Compile Include="Model\Trakt\Request\TraktEpisode.cs" />
     <Compile Include="Model\Trakt\Request\WatchedEpisodeAuth.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Model\Trakt\Request\WatchedAuth.cs" />
     <Compile Include="Model\Trakt\Request\RatingAuth.cs" />
     <Compile Include="Model\Trakt\Request\WatchlistAuth.cs" />
+    <Compile Include="Model\Trakt\TraktObject.cs" />
     <Compile Include="Model\Trakt\TraktRating.cs" />
     <Compile Include="Model\Trakt\TraktSeason.cs" />
     <Compile Include="Model\Trakt\Request\TraktRequestAuth.cs" />
@@ -177,12 +179,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="appbar.back.rest.png" />
+    <Content Include="Images\appbar.back.rest.png" />
     <Content Include="Images\appbar.cancel.rest.png" />
     <Content Include="Images\appbar.check.rest.png" />
     <Content Include="Images\appbar.favs.rest.png" />
     <Content Include="Images\appbar.feature.settings.rest.png" />
-    <Content Include="appbar.next.rest.png" />
+    <Content Include="Images\appbar.next.rest.png" />
     <Content Include="Images\appbar.feature.video.rest.png" />
     <Content Include="Images\appbar.refresh.rest.png" />
     <Content Include="ApplicationIcon.png">
@@ -194,7 +196,6 @@
     <Content Include="Images\appbar.seen.rest.png" />
     <Content Include="Images\EmptyPanoramaBackgroundWhite.png" />
     <Content Include="Images\PanoramaBackground.png" />
-    <Resource Include="imagenotfound.jpg" />
     <Content Include="Images\EmptyPanoramaBackground.png" />
     <Content Include="Images\heart-love.png" />
     <Content Include="Images\PanoramaBackgroundWhite.png" />

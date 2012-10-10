@@ -269,7 +269,7 @@ namespace WPtrakt
                 {
                     String fileName = this._imdb + "thumb" + ".jpg";
 
-                    if (ImageController.doesImageFileExist(fileName))
+                    if (StorageController.doesFileExist(fileName))
                     {
                         _thumbImage = ImageController.getImageFromStorage(fileName);
                     }
@@ -303,7 +303,7 @@ namespace WPtrakt
                 {
                     String fileName = this._imdb + "screen" + ".jpg";
 
-                    if (ImageController.doesImageFileExist(fileName))
+                    if (StorageController.doesFileExist(fileName))
                     {
                         _screenImage = ImageController.getImageFromStorage(fileName);
                     }
@@ -336,7 +336,7 @@ namespace WPtrakt
                 {
                     String fileName = this._imdb + "medium" + ".jpg";
 
-                    if (ImageController.doesImageFileExist(fileName))
+                    if (StorageController.doesFileExist(fileName))
                     {
                         _mediumImage = ImageController.getImageFromStorage(fileName);
                     }

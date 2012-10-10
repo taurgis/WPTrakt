@@ -196,7 +196,7 @@ namespace WPtrakt
                         
                         });
 
-                        if (ImageController.doesImageFileExist(movie.imdb_id + "medium" + ".jpg"))
+                        if (StorageController.doesFileExist(movie.imdb_id + "medium" + ".jpg"))
                             Thread.Sleep(500);
                         else
                             Thread.Sleep(1000);

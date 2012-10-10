@@ -174,11 +174,21 @@ namespace WPtrakt
 
         public void LoadData()
         {
-            var profileClient = new WebClient();
-
-            profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
-            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/profile.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-
+            if (StorageController.doesFileExist(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json"))
+            {
+                _profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
+                if ((DateTime.Now - _profile.DownloadTime).Days < 1)
+                {
+                    loadHistory();
+                    RefreshProfile();
+                }
+                else
+                    CallProfileService();
+            }
+            else
+            {
+                CallProfileService();
+            }
             if (TrendingEnabled)
             {
                 this.LoadingStatusTrending = "Visible";
@@ -188,6 +198,14 @@ namespace WPtrakt
             }
 
             this.IsDataLoaded = true;
+        }
+
+        private void CallProfileService()
+        {
+            var profileClient = new WebClient();
+
+            profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
+            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/profile.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
         }
 
         void client_DownloadProfileStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -200,14 +218,9 @@ namespace WPtrakt
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktProfile));
                     _profile = (TraktProfile)ser.ReadObject(ms);
-
+                    StorageController.saveObject(_profile, typeof(TraktProfile));
                     loadHistory();
-                    NotifyPropertyChanged("UserAvatar");
-                    NotifyPropertyChanged("UserName");
-                    NotifyPropertyChanged("UserAbout");
-                    NotifyPropertyChanged("LoadingStatus");
-                    NotifyPropertyChanged("MainVisibility");
-                    NotifyPropertyChanged("PanoramaEnabled");
+                    RefreshProfile();
                 }
             }
             catch (WebException)
@@ -217,6 +230,16 @@ namespace WPtrakt
                 NotifyPropertyChanged("LoadingStatus");
                 ErrorManager.ShowConnectionErrorPopup();
             }
+        }
+
+        private void RefreshProfile()
+        {
+            NotifyPropertyChanged("UserAvatar");
+            NotifyPropertyChanged("UserName");
+            NotifyPropertyChanged("UserAbout");
+            NotifyPropertyChanged("LoadingStatus");
+            NotifyPropertyChanged("MainVisibility");
+            NotifyPropertyChanged("PanoramaEnabled");
         }
 
         void client_DownloadTrendingStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -275,7 +298,7 @@ namespace WPtrakt
 
                         });
 
-                        if(ImageController.doesImageFileExist(movie.imdb_id + "medium" + ".jpg"))
+                        if(StorageController.doesFileExist(movie.imdb_id + "medium" + ".jpg"))
                             Thread.Sleep(500);
                         else
                             Thread.Sleep(1000);
