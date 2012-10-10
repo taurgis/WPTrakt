@@ -440,6 +440,7 @@ namespace WPtrakt
             _myRating = movie.MyRating;
             _myRatingAdvanced = movie.MyRatingAdvanced;
             _watched = movie.Watched;
+            _imdb = movie.imdb_id;
 
             NotifyPropertyChanged("Name");
             NotifyPropertyChanged("Fanart");
