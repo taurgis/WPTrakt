@@ -379,8 +379,9 @@ namespace WPtrakt
 
         public void LoadData(String imdbId)
         {
-            String fileName = TraktMovie.getFolderStatic() + "/" + _imdb + ".json";
             this._imdb = imdbId;
+            String fileName = TraktMovie.getFolderStatic() + "/" + _imdb + ".json";
+            
          
             if (StorageController.doesFileExist(fileName))
             {

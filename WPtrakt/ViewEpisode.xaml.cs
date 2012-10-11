@@ -17,6 +17,7 @@ using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using VPtrakt.Controllers;
+using System.IO.IsolatedStorage;
 
 namespace WPtrakt
 {
@@ -132,6 +133,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 MessageBox.Show("Episode marked as watched.");
+              
                 App.EpisodeViewModel.Watched = true;
                 LoadAppBar();
             }

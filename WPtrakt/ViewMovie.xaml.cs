@@ -11,6 +11,7 @@ using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using System.Windows.Media.Animation;
+using System.IO.IsolatedStorage;
 
 namespace WPtrakt
 {
@@ -83,6 +84,8 @@ namespace WPtrakt
 
         private void ApplicationBarIconButton2_Click(object sender, EventArgs e)
         {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
+    
             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + App.MovieViewModel.Imdb + "&year=" + App.MovieViewModel.Year + "&title=" + App.MovieViewModel.Name, UriKind.Relative));
         }
 
@@ -92,6 +95,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 MessageBox.Show("Movie added to watchlist.");
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
                 LoadDisabledAddtoWatchlist();
             }
             catch (WebException)
@@ -193,6 +197,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 MessageBox.Show("Movie marked as watched.");
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
                 App.MovieViewModel.Watched = true;
                 if (App.MovieViewModel.InWatchlist)
                     LoadDisabledAddtoWatchlist();
