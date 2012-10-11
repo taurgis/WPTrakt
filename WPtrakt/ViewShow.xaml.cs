@@ -123,10 +123,22 @@ namespace WPtrakt
 
         private void StackPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            StackPanel senderPanel = (StackPanel)sender;
-            ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
-            NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-        }
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+            completedHandlerMainPage = delegate
+            {
+
+                StackPanel senderPanel = (StackPanel)sender;
+                ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
+                NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
+                 }
 
         private void PanoramaItem_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
@@ -157,6 +169,11 @@ namespace WPtrakt
             App.ShowViewModel.LoadEpisodeData(id);
 
             InitAppBar();
+        }
+
+        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Opacity = 1;
         }
     
 
