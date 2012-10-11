@@ -7,6 +7,7 @@ using Microsoft.Phone.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO.IsolatedStorage;
+using System.Windows.Media.Animation;
 
 namespace WPtrakt
 {
@@ -27,18 +28,25 @@ namespace WPtrakt
             }
         }
 
-        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-           App.MyMoviesViewModel = null;
-        }
-
         #region Taps
 
         private void Canvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Canvas senderCanvas = (Canvas)sender;
-            ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
-            NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+            completedHandlerMainPage = delegate
+            {
+
+                Canvas senderImage = (Canvas)sender;
+                ListItemViewModel model = (ListItemViewModel)senderImage.DataContext;
+                NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
         }
 
         private void Panorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -54,9 +62,21 @@ namespace WPtrakt
 
         private void Image_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Image senderImage = (Image)sender;
-            ListItemViewModel model = (ListItemViewModel)senderImage.DataContext;
-            NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+            completedHandlerMainPage = delegate
+            {
+
+                Image senderImage = (Image)sender;
+                ListItemViewModel model = (ListItemViewModel)senderImage.DataContext;
+                NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
         }
 
         #endregion
@@ -66,6 +86,25 @@ namespace WPtrakt
             IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("mymovies.json");
  
             App.MyMoviesViewModel.LoadData();
+        }
+
+        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandler = delegate { };
+            completedHandler = delegate
+            {
+                storyboard.Completed -= completedHandler;
+                storyboard.Stop();
+            };
+            storyboard.Completed += completedHandler;
+            storyboard.Begin();
+        }
+
+        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Opacity = 1;
         }
     }
 

@@ -8,6 +8,12 @@
 
     <!--Application Resources-->
     <Application.Resources>
+            <Storyboard x:Key="FadeOut">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
+                    <LinearDoubleKeyFrame KeyTime="0" Value="1"/>
+                    <LinearDoubleKeyFrame KeyTime="0:0:0.4" Value="0.0"/>
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
     </Application.Resources>
 
     <Application.ApplicationLifetimeObjects>

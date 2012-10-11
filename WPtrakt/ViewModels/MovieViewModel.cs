@@ -10,6 +10,7 @@ using VPtrakt.Controllers;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using System.Threading;
 
 namespace WPtrakt
 {
@@ -378,20 +379,42 @@ namespace WPtrakt
 
         public void LoadData(String imdbId)
         {
-            String fileName= TraktMovie.getFolderStatic() + "/" + imdbId + ".json";
+            String fileName = TraktMovie.getFolderStatic() + "/" + _imdb + ".json";
+            this._imdb = imdbId;
+         
             if (StorageController.doesFileExist(fileName))
             {
-                TraktMovie movie = (TraktMovie)StorageController.LoadObject(fileName, typeof(TraktMovie));
-                if ((DateTime.Now - movie.DownloadTime).Days < 1)
-                {
-                    UpdateMovieView(movie);
-                }
-                else
-                    CallMovieService(imdbId);
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = false;
+                worker.WorkerSupportsCancellation = false;
+                worker.DoWork += new DoWorkEventHandler(movieworker_DoWork);
+
+                worker.RunWorkerAsync();
             }
             else
             {
                CallMovieService(imdbId);
+            }
+        }
+
+        void movieworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.Sleep(1000);
+            String fileName = TraktMovie.getFolderStatic() + "/" + _imdb + ".json";
+            TraktMovie movie = (TraktMovie)StorageController.LoadObject(fileName, typeof(TraktMovie));
+            if ((DateTime.Now - movie.DownloadTime).Days < 1)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+               {
+                   UpdateMovieView(movie);
+               });
+            }
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+               {
+                   CallMovieService(_imdb);
+               });
             }
         }
 

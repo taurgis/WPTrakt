@@ -11,6 +11,7 @@ using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using VPtrakt.Controllers;
 using WPtrakt.Controllers;
+using System.IO.IsolatedStorage;
 
 
 namespace WPtrakt
@@ -110,11 +111,67 @@ namespace WPtrakt
 
         public void LoadData()
         {
+            this.ShowItems = new ObservableCollection<ListItemViewModel>();
+            RefreshMyShowsView();
+            String fileName = "myshows.json";
+            if (StorageController.doesFileExist(fileName))
+            {
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = false;
+                worker.WorkerSupportsCancellation = false;
+                worker.DoWork += new DoWorkEventHandler(myShowsworker_DoWork);
+
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                CallMyShowService();
+            }
+
+            this.IsDataLoaded = true;
+        }
+
+        void myShowsworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.Sleep(1000);
+            String fileName = "myshows.json";
+            if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
+            {
+
+                TraktShow[] myShows = (TraktShow[])StorageController.LoadObjectFromMain(fileName, typeof(TraktShow[]));
+
+                ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                foreach (TraktShow show in myShows)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres });
+                }
+
+                if (tempItems.Count == 0)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                }
+
+              
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    this.ShowItems = tempItems;
+                    RefreshMyShowsView();
+                });
+            }
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    CallMyShowService();
+                });
+            }
+        }
+
+        private void CallMyShowService()
+        {
             var trendingClient = new WebClient();
             trendingClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShowsStringCompleted);
             trendingClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/library/shows/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-
-            this.IsDataLoaded = true;
         }
 
         void client_UploadShowsStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -128,7 +185,7 @@ namespace WPtrakt
                     //parse into jsonser
                     var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
                     TraktShow[] obj = (TraktShow[])ser.ReadObject(ms);
-
+                    StorageController.saveObjectInMainFolder(obj, typeof(TraktShow[]), "myshows.json");
                     foreach (TraktShow show in obj)
                     {
                         tempItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres });
@@ -197,6 +254,12 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+        }
+
+        private void RefreshMyShowsView()
+        {
+            NotifyPropertyChanged("ShowItems");
+            NotifyPropertyChanged("LoadingStatusShows");
         }
 
 

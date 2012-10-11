@@ -23,12 +23,12 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> HistoryItems { get; private set; }
         private TraktProfile _profile;
         private List<TraktMovie> trendingMovies;
-        private BackgroundWorker worker;
+      
 
         public MainViewModel()
         {
             this.TrendingItems = new ObservableCollection<ListItemViewModel>();
-            worker = new BackgroundWorker();
+          
         }
 
         #region Getters/Setters
@@ -176,14 +176,12 @@ namespace WPtrakt
         {
             if (StorageController.doesFileExist(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json"))
             {
-                _profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
-                if ((DateTime.Now - _profile.DownloadTime).Days < 1)
-                {
-                    loadHistory();
-                    RefreshProfile();
-                }
-                else
-                    CallProfileService();
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = false;
+                worker.WorkerSupportsCancellation = false;
+                worker.DoWork += new DoWorkEventHandler(profileworker_DoWork);
+       
+                worker.RunWorkerAsync();
             }
             else
             {
@@ -199,6 +197,28 @@ namespace WPtrakt
 
             this.IsDataLoaded = true;
         }
+
+        void profileworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.Sleep(1000);
+            _profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
+            if ((DateTime.Now - _profile.DownloadTime).Days < 1)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    loadHistory();
+                    RefreshProfile();
+                });
+            }
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                 CallProfileService();
+                });
+            }
+        }
+
 
         private void CallProfileService()
         {
@@ -266,6 +286,7 @@ namespace WPtrakt
                     }
                 }
 
+                BackgroundWorker worker = new BackgroundWorker();
                 worker.WorkerReportsProgress = false;
                 worker.WorkerSupportsCancellation = false;
                 worker.DoWork += new DoWorkEventHandler(worker_DoWork);

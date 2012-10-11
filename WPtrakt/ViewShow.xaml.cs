@@ -101,6 +101,16 @@ namespace WPtrakt
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
             App.ShowViewModel = null;
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandler = delegate { };
+            completedHandler = delegate
+            {
+                storyboard.Completed -= completedHandler;
+                storyboard.Stop();
+            };
+            storyboard.Completed += completedHandler;
+            storyboard.Begin();
         }
 
         private void ImdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)

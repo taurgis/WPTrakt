@@ -32,11 +32,6 @@ namespace WPtrakt
             }
         }
 
-        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            App.MyShowsViewModel = null;
-        }
-
         private void Panorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (this.MyShowsPanorama.SelectedIndex == 1)
@@ -59,28 +54,81 @@ namespace WPtrakt
 
         private void Canvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Canvas senderCanvas = (Canvas)sender;
-            ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
-            NavigationService.Navigate(new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+            completedHandlerMainPage = delegate
+            {
+                Canvas senderCanvas = (Canvas)sender;
+                ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
+                NavigationService.Navigate(new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
         }
 
         private void StackPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            StackPanel senderPanel = (StackPanel)sender;
-            ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
-            NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+            completedHandlerMainPage = delegate
+            {
+                StackPanel senderPanel = (StackPanel)sender;
+                ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
+                NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
+        
         }
 
 
         private void Image_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Image senderImage = (Image)sender;
-            ListItemViewModel model = (ListItemViewModel)senderImage.DataContext;
-            NavigationService.Navigate(new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+            completedHandlerMainPage = delegate
+            {
+                Image senderCanvas = (Image)sender;
+                ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
+                NavigationService.Navigate(new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
 
         }
 
         #endregion
+
+        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandler = delegate { };
+            completedHandler = delegate
+            {
+                storyboard.Completed -= completedHandler;
+                storyboard.Stop();
+            };
+            storyboard.Completed += completedHandler;
+            storyboard.Begin();
+        }
+
+        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Opacity = 1;
+        }
     }
 
     public class ShowNameSelector : IQuickJumpGridSelector

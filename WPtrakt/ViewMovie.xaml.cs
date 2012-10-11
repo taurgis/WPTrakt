@@ -10,6 +10,7 @@ using VPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
+using System.Windows.Media.Animation;
 
 namespace WPtrakt
 {
@@ -46,6 +47,16 @@ namespace WPtrakt
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
             App.MovieViewModel = null;
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandler = delegate { };
+            completedHandler = delegate
+            {
+                storyboard.Completed -= completedHandler;
+                storyboard.Stop();
+            };
+            storyboard.Completed += completedHandler;
+            storyboard.Begin();
         }
 
         private void ImdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)

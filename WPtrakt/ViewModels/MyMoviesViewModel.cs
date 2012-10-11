@@ -99,36 +99,53 @@ namespace WPtrakt
             String fileName ="mymovies.json";
             if (StorageController.doesFileExist(fileName))
             {
-                if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime("mymovies.json")).Days < 1)
-                {
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = false;
+                worker.WorkerSupportsCancellation = false;
+                worker.DoWork += new DoWorkEventHandler(myMoviesworker_DoWork);
 
-                    TraktMovie[] myMovies = (TraktMovie[])StorageController.LoadObjectFromMain(fileName, typeof(TraktMovie[]));
-
-                    ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
-                    foreach (TraktMovie movie in myMovies)
-                    {
-                        tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
-                    }
-
-                    if (tempItems.Count == 0)
-                    {
-                        tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
-                    }
-
-                    UpdateMyMovieView(tempItems);
-                }
-                else
-                    CallMyMoviesService();
-               
+                worker.RunWorkerAsync();
             }
             else
             {
                 CallMyMoviesService();
             }
 
-            
 
             this.IsDataLoaded = true;
+        }
+
+        void myMoviesworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.Sleep(1000);
+            String fileName = "mymovies.json";
+            if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
+            {
+
+                TraktMovie[] myMovies = (TraktMovie[])StorageController.LoadObjectFromMain(fileName, typeof(TraktMovie[]));
+
+                ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                foreach (TraktMovie movie in myMovies)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                }
+
+                if (tempItems.Count == 0)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                }
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+               {
+                   UpdateMyMovieView(tempItems);
+               });
+            }
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+               {
+                   CallMyMoviesService();
+               });
+            }
         }
 
         private void CallMyMoviesService()
