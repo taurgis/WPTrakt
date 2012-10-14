@@ -273,6 +273,107 @@ namespace WPtrakt
                 }
             }
         }
+        private Int16 _rating;
+        public Int16 Rating
+        {
+            get
+            {
+                return _rating;
+            }
+            set
+            {
+                if (value != _rating)
+                {
+                    _rating = value;
+                }
+            }
+        }
+
+        private Boolean _watched;
+        public Boolean Watched
+        {
+            get
+            {
+                return _watched;
+            }
+            set
+            {
+                if (value != _watched)
+                {
+                    _watched = value;
+                }
+            }
+        }
+
+        private Int16 _votes;
+        public Int16 Votes
+        {
+            get
+            {
+                return _votes;
+            }
+            set
+            {
+                if (value != _votes)
+                {
+                    _votes = value;
+                }
+            }
+        }
+        public String RatingString
+        {
+            get
+            {
+                String baseString;
+                baseString = this.Rating / 10 + "/10 (" + this.Votes + ")";
+
+                if (!(this.MyRatingAdvanced == 0 && this.MyRating.Equals("false")))
+                {
+                    if (this.MyRatingAdvanced == 0 && !(this.MyRating.Equals("false")))
+                    {
+                        baseString += " - Mine: " + this.MyRating;
+                    }
+                    else
+                    {
+                        baseString += " - Mine: " + this.MyRatingAdvanced + "/10";
+                    }
+                }
+                return baseString;
+            }
+        }
+
+        private Int16 _myRatingAdvanced;
+        public Int16 MyRatingAdvanced
+        {
+            get
+            {
+                return _myRatingAdvanced;
+            }
+            set
+            {
+                if (value != _myRatingAdvanced)
+                {
+                    _myRatingAdvanced = value;
+                }
+            }
+        }
+
+        private String _myRating;
+        public String MyRating
+        {
+            get
+            {
+                return _myRating;
+            }
+            set
+            {
+                if (value != _myRating)
+                {
+                    _myRating = value;
+                }
+            }
+        }
+
 
         public String LoadingStatusSeason
         {
@@ -399,6 +500,11 @@ namespace WPtrakt
             _certification = show.Certification;
             _year = show.year.ToString();
             _InWatchlist = show.InWatchlist;
+            _rating = show.Ratings.Percentage;
+            _votes = show.Ratings.Votes;
+            _myRating = show.MyRating;
+            _myRatingAdvanced = show.MyRatingAdvanced;
+
             NotifyPropertyChanged("Name");
             NotifyPropertyChanged("Fanart");
             NotifyPropertyChanged("GenreString");
@@ -408,6 +514,7 @@ namespace WPtrakt
             NotifyPropertyChanged("Runtime");
             NotifyPropertyChanged("LoadingStatusShow");
             NotifyPropertyChanged("DetailVisibility");
+            NotifyPropertyChanged("RatingString");
 
             LoadBackgroundImage();
         }

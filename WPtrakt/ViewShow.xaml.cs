@@ -124,7 +124,22 @@ namespace WPtrakt
             disabledAddtoWatchlist.Text = "Watchlist +";
             appBar.Buttons.Add(disabledAddtoWatchlist);
 
+            ApplicationBarIconButton ratingButton = new ApplicationBarIconButton();
+            ratingButton = new ApplicationBarIconButton(new Uri("Images/appbar.favs.rest.png", UriKind.Relative));
+            ratingButton.IsEnabled = true;
+            ratingButton.Text = "Rate";
+            ratingButton.Click += new EventHandler(ratingButton_Click);
+
+            appBar.Buttons.Add(ratingButton);
+
             this.ApplicationBar = appBar;
+        }
+
+        void ratingButton_Click(object sender, EventArgs e)
+        {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + ".json");
+
+            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + App.ShowViewModel.Imdb + "&year=" + App.ShowViewModel.Year + "&title=" + App.ShowViewModel.Name, UriKind.Relative));
         }
 
         void disabledAddtoWatchlist_Click(object sender, EventArgs e)
@@ -147,7 +162,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 MessageBox.Show("Show added to watchlist.");
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Imdb + ".json");
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + ".json");
                 InitAppBarMain(true);
             }
             catch (WebException)
