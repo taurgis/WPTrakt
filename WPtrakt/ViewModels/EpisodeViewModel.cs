@@ -1,24 +1,14 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using System.IO;
-using System.IO.IsolatedStorage;
+using System.Net;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
-using System.Collections.ObjectModel;
-using System.Text;
-using System.Runtime.Serialization.Json;
-using WPtrakt.Model.Trakt;
 using WPtrakt.Model;
+using WPtrakt.Model.Trakt;
 
 namespace WPtrakt
 {
@@ -334,10 +324,54 @@ namespace WPtrakt
 
         public void LoadData(String tvdb, String season, String episode)
         {
-            var movieClient = new WebClient();
+            
             this._tvdb = tvdb;
             this._season = season;
             this._number = episode;
+
+            String fileName = TraktWatched.getFolderStatic() + "/" + tvdb + season + episode + ".json";
+            if (StorageController.doesFileExist(fileName))
+            {
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = false;
+                worker.WorkerSupportsCancellation = false;
+                worker.DoWork += new DoWorkEventHandler(episodeworker_DoWork);
+
+                worker.RunWorkerAsync();
+
+             
+            }
+            else
+            {
+                CallEpisodeService(tvdb, season, episode);
+            }
+
+   
+        }
+
+        void episodeworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String fileName = TraktWatched.getFolderStatic() + "/" + _tvdb + _season + _number + ".json";
+            TraktWatched episodeCache = (TraktWatched)StorageController.LoadObject(fileName, typeof(TraktWatched));
+            if ((DateTime.Now - episodeCache.DownloadTime).Days < 1)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    UpdateEpisodeView(episodeCache);
+                });
+            }
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    CallEpisodeService(_tvdb, _season, _number);
+                });
+            }
+        }
+
+        private void CallEpisodeService(String tvdb, String season, String episode)
+        {
+            var movieClient = new WebClient();
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeStringCompleted);
             movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/summary.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
         }
@@ -350,30 +384,36 @@ namespace WPtrakt
             {
                 var ser = new DataContractJsonSerializer(typeof(TraktWatched));
                 TraktWatched episode = (TraktWatched)ser.ReadObject(ms);
-                _showName = episode.Show.Title;
-                _showYear = episode.Show.year;
-                _name = episode.Episode.Title;
-                _fanart = episode.Show.Images.Fanart;
-                _overview = episode.Episode.Overview;
-                _season = episode.Episode.Season;
-                _number = episode.Episode.Number;
-                _screen = episode.Episode.Images.Screen;
-                _imdb = episode.Show.imdb_id;
-                _airDate = episode.Episode.FirstAired;
-                _watched = episode.Episode.Watched;
-                NotifyPropertyChanged("Name");
-                NotifyPropertyChanged("Fanart");
-                NotifyPropertyChanged("Overview");
-                NotifyPropertyChanged("Season");
-                NotifyPropertyChanged("Number");
-                NotifyPropertyChanged("AirDate");
-                NotifyPropertyChanged("LoadingStatusEpisode");
-                NotifyPropertyChanged("DetailVisibility");
-
-                LoadBackgroundImage();
-                LoadScreenImage();
+                StorageController.saveObject(episode, typeof(TraktWatched));
+                UpdateEpisodeView(episode);
                 IsDataLoaded = true;
             }
+        }
+
+        private void UpdateEpisodeView(TraktWatched episode)
+        {
+            _showName = episode.Show.Title;
+            _showYear = episode.Show.year;
+            _name = episode.Episode.Title;
+            _fanart = episode.Show.Images.Fanart;
+            _overview = episode.Episode.Overview;
+            _season = episode.Episode.Season;
+            _number = episode.Episode.Number;
+            _screen = episode.Episode.Images.Screen;
+            _imdb = episode.Show.imdb_id;
+            _airDate = episode.Episode.FirstAired;
+            _watched = episode.Episode.Watched;
+            NotifyPropertyChanged("Name");
+            NotifyPropertyChanged("Fanart");
+            NotifyPropertyChanged("Overview");
+            NotifyPropertyChanged("Season");
+            NotifyPropertyChanged("Number");
+            NotifyPropertyChanged("AirDate");
+            NotifyPropertyChanged("LoadingStatusEpisode");
+            NotifyPropertyChanged("DetailVisibility");
+
+            LoadBackgroundImage();
+            LoadScreenImage();
         }
 
         private void LoadBackgroundImage()

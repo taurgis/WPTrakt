@@ -13,7 +13,7 @@ using System.Runtime.Serialization;
 namespace WPtrakt.Model.Trakt
 {
     [DataContract]
-    public class TraktEpisode
+    public class TraktEpisode 
     {
         [DataMember(Name = "season")]
         public String Season { get; set; }
@@ -35,6 +35,8 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "watched")]
         public Boolean Watched { get; set; }
+
+    
     }
 
     /*

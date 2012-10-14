@@ -10,6 +10,7 @@ using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model;
 using VPtrakt.Controllers;
+using System.Threading;
 
 namespace WPtrakt
 {
@@ -303,13 +304,12 @@ namespace WPtrakt
             String fileName = TraktShow.getFolderStatic() + "/" + tvdb + ".json";
             if (StorageController.doesFileExist(fileName))
             {
-                TraktShow show = (TraktShow)StorageController.LoadObject(fileName, typeof(TraktShow));
-                if ((DateTime.Now - show.DownloadTime).Days < 1)
-                {
-                    UpdateShowView(show);
-                }
-                else
-                    CallShowService(tvdb);
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = false;
+                worker.WorkerSupportsCancellation = false;
+                worker.DoWork += new DoWorkEventHandler(showworker_DoWork);
+
+                worker.RunWorkerAsync();
             }
             else
             {
@@ -319,6 +319,27 @@ namespace WPtrakt
             var seasonClient = new WebClient();
             seasonClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadSeasonsStringCompleted);
             seasonClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/seasons.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb));
+        }
+
+        void showworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Thread.Sleep(1000);
+            String fileName = TraktShow.getFolderStatic() + "/" + _tvdb + ".json";
+            TraktShow show = (TraktShow)StorageController.LoadObject(fileName, typeof(TraktShow));
+            if ((DateTime.Now - show.DownloadTime).Days < 1)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                 UpdateShowView(show);
+                });
+            }
+            else
+            {
+                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                 {
+                     CallShowService(_tvdb);
+                 });
+            }
         }
 
         private void CallShowService(String tvdb)
