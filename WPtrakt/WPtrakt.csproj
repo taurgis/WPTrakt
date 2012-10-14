@@ -216,6 +216,10 @@
       <Project>{282CA4CA-0FF6-4A14-9FB2-1A14261A3953}</Project>
       <Name>Clarity.Phone</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WPtraktLiveTile\WPtraktLiveTile.csproj">
+      <Project>{EF30EF9C-FE16-4795-B541-71CAFB5B158B}</Project>
+      <Name>WPtraktLiveTile</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

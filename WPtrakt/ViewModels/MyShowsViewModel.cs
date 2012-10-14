@@ -228,7 +228,8 @@ namespace WPtrakt
                     //parse into jsonser
                     var ser = new DataContractJsonSerializer(typeof(TraktCalendar[]));
                     TraktCalendar[] obj = (TraktCalendar[])ser.ReadObject(ms);
-
+                    StorageController.saveObjectInMainFolder(obj, typeof(TraktCalendar[]), "upcomming.json");
+              
                     foreach (TraktCalendar calendarDate in obj)
                     {
                         ObservableCollection<ListItemViewModel> tempEpisodes = new ObservableCollection<ListItemViewModel>();

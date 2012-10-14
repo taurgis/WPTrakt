@@ -28,7 +28,14 @@ namespace WPtrakt
             DataContext = App.SettingsViewModel;
            
             this.Loaded += new RoutedEventHandler(SettingsPage_Loaded);
-            this.toggle.IsEnabled = false;  
+            var taskName = "WPtraktLiveTile";
+            var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
+            if (oldTask != null)
+            {
+                this.toggle.IsChecked = true;
+            }
+            else
+                this.toggle.IsChecked = false;
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -64,6 +71,27 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
 
+                if (toggle.IsChecked == true)
+                {
+                    var taskName = "WPtraktLiveTile";
+                    PeriodicTask task = new PeriodicTask(taskName);
+                    task.Description = "This task updates the WPtrakt live tile.";
+                    //at this point there are no tasks in background tasks of phone settings
+                    try
+                    {
+                        ScheduledActionService.Add(task);
+                    }
+                    catch (InvalidOperationException) { }
+                    //at this point, there are two tasks with app title, same description
+                   // ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+                }
+                else
+                {
+                    var taskName = "WPtraktLiveTile";
+                    ScheduledActionService.Remove(taskName);
+                    updateTileToStandard();
+                }
+
                 NavigationService.GoBack();
                
             }
@@ -98,6 +126,7 @@ namespace WPtrakt
         private void toggle_Unchecked(object sender, RoutedEventArgs e)
         {
             this.toggle.Content = "Disabled";
+           
         }
 
         private void updateTileToStandard()

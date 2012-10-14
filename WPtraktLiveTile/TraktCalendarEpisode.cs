@@ -10,15 +10,15 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Runtime.Serialization;
 
-namespace WPtrakt.Model.Trakt
+namespace WPtraktLiveTile
 {
     [DataContract]
-    public class TraktCalendar : TraktObject
+    public class TraktCalendarEpisode
     {
-        [DataMember(Name = "date")]
-        public String Date { get; set; }
+        [DataMember(Name = "show")]
+        public TraktShow Show { get; set; }
 
-        [DataMember(Name = "episodes")]
-        public TraktCalendarEpisode[] Episodes { get; set; }
+        [DataMember(Name = "episode")]
+        public TraktEpisode Episode { get; set; }
     }
 }
