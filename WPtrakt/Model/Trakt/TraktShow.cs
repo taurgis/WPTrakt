@@ -63,6 +63,9 @@ namespace WPtrakt.Model.Trakt
         [DataMember(Name = "genres")]
         public String[] Genres { get; set; }
 
+        [DataMember(Name = "in_watchlist")]
+        public Boolean InWatchlist { get; set; }
+
         public static String getFolderStatic()
         {
             return "show";

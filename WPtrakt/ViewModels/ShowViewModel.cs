@@ -69,6 +69,23 @@ namespace WPtrakt
             }
         }
 
+        private Boolean _InWatchlist;
+        public Boolean InWatchlist
+        {
+            get
+            {
+                return _InWatchlist;
+            }
+            set
+            {
+                if (value != _InWatchlist)
+                {
+                    _InWatchlist = value;
+
+                }
+            }
+        }
+
         private string _tvdb;
         public string Tvdb
         {
@@ -381,6 +398,7 @@ namespace WPtrakt
             _runtime = show.Runtime.ToString();
             _certification = show.Certification;
             _year = show.year.ToString();
+            _InWatchlist = show.InWatchlist;
             NotifyPropertyChanged("Name");
             NotifyPropertyChanged("Fanart");
             NotifyPropertyChanged("GenreString");

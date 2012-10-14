@@ -260,6 +260,7 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatus");
             NotifyPropertyChanged("MainVisibility");
             NotifyPropertyChanged("PanoramaEnabled");
+            NotifyPropertyChanged("HistoryItems");
         }
 
         void client_DownloadTrendingStringCompleted(object sender, UploadStringCompletedEventArgs e)

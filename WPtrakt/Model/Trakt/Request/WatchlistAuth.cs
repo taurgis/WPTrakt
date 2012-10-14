@@ -18,5 +18,7 @@ namespace VPtrakt.Model.Trakt.Request
     {
         [DataMember(Name = "movies")]
         public TraktMovie[] Movies { get; set; }
+        [DataMember(Name = "shows")]
+        public TraktShow[] Shows { get; set; }
     }
 }

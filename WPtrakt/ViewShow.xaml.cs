@@ -13,6 +13,11 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Tasks;
 using Microsoft.Phone.Shell;
 using System.Collections.ObjectModel;
+using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Model.Trakt;
+using WPtrakt.Model;
+using System.IO.IsolatedStorage;
+using VPtrakt.Controllers;
 
 namespace WPtrakt
 {
@@ -38,17 +43,21 @@ namespace WPtrakt
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (this.MoviePanorama.SelectedIndex == 1)
+            if (this.MoviePanorama.SelectedIndex == 0)
+            {
+                InitAppBarMain(false);
+            }
+            else if (this.MoviePanorama.SelectedIndex == 1)
             {
                 if (App.ShowViewModel.EpisodeItems.Count == 0)
                 {
-                   this.ApplicationBar.IsVisible = true;
-                  
+                    this.ApplicationBar.IsVisible = true;
+
                     String id;
                     NavigationContext.QueryString.TryGetValue("id", out id);
                     App.ShowViewModel.LoadEpisodeData(id);
                 }
-                InitAppBar();
+                InitAppBarSeasons();
 
             }
             else if (this.MoviePanorama.SelectedIndex == 2)
@@ -68,7 +77,7 @@ namespace WPtrakt
             }
         }
 
-        private void InitAppBar()
+        private void InitAppBarSeasons()
         {
             ApplicationBar appBar = new ApplicationBar();
 
@@ -96,6 +105,56 @@ namespace WPtrakt
             nextSeason.Text = "Next";
             appBar.Buttons.Add(nextSeason);
             this.ApplicationBar = appBar;
+        }
+
+        private void InitAppBarMain(Boolean forceDisabled)
+        {
+            ApplicationBar appBar = new ApplicationBar();
+            appBar.Mode = ApplicationBarMode.Minimized;
+            ApplicationBarIconButton disabledAddtoWatchlist = new ApplicationBarIconButton();
+            disabledAddtoWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.video.rest.png", UriKind.Relative));
+
+            if (App.ShowViewModel.InWatchlist || forceDisabled)
+            {
+                disabledAddtoWatchlist.IsEnabled = false;
+            }
+
+            disabledAddtoWatchlist.Click += new EventHandler(disabledAddtoWatchlist_Click);
+
+            disabledAddtoWatchlist.Text = "Watchlist +";
+            appBar.Buttons.Add(disabledAddtoWatchlist);
+
+            this.ApplicationBar = appBar;
+        }
+
+        void disabledAddtoWatchlist_Click(object sender, EventArgs e)
+        {
+            var watchlistClient = new WebClient();
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadWatchlistStringCompleted);
+            WatchlistAuth auth = new WatchlistAuth();
+            auth.Shows = new TraktShow[1];
+            auth.Shows[0] = new TraktShow();
+            auth.Shows[0].imdb_id = App.ShowViewModel.Imdb;
+            auth.Shows[0].Title = App.ShowViewModel.Name;
+            auth.Shows[0].year = Int16.Parse(App.ShowViewModel.Year);
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/watchlist/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+        }
+
+        void client_UploadWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                MessageBox.Show("Show added to watchlist.");
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Imdb + ".json");
+                InitAppBarMain(true);
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
@@ -157,7 +216,7 @@ namespace WPtrakt
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             NavigationContext.QueryString.TryGetValue("id", out id);
             App.ShowViewModel.LoadEpisodeData(id);
-            InitAppBar();
+            InitAppBarSeasons();
         }
 
         private void ApplicationBarIconButton_Click_EpisodeForward(object sender, EventArgs e)
@@ -168,12 +227,17 @@ namespace WPtrakt
             NavigationContext.QueryString.TryGetValue("id", out id);
             App.ShowViewModel.LoadEpisodeData(id);
 
-            InitAppBar();
+            InitAppBarSeasons();
         }
 
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
         {
             this.Opacity = 1;
+        }
+
+        private void ListBox_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            InitAppBarMain(false);
         }
     
 

@@ -83,10 +83,10 @@ namespace WPtraktLiveTile
                                 DateTime calDate = DateTime.Parse(calendar.Date);
                                 if ((DateTime.UtcNow.Year <= calDate.Year) && (DateTime.UtcNow.Month <= calDate.Month) && (DateTime.UtcNow.DayOfYear <= calDate.DayOfYear))
                                 {
-                                    airdate = calDate;
                                     if (nextEpisode == null)
                                     {
-                                        foreach(TraktCalendarEpisode traktEpisode in calendar.Episodes)
+                                        airdate = calDate;
+                                        foreach (TraktCalendarEpisode traktEpisode in calendar.Episodes)
                                         {
                                             DateTime episodeDateTime = DateTime.Parse(calendar.Date + " " + traktEpisode.Show.AirTime);
                                             if (episodeDateTime > DateTime.UtcNow)
@@ -96,6 +96,8 @@ namespace WPtraktLiveTile
                                             }
                                         }
                                     }
+                                    else
+                                        break;
                                 }
                             }
 
