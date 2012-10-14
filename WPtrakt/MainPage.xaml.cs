@@ -7,6 +7,8 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using WPtrakt.Model;
 using System.Windows.Media.Animation;
+using System.IO.IsolatedStorage;
+using WPtrakt.Model.Trakt;
 
 namespace WPtrakt
 {
@@ -52,6 +54,7 @@ namespace WPtrakt
 
         private void ApplicationBarRefreshButton_Click(object sender, EventArgs e)
         {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
             App.ViewModel.Profile = null;
             App.ViewModel.LoadData();
         }
