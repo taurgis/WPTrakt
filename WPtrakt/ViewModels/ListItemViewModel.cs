@@ -277,9 +277,10 @@ namespace WPtrakt
                     {
                         try
                         {
-                            WebClient client = new WebClient();
-                            client.OpenReadCompleted += new OpenReadCompletedEventHandler(client_OpenReadThumbCompleted);
-                            client.OpenReadAsync(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
+                            HttpWebRequest request;
+
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
+                            request.BeginGetResponse(new AsyncCallback(request_OpenReadThumbCompleted), new object[] { request });
                         }
                         catch (NullReferenceException) { }
                         return null;
@@ -311,9 +312,11 @@ namespace WPtrakt
                     {
                         if (_imageSource != null)
                         {
-                            WebClient client = new WebClient();
-                            client.OpenReadCompleted += new OpenReadCompletedEventHandler(client_OpenReadScreenCompleted);
-                            client.OpenReadAsync(new Uri(_imageSource));
+                            HttpWebRequest request;
+
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource));
+                            request.BeginGetResponse(new AsyncCallback(request_OpenReadScreenCompleted), new object[] { request });
+
                         }
                         return null;
                     }
@@ -342,9 +345,12 @@ namespace WPtrakt
                     }
                     else
                     {
-                        WebClient client = new WebClient();
-                        client.OpenReadCompleted += new OpenReadCompletedEventHandler(client_OpenReadMediumCompleted);
-                        client.OpenReadAsync(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
+                        HttpWebRequest request;
+
+                        request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
+                        request.BeginGetResponse(new AsyncCallback(request_OpenReadMediumCompleted), new object[] { request });
+
+
                         return null;
                     }
                     return _mediumImage;  
@@ -356,22 +362,63 @@ namespace WPtrakt
             }
         }
 
-        void client_OpenReadMediumCompleted(object sender, OpenReadCompletedEventArgs e)
+        void request_OpenReadMediumCompleted(IAsyncResult r)
         {
-            _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", e.Result, 120, 179, 70);
-            NotifyPropertyChanged("MediumImage");
+            object[] param = (object[])r.AsyncState;
+            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+            if (status == System.Net.HttpStatusCode.OK)
+            {
+                Stream str = httpResoponse.GetResponseStream();
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", str, 120, 179, 70);
+                    NotifyPropertyChanged("MediumImage");
+                }));
+            }
 
         }
-        void client_OpenReadScreenCompleted(object sender, OpenReadCompletedEventArgs e)
+        void request_OpenReadScreenCompleted(IAsyncResult r)
         {
-            _screenImage = ImageController.saveImage(_imdb + "screen.jpg", e.Result, 100, 56, 90);
-            NotifyPropertyChanged("ScreenImage");
+           
+            object[] param = (object[])r.AsyncState;
+            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+            if (status == System.Net.HttpStatusCode.OK)
+            {
+                Stream str = httpResoponse.GetResponseStream();
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _screenImage = ImageController.saveImage(_imdb + "screen.jpg", str, 100, 56, 90);
+            
+                    NotifyPropertyChanged("ScreenImage");
+                }));
+            }
         }
 
-        void client_OpenReadThumbCompleted(object sender, OpenReadCompletedEventArgs e)
+        private void request_OpenReadThumbCompleted(IAsyncResult r)
         {
-            _thumbImage = ImageController.saveImage(_imdb + "thumb.jpg", e.Result, 61, 91, 70);
-            NotifyPropertyChanged("ThumbImage");
+            object[] param = (object[])r.AsyncState;
+            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+            if (status == System.Net.HttpStatusCode.OK)
+            {
+                Stream str = httpResoponse.GetResponseStream();
+               
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                 {
+                     _thumbImage = ImageController.saveImage(_imdb + "thumb.jpg", str, 61, 91, 70);
+                    NotifyPropertyChanged("ThumbImage");
+                }));
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

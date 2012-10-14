@@ -11,6 +11,7 @@ using WPtrakt.Model.Trakt;
 using WPtrakt.Model;
 using VPtrakt.Controllers;
 using System.Threading;
+using System.Windows;
 
 namespace WPtrakt
 {
@@ -429,18 +430,31 @@ namespace WPtrakt
             }
             else
             {
-                WebClient client = new WebClient();
-                client.OpenReadCompleted += new OpenReadCompletedEventHandler(client_OpenReadFanartCompleted);
-                client.OpenReadAsync(new Uri(Fanart));
+                HttpWebRequest request;
 
+                request = (HttpWebRequest)WebRequest.Create(new Uri(Fanart));
+                request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
             }
         }
 
-        void client_OpenReadFanartCompleted(object sender, OpenReadCompletedEventArgs e)
+        void request_OpenReadFanartCompleted(IAsyncResult r)
         {
-            _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", e.Result, 800, 450, 100);
-            NotifyPropertyChanged("BackgroundImage");
+            object[] param = (object[])r.AsyncState;
+            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
 
+            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+            if (status == System.Net.HttpStatusCode.OK)
+            {
+                Stream str = httpResoponse.GetResponseStream();
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
+
+                    NotifyPropertyChanged("BackgroundImage");
+                }));
+            }
         }
 
         public void LoadEpisodeData(String tvdb)

@@ -320,9 +320,9 @@ namespace WPtrakt
                         });
 
                         if(StorageController.doesFileExist(movie.imdb_id + "medium" + ".jpg"))
-                            Thread.Sleep(500);
+                            Thread.Sleep(250);
                         else
-                            Thread.Sleep(1000);
+                            Thread.Sleep(500);
                     }
             }
         }
