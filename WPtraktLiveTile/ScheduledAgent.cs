@@ -10,6 +10,7 @@ using System.Net;
 using System.Text;
 using System.Collections.Generic;
 using System.Windows.Media.Imaging;
+using System.Net.NetworkInformation;
 
 namespace WPtraktLiveTile
 {
@@ -79,72 +80,14 @@ namespace WPtraktLiveTile
                         else
                         {
                             TraktCalendarEpisode nextEpisode = null;
-                           
-                            List<TraktCalendarEpisode> upcommingEpisodes = new List<TraktCalendarEpisode>();
 
-
-                            foreach (TraktCalendar calendar in cal)
-                            {
-                                DateTime calDate = DateTime.Parse(calendar.Date);
-                         
-                                if ((DateTime.UtcNow.Year <= calDate.Year) && (DateTime.UtcNow.Month <= calDate.Month) && (DateTime.UtcNow.DayOfYear <= calDate.DayOfYear))
-                                {
-                                    if ((calDate - DateTime.Now).Days > 7)
-                                        break;
-
-                                    foreach (TraktCalendarEpisode episode in calendar.Episodes)
-                                    {
-                                        episode.Date = calDate;
-                                        upcommingEpisodes.Add(episode);
-                                    }
-                                }
-
-                            }
-
-                            nextEpisode = upcommingEpisodes[new Random().Next(upcommingEpisodes.Count)];
+                            nextEpisode = LookupRandomNextEpisode(cal, nextEpisode);
 
                             if (nextEpisode != null)
                             {
-                                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-                                {
-                                    if (store.FileExists(nextEpisode.Show.imdb_id + "background" + ".jpg"))
-                                    {
-                                        if (!store.FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
-                                        {
-                                            store.CopyFile(nextEpisode.Show.imdb_id + "background" + ".jpg", "/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        HttpWebRequest request;
-                                        ImdbId = nextEpisode.Show.imdb_id;
-                                        request = (HttpWebRequest)WebRequest.Create(new Uri(nextEpisode.Show.Images.Fanart));
-                                        request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-                                     
-                                    }
-                                }
+                                LoadBackgroundImage(nextEpisode);
 
-                                ShellTile appTile = ShellTile.ActiveTiles.First();
-
-                                if (appTile != null)
-                                {
-                                    StandardTileData newTileData = new StandardTileData();
-                                    newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
-                                    newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today") : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
-
-                                    if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
-                                    {
-                                        newTileData.BackgroundImage = new Uri("appdata:background.png");
-                                        appTile.Update(newTileData);
-                                    }
-                                    else
-                                    {
-                                        newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg", 
-                                                              UriKind.Absolute);
-                                        appTile.Update(newTileData);
-                                        NotifyComplete();
-                                    }
-                                }
+                                CreateEpisodeTile(nextEpisode);
                             }
                             else
                             {
@@ -160,6 +103,82 @@ namespace WPtraktLiveTile
             {
                 createNoUpcommingTile();
                 UpdateUpcomming();
+            }
+        }
+
+        private static TraktCalendarEpisode LookupRandomNextEpisode(TraktCalendar[] cal, TraktCalendarEpisode nextEpisode)
+        {
+            List<TraktCalendarEpisode> upcommingEpisodes = new List<TraktCalendarEpisode>();
+
+
+            foreach (TraktCalendar calendar in cal)
+            {
+                DateTime calDate = DateTime.Parse(calendar.Date);
+
+                if ((DateTime.UtcNow.Year <= calDate.Year) && (DateTime.UtcNow.Month <= calDate.Month) && (DateTime.UtcNow.DayOfYear <= calDate.DayOfYear))
+                {
+                    if ((calDate - DateTime.Now).Days > 7)
+                        break;
+
+                    foreach (TraktCalendarEpisode episode in calendar.Episodes)
+                    {
+                        episode.Date = calDate;
+                        upcommingEpisodes.Add(episode);
+                    }
+                }
+
+            }
+
+            nextEpisode = upcommingEpisodes[new Random().Next(upcommingEpisodes.Count)];
+            return nextEpisode;
+        }
+
+        private void CreateEpisodeTile(TraktCalendarEpisode nextEpisode)
+        {
+            ShellTile appTile = ShellTile.ActiveTiles.First();
+
+            if (appTile != null)
+            {
+                StandardTileData newTileData = new StandardTileData();
+                newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
+                newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today") : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
+
+                if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
+                {
+                    newTileData.BackgroundImage = new Uri("appdata:background.png");
+                    appTile.Update(newTileData);
+                }
+                else
+                {
+                    newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg",
+                                          UriKind.Absolute);
+                    appTile.Update(newTileData);
+                    NotifyComplete();
+                }
+            }
+        }
+
+        private void LoadBackgroundImage(TraktCalendarEpisode nextEpisode)
+        {
+            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                if (store.FileExists(nextEpisode.Show.imdb_id + "background" + ".jpg"))
+                {
+                    if (!store.FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
+                    {
+                        store.CopyFile(nextEpisode.Show.imdb_id + "background" + ".jpg", "/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg");
+                    }
+                }
+                else
+                {
+                    if (NetworkInterface.GetIsNetworkAvailable())
+                    {
+                        HttpWebRequest request;
+                        ImdbId = nextEpisode.Show.imdb_id;
+                        request = (HttpWebRequest)WebRequest.Create(new Uri(nextEpisode.Show.Images.Fanart));
+                        request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
+                    }
+                }
             }
         }
 
@@ -203,9 +222,12 @@ namespace WPtraktLiveTile
 
         private void UpdateUpcomming()
         {
-            var calendarClient = new WebClient();
-            calendarClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadCalendartringCompleted);
-            calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + IsolatedStorageSettings.ApplicationSettings["UserName"] + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"), createJsonStringForAuthentication());
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                var calendarClient = new WebClient();
+                calendarClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadCalendartringCompleted);
+                calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + IsolatedStorageSettings.ApplicationSettings["UserName"] + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"), createJsonStringForAuthentication());
+            }
         }
 
         private String createJsonStringForAuthentication()
@@ -270,11 +292,7 @@ namespace WPtraktLiveTile
             {
                 var bi = new BitmapImage();
                 bi.SetSource(pic);
-
-              
-
                 var wb = new WriteableBitmap(bi);
-
 
                 using (var isoFileStream = isoStore.CreateFile(fileName))
                 {
