@@ -41,9 +41,7 @@
                         <ListBoxItem>
                             <toolkit:ToggleSwitch  Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="320" />
                         </ListBoxItem>
-                        <ListBoxItem>
-                            <TextBlock Margin="0 -20" HorizontalAlignment="Center" TextWrapping="Wrap"  Text="The background of the tile will only show the image of the show, if the show has been viewed inside the application (The background image is downloaded then.)" Style="{StaticResource PhoneTextSubtleStyle}" Width="410" Height="109" />
-                        </ListBoxItem>
+                        <ListBoxItem></ListBoxItem>
                     </ListBox>
                     <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" />
                 </StackPanel>

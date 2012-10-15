@@ -88,7 +88,7 @@ namespace WPtrakt
                     }
                     catch (InvalidOperationException) { }
                     //at this point, there are two tasks with app title, same description
-                   ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+                   //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
                 }
                 else
                 {

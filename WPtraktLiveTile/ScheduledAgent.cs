@@ -85,8 +85,6 @@ namespace WPtraktLiveTile
 
                             if (nextEpisode != null)
                             {
-                                LoadBackgroundImage(nextEpisode);
-
                                 CreateEpisodeTile(nextEpisode);
                             }
                             else
@@ -143,33 +141,19 @@ namespace WPtraktLiveTile
                 newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
                 newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today") : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
 
-                if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg"))
+                if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/wptile.jpg"))
                 {
                     newTileData.BackgroundImage = new Uri("appdata:background.png");
                     appTile.Update(newTileData);
                 }
                 else
                 {
-                    newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg",
+                    newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/wptile.jpg",
                                           UriKind.Absolute);
                     appTile.Update(newTileData);
                 }
 
                  NotifyComplete();
-            }
-        }
-
-        private void LoadBackgroundImage(TraktCalendarEpisode nextEpisode)
-        {
-            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                if (store.FileExists(nextEpisode.Show.tvdb_id + "background.jpg"))
-                {
-                    if (!store.FileExists("/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg"))
-                    {
-                        store.CopyFile(nextEpisode.Show.tvdb_id + "background.jpg", "/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg");
-                    }
-                }
             }
         }
 
