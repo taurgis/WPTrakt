@@ -87,13 +87,7 @@ namespace WPtrakt
                 }
                 else
                 {
-                    var taskName = "WPtraktLiveTile";
-                    try
-                    {
-                        ScheduledActionService.Remove(taskName);
-                    }
-                    catch (InvalidOperationException) { }
-                    updateTileToStandard();
+                    DisableLiveTile();
                 }
 
                 NavigationService.GoBack();
@@ -101,11 +95,23 @@ namespace WPtrakt
             }
             catch (WebException)
             {
+                DisableLiveTile();
                 if (MessageBox.Show("Invalid login data. Press cancel to exit.", "Error", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
                 {
                     throw new Exception("ExitAppException");
                 }
             }
+        }
+
+        private void DisableLiveTile()
+        {
+            var taskName = "WPtraktLiveTile";
+            try
+            {
+                ScheduledActionService.Remove(taskName);
+            }
+            catch (InvalidOperationException) { }
+            updateTileToStandard();
         }
 
         private void TextBlock_Tap(object sender, System.Windows.Input.GestureEventArgs e)
