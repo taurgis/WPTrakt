@@ -576,7 +576,6 @@ namespace WPtrakt
                 Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
-                    ImageController.saveImage(_tvdb + "backgroundsmall.jpg", str, 179, 100, 100);
                     NotifyPropertyChanged("BackgroundImage");
                 }));
             }

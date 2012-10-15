@@ -48,7 +48,13 @@ namespace WPtrakt
 
         private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
         {
+            String tempUsername = AppUser.Instance.UserName;
+            String tempPassword = AppUser.Instance.Password;
+
             IsolatedStorageFile.GetUserStoreForApplication().Remove();
+            IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;
+            IsolatedStorageSettings.ApplicationSettings["Password"] = tempPassword;
+            IsolatedStorageSettings.ApplicationSettings.Save();
             App.SettingsViewModel.NotifyPropertyChanged("Usage");
         }
 
@@ -61,7 +67,6 @@ namespace WPtrakt
 
             profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
             profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/account/test/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-            
         }
 
         void client_DownloadProfileStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -119,13 +124,9 @@ namespace WPtrakt
             EmailComposeTask emailcomposer = new EmailComposeTask();
 
             emailcomposer.To = "wptrakt@outlook.com";
-
             emailcomposer.Subject = "WPTrakt Support Question/Bugreport";
-
             emailcomposer.Body = "";
-
             emailcomposer.Show();
-
         }
 
         private void toggle_Checked(object sender, RoutedEventArgs e)

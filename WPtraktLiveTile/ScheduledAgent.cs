@@ -163,11 +163,11 @@ namespace WPtraktLiveTile
         {
             using (var store = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                if (store.FileExists(nextEpisode.Show.tvdb_id + "backgroundsmall.jpg"))
+                if (store.FileExists(nextEpisode.Show.tvdb_id + "background.jpg"))
                 {
                     if (!store.FileExists("/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg"))
                     {
-                        store.CopyFile(nextEpisode.Show.tvdb_id + "backgroundsmall.jpg", "/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg");
+                        store.CopyFile(nextEpisode.Show.tvdb_id + "background.jpg", "/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg");
                     }
                 }
             }

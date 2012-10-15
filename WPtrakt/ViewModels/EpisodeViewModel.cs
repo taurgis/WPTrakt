@@ -419,7 +419,7 @@ namespace WPtrakt
 
         private void LoadBackgroundImage()
         {
-            String fileName = this._imdb + "background" + ".jpg";
+            String fileName = this._tvdb + "background" + ".jpg";
 
             if (StorageController.doesFileExist(fileName))
             {
@@ -466,8 +466,7 @@ namespace WPtrakt
 
                 Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    _backgroundImage = ImageController.saveImage(_imdb + "background.jpg", str, 800, 450, 100);
-                    ImageController.saveImage(_tvdb + "backgroundsmall.jpg", str, 179, 100, 100);
+                    _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
                     NotifyPropertyChanged("BackgroundImage");
                 }));
             }
