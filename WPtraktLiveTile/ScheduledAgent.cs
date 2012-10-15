@@ -143,18 +143,19 @@ namespace WPtraktLiveTile
                 newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
                 newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today") : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
 
-                if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
+                if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg"))
                 {
                     newTileData.BackgroundImage = new Uri("appdata:background.png");
                     appTile.Update(newTileData);
                 }
                 else
                 {
-                    newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg",
+                    newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg",
                                           UriKind.Absolute);
                     appTile.Update(newTileData);
-                    NotifyComplete();
                 }
+
+                 NotifyComplete();
             }
         }
 
@@ -162,48 +163,14 @@ namespace WPtraktLiveTile
         {
             using (var store = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                if (store.FileExists(nextEpisode.Show.imdb_id + "background" + ".jpg"))
+                if (store.FileExists(nextEpisode.Show.tvdb_id + "backgroundsmall.jpg"))
                 {
-                    if (!store.FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
+                    if (!store.FileExists("/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg"))
                     {
-                        store.CopyFile(nextEpisode.Show.imdb_id + "background" + ".jpg", "/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg");
-                    }
-                }
-                else
-                {
-                    if (NetworkInterface.GetIsNetworkAvailable())
-                    {
-                        HttpWebRequest request;
-                        ImdbId = nextEpisode.Show.imdb_id;
-                        request = (HttpWebRequest)WebRequest.Create(new Uri(nextEpisode.Show.Images.Fanart));
-                        request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
+                        store.CopyFile(nextEpisode.Show.tvdb_id + "backgroundsmall.jpg", "/Shared/ShellContent/" + nextEpisode.Show.tvdb_id + "tile.jpg");
                     }
                 }
             }
-        }
-
-        private String ImdbId { get; set; }
-
-        void request_OpenReadFanartCompleted(IAsyncResult r)
-        {
-            object[] param = (object[])r.AsyncState;
-            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-            if (status == System.Net.HttpStatusCode.OK)
-            {
-                Stream str = httpResoponse.GetResponseStream();
-
-                  Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                saveImage(ImdbId + "background.jpg", str, 800, 450, 100);
-                CreateTile();
-                }));
-               
-            }
-
-            NotifyComplete();
         }
 
         private void createNoUpcommingTile()
@@ -213,6 +180,7 @@ namespace WPtraktLiveTile
             if (appTile != null)
             {
                 StandardTileData newTileData = new StandardTileData();
+                newTileData.BackgroundImage = new Uri("appdata:background.png");
                 newTileData.BackContent = "No upcomming episodes";
                 newTileData.BackTitle = DateTime.Now.ToShortTimeString();
 
