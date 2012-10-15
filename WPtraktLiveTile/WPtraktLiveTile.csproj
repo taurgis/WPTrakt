@@ -60,6 +60,7 @@
     <Compile Include="TraktCalendar.cs" />
     <Compile Include="TraktCalendarEpisode.cs" />
     <Compile Include="TraktEpisode.cs" />
+    <Compile Include="TraktImage.cs" />
     <Compile Include="TraktRequestAuth.cs" />
     <Compile Include="TraktShow.cs" />
   </ItemGroup>

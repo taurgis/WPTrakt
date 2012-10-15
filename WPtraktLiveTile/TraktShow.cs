@@ -60,6 +60,8 @@ namespace WPtraktLiveTile
         [DataMember(Name = "genres")]
         public String[] Genres { get; set; }
 
+        [DataMember(Name = "images")]
+        public TraktImage Images { get; set; }
     }
 }
 /*

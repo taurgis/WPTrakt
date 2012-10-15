@@ -12,6 +12,7 @@ using WPtrakt.Model.Trakt;
 using VPtrakt.Controllers;
 using WPtrakt.Controllers;
 using System.IO.IsolatedStorage;
+using VPtrakt.Model.Trakt.Request;
 
 
 namespace WPtrakt
@@ -211,8 +212,9 @@ namespace WPtrakt
         public void LoadCalendarData()
         {
             var calendarClient = new WebClient();
+
             calendarClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadCalendartringCompleted);
-            calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+            calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"), AppUser.createJsonStringForAuthentication());
 
             this.IsDataLoaded = true;
         }
@@ -229,9 +231,11 @@ namespace WPtrakt
                     var ser = new DataContractJsonSerializer(typeof(TraktCalendar[]));
                     TraktCalendar[] obj = (TraktCalendar[])ser.ReadObject(ms);
                     StorageController.saveObjectInMainFolder(obj, typeof(TraktCalendar[]), "upcomming.json");
-              
+                  
                     foreach (TraktCalendar calendarDate in obj)
                     {
+                        if ((DateTime.Parse(calendarDate.Date) - DateTime.Now).Days > 7)
+                            break;
                         ObservableCollection<ListItemViewModel> tempEpisodes = new ObservableCollection<ListItemViewModel>();
                         foreach (TraktCalendarEpisode episode in calendarDate.Episodes)
                         {

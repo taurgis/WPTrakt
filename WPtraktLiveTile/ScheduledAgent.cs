@@ -8,6 +8,8 @@ using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Net;
 using System.Text;
+using System.Collections.Generic;
+using System.Windows.Media.Imaging;
 
 namespace WPtraktLiveTile
 {
@@ -77,43 +79,72 @@ namespace WPtraktLiveTile
                         else
                         {
                             TraktCalendarEpisode nextEpisode = null;
-                            DateTime airdate = DateTime.Now;
+                           
+                            List<TraktCalendarEpisode> upcommingEpisodes = new List<TraktCalendarEpisode>();
+
+
                             foreach (TraktCalendar calendar in cal)
                             {
                                 DateTime calDate = DateTime.Parse(calendar.Date);
+                         
                                 if ((DateTime.UtcNow.Year <= calDate.Year) && (DateTime.UtcNow.Month <= calDate.Month) && (DateTime.UtcNow.DayOfYear <= calDate.DayOfYear))
                                 {
-                                    if (nextEpisode == null)
-                                    {
-                                        airdate = calDate;
-                                        foreach (TraktCalendarEpisode traktEpisode in calendar.Episodes)
-                                        {
-                                            DateTime episodeDateTime = DateTime.Parse(calendar.Date + " " + traktEpisode.Show.AirTime);
-                                            if (episodeDateTime > DateTime.UtcNow)
-                                            {
-                                                nextEpisode = traktEpisode;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    else
+                                    if ((calDate - DateTime.Now).Days > 7)
                                         break;
+
+                                    foreach (TraktCalendarEpisode episode in calendar.Episodes)
+                                    {
+                                        episode.Date = calDate;
+                                        upcommingEpisodes.Add(episode);
+                                    }
                                 }
+
                             }
+
+                            nextEpisode = upcommingEpisodes[new Random().Next(upcommingEpisodes.Count)];
 
                             if (nextEpisode != null)
                             {
+                                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+                                {
+                                    if (store.FileExists(nextEpisode.Show.imdb_id + "background" + ".jpg"))
+                                    {
+                                        if (!store.FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
+                                        {
+                                            store.CopyFile(nextEpisode.Show.imdb_id + "background" + ".jpg", "/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        HttpWebRequest request;
+                                        ImdbId = nextEpisode.Show.imdb_id;
+                                        request = (HttpWebRequest)WebRequest.Create(new Uri(nextEpisode.Show.Images.Fanart));
+                                        request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
+                                     
+                                    }
+                                }
+
                                 ShellTile appTile = ShellTile.ActiveTiles.First();
 
                                 if (appTile != null)
                                 {
                                     StandardTileData newTileData = new StandardTileData();
                                     newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
-                                    newTileData.BackTitle = ((airdate.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today at " + nextEpisode.Show.AirTime) : (airdate.ToShortDateString()));
+                                    newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today") : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
 
-                                    appTile.Update(newTileData);
+                                    if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg"))
+                                    {
+                                        newTileData.BackgroundImage = new Uri("appdata:background.png");
+                                        appTile.Update(newTileData);
+                                    }
+                                    else
+                                    {
+                                        newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/" + nextEpisode.Show.imdb_id + "tile.jpg", 
+                                                              UriKind.Absolute);
+                                        appTile.Update(newTileData);
+                                        NotifyComplete();
+                                    }
                                 }
-                                NotifyComplete();
                             }
                             else
                             {
@@ -130,6 +161,30 @@ namespace WPtraktLiveTile
                 createNoUpcommingTile();
                 UpdateUpcomming();
             }
+        }
+
+        private String ImdbId { get; set; }
+
+        void request_OpenReadFanartCompleted(IAsyncResult r)
+        {
+            object[] param = (object[])r.AsyncState;
+            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+            if (status == System.Net.HttpStatusCode.OK)
+            {
+                Stream str = httpResoponse.GetResponseStream();
+
+                  Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                saveImage(ImdbId + "background.jpg", str, 800, 450, 100);
+                CreateTile();
+                }));
+               
+            }
+
+            NotifyComplete();
         }
 
         private void createNoUpcommingTile()
@@ -150,8 +205,7 @@ namespace WPtraktLiveTile
         {
             var calendarClient = new WebClient();
             calendarClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadCalendartringCompleted);
-            calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + IsolatedStorageSettings.ApplicationSettings["UserName"]), createJsonStringForAuthentication());
-
+            calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + IsolatedStorageSettings.ApplicationSettings["UserName"] + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"), createJsonStringForAuthentication());
         }
 
         private String createJsonStringForAuthentication()
@@ -207,6 +261,34 @@ namespace WPtraktLiveTile
             }
             catch (WebException)
             {
+            }
+        }
+
+        public  BitmapImage saveImage(String fileName, Stream pic, Int16 width, Int16 height, Int16 quality)
+        {
+            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                var bi = new BitmapImage();
+                bi.SetSource(pic);
+
+              
+
+                var wb = new WriteableBitmap(bi);
+
+
+                using (var isoFileStream = isoStore.CreateFile(fileName))
+                {
+                    try
+                    {
+                        Extensions.SaveJpeg(wb, isoFileStream, width, height, 0, quality);
+                    }
+                    catch (IsolatedStorageException)
+                    {
+                        //Do nothing for now.
+                    }
+                }
+
+                return bi;
             }
         }
     }

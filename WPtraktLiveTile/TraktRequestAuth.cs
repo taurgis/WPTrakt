@@ -20,7 +20,5 @@ namespace WPtraktLiveTile
 
         [DataMember(Name = "password")]
         public String Password { get; set; }
-
-
     }
 }

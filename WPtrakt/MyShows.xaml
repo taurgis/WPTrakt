@@ -10,7 +10,7 @@
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
     xmlns:local="clr-namespace:WPtrakt"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
@@ -29,7 +29,7 @@
                     <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShows}"/>
                     <cc:QuickJumpGrid DataSource="{Binding ShowItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,0,0,0" Height="640">
+                                  Margin="12,0,0,0" Height="620">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -97,4 +97,9 @@
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
+            <shell:ApplicationBarIconButton IconUri="Images/appbar.refresh.rest.png" Text="Refresh" Click="ApplicationBarIconButton_Click" />
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>

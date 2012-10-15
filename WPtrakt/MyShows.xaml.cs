@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Clarity.Phone.Controls;
 using System.Windows.Media.Imaging;
+using System.IO.IsolatedStorage;
 
 namespace WPtrakt
 {
@@ -128,6 +129,13 @@ namespace WPtrakt
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
         {
             this.Opacity = 1;
+        }
+
+        private void ApplicationBarIconButton_Click(object sender, EventArgs e)
+        {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("myshows.json");
+
+            App.MyShowsViewModel.LoadData();
         }
     }
 

@@ -95,6 +95,7 @@ namespace WPtrakt
         public void LoadData()
         {
             this.MovieItems = new ObservableCollection<ListItemViewModel>();
+            RefreshMyMoviesView();
             String fileName ="mymovies.json";
             if (StorageController.doesFileExist(fileName))
             {

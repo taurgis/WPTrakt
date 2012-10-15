@@ -30,7 +30,7 @@
                     <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovies}"/>
                     <cc:QuickJumpGrid DataSource="{Binding MovieItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,0,0,0" Height="640" Width="Auto"  MaxWidth="880">
+                                  Margin="12,0,0,0" Height="620" Width="Auto"  MaxWidth="880">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>

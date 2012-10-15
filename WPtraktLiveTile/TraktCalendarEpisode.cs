@@ -20,5 +20,7 @@ namespace WPtraktLiveTile
 
         [DataMember(Name = "episode")]
         public TraktEpisode Episode { get; set; }
+
+        public DateTime Date { get; set; }
     }
 }
