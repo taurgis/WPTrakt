@@ -140,20 +140,9 @@ namespace WPtraktLiveTile
                 StandardTileData newTileData = new StandardTileData();
                 newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
                 newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today") : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
-
-                if (!IsolatedStorageFile.GetUserStoreForApplication().FileExists("/Shared/ShellContent/wptile.jpg"))
-                {
-                    newTileData.BackgroundImage = new Uri("appdata:background.png");
-                    appTile.Update(newTileData);
-                }
-                else
-                {
-                    newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/wptile.jpg",
-                                          UriKind.Absolute);
-                    appTile.Update(newTileData);
-                }
-
-                 NotifyComplete();
+                newTileData.BackgroundImage = new Uri("appdata:background.png");
+                appTile.Update(newTileData);
+                NotifyComplete();
             }
         }
 
@@ -235,30 +224,6 @@ namespace WPtraktLiveTile
             }
             catch (WebException)
             {
-            }
-        }
-
-        public  BitmapImage saveImage(String fileName, Stream pic, Int16 width, Int16 height, Int16 quality)
-        {
-            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                var bi = new BitmapImage();
-                bi.SetSource(pic);
-                var wb = new WriteableBitmap(bi);
-
-                using (var isoFileStream = isoStore.CreateFile(fileName))
-                {
-                    try
-                    {
-                        Extensions.SaveJpeg(wb, isoFileStream, width, height, 0, quality);
-                    }
-                    catch (IsolatedStorageException)
-                    {
-                        //Do nothing for now.
-                    }
-                }
-
-                return bi;
             }
         }
     }

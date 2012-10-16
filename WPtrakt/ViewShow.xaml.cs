@@ -18,6 +18,7 @@ using WPtrakt.Model.Trakt;
 using WPtrakt.Model;
 using System.IO.IsolatedStorage;
 using VPtrakt.Controllers;
+using WPtrakt.Model.Trakt.Request;
 
 namespace WPtrakt
 {
@@ -132,7 +133,52 @@ namespace WPtrakt
 
             appBar.Buttons.Add(ratingButton);
 
+            CreateWatchedButton(appBar, !App.ShowViewModel.Watched);
+
             this.ApplicationBar = appBar;
+        }
+
+        private void CreateWatchedButton(ApplicationBar appBar, Boolean enabled)
+        {
+            ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
+            watchedButton = new ApplicationBarIconButton(new Uri("Images/appbar.seen.rest.png", UriKind.Relative));
+            watchedButton.IsEnabled = enabled;
+            watchedButton.Text = "Seen";
+            watchedButton.Click += new EventHandler(WatchedIconButton_Click);
+
+            appBar.Buttons.Add(watchedButton);
+        }
+
+        private void WatchedIconButton_Click(object sender, EventArgs e)
+        {
+            var watchlistClient = new WebClient();
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeenStringCompleted);
+            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
+           
+           
+            auth.Imdb = App.ShowViewModel.Imdb;
+            auth.Title = App.ShowViewModel.Name;
+            auth.Year = Int16.Parse(App.ShowViewModel.Year);
+
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/seen/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+        }
+
+        void client_UploadSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                MessageBox.Show("Show marked as watched.");
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + ".json");
+                App.ShowViewModel.Watched = true;
+                InitAppBarMain(false);
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         void ratingButton_Click(object sender, EventArgs e)
@@ -212,15 +258,13 @@ namespace WPtrakt
             };
             storyboard.Completed += completedHandlerMainPage;
             storyboard.Begin();
-                 }
+        }
 
         private void PanoramaItem_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-
-                String id;
-                NavigationContext.QueryString.TryGetValue("id", out id);
-                App.ShowViewModel.LoadEpisodeData(id);
-            
+            String id;
+            NavigationContext.QueryString.TryGetValue("id", out id);
+            App.ShowViewModel.LoadEpisodeData(id);
         }
 
 

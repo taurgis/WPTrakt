@@ -76,6 +76,9 @@ namespace WPtrakt.Model.Trakt
         [DataMember(Name = "rating")]
         public String MyRating { get; set; }
 
+        [DataMember(Name = "watched")]
+        public Boolean Watched { get; set; }
+
         public static String getFolderStatic()
         {
             return "show";

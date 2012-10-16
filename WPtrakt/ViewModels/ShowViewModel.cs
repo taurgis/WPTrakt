@@ -504,6 +504,7 @@ namespace WPtrakt
             _votes = show.Ratings.Votes;
             _myRating = show.MyRating;
             _myRatingAdvanced = show.MyRatingAdvanced;
+            _watched = show.Watched;
 
             NotifyPropertyChanged("Name");
             NotifyPropertyChanged("Fanart");
