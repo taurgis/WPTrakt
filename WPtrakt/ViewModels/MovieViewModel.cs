@@ -483,6 +483,11 @@ namespace WPtrakt
 
         public void LoadShoutData(String imdbId)
         {
+            ShoutItems = new ObservableCollection<ListItemViewModel>();
+            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
+
+            NotifyPropertyChanged("ShoutItems");
+
             var movieClient = new WebClient();
             this._imdb = imdbId;
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);

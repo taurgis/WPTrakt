@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
-using Microsoft.Phone.Tasks;
 using Microsoft.Phone.Shell;
-using VPtrakt.Model.Trakt.Request;
-using WPtrakt.Model.Trakt;
-using WPtrakt.Model.Trakt.Request;
-using WPtrakt.Model;
+using Microsoft.Phone.Tasks;
 using VPtrakt.Controllers;
-using System.IO.IsolatedStorage;
+using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Model;
+using WPtrakt.Model.Trakt.Request;
 
 namespace WPtrakt
 {
@@ -56,6 +49,8 @@ namespace WPtrakt
                     NavigationContext.QueryString.TryGetValue("episode", out episode);
                     App.EpisodeViewModel.LoadShoutData(id, season, episode);
                 }
+
+                InitAppBarShouts();
 
             }
         }
@@ -98,6 +93,31 @@ namespace WPtrakt
             this.ApplicationBar = appBar;
         }
 
+
+        private void InitAppBarShouts()
+        {
+            ApplicationBar appBar = new ApplicationBar();
+            appBar.Mode = ApplicationBarMode.Minimized;
+
+            CreateRefreshShoutsButton(appBar);
+
+            this.ApplicationBar = appBar;
+        }
+
+        private void CreateRefreshShoutsButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
+            watchedButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
+            watchedButton.Text = "Refresh";
+            watchedButton.Click += new EventHandler(ShoutsIconButton_Click);
+
+            appBar.Buttons.Add(watchedButton);
+        }
+
+        private void ShoutsIconButton_Click(object sender, EventArgs e)
+        {
+            App.EpisodeViewModel.LoadShoutData(App.EpisodeViewModel.Tvdb, App.EpisodeViewModel.Season, App.EpisodeViewModel.Number);
+        }
 
         private void CreateWatchedButton(ApplicationBar appBar, Boolean enabled)
         {

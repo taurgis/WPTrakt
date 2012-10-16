@@ -628,6 +628,11 @@ namespace WPtrakt
 
         public void LoadShoutData(String tvdb)
         {
+            ShoutItems = new ObservableCollection<ListItemViewModel>();
+            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
+
+            NotifyPropertyChanged("ShoutItems");
+
             var showClient = new WebClient();
             this._tvdb = tvdb;
             showClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadShoutStringCompleted);

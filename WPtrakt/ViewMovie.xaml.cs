@@ -43,7 +43,9 @@ namespace WPtrakt
                     NavigationContext.QueryString.TryGetValue("id", out id);
                     App.MovieViewModel.LoadShoutData(id);
                 }
+                InitAppBarShouts();
             }
+
         }
 
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
@@ -121,6 +123,32 @@ namespace WPtrakt
             CreateWatchedButton(appBar, !App.MovieViewModel.Watched);
 
             this.ApplicationBar = appBar;
+        }
+
+
+        private void InitAppBarShouts()
+        {
+            ApplicationBar appBar = new ApplicationBar();
+            appBar.Mode = ApplicationBarMode.Minimized;
+
+            CreateRefreshShoutsButton(appBar);
+
+            this.ApplicationBar = appBar;
+        }
+
+        private void CreateRefreshShoutsButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
+            watchedButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
+            watchedButton.Text = "Refresh";
+            watchedButton.Click += new EventHandler(ShoutsIconButton_Click);
+
+            appBar.Buttons.Add(watchedButton);
+        }
+
+        private void ShoutsIconButton_Click(object sender, EventArgs e)
+        {
+            App.MovieViewModel.LoadShoutData(App.MovieViewModel.Imdb);
         }
 
         private void ListBox_SizeChanged(object sender, SizeChangedEventArgs e)

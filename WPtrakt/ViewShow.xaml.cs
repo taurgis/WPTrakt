@@ -69,12 +69,12 @@ namespace WPtrakt
                     NavigationContext.QueryString.TryGetValue("id", out id);
                     App.ShowViewModel.LoadShoutData(id);
                 }
-                this.ApplicationBar.IsVisible = false;
+                InitAppBarShouts();
 
             }
             else
             {
-                this.ApplicationBar.IsVisible = false;
+                
             }
         }
 
@@ -105,6 +105,16 @@ namespace WPtrakt
           
             nextSeason.Text = "Next";
             appBar.Buttons.Add(nextSeason);
+            this.ApplicationBar = appBar;
+        }
+
+        private void InitAppBarShouts()
+        {
+            ApplicationBar appBar = new ApplicationBar();
+            appBar.Mode = ApplicationBarMode.Minimized;
+
+            CreateRefreshShoutsButton(appBar);
+
             this.ApplicationBar = appBar;
         }
 
@@ -147,6 +157,21 @@ namespace WPtrakt
             watchedButton.Click += new EventHandler(WatchedIconButton_Click);
 
             appBar.Buttons.Add(watchedButton);
+        }
+
+        private void CreateRefreshShoutsButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
+            watchedButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
+            watchedButton.Text = "Refresh";
+            watchedButton.Click += new EventHandler(ShoutsIconButton_Click);
+
+            appBar.Buttons.Add(watchedButton);
+        }
+
+        private void ShoutsIconButton_Click(object sender, EventArgs e)
+        {
+            App.ShowViewModel.LoadShoutData(App.ShowViewModel.Tvdb);   
         }
 
         private void WatchedIconButton_Click(object sender, EventArgs e)
