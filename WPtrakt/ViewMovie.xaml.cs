@@ -45,6 +45,15 @@ namespace WPtrakt
                 }
                 InitAppBarShouts();
             }
+            else
+            {
+                if (!App.MovieViewModel.InWatchlist)
+                {
+                    LoadEnabledAddtoWatchlist();
+                }
+                else
+                    LoadDisabledAddtoWatchlist();
+            }
 
         }
 

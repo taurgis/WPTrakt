@@ -39,10 +39,21 @@ namespace WPtrakt
         {
             String id;
             NavigationContext.QueryString.TryGetValue("id", out id);
+            if (!String.IsNullOrEmpty(App.ShowViewModel.GenreString))
+            {
+                RefreshBottomBar();
+            }
+
             App.ShowViewModel.LoadData(id);
+            
         }
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshBottomBar();
+        }
+
+        private void RefreshBottomBar()
         {
             if (this.MoviePanorama.SelectedIndex == 0)
             {
@@ -71,10 +82,6 @@ namespace WPtrakt
                 }
                 InitAppBarShouts();
 
-            }
-            else
-            {
-                
             }
         }
 

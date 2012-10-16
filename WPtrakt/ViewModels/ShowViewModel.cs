@@ -656,7 +656,7 @@ namespace WPtrakt
 
                 if (this.ShoutItems.Count == 0)
                     this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
-
+                ShoutsLoaded = true;
                 NotifyPropertyChanged("ShoutItems");
             }
             catch (WebException)
