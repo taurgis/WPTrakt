@@ -12,6 +12,7 @@ using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using System.Windows.Media.Animation;
 using System.IO.IsolatedStorage;
+using System.Windows.Input;
 
 namespace WPtrakt
 {
@@ -212,5 +213,54 @@ namespace WPtrakt
             }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
+
+        private void ShoutText_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !String.IsNullOrEmpty(((TextBox)sender).Text))
+            {
+                var watchlistClient = new WebClient();
+                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
+                ShoutAuth auth = new ShoutAuth();
+
+                auth.Imdb = App.MovieViewModel.Imdb;
+                auth.Title = App.MovieViewModel.Name;
+                auth.Year = Int16.Parse(App.MovieViewModel.Year);
+               
+                auth.Shout = ((TextBox)sender).Text;
+                LastShout = auth.Shout;
+                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/movie/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+
+            }
+        }
+        private String LastShout { get; set; }
+        void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                MessageBox.Show("Shout posted. It might take up to a minute for the shout to show up in the application.");
+
+                ShoutText.Text = "";
+
+                this.Focus();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+
+        private void ShoutText_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (ShoutText.Text.Equals("Press enter to submit."))
+                ShoutText.Text = "";
+        }
+
+        private void ShoutText_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(ShoutText.Text))
+                ShoutText.Text = "Press enter to submit.";
+        }
+
     }
 }

@@ -71,6 +71,7 @@
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
+    <Compile Include="Model\Trakt\Request\ShoutAuth.cs" />
     <Compile Include="Model\Trakt\Request\TraktEpisode.cs" />
     <Compile Include="Model\Trakt\Request\WatchedEpisodeAuth.cs" />
     <Compile Include="Model\Trakt\Request\TraktMovieRequest.cs" />

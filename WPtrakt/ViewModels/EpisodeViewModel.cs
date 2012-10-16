@@ -481,7 +481,14 @@ namespace WPtrakt
 
         public void LoadShoutData(String tvdb, String season, String episode)
         {
+
+             ShoutItems = new ObservableCollection<ListItemViewModel>();
+            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
+
+            NotifyPropertyChanged("ShoutItems");
+
             var movieClient = new WebClient();
+            
             this._tvdb = tvdb;
             movieClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadShoutStringCompleted);
             movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb+ "/" + season + "/" + episode));
@@ -502,7 +509,6 @@ namespace WPtrakt
             if(this.ShoutItems.Count == 0)
                 this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
             
-            this.ShoutItems.Add(new ListItemViewModel());
             NotifyPropertyChanged("ShoutItems");
         }
 

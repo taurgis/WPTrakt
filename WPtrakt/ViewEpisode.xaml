@@ -60,19 +60,22 @@
 
             <!--Panorama item two-->
             <controls:PanoramaItem Header="Shouts" Margin="0, -50">
-                    <ListBox Margin="0,0,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" >
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Height="Auto">
-                                <Image Source="{Binding ImageSource}" VerticalAlignment="Top" Margin="0,12" Width="60" Height="60"/>
-                                <StackPanel Orientation="Vertical" Width="370" Height="Auto">
-                                    <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Width="280" Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                    <TextBlock VerticalAlignment="Top"  HorizontalAlignment="Left" Width="330" Height="Auto" TextWrapping="Wrap" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                <Grid>
+                    <ListBox VerticalAlignment="Top" Margin="0,0,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" Height="450">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Height="Auto">
+                                    <Image Source="{Binding ImageSource}" VerticalAlignment="Top" Margin="0,12" Width="60" Height="60"/>
+                                    <StackPanel Orientation="Vertical" Width="370" Height="Auto">
+                                        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Width="280" Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                        <TextBlock VerticalAlignment="Top"  HorizontalAlignment="Left" Width="330" Height="Auto" TextWrapping="Wrap" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </StackPanel>
                                 </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBox Width="420" Text="Press enter to submit." Name="ShoutText" VerticalAlignment="Bottom" Margin="0,0,29,50" Height="70" Background="White" Opacity="0.3" KeyDown="ShoutText_KeyDown" GotFocus="ShoutText_GotFocus" LostFocus="ShoutText_LostFocus" />
+                </Grid>
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
