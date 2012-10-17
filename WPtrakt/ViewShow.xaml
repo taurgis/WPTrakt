@@ -95,7 +95,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <TextBox  Width="420" Text="Press enter to submit." Name="ShoutText" VerticalAlignment="Bottom" Margin="0,0,29,50" Height="70" Background="White" Opacity="0.3" KeyDown="ShoutText_KeyDown" GotFocus="ShoutText_GotFocus" LostFocus="ShoutText_LostFocus" />
+                    <TextBox  Width="400" Text="Press enter to submit." Name="ShoutText" VerticalAlignment="Bottom" Margin="0,0,29,50" TextWrapping="Wrap" Opacity="0.4" KeyDown="ShoutText_KeyDown" GotFocus="ShoutText_GotFocus" LostFocus="ShoutText_LostFocus" />
                 </Grid>
             </controls:PanoramaItem>
         </controls:Panorama>
