@@ -52,18 +52,18 @@
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -50" Header="Suggestions" Visibility="{Binding SuggestionsVisibility}" Orientation="Horizontal">
                 <StackPanel>
-                   <ListBox  Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Height="519" Width="700">
+                    <delay:DeferredLoadListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Height="519" Width="700">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
-                        <ListBox.ItemTemplate>
+                        <delay:DeferredLoadListBox.ItemTemplate >
                             <DataTemplate>
                                 <Image delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Margin="5 5 5 5" Width="160" Height="250" Tap="Image_Tap" />
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                        </delay:DeferredLoadListBox.ItemTemplate>
+                    </delay:DeferredLoadListBox>
                     <ProgressBar  HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSuggestions}" Name="progressBarSuggest" IsIndeterminate="True" />
 
                 </StackPanel>
