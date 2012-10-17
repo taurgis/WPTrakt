@@ -95,7 +95,11 @@ namespace WPtrakt
                     DisableLiveTile();
                 }
 
-                NavigationService.GoBack();
+                try
+                {
+                    NavigationService.GoBack();
+                }
+                catch (InvalidOperationException) { }
                
             }
             catch (WebException)

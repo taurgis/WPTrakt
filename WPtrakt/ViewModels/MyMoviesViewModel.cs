@@ -21,6 +21,7 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> SuggestItems { get; private set; }
         private List<TraktMovie> suggestedMovies;
         private BackgroundWorker worker;
+        public Boolean LoadingSuggestItems { get; set; }
 
         public MyMoviesViewModel()
         {
@@ -223,8 +224,7 @@ namespace WPtrakt
                     foreach (TraktMovie movie in obj)
                     {
                         suggestedMovies.Add(movie);
-                        NotifyPropertyChanged("SuggestItems");
-                        if (counter++ >= 10)
+                        if (counter++ >= 8)
                             break;
                     }
 
@@ -254,20 +254,15 @@ namespace WPtrakt
                     foreach (TraktMovie movieInList in suggestedMovies)
                     {
                         var movie = movieInList;
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id });
-                            NotifyPropertyChanged("SuggestItems");
-                        
-                        });
-
-                        if (StorageController.doesFileExist(movie.imdb_id + "medium" + ".jpg"))
-                            Thread.Sleep(500);
-                        else
-                            Thread.Sleep(1000);
+                        this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie" });
+                         
                     }
-                  
-                
+
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        NotifyPropertyChanged("SuggestItems");
+
+                    });
             }
         }
 

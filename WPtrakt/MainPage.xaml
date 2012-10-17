@@ -8,9 +8,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728" 
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
+
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded">
@@ -18,7 +20,7 @@
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" >
         <!--Panorama control-->
-        <controls:Panorama IsEnabled="{Binding PanoramaEnabled}" Name="MainPanorama" Title=" " Margin="0,0,0,-39">
+        <controls:Panorama IsEnabled="{Binding PanoramaEnabled}" Name="MainPanorama" Title=" " Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged">
             <controls:Panorama.Background>
                 <ImageBrush ImageSource="Images/PanoramaBackground.png"/>
             </controls:Panorama.Background>
@@ -57,14 +59,14 @@
                 <ListBox  Margin="0,-20,-10,0" ItemsSource="{Binding TrendingItems}" Height="519" Width="700">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <toolkit:WrapPanel ItemWidth="138" ItemHeight="213"/>
+                            <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0 5">
-                                <Image Canvas.ZIndex="3" HorizontalAlignment="Left" Margin="0 15"  Source="Images/seen.png" Width="{Binding WatchedVisible}" Height="22" />
-                                <Image Canvas.ZIndex="2" Source="{Binding MediumImage}" Margin="0 -45 5 5" Width="138" Height="203" Tap="Image_Tap" />
+                                <Image Canvas.ZIndex="3" HorizontalAlignment="Left" Margin="0 15"  Source="Images/seen.png" Width="{Binding WatchedVisible}" Height="23" />
+                                    <Image Canvas.ZIndex="2" delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Margin="0 -45 5 5" Width="160" Height="250" Tap="Image_Tap" />
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

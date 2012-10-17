@@ -9,6 +9,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
+    xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
     xmlns:local="clr-namespace:WPtrakt"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
@@ -54,12 +55,12 @@
                    <ListBox  Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Height="519" Width="700">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <toolkit:WrapPanel ItemWidth="138" ItemHeight="203"/>
+                                <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Image Source="{Binding MediumImage}" Margin="5 5 5 5" Width="138" Height="203" Tap="Image_Tap" />
+                                <Image delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Margin="5 5 5 5" Width="160" Height="250" Tap="Image_Tap" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

@@ -200,15 +200,6 @@
     <Resource Include="Images\EmptyPanoramaBackground.png" />
     <Content Include="Images\heart-love.png" />
     <Resource Include="Images\PanoramaBackgroundWhite.png" />
-    <Content Include="Images\ratingbg.png" />
-    <Content Include="Images\ratingbg_1.png" />
-    <Content Include="Images\ratingbg_2.png" />
-    <Content Include="Images\ratingbg_3.png" />
-    <Content Include="Images\ratingbg_4.png" />
-    <Content Include="Images\ratingbg_5.png" />
-    <Resource Include="Images\ratingbg_6.png" />
-    <Resource Include="Images\ratingbg_7.png" />
-    <Resource Include="Images\ratingbg_8.png" />
     <Content Include="Images\seen.png" />
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
@@ -216,6 +207,10 @@
     <ProjectReference Include="..\Clarity.Phone\Clarity.Phone.csproj">
       <Project>{282CA4CA-0FF6-4A14-9FB2-1A14261A3953}</Project>
       <Name>Clarity.Phone</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PhonePerformance\PhonePerformance.csproj">
+      <Project>{FCF263CD-388B-44E4-8A92-A4C5F670394F}</Project>
+      <Name>PhonePerformance</Name>
     </ProjectReference>
     <ProjectReference Include="..\WPtraktLiveTile\WPtraktLiveTile.csproj">
       <Project>{EF30EF9C-FE16-4795-B541-71CAFB5B158B}</Project>

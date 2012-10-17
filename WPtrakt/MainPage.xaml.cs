@@ -1,13 +1,11 @@
 ﻿using System;
+using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Windows.Media.Animation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using WPtrakt.Model;
-using System.Windows.Media.Animation;
-using System.IO.IsolatedStorage;
 using WPtrakt.Model.Trakt;
 
 namespace WPtrakt
@@ -19,7 +17,6 @@ namespace WPtrakt
             InitializeComponent();
             DataContext = App.ViewModel;
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
-
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -38,9 +35,7 @@ namespace WPtrakt
                     NavigationService.Navigate(theUri);
                 }
                 else
-                {
                     App.ViewModel.LoadData();
-                }
             }
         }
 
@@ -64,6 +59,7 @@ namespace WPtrakt
             Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
             Storyboard.SetTarget(storyboard, LayoutRoot);
             EventHandler completedHandlerMainPage = delegate { };
+
             completedHandlerMainPage = delegate
             {
                 Uri theUri = new Uri("/MyMovies.xaml", UriKind.Relative);
@@ -72,6 +68,7 @@ namespace WPtrakt
                 storyboard.Stop();
                 this.Opacity = 0;
             };
+
             storyboard.Completed += completedHandlerMainPage;
             storyboard.Begin();
         }
@@ -81,6 +78,7 @@ namespace WPtrakt
             Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
             Storyboard.SetTarget(storyboard, LayoutRoot);
             EventHandler completedHandlerMainPage = delegate { };
+
             completedHandlerMainPage = delegate
             {
                 Uri theUri = new Uri("/MyShows.xaml", UriKind.Relative);
@@ -89,6 +87,7 @@ namespace WPtrakt
                 storyboard.Stop();
                 this.Opacity = 0;
             };
+
             storyboard.Completed += completedHandlerMainPage;
             storyboard.Begin();
         }
@@ -104,16 +103,18 @@ namespace WPtrakt
             Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
             Storyboard.SetTarget(storyboard, LayoutRoot);
             EventHandler completedHandlerMainPage = delegate { };
-            completedHandlerMainPage = delegate
-                    {
 
-                        Image senderImage = (Image)sender;
-                        ListItemViewModel model = (ListItemViewModel)senderImage.DataContext;
-                        NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
-                        storyboard.Completed -= completedHandlerMainPage;
-                        storyboard.Stop();
-                        this.Opacity = 0;
-                    };
+            completedHandlerMainPage = delegate
+            {
+
+                Image senderImage = (Image)sender;
+                ListItemViewModel model = (ListItemViewModel)senderImage.DataContext;
+                NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+
             storyboard.Completed += completedHandlerMainPage;
             storyboard.Begin();
         }
@@ -123,9 +124,9 @@ namespace WPtrakt
             Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
             Storyboard.SetTarget(storyboard, LayoutRoot);
             EventHandler completedHandlerMainPage = delegate { };
+
             completedHandlerMainPage = delegate
             {
-
                 StackPanel senderPanel = (StackPanel)sender;
                 ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
                 NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
@@ -134,6 +135,7 @@ namespace WPtrakt
                 storyboard.Stop();
                 this.Opacity = 0;
             };
+
             storyboard.Completed += completedHandlerMainPage;
             storyboard.Begin();
         }
@@ -145,5 +147,19 @@ namespace WPtrakt
             this.Opacity = 1;
         }
 
+        private void MainPanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MainPanorama.SelectedIndex == 1)
+            {
+                if (App.ViewModel.TrendingItems.Count == 0)
+                {
+                    if (!App.ViewModel.LoadingTrendingItems)
+                    {
+                        App.ViewModel.LoadingTrendingItems = true;
+                        App.ViewModel.loadTrending();
+                    }
+                }
+            }
+        }
     }
 }

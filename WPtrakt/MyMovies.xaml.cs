@@ -55,7 +55,11 @@ namespace WPtrakt
             {
                 if (App.MyMoviesViewModel.SuggestItems.Count == 0)
                 {
-                    App.MyMoviesViewModel.LoadSuggestData();
+                    if (!App.MyMoviesViewModel.LoadingSuggestItems)
+                    {
+                        App.MyMoviesViewModel.LoadingSuggestItems = true;
+                        App.MyMoviesViewModel.LoadSuggestData();
+                    }
                 }
             }
         }

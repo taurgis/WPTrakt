@@ -87,7 +87,7 @@ namespace WPtrakt
             get
             {
                 if (Watched)
-                    return "133";
+                    return "156";
                 else
                     return "0";
             }
@@ -179,6 +179,33 @@ namespace WPtrakt
             set
             {
                 _imageSource = value;
+            }
+        }
+
+
+        public string ImageSourceMedium
+        {
+            get
+            {
+                if (_type.Equals("Movie"))
+                {
+                    return _imageSource.Replace(".2.jpg", ".1-300.jpg");
+                }
+                else
+                  return _imageSource.Replace(".2.jpg", "-138.2.jpg");
+            }
+        }
+
+        private String _type;
+        public String Type
+        {
+            get
+            {
+                return _type;
+            }
+            set
+            {
+                _type = value;
             }
         }
 

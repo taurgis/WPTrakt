@@ -23,6 +23,7 @@ namespace WPtrakt
         public ObservableCollection<CalendarListItemViewModel> CalendarItems { get; private set; }
         public ObservableCollection<ListItemViewModel> SuggestItems { get; private set; }
         private List<TraktShow> suggestedShows;
+        public Boolean LoadingSuggestItems { get; set; }
         private BackgroundWorker worker = new BackgroundWorker();
 
         public MyShowsViewModel()
@@ -293,8 +294,8 @@ namespace WPtrakt
                     foreach (TraktShow show in obj)
                     {
                         suggestedShows.Add(show);
-                        NotifyPropertyChanged("SuggestItems");
-                        if (counter++ >= 10)
+   
+                        if (counter++ >= 8)
                             break;
                     }
 
@@ -324,20 +325,13 @@ namespace WPtrakt
                     foreach (TraktShow showInList in suggestedShows)
                     {
                         var show = showInList;
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            this.SuggestItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id });
-                         
-                            NotifyPropertyChanged("SuggestItems");
-                        });
-
-                        if (StorageController.doesFileExist(show.imdb_id + "medium" + ".jpg"))
-                            Thread.Sleep(500);
-                        else
-                            Thread.Sleep(1000);
+                      
+                        this.SuggestItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, Type = "Show" });
                     }
-                    
-                
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        NotifyPropertyChanged("SuggestItems");
+                    });
             }
         }
 

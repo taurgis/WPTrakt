@@ -22,9 +22,8 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> TrendingItems { get; private set; }
         public ObservableCollection<ListItemViewModel> HistoryItems { get; private set; }
         private TraktProfile _profile;
-        private List<TraktMovie> trendingMovies;
+        public Boolean LoadingTrendingItems { get; set; }
       
-
         public MainViewModel()
         {
             this.TrendingItems = new ObservableCollection<ListItemViewModel>();
@@ -187,26 +186,22 @@ namespace WPtrakt
             {
                 CallProfileService();
             }
-            if (TrendingEnabled)
-            {
-                this.LoadingStatusTrending = "Visible";
-                var trendingClient = new WebClient();
-                trendingClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadTrendingStringCompleted);
-                trendingClient.UploadStringAsync(new Uri("http://api.trakt.tv/movies/trending.json/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication());
-            }
+            
 
             this.IsDataLoaded = true;
         }
 
         void profileworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(300);
             _profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
             if ((DateTime.Now - _profile.DownloadTime).Days < 1)
             {
+                loadHistory();
+
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    loadHistory();
+                    NotifyPropertyChanged("HistoryItems");
                     RefreshProfile();
                 });
             }
@@ -240,6 +235,7 @@ namespace WPtrakt
                     _profile = (TraktProfile)ser.ReadObject(ms);
                     StorageController.saveObject(_profile, typeof(TraktProfile));
                     loadHistory();
+                    NotifyPropertyChanged("HistoryItems");
                     RefreshProfile();
                 }
             }
@@ -263,36 +259,68 @@ namespace WPtrakt
             NotifyPropertyChanged("HistoryItems");
         }
 
-        void client_DownloadTrendingStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        #region Trending
+
+        public void loadTrending()
+        {
+            if (TrendingEnabled)
+            {
+                this.LoadingStatusTrending = "Visible";
+                HttpWebRequest request;
+
+                request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/movies/trending.json/5eaaacc7a64121f92b15acf5ab4d9a0b"));
+                request.Method = "POST";
+                request.BeginGetRequestStream(new AsyncCallback(GetRequestStreamCallback), request);
+            }
+        }
+
+        void GetRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadTrendingStringCompleted), webRequest);
+        }
+
+        void client_DownloadTrendingStringCompleted(IAsyncResult r)
         {
             try
             {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    //parse into jsonser
-                    var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
-                    TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
-                    int counter = 1;
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
 
-                    trendingMovies = new List<TraktMovie>();
-
-                    foreach (TraktMovie movie in obj)
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                     {
-                        trendingMovies.Add(movie);
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
+                        TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
+                        this.TrendingItems = new ObservableCollection<ListItemViewModel>();
+                        int count = 0;
+                        foreach (TraktMovie traktMovie in obj)
+                        {
+                            if (++count > 8)
+                                break;
 
-                        if (counter++ >= 10)
-                            break;
+                            TraktMovie movie = traktMovie;
+                            this.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.Ratings.Percentage, NumberOfRatings = movie.Ratings.Votes.ToString(), Type = "Movie" });
+                        }
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            NotifyPropertyChanged("TrendingItems");
+                            this.LoadingStatusTrending = "Collapsed";
+                        });
                     }
                 }
-
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-                worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-                worker.RunWorkerAsync();
             }
             catch (WebException)
             {
@@ -300,33 +328,7 @@ namespace WPtrakt
             }
         }
 
-        void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            this.LoadingStatusTrending = "Collapsed";
-        }
-
-        void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            this.TrendingItems = new ObservableCollection<ListItemViewModel>();
-            if (trendingMovies != null)
-            {
-                    foreach (TraktMovie movieInList in trendingMovies)
-                    {
-                        var movie = movieInList;
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                           this.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.Ratings.Percentage, NumberOfRatings = movie.Ratings.Votes.ToString() });
-                           NotifyPropertyChanged("TrendingItems");
-
-                        });
-
-                        if(StorageController.doesFileExist(movie.imdb_id + "medium" + ".jpg"))
-                            Thread.Sleep(250);
-                        else
-                            Thread.Sleep(500);
-                    }
-            }
-        }
+        #endregion
 
         private void loadHistory()
         {
@@ -340,8 +342,6 @@ namespace WPtrakt
 
             if (this.HistoryItems.Count == 0)
                 this.HistoryItems.Add(new ListItemViewModel() { Name = "No recent history" });
-                
-            NotifyPropertyChanged("HistoryItems");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
