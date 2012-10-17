@@ -53,11 +53,16 @@
             <controls:PanoramaItem Margin="0 -50" Header="Suggestions" Visibility="{Binding SuggestionsVisibility}" Orientation="Horizontal">
                 <StackPanel>
                     <delay:DeferredLoadListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Height="519" Width="700">
-                        <ListBox.ItemsPanel>
+                        <delay:DeferredLoadListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
                             </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
+                        </delay:DeferredLoadListBox.ItemsPanel>
+                        <delay:DeferredLoadListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Height" Value="250"/>
+                            </Style>
+                        </delay:DeferredLoadListBox.ItemContainerStyle>
                         <delay:DeferredLoadListBox.ItemTemplate >
                             <DataTemplate>
                                 <Image delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Margin="5 5 5 5" Width="160" Height="250" Tap="Image_Tap" />

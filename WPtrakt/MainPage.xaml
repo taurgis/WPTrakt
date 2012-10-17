@@ -57,11 +57,16 @@
                 <!--Double line list with image placeholder and text wrapping-->
                 <StackPanel>
                     <delay:DeferredLoadListBox Margin="0,-20,-10,0" ItemsSource="{Binding TrendingItems}" Height="519" Width="700">
-                        <ListBox.ItemsPanel>
+                        <delay:DeferredLoadListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
                             </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
+                        </delay:DeferredLoadListBox.ItemsPanel>
+                        <delay:DeferredLoadListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Height" Value="250"/>
+                            </Style>
+                        </delay:DeferredLoadListBox.ItemContainerStyle>
                         <delay:DeferredLoadListBox.ItemTemplate >
                             <DataTemplate>
                                 <StackPanel Margin="0 5">
