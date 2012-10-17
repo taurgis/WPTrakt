@@ -7,6 +7,7 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
@@ -22,36 +23,66 @@
             
             <!--Panorama item one-->
             <controls:PanoramaItem Header="Movies" Width="480">
-                <ListBox Margin="0,0,-12,0" ItemsSource="{Binding MovieItems}" Name="MovieList" MaxWidth="800" >
-                    <ListBox.ItemTemplate>
+                <delay:DeferredLoadListBox ItemsSource="{Binding MovieItems}">
+                    <delay:DeferredLoadListBox.ItemTemplate>
                         <DataTemplate>
                             <Canvas Margin="0,6,0,6" Height="103" Tap="MovieCanvas_Tap">
-                                <StackPanel VerticalAlignment="Top" Orientation="Vertical">
-                                    <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" MaxWidth="800" />
-                                    <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
-                                    <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Image
+                                        delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Height="75" Width="50"/>
+                                    <StackPanel VerticalAlignment="Top" Orientation="Vertical">
+                                        <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" MaxWidth="800" />
+                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </StackPanel>
                                 </StackPanel>
                             </Canvas>
                         </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    </delay:DeferredLoadListBox.ItemTemplate>
+                    <delay:DeferredLoadListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Height" Value="103"/>
+                        </Style>
+                    </delay:DeferredLoadListBox.ItemContainerStyle>
+                    <delay:DeferredLoadListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </delay:DeferredLoadListBox.ItemsPanel>
+
+                </delay:DeferredLoadListBox>
             </controls:PanoramaItem>
 
             <!--Panorama item two-->
             <controls:PanoramaItem Header="Shows" Width="480">
-                <ListBox Margin="0,0,-12,0" ItemsSource="{Binding ShowItems}" Name="ShowList" MaxWidth="430" >
-                    <ListBox.ItemTemplate>
+                <delay:DeferredLoadListBox ItemsSource="{Binding ShowItems}">
+                    <delay:DeferredLoadListBox.ItemTemplate>
                         <DataTemplate>
                             <Canvas Margin="0,6,0,6" Height="103" Tap="ShowCanvas_Tap">
-                               <StackPanel VerticalAlignment="Top" Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image
+                                        delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Height="75" Width="50"/>
+                                    <StackPanel VerticalAlignment="Top" Orientation="Vertical">
                                     <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" MaxWidth="430" />
                                     <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                     <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                 </StackPanel>
+                                </StackPanel>
                             </Canvas>
                         </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                    </delay:DeferredLoadListBox.ItemTemplate>
+                    <delay:DeferredLoadListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Height" Value="103"/>
+                        </Style>
+                    </delay:DeferredLoadListBox.ItemContainerStyle>
+                    <delay:DeferredLoadListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+                    </delay:DeferredLoadListBox.ItemsPanel>
+
+                </delay:DeferredLoadListBox>
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>

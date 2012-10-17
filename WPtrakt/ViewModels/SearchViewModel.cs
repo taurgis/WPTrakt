@@ -88,12 +88,9 @@ namespace WPtrakt
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
                     TraktMovie[] movies = (TraktMovie[])ser.ReadObject(ms);
-                    int count = 0;
                     foreach (TraktMovie movie in movies)
                     {
-                        if (count++ == 12)
-                            break;
-                        this.MovieItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                        this.MovieItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres, Type = "Movie" });
                     }
                     if (ShowItems != null)
                     {
@@ -120,12 +117,10 @@ namespace WPtrakt
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
                     TraktShow[] shows = (TraktShow[])ser.ReadObject(ms);
-                    int count = 0;
+
                     foreach (TraktShow show in shows)
                     {
-                        if (count++ == 12)
-                            break;
-                        this.ShowItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres });
+                        this.ShowItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres, Type="Show" });
                     }
                     if (MovieItems != null)
                     {
