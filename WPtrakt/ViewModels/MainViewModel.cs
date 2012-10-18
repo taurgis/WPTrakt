@@ -185,6 +185,92 @@ namespace WPtrakt
 
         #region Profile
 
+        DispatcherTimer tmr;
+
+        private void CallValidationService()
+        {
+            firstCall = DateTime.Now;
+            tmr = new DispatcherTimer();
+            tmr.Interval = TimeSpan.FromSeconds(2);
+            tmr.Tick += OnTimerTick;
+            tmr.Start();
+
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/account/test/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetValidationRequestStreamCallback), request);
+        }
+
+
+        void GetValidationRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadValidationStringCompleted), webRequest);
+        }
+
+        void client_DownloadValidationStringCompleted(IAsyncResult r)
+        {
+            try
+            {
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                       tmr.Stop();
+                    
+                        LoadProfile();
+                    });
+                }
+
+            }
+            catch (WebException)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    var toast = new ToastPrompt()
+                    {
+                        Title = "User incorrect!",
+                        TextOrientation = System.Windows.Controls.Orientation.Vertical,
+
+                        Message = "Login data incorrect, or server connection problems.",
+                    };
+
+                    toast.Show();
+                    _profile = new TraktProfile();
+                    NotifyPropertyChanged("LoadingStatus");
+                });
+            }
+        }
+
+        void OnTimerTick(object sender, EventArgs e)
+        {
+            int seconds = (DateTime.Now - firstCall).Seconds;
+
+            if (seconds > 10)
+            {
+                var toast = new ToastPrompt
+                {
+                    Title = "Connection",
+                    TextOrientation = System.Windows.Controls.Orientation.Vertical,
+                    Message = "Connection to Trakt slow!",
+                };
+
+                toast.Show();
+                tmr.Stop();
+            }
+        }
+
         private void LoadProfile()
         {
             if (StorageController.doesFileExist(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json"))
@@ -219,102 +305,65 @@ namespace WPtrakt
             }
             else
             {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                 CallProfileService();
-                });
+                CallProfileService();
             }
         }
-
-        DispatcherTimer tmr;
-
-        private void CallValidationService()
-        {
-            var validationClient = new WebClient();
-            firstCall = DateTime.Now;
-            tmr = new DispatcherTimer();
-            tmr.Interval = TimeSpan.FromSeconds(1);
-            tmr.Tick += OnTimerTick;
-            tmr.Start();
-
-            validationClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadValidationStringCompleted);
-            validationClient.UploadStringAsync(new Uri("http://api.trakt.tv/account/test/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-        }
-
-        void OnTimerTick(object sender, EventArgs e)
-        {
-            int seconds = (DateTime.Now - firstCall).Seconds;
-
-            if (seconds > 15)
-            {
-                var toast = new ToastPrompt
-                {
-                    Title = "Connection",
-                    TextOrientation = System.Windows.Controls.Orientation.Vertical,
-                    Message = "Connection to Trakt slow!",
-                };
-                toast.Show();
-
-                tmr.Stop();
-            }
-        } 
 
         private void CallProfileService()
         {
-            var profileClient = new WebClient();
+            HttpWebRequest request;
 
-            profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
-            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/profile.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/profile.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetProfileRequestStreamCallback), request);
         }
 
 
-        void client_DownloadValidationStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void GetProfileRequestStreamCallback(IAsyncResult asynchronousResult)
         {
-            tmr.Stop();
-           
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
 
-            try
-            {
-                String jsonString = e.Result;
-                LoadProfile();
-            }
-            catch (WebException)
-            {
-                var toast = new ToastPrompt()
-                {
-                    Title = "User incorrect!",
-                    TextOrientation = System.Windows.Controls.Orientation.Vertical,
- 
-                    Message = "Login data incorrect, or server connection problems.",
-                };
-                toast.Show();
-                _profile = new TraktProfile();
-                NotifyPropertyChanged("LoadingStatus");
-            }
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadProfileStringCompleted), webRequest);
         }
 
-        void client_DownloadProfileStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void client_DownloadProfileStringCompleted(IAsyncResult r)
         {
             try
             {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    var ser = new DataContractJsonSerializer(typeof(TraktProfile));
-                    _profile = (TraktProfile)ser.ReadObject(ms);
-                    StorageController.saveObject(_profile, typeof(TraktProfile));
-                    loadHistory();
-                    NotifyPropertyChanged("HistoryItems");
-                    RefreshProfile();
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
+
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                    {
+                        var ser = new DataContractJsonSerializer(typeof(TraktProfile));
+                        _profile = (TraktProfile)ser.ReadObject(ms);
+                        StorageController.saveObject(_profile, typeof(TraktProfile));
+                        loadHistory();
+                        NotifyPropertyChanged("HistoryItems");
+                        RefreshProfile();
+                    }
                 }
+
             }
             catch (WebException)
             {
                 _profile = new TraktProfile();
-                NotifyPropertyChanged("MainVisibility");
-                NotifyPropertyChanged("LoadingStatus");
-                ErrorManager.ShowConnectionErrorPopup();
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    NotifyPropertyChanged("MainVisibility");
+                    NotifyPropertyChanged("LoadingStatus");
+                    ErrorManager.ShowConnectionErrorPopup();
+                });
             }
         }
 
@@ -419,8 +468,6 @@ namespace WPtrakt
         }
 
         #endregion
-
-     
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
