@@ -111,6 +111,7 @@ namespace WPtrakt
         #endregion
 
         #region MyShows
+
         public void LoadData()
         {
             this.ShowItems = new ObservableCollection<ListItemViewModel>();
@@ -237,6 +238,8 @@ namespace WPtrakt
 
         #endregion
 
+        #region Calendar
+
         public void LoadCalendarData()
         {
             HttpWebRequest request;
@@ -322,6 +325,9 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatusShows");
         }
 
+        #endregion
+
+        #region Suggestions
 
         public void LoadSuggestData()
         {
@@ -397,6 +403,8 @@ namespace WPtrakt
             this.ShowItems.Clear();
             this.IsDataLoaded = false;
         }
+
+        #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
