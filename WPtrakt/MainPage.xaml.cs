@@ -7,6 +7,7 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using Coding4Fun.Phone.Controls;
 
 namespace WPtrakt
 {
@@ -23,7 +24,13 @@ namespace WPtrakt
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                MessageBox.Show("No network connection available!");
+                var toast = new ToastPrompt
+                {
+                    Title = "Connection",
+                    TextOrientation = System.Windows.Controls.Orientation.Vertical,
+                    Message = "No connection available!",
+                };
+                toast.Show();
                 return;
             }
 

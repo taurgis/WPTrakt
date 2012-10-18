@@ -5,6 +5,7 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
+    xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
@@ -67,7 +68,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Height="Auto">
-                                    <Image Source="{Binding ImageSource}" VerticalAlignment="Top" Margin="0,12" Width="60" Height="60"/>
+                                    <Image delay:LowProfileImageLoader.UriSource="{Binding ImageSource}" VerticalAlignment="Top" Margin="0,12" Width="60" Height="60"/>
                                     <StackPanel Orientation="Vertical" Width="370" Height="Auto">
                                         <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Width="280" Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
                                         <TextBlock VerticalAlignment="Top"  HorizontalAlignment="Left" Width="330" Height="Auto" TextWrapping="Wrap" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />

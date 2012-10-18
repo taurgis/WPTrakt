@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows;
 using Microsoft.Phone.Shell;
 using Coding4Fun.Phone.Controls;
+using System.Windows.Threading;
 
 
 namespace WPtrakt
@@ -225,25 +226,22 @@ namespace WPtrakt
             }
         }
 
+        DispatcherTimer tmr;
+
         private void CallValidationService()
         {
             var validationClient = new WebClient();
             firstCall = DateTime.Now;
+            tmr = new DispatcherTimer();
+            tmr.Interval = TimeSpan.FromSeconds(1);
+            tmr.Tick += OnTimerTick;
+            tmr.Start();
+
             validationClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadValidationStringCompleted);
             validationClient.UploadStringAsync(new Uri("http://api.trakt.tv/account/test/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
         }
 
-
-        private void CallProfileService()
-        {
-            var profileClient = new WebClient();
-
-            profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
-            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/profile.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-        }
-
-
-        void client_DownloadValidationStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void OnTimerTick(object sender, EventArgs e)
         {
             int seconds = (DateTime.Now - firstCall).Seconds;
 
@@ -256,7 +254,24 @@ namespace WPtrakt
                     Message = "Connection to Trakt slow!",
                 };
                 toast.Show();
+
+                tmr.Stop();
             }
+        } 
+
+        private void CallProfileService()
+        {
+            var profileClient = new WebClient();
+
+            profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
+            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/profile.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+        }
+
+
+        void client_DownloadValidationStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            tmr.Stop();
+           
 
             try
             {

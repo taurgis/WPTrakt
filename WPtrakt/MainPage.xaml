@@ -58,26 +58,21 @@
             <controls:PanoramaItem Visibility="{Binding TrendingVisibility}"  Margin="0 -50" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
                 <!--Double line list with image placeholder and text wrapping-->
                 <StackPanel>
-                    <delay:DeferredLoadListBox Margin="0,-20,-10,0" ItemsSource="{Binding TrendingItems}" Height="519" Width="700">
-                        <delay:DeferredLoadListBox.ItemsPanel>
+                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding TrendingItems}" Height="519" Width="700">
+                        <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
                             </ItemsPanelTemplate>
-                        </delay:DeferredLoadListBox.ItemsPanel>
-                        <delay:DeferredLoadListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Height" Value="250"/>
-                            </Style>
-                        </delay:DeferredLoadListBox.ItemContainerStyle>
-                        <delay:DeferredLoadListBox.ItemTemplate >
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate >
                             <DataTemplate>
                                 <StackPanel Margin="0 5">
                                     <Image Canvas.ZIndex="3" HorizontalAlignment="Left" Margin="0 15"  Source="Images/seen.png" Width="{Binding WatchedVisible}" Height="23" />
                                     <Image Canvas.ZIndex="2" delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Margin="0 -45 5 5" Width="160" Height="250" Tap="Image_Tap" />
                                 </StackPanel>
                             </DataTemplate>
-                        </delay:DeferredLoadListBox.ItemTemplate>
-                    </delay:DeferredLoadListBox>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                     <ProgressBar Visibility="{Binding LoadingStatusTrending}" x:Name="progressBarImages" Margin="0 -20" IsIndeterminate="True" />
                 </StackPanel>
             </controls:PanoramaItem>
