@@ -179,7 +179,6 @@ namespace WPtrakt
         {
             CallValidationService();
     
-
             this.IsDataLoaded = true;
         }
 

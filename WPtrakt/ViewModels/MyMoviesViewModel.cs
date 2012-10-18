@@ -142,43 +142,67 @@ namespace WPtrakt
             }
             else
             {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-               {
-                   CallMyMoviesService();
-               });
+                CallMyMoviesService();
             }
         }
 
         private void CallMyMoviesService()
         {
-            var trendingClient = new WebClient();
-            trendingClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMoviesStringCompleted);
-            trendingClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/library/movies/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/library/movies/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetMyMoviesRequestStreamCallback), request);
         }
 
-        void client_UploadMoviesStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void GetMyMoviesRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadMyMoviesStringCompleted), webRequest);
+        }
+
+        void client_DownloadMyMoviesStringCompleted(IAsyncResult r)
         {
             try
             {
-                String jsonString = e.Result;
-                ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    //parse into jsonser
-                    var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
-                    TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
-                    StorageController.saveObjectInMainFolder(obj, typeof(TraktMovie[]), "mymovies.json");
-                    foreach (TraktMovie movie in obj)
-                    {
-                        tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
-                    }
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
 
-                    if (tempItems.Count == 0)
+                    ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                     {
-                        tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
+                        TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
+                        StorageController.saveObjectInMainFolder(obj, typeof(TraktMovie[]), "mymovies.json");
+                        foreach (TraktMovie movie in obj)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                        }
+
+                        if (tempItems.Count == 0)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                        }
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            UpdateMyMovieView(tempItems);
+                        });
                     }
-                    UpdateMyMovieView(tempItems);
                 }
+
             }
             catch (WebException)
             {
@@ -201,39 +225,68 @@ namespace WPtrakt
 
         public void LoadSuggestData()
         {
-            var suggestClient = new WebClient();
-           
-            suggestClient.UploadStringCompleted += new UploadStringCompletedEventHandler(suggestClient_UploadStringCompleted);
-            suggestClient.UploadStringAsync(new Uri("http://api.trakt.tv/recommendations/movies/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication());
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/movies/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetSuggestionsRequestStreamCallback), request);
+
         }
 
-        void suggestClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void GetSuggestionsRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadSuggestionsStringCompleted), webRequest);
+        }
+
+        void client_DownloadSuggestionsStringCompleted(IAsyncResult r)
         {
             try
             {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    //parse into jsonser
-                    var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
-                    TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
-                    int counter = 1;
-                    suggestedMovies = new List<TraktMovie>();
-                    this.SuggestItems = new ObservableCollection<ListItemViewModel>();
-                    foreach (TraktMovie movie in obj)
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                     {
-                        suggestedMovies.Add(movie);
-                        if (counter++ >= 8)
-                            break;
-                    }
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
+                        TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
+                        int counter = 1;
+                        suggestedMovies = new List<TraktMovie>();
+                        this.SuggestItems = new ObservableCollection<ListItemViewModel>();
 
-                    worker.WorkerReportsProgress = true;
-                    worker.WorkerSupportsCancellation = true;
-                    worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-                    worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-                    worker.RunWorkerAsync();
+                        foreach (TraktMovie movieInList in obj)
+                        {
+                            if (counter++ > 8)
+                                break;
+
+                            var movie = movieInList;
+                            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                           {
+                               this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie" });
+                               NotifyPropertyChanged("SuggestItems");
+                           });
+
+                            Thread.Sleep(1500);
+                        }
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            NotifyPropertyChanged("LoadingStatusSuggestions");
+                        });
+                    }
                 }
+
             }
             catch (WebException)
             {
@@ -241,30 +294,6 @@ namespace WPtrakt
             }
         }
 
-        void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            NotifyPropertyChanged("LoadingStatusSuggestions");
-        }
-
-        void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            if (suggestedMovies != null)
-            {
-              
-                    foreach (TraktMovie movieInList in suggestedMovies)
-                    {
-                        var movie = movieInList;
-                        this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie" });
-                         
-                    }
-
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        NotifyPropertyChanged("SuggestItems");
-
-                    });
-            }
-        }
 
         public void ClearItems()
         {
