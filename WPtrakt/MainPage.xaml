@@ -14,40 +14,6 @@
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded">
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <phone:PhoneApplicationPage.Resources>
-        <Style x:Key="PanoramaBGStyle" TargetType="controls:Panorama">
-            <Setter Property="ItemsPanel">
-                <Setter.Value>
-                    <ItemsPanelTemplate>
-                        <controlsPrimitives:PanoramaPanel x:Name="panel"/>
-                    </ItemsPanelTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="controls:Panorama">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <controlsPrimitives:PanningBackgroundLayer x:Name="BackgroundLayer" HorizontalAlignment="Left" Grid.RowSpan="2">
-                                <Border x:Name="background" Background="{TemplateBinding Background}" CacheMode="BitmapCache"/>
-                            </controlsPrimitives:PanningBackgroundLayer>
-                            <Rectangle Fill="{StaticResource PhoneAccentBrush}" Grid.Row="0" Height="140" VerticalAlignment="Top" />
-                            <controlsPrimitives:PanningTitleLayer x:Name="TitleLayer" CacheMode="BitmapCache" ContentTemplate="{TemplateBinding TitleTemplate}" Content="{TemplateBinding Title}" FontSize="187" FontFamily="Segoe WP SemiLight" HorizontalAlignment="Left" Margin="10,-76,0,9" Grid.Row="0"/>
-                            <controlsPrimitives:PanningLayer x:Name="ItemsLayer" HorizontalAlignment="Left" Grid.Row="1">
-                                <ItemsPresenter x:Name="items"/>
-                            </controlsPrimitives:PanningLayer>
-                            <Border BorderBrush="#0785ac" BorderThickness="2" Margin="0 40"  VerticalAlignment="Bottom" Height="3"/>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </phone:PhoneApplicationPage.Resources>
     <phone:PhoneApplicationPage.FontFamily>
         <StaticResource ResourceKey="PhoneFontFamilyNormal"/>
     </phone:PhoneApplicationPage.FontFamily>

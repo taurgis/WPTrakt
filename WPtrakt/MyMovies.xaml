@@ -18,12 +18,10 @@
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded">
 
+    
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
-        <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Name="MyMoviesPanorama">
-            <controls:Panorama.Background>
-                <ImageBrush ImageSource="Images/EmptyPanoramaBackground.png"/>
-            </controls:Panorama.Background>
+        <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}" Name="MyMoviesPanorama">
             <controls:PanoramaItem Margin="0 -50" Orientation="Horizontal">
                 <!--Double line list with image placeholder and text wrapping-->
                 <StackPanel>
