@@ -346,10 +346,14 @@ namespace WPtrakt
                     {
                         var ser = new DataContractJsonSerializer(typeof(TraktProfile));
                         _profile = (TraktProfile)ser.ReadObject(ms);
+
                         StorageController.saveObject(_profile, typeof(TraktProfile));
-                        loadHistory();
-                        NotifyPropertyChanged("HistoryItems");
-                        RefreshProfile();
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            loadHistory();
+                            NotifyPropertyChanged("HistoryItems");
+                            RefreshProfile();
+                        });
                     }
                 }
 
