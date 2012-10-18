@@ -22,7 +22,6 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> ShowItems { get; private set; }
         public ObservableCollection<CalendarListItemViewModel> CalendarItems { get; private set; }
         public ObservableCollection<ListItemViewModel> SuggestItems { get; private set; }
-        private List<TraktShow> suggestedShows;
         public Boolean LoadingSuggestItems { get; set; }
         private BackgroundWorker worker = new BackgroundWorker();
 
@@ -111,6 +110,7 @@ namespace WPtrakt
 
         #endregion
 
+        #region MyShows
         public void LoadData()
         {
             this.ShowItems = new ObservableCollection<ListItemViewModel>();
@@ -171,38 +171,63 @@ namespace WPtrakt
 
         private void CallMyShowService()
         {
-            var trendingClient = new WebClient();
-            trendingClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShowsStringCompleted);
-            trendingClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/library/shows/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/library/shows/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetMyShowsRequestStreamCallback), request);
         }
 
-        void client_UploadShowsStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void GetMyShowsRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadMyShowsStringCompleted), webRequest);
+        }
+
+        void client_DownloadMyShowsStringCompleted(IAsyncResult r)
         {
             try
             {
-                String jsonString = e.Result;
-                ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    //parse into jsonser
-                    var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
-                    TraktShow[] obj = (TraktShow[])ser.ReadObject(ms);
-                    StorageController.saveObjectInMainFolder(obj, typeof(TraktShow[]), "myshows.json");
-                    foreach (TraktShow show in obj)
-                    {
-                        tempItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres });
-                    }
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
 
-                    if (tempItems.Count == 0)
+                    ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                     {
-                        tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
-                    }
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
+                        TraktShow[] obj = (TraktShow[])ser.ReadObject(ms);
+                        StorageController.saveObjectInMainFolder(obj, typeof(TraktShow[]), "myshows.json");
+                        foreach (TraktShow show in obj)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres });
+                        }
 
-                    this.ShowItems = tempItems;
-                    NotifyPropertyChanged("ShowItems");
-                    
+                        if (tempItems.Count == 0)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                        }
+
+                        this.ShowItems = tempItems;
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            NotifyPropertyChanged("ShowItems");
+                            NotifyPropertyChanged("LoadingStatusShows");
+                        });
+                    }
                 }
-                NotifyPropertyChanged("LoadingStatusShows");
             }
             catch (WebException)
             {
@@ -210,51 +235,80 @@ namespace WPtrakt
             }
         }
 
+        #endregion
+
         public void LoadCalendarData()
         {
-            var calendarClient = new WebClient();
+            HttpWebRequest request;
 
-            calendarClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadCalendartringCompleted);
-            calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"), AppUser.createJsonStringForAuthentication());
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetCalendarRequestStreamCallback), request);
 
             this.IsDataLoaded = true;
         }
 
-        void client_UploadCalendartringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void GetCalendarRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadCalendarStringCompleted), webRequest);
+        }
+
+        void client_DownloadCalendarStringCompleted(IAsyncResult r)
         {
             try
             {
-                String jsonString = e.Result;
-                ObservableCollection<CalendarListItemViewModel> tempItems = new ObservableCollection<CalendarListItemViewModel>();
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    //parse into jsonser
-                    var ser = new DataContractJsonSerializer(typeof(TraktCalendar[]));
-                    TraktCalendar[] obj = (TraktCalendar[])ser.ReadObject(ms);
-                    StorageController.saveObjectInMainFolder(obj, typeof(TraktCalendar[]), "upcomming.json");
-                  
-                    foreach (TraktCalendar calendarDate in obj)
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
+                    ObservableCollection<CalendarListItemViewModel> tempItems = new ObservableCollection<CalendarListItemViewModel>();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                     {
-                        if ((DateTime.Parse(calendarDate.Date) - DateTime.Now).Days > 7)
-                            break;
-                        ObservableCollection<ListItemViewModel> tempEpisodes = new ObservableCollection<ListItemViewModel>();
-                        foreach (TraktCalendarEpisode episode in calendarDate.Episodes)
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktCalendar[]));
+                        TraktCalendar[] obj = (TraktCalendar[])ser.ReadObject(ms);
+                        StorageController.saveObjectInMainFolder(obj, typeof(TraktCalendar[]), "upcomming.json");
+
+                        foreach (TraktCalendar calendarDate in obj)
                         {
-                            tempEpisodes.Add(new ListItemViewModel() { Name = episode.Show.Title, ImageSource = episode.Episode.Images.Screen, Imdb = episode.Show.imdb_id + episode.Episode.Season + episode.Episode.Number, SubItemText = episode.Episode.Title, TruncateTitle = false, Tvdb = episode.Show.tvdb_id, Episode = episode.Episode.Number, Season = episode.Episode.Season });
+                            if ((DateTime.Parse(calendarDate.Date) - DateTime.Now).Days > 7)
+                                break;
+                            ObservableCollection<ListItemViewModel> tempEpisodes = new ObservableCollection<ListItemViewModel>();
+                            foreach (TraktCalendarEpisode episode in calendarDate.Episodes)
+                            {
+                                tempEpisodes.Add(new ListItemViewModel() { Name = episode.Show.Title, ImageSource = episode.Episode.Images.Screen, Imdb = episode.Show.imdb_id + episode.Episode.Season + episode.Episode.Number, SubItemText = episode.Episode.Title, TruncateTitle = false, Tvdb = episode.Show.tvdb_id, Episode = episode.Episode.Number, Season = episode.Episode.Season });
 
+                            }
+                            tempItems.Add(new CalendarListItemViewModel() { Date = calendarDate.Date, Items = tempEpisodes });
                         }
-                        tempItems.Add(new CalendarListItemViewModel() { Date = calendarDate.Date, Items = tempEpisodes });
+
+                        if (obj.Length == 00)
+                        {
+                            tempItems.Add(new CalendarListItemViewModel() { Date = "No upcomming episodes", Items = new ObservableCollection<ListItemViewModel>() });
+                        }
+
+                        this.CalendarItems = tempItems;
+
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            NotifyPropertyChanged("LoadingStatusCalendar");
+                            NotifyPropertyChanged("CalendarItems");
+                        });
                     }
 
-                    if (obj.Length == 00)
-                    {
-                        tempItems.Add(new CalendarListItemViewModel() { Date = "No upcomming episodes", Items = new ObservableCollection<ListItemViewModel>() });
-                    }
-
-                    this.CalendarItems = tempItems;
-                    NotifyPropertyChanged("LoadingStatusCalendar");
-                    NotifyPropertyChanged("CalendarItems");
                 }
+
             }
             catch (WebException)
             {
@@ -271,67 +325,70 @@ namespace WPtrakt
 
         public void LoadSuggestData()
         {
-            var suggestClient = new WebClient();
+            HttpWebRequest request;
 
-            suggestClient.UploadStringCompleted += new UploadStringCompletedEventHandler(suggestClient_UploadStringCompleted);
-            suggestClient.UploadStringAsync(new Uri("http://api.trakt.tv/recommendations/shows/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication());
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/shows/5eaaacc7a64121f92b15acf5ab4d9a0b"));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetSuggestRequestStreamCallback), request);
         }
 
-        void suggestClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void GetSuggestRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadSuggestStringCompleted), webRequest);
+        }
+
+        void client_DownloadSuggestStringCompleted(IAsyncResult r)
         {
             try
             {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    //parse into jsonser
-                    var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
-                    TraktShow[] obj = (TraktShow[])ser.ReadObject(ms);
-                    int counter = 1;
-                    suggestedShows = new List<TraktShow>();
-                    this.SuggestItems = new ObservableCollection<ListItemViewModel>();
-                    foreach (TraktShow show in obj)
-                    {
-                        suggestedShows.Add(show);
-   
-                        if (counter++ >= 8)
-                            break;
-                    }
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
 
-                    worker.WorkerReportsProgress = true;
-                    worker.WorkerSupportsCancellation = true;
-                    worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-                    worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
-                    worker.RunWorkerAsync();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                    {
+                        var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
+                        TraktShow[] obj = (TraktShow[])ser.ReadObject(ms);
+                        int counter = 1;
+                        this.SuggestItems = new ObservableCollection<ListItemViewModel>();
+
+                        foreach (TraktShow showInList in obj)
+                        {
+                            if (counter++ > 8)
+                                break;
+
+                            var show = showInList;
+
+                            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                            {
+                                this.SuggestItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, Type = "Show" });
+                                NotifyPropertyChanged("SuggestItems");
+                            });
+
+                            Thread.Sleep(1500);
+                        }
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            NotifyPropertyChanged("LoadingStatusSuggestions");
+                        });
+                    }
                 }
             }
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
-            }
-        }
-
-        void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            NotifyPropertyChanged("LoadingStatusSuggestions");
-        }
-
-        void worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            if (suggestedShows != null)
-            {
-              
-                    foreach (TraktShow showInList in suggestedShows)
-                    {
-                        var show = showInList;
-                      
-                        this.SuggestItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, Type = "Show" });
-                    }
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        NotifyPropertyChanged("SuggestItems");
-                    });
             }
         }
 

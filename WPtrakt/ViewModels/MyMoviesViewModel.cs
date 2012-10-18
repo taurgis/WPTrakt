@@ -93,6 +93,8 @@ namespace WPtrakt
 
         #endregion
 
+        #region MyMovies
+
         public void LoadData()
         {
             this.MovieItems = new ObservableCollection<ListItemViewModel>();
@@ -223,6 +225,10 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatusMovies");
         }
 
+        #endregion
+
+        #region Suggest
+
         public void LoadSuggestData()
         {
             HttpWebRequest request;
@@ -294,6 +300,7 @@ namespace WPtrakt
             }
         }
 
+        #endregion
 
         public void ClearItems()
         {
