@@ -21,6 +21,7 @@
                 <LinearDoubleKeyFrame KeyTime="0:0:0.9" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
+        
     </Application.Resources>
 
     <Application.ApplicationLifetimeObjects>

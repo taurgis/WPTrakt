@@ -1,5 +1,4 @@
-﻿<phone:PhoneApplicationPage 
-    x:Class="WPtrakt.Main"
+﻿<phone:PhoneApplicationPage
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
@@ -9,28 +8,65 @@
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728" 
-    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}"
-
-    Foreground="{StaticResource PhoneForegroundBrush}"
+    xmlns:controlsPrimitives="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls" 
+    x:Class="WPtrakt.Main"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded">
-
     <!--LayoutRoot is the root grid where all page content is placed-->
+    <phone:PhoneApplicationPage.Resources>
+        <Style x:Key="PanoramaBGStyle" TargetType="controls:Panorama">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <controlsPrimitives:PanoramaPanel x:Name="panel"/>
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="controls:Panorama">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <controlsPrimitives:PanningBackgroundLayer x:Name="BackgroundLayer" HorizontalAlignment="Left" Grid.RowSpan="2">
+                                <Border x:Name="background" Background="{TemplateBinding Background}" CacheMode="BitmapCache"/>
+                            </controlsPrimitives:PanningBackgroundLayer>
+                            <Rectangle Fill="{StaticResource PhoneAccentBrush}" Grid.Row="0" Height="140" VerticalAlignment="Top" />
+                            <controlsPrimitives:PanningTitleLayer x:Name="TitleLayer" CacheMode="BitmapCache" ContentTemplate="{TemplateBinding TitleTemplate}" Content="{TemplateBinding Title}" FontSize="187" FontFamily="Segoe WP SemiLight" HorizontalAlignment="Left" Margin="10,-76,0,9" Grid.Row="0"/>
+                            <controlsPrimitives:PanningLayer x:Name="ItemsLayer" HorizontalAlignment="Left" Grid.Row="1">
+                                <ItemsPresenter x:Name="items"/>
+                            </controlsPrimitives:PanningLayer>
+                            <Border BorderBrush="#0785ac" BorderThickness="2" Margin="0 40"  VerticalAlignment="Bottom" Height="3"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </phone:PhoneApplicationPage.Resources>
+    <phone:PhoneApplicationPage.FontFamily>
+        <StaticResource ResourceKey="PhoneFontFamilyNormal"/>
+    </phone:PhoneApplicationPage.FontFamily>
+    <phone:PhoneApplicationPage.FontSize>
+        <StaticResource ResourceKey="PhoneFontSizeNormal"/>
+    </phone:PhoneApplicationPage.FontSize>
+    <phone:PhoneApplicationPage.Foreground>
+        <StaticResource ResourceKey="PhoneForegroundBrush"/>
+    </phone:PhoneApplicationPage.Foreground>
     <Grid x:Name="LayoutRoot" >
         <!--Panorama control-->
-        <controls:Panorama IsEnabled="{Binding PanoramaEnabled}" Name="MainPanorama" Title=" " Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged">
-            <controls:Panorama.Background>
-                <ImageBrush ImageSource="Images/PanoramaBackground.png"/>
-            </controls:Panorama.Background>
-
+        <controls:Panorama  Title="WPtrakt" IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
+            
             <!--Panorama item one-->
             <controls:PanoramaItem Header="Profile" Margin="0 -50">
                 <!--Double line list with text wrapping-->
                 <StackPanel Margin="0,-90,-12,0" Width="432" Height="539">
-                    <ProgressBar Visibility="{Binding LoadingStatus}" Name="progressBar" IsIndeterminate="True" />
-                    <TextBlock Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
+                    <ProgressBar Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
+                    <TextBlock x:Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
                     <StackPanel Margin="0,0,0,17"  Width="432" Height="150" Orientation="Horizontal" HorizontalAlignment="Center">
                         <Image Width="138" Height="138" Margin="20 5 10 5" Source="{Binding UserAvatar}"/>
                         <StackPanel Margin="0,5,0,17"  Width="260" Height="138" Orientation="Vertical" HorizontalAlignment="Center">
@@ -53,7 +89,7 @@
                 </StackPanel>
             </controls:PanoramaItem>
 
-            <controls:PanoramaItem Visibility="{Binding TrendingVisibility}"  Margin="0 -50" Header="Trending" Name="TrendingPanoramaItem" Orientation="Horizontal">
+            <controls:PanoramaItem Visibility="{Binding TrendingVisibility}"  Margin="0 -50" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
                 <!--Double line list with image placeholder and text wrapping-->
                 <StackPanel>
                     <delay:DeferredLoadListBox Margin="0,-20,-10,0" ItemsSource="{Binding TrendingItems}" Height="519" Width="700">
@@ -76,12 +112,12 @@
                             </DataTemplate>
                         </delay:DeferredLoadListBox.ItemTemplate>
                     </delay:DeferredLoadListBox>
-                    <ProgressBar Visibility="{Binding LoadingStatusTrending}" Name="progressBarImages" Margin="0 -20" IsIndeterminate="True" />
+                    <ProgressBar Visibility="{Binding LoadingStatusTrending}" x:Name="progressBarImages" Margin="0 -20" IsIndeterminate="True" />
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -50" Header="History" Name="HistoryPanoramaItem" Orientation="Horizontal">
+            <controls:PanoramaItem Margin="0 -50" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
                 <!--Double line list with text wrapping-->
-                <ListBox Margin="0,0,-12,0" ItemsSource="{Binding HistoryItems}" Name="HistoryList" >
+                <ListBox Margin="0,0,-12,0" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Height="90" Tap="StackPanel_Tap">
@@ -97,6 +133,8 @@
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
+
+  
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
             <shell:ApplicationBarIconButton IconUri="Images/appbar.feature.settings.rest.png" Text="Settings" Click="ApplicationBarSettingsButton_Click" />

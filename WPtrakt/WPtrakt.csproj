@@ -180,6 +180,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Background.png" />
     <Content Include="Images\appbar.back.rest.png" />
     <Content Include="Images\appbar.cancel.rest.png" />
     <Content Include="Images\appbar.check.rest.png" />
@@ -191,15 +192,9 @@
     <Content Include="ApplicationIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Background.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Images\appbar.seen.rest.png" />
-    <Resource Include="Images\EmptyPanoramaBackgroundWhite.png" />
-    <Resource Include="Images\PanoramaBackground.png" />
     <Resource Include="Images\EmptyPanoramaBackground.png" />
     <Content Include="Images\heart-love.png" />
-    <Resource Include="Images\PanoramaBackgroundWhite.png" />
     <Content Include="Images\seen.png" />
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
