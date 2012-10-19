@@ -74,10 +74,11 @@
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
+    <Compile Include="Model\Trakt\Request\TraktMovieRequest.cs" />
     <Compile Include="Model\Trakt\Request\ShoutAuth.cs" />
     <Compile Include="Model\Trakt\Request\TraktEpisode.cs" />
     <Compile Include="Model\Trakt\Request\WatchedEpisodeAuth.cs" />
-    <Compile Include="Model\Trakt\Request\TraktMovieRequest.cs" />
+    <Compile Include="Model\Trakt\Request\CheckinAuth.cs" />
     <Compile Include="Model\Trakt\Request\WatchedAuth.cs" />
     <Compile Include="Model\Trakt\Request\RatingAuth.cs" />
     <Compile Include="Model\Trakt\Request\WatchlistAuth.cs" />

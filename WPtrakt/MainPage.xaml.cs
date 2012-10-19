@@ -8,6 +8,9 @@ using Microsoft.Phone.Net.NetworkInformation;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using Coding4Fun.Phone.Controls;
+using System.Net;
+using VPtrakt.Model.Trakt.Request;
+using VPtrakt.Controllers;
 
 namespace WPtrakt
 {
@@ -171,5 +174,28 @@ namespace WPtrakt
                 }
             }
         }
+        #region Menu
+        private void CancelCheckin_Click(object sender, EventArgs e)
+        {
+            var cancelCheckinClient = new WebClient();
+            cancelCheckinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(cancelCheckinClient_UploadStringCompleted);
+
+            cancelCheckinClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/cancelcheckin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+
+        }
+
+        void cancelCheckinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                MessageBox.Show("Cancelled any active check in.");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+        #endregion
     }
 }

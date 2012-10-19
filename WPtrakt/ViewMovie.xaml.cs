@@ -13,6 +13,7 @@ using WPtrakt.Model.Trakt.Request;
 using System.Windows.Media.Animation;
 using System.IO.IsolatedStorage;
 using System.Windows.Input;
+using System.Reflection;
 
 namespace WPtrakt
 {
@@ -173,6 +174,50 @@ namespace WPtrakt
             appBar.Buttons.Add(watchedButton);
         }
 
+        private void CreateCheckingButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton checkinButton = new ApplicationBarIconButton();
+            checkinButton = new ApplicationBarIconButton(new Uri("Images/appbar.check.rest.png", UriKind.Relative));
+            checkinButton.Text = "Check In";
+            checkinButton.Click += new EventHandler(checkinButton_Click);
+
+            appBar.Buttons.Add(checkinButton);
+        }
+
+        void checkinButton_Click(object sender, EventArgs e)
+        {
+            var checkinClient = new WebClient();
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
+            CheckinAuth auth = new CheckinAuth();
+
+            auth.imdb_id = App.MovieViewModel.Imdb;
+            auth.Title = App.MovieViewModel.Name;
+            auth.year = Int16.Parse(App.MovieViewModel.Year);
+            auth.AppDate = "19/10/2012";
+
+            var assembly = Assembly.GetExecutingAssembly().FullName;
+            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+            auth.AppVersion = fullVersionNumber;
+
+            checkinClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
+        }
+
+        void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                MessageBox.Show("Checked in!");
+                InitAppBar();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
         private void ShoutsIconButton_Click(object sender, EventArgs e)
         {
             App.MovieViewModel.LoadShoutData(App.MovieViewModel.Imdb);
@@ -198,6 +243,8 @@ namespace WPtrakt
                 CreateUnSeenButton(appBar);
             else
                 CreateSeenButton(appBar);
+
+            CreateCheckingButton(appBar);
 
             this.ApplicationBar = appBar;
         }
