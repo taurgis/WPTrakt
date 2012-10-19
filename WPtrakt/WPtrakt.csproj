@@ -197,6 +197,7 @@
     </Content>
     <Content Include="Images\appbar.seen.rest.png" />
     <Resource Include="Images\EmptyPanoramaBackground.png" />
+    <Content Include="Images\appbar.send.text.rest.png" />
     <Content Include="Images\heart-love.png" />
     <Content Include="Images\seen.png" />
     <Content Include="SplashScreenImage.jpg" />

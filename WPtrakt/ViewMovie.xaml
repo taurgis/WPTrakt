@@ -22,11 +22,11 @@
         </Grid.Background>
         
         <controls:Panorama  Title="{Binding Name}" Name="MoviePanorama" SelectionChanged="MoviePanorama_SelectionChanged">
-            <controls:PanoramaItem Header="Overview" Margin="0, -50">
+            <controls:PanoramaItem Header="Overview" Margin="0, -50" Canvas.ZIndex="2">
                 <StackPanel>
                     <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusMovie}" Name="progressBarLoading" IsIndeterminate="True" />
                     <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}"/>
-                    <ListBox Margin="0, 0,0,-3"  Height="625" Width="430" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
+                    <ListBox Margin="0, 0,0,-3"  Height="575" Width="430" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
                         <ListBoxItem Height="Auto"  Width="430">
                             <StackPanel  Width="430">
                                 <StackPanel Orientation="Horizontal">
@@ -64,7 +64,7 @@
             <!--Panorama item two-->
             <controls:PanoramaItem Header="Shouts" Margin="0, -50">
                 <Grid>
-                    <ListBox VerticalAlignment="Top" Margin="0,0,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" Height="450">
+                    <ListBox VerticalAlignment="Top" Margin="0,0,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" Height="400">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Height="Auto">
@@ -77,7 +77,9 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <TextBox Text="Press enter to submit." Name="ShoutText" VerticalAlignment="Bottom" Margin="0,0,0,50" TextWrapping="Wrap" KeyDown="ShoutText_KeyDown" GotFocus="ShoutText_GotFocus" LostFocus="ShoutText_LostFocus" Width="400" Background="{StaticResource PhoneAccentBrush}" />
+                    <StackPanel VerticalAlignment="Bottom" Height="Auto" Margin="0,0,0,55">
+                        <TextBox Name="ShoutText" VerticalAlignment="Bottom" />
+                    </StackPanel>
                 </Grid>
             </controls:PanoramaItem>
         </controls:Panorama>
@@ -85,7 +87,7 @@
     <!--Panorama-based applications should not show an ApplicationBar-->
     
     <phone:PhoneApplicationPage.ApplicationBar >
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Default">
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>

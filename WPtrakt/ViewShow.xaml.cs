@@ -118,9 +118,9 @@ namespace WPtrakt
         private void InitAppBarShouts()
         {
             ApplicationBar appBar = new ApplicationBar();
-            appBar.Mode = ApplicationBarMode.Minimized;
 
             CreateRefreshShoutsButton(appBar);
+            CreateSendButton(appBar);
 
             this.ApplicationBar = appBar;
         }
@@ -128,7 +128,6 @@ namespace WPtrakt
         private void InitAppBarMain(Boolean forceDisabled)
         {
             ApplicationBar appBar = new ApplicationBar();
-            appBar.Mode = ApplicationBarMode.Minimized;
             ApplicationBarIconButton disabledAddtoWatchlist = new ApplicationBarIconButton();
             disabledAddtoWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.video.rest.png", UriKind.Relative));
 
@@ -174,6 +173,35 @@ namespace WPtrakt
             watchedButton.Click += new EventHandler(ShoutsIconButton_Click);
 
             appBar.Buttons.Add(watchedButton);
+        }
+
+        private void CreateSendButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton sendButton = new ApplicationBarIconButton();
+            sendButton = new ApplicationBarIconButton(new Uri("Images/appbar.send.text.rest.png", UriKind.Relative));
+            sendButton.IsEnabled = true;
+            sendButton.Text = "Send";
+            sendButton.Click += new EventHandler(sendButton_Click);
+
+            appBar.Buttons.Add(sendButton);
+        }
+
+        void sendButton_Click(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrEmpty((ShoutText.Text)))
+            {
+                var watchlistClient = new WebClient();
+                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
+                ShoutAuth auth = new ShoutAuth();
+
+                auth.Tvdb = App.ShowViewModel.Tvdb;
+                auth.Title = App.ShowViewModel.Name;
+                auth.Year = Int16.Parse(App.ShowViewModel.Year);
+
+                auth.Shout = ((TextBox)sender).Text;
+                LastShout = auth.Shout;
+                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/show/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+            }
         }
 
         private void ShoutsIconButton_Click(object sender, EventArgs e)
@@ -331,24 +359,7 @@ namespace WPtrakt
             InitAppBarMain(false);
         }
 
-        private void ShoutText_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && !String.IsNullOrEmpty(((TextBox)sender).Text))
-            {
-                var watchlistClient = new WebClient();
-                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-                ShoutAuth auth = new ShoutAuth();
 
-                auth.Tvdb = App.ShowViewModel.Tvdb;
-                auth.Title = App.ShowViewModel.Name;
-                auth.Year = Int16.Parse(App.ShowViewModel.Year);
-
-                auth.Shout = ((TextBox)sender).Text;
-                LastShout = auth.Shout;
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/show/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
-
-            }
-        }
         private String LastShout { get; set; }
         void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
@@ -366,19 +377,5 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
         }
-
-        private void ShoutText_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (ShoutText.Text.Equals("Press enter to submit."))
-                ShoutText.Text = "";
-        }
-
-        private void ShoutText_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if(String.IsNullOrEmpty(ShoutText.Text))
-                ShoutText.Text = "Press enter to submit.";
-        }
-
-        
     }
 }

@@ -90,7 +90,6 @@ namespace WPtrakt
         private void LoadAppBar()
         {
             ApplicationBar appBar = new ApplicationBar();
-            appBar.Mode = ApplicationBarMode.Minimized;
 
             CreateWatchedButton(appBar, !App.EpisodeViewModel.Watched);
 
@@ -101,9 +100,9 @@ namespace WPtrakt
         private void InitAppBarShouts()
         {
             ApplicationBar appBar = new ApplicationBar();
-            appBar.Mode = ApplicationBarMode.Minimized;
 
             CreateRefreshShoutsButton(appBar);
+            CreateSendButton(appBar);
 
             this.ApplicationBar = appBar;
         }
@@ -132,6 +131,36 @@ namespace WPtrakt
             watchedButton.Click += new EventHandler(ApplicationBarIconButton_Click);
 
             appBar.Buttons.Add(watchedButton);
+        }
+
+        private void CreateSendButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton sendButton = new ApplicationBarIconButton();
+            sendButton = new ApplicationBarIconButton(new Uri("Images/appbar.send.text.rest.png", UriKind.Relative));
+            sendButton.IsEnabled = true;
+            sendButton.Text = "Send";
+            sendButton.Click += new EventHandler(sendButton_Click);
+
+            appBar.Buttons.Add(sendButton);
+        }
+
+        void sendButton_Click(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrEmpty((ShoutText.Text)))
+            {
+                var watchlistClient = new WebClient();
+                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
+                ShoutAuth auth = new ShoutAuth();
+
+                auth.Tvdb = App.EpisodeViewModel.Tvdb;
+                auth.Title = App.EpisodeViewModel.ShowName;
+                auth.Year = App.EpisodeViewModel.ShowYear;
+                auth.Season = Int16.Parse(App.EpisodeViewModel.Season);
+                auth.episode = Int16.Parse(App.EpisodeViewModel.Number);
+                auth.Shout = ((TextBox)sender).Text;
+                LastShout = auth.Shout;
+                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/episode/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+            }
         }
 
         private void ApplicationBarIconButton_Click(object sender, EventArgs e)
@@ -168,25 +197,6 @@ namespace WPtrakt
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
-        private void ShoutText_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && !String.IsNullOrEmpty(((TextBox)sender).Text))
-            {
-                var watchlistClient = new WebClient();
-                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-                ShoutAuth auth = new ShoutAuth();
-              
-                auth.Tvdb = App.EpisodeViewModel.Tvdb;
-                auth.Title = App.EpisodeViewModel.ShowName;
-                auth.Year = App.EpisodeViewModel.ShowYear;
-                auth.Season = Int16.Parse(App.EpisodeViewModel.Season);
-                auth.episode = Int16.Parse( App.EpisodeViewModel.Number);
-                auth.Shout = ((TextBox)sender).Text;
-                LastShout = auth.Shout;
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/episode/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
-
-            }
-        }
         private String LastShout { get; set; }
         void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
@@ -204,18 +214,5 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
         }
-
-        private void ShoutText_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (ShoutText.Text.Equals("Press enter to submit."))
-                ShoutText.Text = "";
-        }
-
-        private void ShoutText_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (String.IsNullOrEmpty(ShoutText.Text))
-                ShoutText.Text = "Press enter to submit.";
-        }
-
     }
 }
