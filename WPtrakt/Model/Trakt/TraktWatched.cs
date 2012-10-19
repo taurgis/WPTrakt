@@ -27,6 +27,9 @@ namespace WPtrakt.Model.Trakt
         [DataMember(Name = "show")]
         public TraktShow Show { get; set; }
 
+        [DataMember(Name = "movie")]
+        public TraktMovie Movie { get; set; }
+
         [DataMember(Name = "episode")]
         public TraktEpisode Episode { get; set; }
 

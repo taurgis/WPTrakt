@@ -241,7 +241,7 @@ namespace Delay
                 resize.Invalidate();
                 return resize;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 
             }

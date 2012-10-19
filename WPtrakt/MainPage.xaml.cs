@@ -136,8 +136,11 @@ namespace WPtrakt
             {
                 StackPanel senderPanel = (StackPanel)sender;
                 ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
-                NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-      
+                if(model.Type.Equals("episode"))
+                    NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+                else
+                    NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+              
                 storyboard.Completed -= completedHandlerMainPage;
                 storyboard.Stop();
                 this.Opacity = 0;
