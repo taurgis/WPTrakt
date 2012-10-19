@@ -40,11 +40,14 @@
                             <TextBlock Text="Episode:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
                             <TextBlock Text="{Binding Number}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
                         </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Date:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                                    <TextBlock Text="{Binding AirDate}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
-                                </StackPanel>
-
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Date:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                            <TextBlock Text="{Binding AirDate}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Rating:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                            <TextBlock Text="{Binding RatingString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
+                        </StackPanel>
 
                                 <TextBlock Margin="10" Text="{Binding Overview}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" Width="410" />
                             </StackPanel>

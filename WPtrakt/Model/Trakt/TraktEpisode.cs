@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Runtime.Serialization;
+using VPtrakt.Model.Trakt;
 
 namespace WPtrakt.Model.Trakt
 {
@@ -36,6 +37,14 @@ namespace WPtrakt.Model.Trakt
         [DataMember(Name = "watched")]
         public Boolean Watched { get; set; }
 
+        [DataMember(Name = "ratings")]
+        public TraktRating Ratings { get; set; }
+
+        [DataMember(Name = "rating_advanced")]
+        public Int16 MyRatingAdvanced { get; set; }
+
+        [DataMember(Name = "rating")]
+        public String MyRating { get; set; }
     
     }
 

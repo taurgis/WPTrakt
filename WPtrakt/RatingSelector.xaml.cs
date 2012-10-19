@@ -36,8 +36,39 @@ namespace VPtrakt
             NavigationContext.QueryString.TryGetValue("type", out type);
             if (type.Equals("movie"))
                 RateMovie();
-            else
+            else if (type.Equals("show"))
                 RateShow();
+            else
+                RateEpisode();
+        }
+
+        private void RateEpisode()
+        {
+            String imdb;
+            String year;
+            String title;
+            String season;
+            String episode;
+
+            NavigationContext.QueryString.TryGetValue("imdb", out imdb);
+            NavigationContext.QueryString.TryGetValue("year", out year);
+            NavigationContext.QueryString.TryGetValue("title", out title);
+            NavigationContext.QueryString.TryGetValue("season", out season);
+            NavigationContext.QueryString.TryGetValue("episode", out episode);
+
+            var ratingClient = new WebClient();
+
+            ratingClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadRatingStringCompleted);
+            RatingAuth auth = new RatingAuth();
+
+            auth.Imdb = imdb;
+            auth.Title = title;
+            auth.Year = Int16.Parse(year);
+            auth.Season = Int16.Parse(season);
+            auth.Episode = Int16.Parse(episode);
+            auth.Rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
+            ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/episode/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
+      
         }
 
         private void RateShow()

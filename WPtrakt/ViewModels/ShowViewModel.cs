@@ -273,6 +273,7 @@ namespace WPtrakt
                 }
             }
         }
+
         private Int16 _rating;
         public Int16 Rating
         {

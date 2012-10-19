@@ -11,6 +11,9 @@ using VPtrakt.Controllers;
 using VPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt.Request;
+using System.IO.IsolatedStorage;
+using WPtrakt.Model.Trakt;
+using System.Windows.Navigation;
 
 namespace WPtrakt
 {
@@ -91,6 +94,7 @@ namespace WPtrakt
         {
             ApplicationBar appBar = new ApplicationBar();
 
+            CreateRatingButton(appBar);
             CreateWatchedButton(appBar, !App.EpisodeViewModel.Watched);
 
             this.ApplicationBar = appBar;
@@ -131,6 +135,25 @@ namespace WPtrakt
             watchedButton.Click += new EventHandler(ApplicationBarIconButton_Click);
 
             appBar.Buttons.Add(watchedButton);
+        }
+
+        private void CreateRatingButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton ratingButton = new ApplicationBarIconButton();
+            ratingButton = new ApplicationBarIconButton(new Uri("Images/appbar.favs.rest.png", UriKind.Relative));
+            ratingButton.IsEnabled = true;
+            ratingButton.Text = "Rate";
+            ratingButton.Click += new EventHandler(ratingButton_Click);
+
+            appBar.Buttons.Add(ratingButton);
+        }
+
+        private void ratingButton_Click(object sender, EventArgs e)
+        {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number  + ".json");
+           
+            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + App.EpisodeViewModel.Imdb + "&year=" + App.EpisodeViewModel.ShowYear + "&title=" + App.EpisodeViewModel.ShowName + "&season=" + App.EpisodeViewModel.Season + "&episode=" + App.EpisodeViewModel.Number, UriKind.Relative));
+
         }
 
         private void CreateSendButton(ApplicationBar appBar)

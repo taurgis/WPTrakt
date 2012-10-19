@@ -1,24 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
+using System.IO.IsolatedStorage;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
-using Microsoft.Phone.Tasks;
 using Microsoft.Phone.Shell;
-using System.Collections.ObjectModel;
-using VPtrakt.Model.Trakt.Request;
-using WPtrakt.Model.Trakt;
-using WPtrakt.Model;
-using System.IO.IsolatedStorage;
+using Microsoft.Phone.Tasks;
 using VPtrakt.Controllers;
-using WPtrakt.Model.Trakt.Request;
+using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Model;
+using WPtrakt.Model.Trakt;
 
 namespace WPtrakt
 {

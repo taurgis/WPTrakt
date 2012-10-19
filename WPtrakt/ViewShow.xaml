@@ -45,10 +45,10 @@
                             <TextBlock Text="Genre:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
                             <TextBlock Text="{Binding GenreString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"   />
                         </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Rating:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                                    <TextBlock Text="{Binding RatingString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
-                                </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Rating:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                            <TextBlock Text="{Binding RatingString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
+                        </StackPanel>
                                 <TextBlock Margin="10" Text="{Binding Overview}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" Width="410" />
                             </StackPanel>
                         </ListBoxItem>

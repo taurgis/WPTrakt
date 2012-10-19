@@ -193,6 +193,94 @@ namespace WPtrakt
             }
         }
 
+        private Int16 _rating;
+        public Int16 Rating
+        {
+            get
+            {
+                return _rating;
+            }
+            set
+            {
+                if (value != _rating)
+                {
+                    _rating = value;
+                }
+            }
+        }
+
+        private Int16 _votes;
+        public Int16 Votes
+        {
+            get
+            {
+                return _votes;
+            }
+            set
+            {
+                if (value != _votes)
+                {
+                    _votes = value;
+                }
+            }
+        }
+        public String RatingString
+        {
+            get
+            {
+                String baseString;
+                baseString = this.Rating / 10 + "/10 (" + this.Votes + ")";
+
+                if (this.MyRating == null)
+                    return "N/A";
+
+                if (!(this.MyRatingAdvanced == 0 && this.MyRating.Equals("false")))
+                {
+                    if (this.MyRatingAdvanced == 0 && !(this.MyRating.Equals("false")))
+                    {
+                        baseString += " - Mine: " + this.MyRating;
+                    }
+                    else
+                    {
+                        baseString += " - Mine: " + this.MyRatingAdvanced + "/10";
+                    }
+                }
+                return baseString;
+            }
+        }
+
+        private Int16 _myRatingAdvanced;
+        public Int16 MyRatingAdvanced
+        {
+            get
+            {
+                return _myRatingAdvanced;
+            }
+            set
+            {
+                if (value != _myRatingAdvanced)
+                {
+                    _myRatingAdvanced = value;
+                }
+            }
+        }
+
+        private String _myRating;
+        public String MyRating
+        {
+            get
+            {
+                return _myRating;
+            }
+            set
+            {
+                if (value != _myRating)
+                {
+                    _myRating = value;
+                }
+            }
+        }
+
 
         private string _fanart;
         public string Fanart
@@ -404,6 +492,14 @@ namespace WPtrakt
             _imdb = episode.Show.imdb_id;
             _airDate = episode.Episode.FirstAired;
             _watched = episode.Episode.Watched;
+            if (episode.Episode.Ratings != null)
+            {
+                _rating = episode.Episode.Ratings.Percentage;
+                _votes = episode.Episode.Ratings.Votes;
+                _myRating = episode.Episode.MyRating;
+                _myRatingAdvanced = episode.Episode.MyRatingAdvanced;
+                NotifyPropertyChanged("RatingString");
+            }
             NotifyPropertyChanged("Name");
             NotifyPropertyChanged("Fanart");
             NotifyPropertyChanged("Overview");

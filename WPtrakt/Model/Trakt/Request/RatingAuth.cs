@@ -26,5 +26,11 @@ namespace VPtrakt.Model.Trakt.Request
 
         [DataMember(Name = "rating")]
         public Int16 Rating { get; set; }
+
+        [DataMember(Name = "season")]
+        public Int16 Season { get; set; }
+
+        [DataMember(Name = "episode")]
+        public Int16 Episode { get; set; }
     }
 }
