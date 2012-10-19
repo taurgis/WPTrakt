@@ -152,7 +152,7 @@ namespace WPtrakt
         {
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/library/movies/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/library/movies/all.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetMyMoviesRequestStreamCallback), request);
         }
@@ -233,7 +233,7 @@ namespace WPtrakt
         {
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/movies/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/movies/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetSuggestionsRequestStreamCallback), request);
 

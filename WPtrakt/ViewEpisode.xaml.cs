@@ -180,9 +180,9 @@ namespace WPtrakt
                 auth.Year = App.EpisodeViewModel.ShowYear;
                 auth.Season = Int16.Parse(App.EpisodeViewModel.Season);
                 auth.episode = Int16.Parse(App.EpisodeViewModel.Number);
-                auth.Shout = ((TextBox)sender).Text;
+                auth.Shout = (ShoutText.Text);
                 LastShout = auth.Shout;
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/episode/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/episode/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
             }
         }
 
@@ -200,7 +200,7 @@ namespace WPtrakt
             auth.Title = App.EpisodeViewModel.ShowName;
             auth.Year = App.EpisodeViewModel.ShowYear;
 
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/seen/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
         }
 
         void client_UploadSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)

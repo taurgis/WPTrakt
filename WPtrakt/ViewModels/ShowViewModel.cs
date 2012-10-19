@@ -438,7 +438,7 @@ namespace WPtrakt
 
             var seasonClient = new WebClient();
             seasonClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadSeasonsStringCompleted);
-            seasonClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/seasons.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb));
+            seasonClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb));
         }
 
         void showworker_DoWork(object sender, DoWorkEventArgs e)
@@ -466,7 +466,7 @@ namespace WPtrakt
         {
             var showClient = new WebClient();
             showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShowStringCompleted);
-            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/summary.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb), AppUser.createJsonStringForAuthentication());
+            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb), AppUser.createJsonStringForAuthentication());
         }
 
         void client_UploadShowStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -595,7 +595,7 @@ namespace WPtrakt
                     var showClient = new WebClient();
                     this._tvdb = tvdb;
                     showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeStringCompleted);
-                    showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/season.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb + "/" + currentSeason), AppUser.createJsonStringForAuthentication());
+                    showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + currentSeason), AppUser.createJsonStringForAuthentication());
                 }
             }
         }
@@ -637,7 +637,7 @@ namespace WPtrakt
             var showClient = new WebClient();
             this._tvdb = tvdb;
             showClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadShoutStringCompleted);
-            showClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/shouts.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb));
+            showClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb));
         }
 
         void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)

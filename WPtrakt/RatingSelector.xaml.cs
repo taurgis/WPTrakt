@@ -67,7 +67,7 @@ namespace VPtrakt
             auth.Season = Int16.Parse(season);
             auth.Episode = Int16.Parse(episode);
             auth.Rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
-            ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/episode/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
+            ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/episode/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
       
         }
 
@@ -90,7 +90,7 @@ namespace VPtrakt
             auth.Title = title;
             auth.Year = Int16.Parse(year);
             auth.Rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
-            ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/show/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
+            ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/show/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
         }
 
         private void RateMovie()
@@ -112,7 +112,7 @@ namespace VPtrakt
             auth.Title = title;
             auth.Year = Int16.Parse(year);
             auth.Rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
-            ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/movie/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
+            ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
         }
 
         void client_UploadRatingStringCompleted(object sender, UploadStringCompletedEventArgs e)

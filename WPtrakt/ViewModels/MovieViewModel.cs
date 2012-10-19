@@ -425,7 +425,7 @@ namespace WPtrakt
             var movieClient = new WebClient();
             this._imdb = imdbId;
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/summary.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + imdbId), AppUser.createJsonStringForAuthentication());
+            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
         }
 
         void client_UploadMovieStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -491,7 +491,7 @@ namespace WPtrakt
             var movieClient = new WebClient();
             this._imdb = imdbId;
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/shouts.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + imdbId), AppUser.createJsonStringForAuthentication());
+            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
         }
 
         void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)

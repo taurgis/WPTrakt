@@ -188,6 +188,7 @@
     <Content Include="Images\appbar.cancel.rest.png" />
     <Content Include="Images\appbar.check.rest.png" />
     <Content Include="Images\appbar.favs.rest.png" />
+    <Content Include="Images\appbar.feature.removevideo.rest.png" />
     <Content Include="Images\appbar.feature.settings.rest.png" />
     <Content Include="Images\appbar.next.rest.png" />
     <Content Include="Images\appbar.feature.video.rest.png" />
@@ -198,6 +199,7 @@
     <Content Include="Images\appbar.seen.rest.png" />
     <Resource Include="Images\EmptyPanoramaBackground.png" />
     <Content Include="Images\appbar.send.text.rest.png" />
+    <Content Include="Images\appbar.unseen.rest.png" />
     <Content Include="Images\heart-love.png" />
     <Content Include="Images\seen.png" />
     <Content Include="SplashScreenImage.jpg" />

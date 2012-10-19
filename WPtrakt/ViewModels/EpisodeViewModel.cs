@@ -462,7 +462,7 @@ namespace WPtrakt
         {
             var movieClient = new WebClient();
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/summary.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
+            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
         }
 
         void client_UploadEpisodeStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -587,7 +587,7 @@ namespace WPtrakt
             
             this._tvdb = tvdb;
             movieClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadShoutStringCompleted);
-            movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + tvdb+ "/" + season + "/" + episode));
+            movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb+ "/" + season + "/" + episode));
         }
 
         void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)

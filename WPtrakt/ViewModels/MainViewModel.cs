@@ -196,7 +196,7 @@ namespace WPtrakt
 
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/account/test/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetValidationRequestStreamCallback), request);
         }
@@ -312,7 +312,7 @@ namespace WPtrakt
         {
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/profile.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/profile.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetProfileRequestStreamCallback), request);
         }
@@ -390,7 +390,7 @@ namespace WPtrakt
                 if (watched.Episode != null)
                     this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Episode.Title, ImageSource = watched.Episode.Images.Screen, Imdb = watched.Show.imdb_id + watched.Episode.Season + watched.Episode.Number, SubItemText = "Season " + watched.Episode.Season + ", Episode " + watched.Episode.Number, Episode = watched.Episode.Number, Season = watched.Episode.Season, Tvdb = watched.Show.tvdb_id, Type="episode" });
                 else if( watched.Movie != null)
-                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Movie.Title, ImageSource = watched.Movie.Images.Poster, Imdb = watched.Movie.imdb_id, SubItemText = watched.Movie.year.ToString() + "\r\n" + "Runtime: " + watched.Movie.Runtime + " mins", Type="movie" });
+                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Movie.Title, ImageSource = watched.Movie.Images.Poster, Imdb = watched.Movie.imdb_id, SubItemText =  "Runtime: " + watched.Movie.Runtime + " mins\r\n" + watched.Movie.year.ToString() , Type="movie" });
             }
 
             if (this.HistoryItems.Count == 0)
@@ -408,7 +408,7 @@ namespace WPtrakt
                 this.LoadingStatusTrending = "Visible";
                 HttpWebRequest request;
 
-                request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/movies/trending.json/5eaaacc7a64121f92b15acf5ab4d9a0b"));
+                request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/movies/trending.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
                 request.Method = "POST";
                 request.BeginGetRequestStream(new AsyncCallback(GetRequestStreamCallback), request);
             }

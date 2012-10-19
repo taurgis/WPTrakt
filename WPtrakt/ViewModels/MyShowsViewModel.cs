@@ -174,7 +174,7 @@ namespace WPtrakt
         {
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/library/shows/all.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/library/shows/all.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetMyShowsRequestStreamCallback), request);
         }
@@ -244,7 +244,7 @@ namespace WPtrakt
         {
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/calendar/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetCalendarRequestStreamCallback), request);
 
@@ -333,7 +333,7 @@ namespace WPtrakt
         {
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/shows/5eaaacc7a64121f92b15acf5ab4d9a0b"));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/shows/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetSuggestRequestStreamCallback), request);
         }

@@ -66,7 +66,7 @@ namespace WPtrakt
             var profileClient = new WebClient();
 
             profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
-            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/account/test/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
         }
 
         void client_DownloadProfileStringCompleted(object sender, UploadStringCompletedEventArgs e)

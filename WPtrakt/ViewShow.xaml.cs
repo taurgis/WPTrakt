@@ -191,9 +191,9 @@ namespace WPtrakt
                 auth.Title = App.ShowViewModel.Name;
                 auth.Year = Int16.Parse(App.ShowViewModel.Year);
 
-                auth.Shout = ((TextBox)sender).Text;
+                auth.Shout = ShoutText.Text;
                 LastShout = auth.Shout;
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/show/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/show/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
             }
         }
 
@@ -214,7 +214,7 @@ namespace WPtrakt
             auth.Title = App.ShowViewModel.Name;
             auth.Year = Int16.Parse(App.ShowViewModel.Year);
 
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/seen/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
         }
 
         void client_UploadSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -252,7 +252,7 @@ namespace WPtrakt
             auth.Shows[0].imdb_id = App.ShowViewModel.Imdb;
             auth.Shows[0].Title = App.ShowViewModel.Name;
             auth.Shows[0].year = Int16.Parse(App.ShowViewModel.Year);
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/watchlist/5eaaacc7a64121f92b15acf5ab4d9a0b"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
         }
 
         void client_UploadWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
