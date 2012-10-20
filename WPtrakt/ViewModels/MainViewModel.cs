@@ -262,7 +262,7 @@ namespace WPtrakt
                 {
                     Title = "Connection",
                     TextOrientation = System.Windows.Controls.Orientation.Vertical,
-                    Message = "Connection to Trakt slow!",
+                    Message = "Slow connection to trakt!",
                 };
 
                 toast.Show();

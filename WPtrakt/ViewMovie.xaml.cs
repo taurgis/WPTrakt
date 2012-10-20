@@ -59,14 +59,18 @@ namespace WPtrakt
             Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
             Storyboard.SetTarget(storyboard, LayoutRoot);
             EventHandler completedHandler = delegate { };
+
             completedHandler = delegate
             {
                 storyboard.Completed -= completedHandler;
                 storyboard.Stop();
             };
+
             storyboard.Completed += completedHandler;
             storyboard.Begin();
         }
+
+        #region Taps
 
         private void ImdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
@@ -76,46 +80,55 @@ namespace WPtrakt
             task.Show();
         }
 
-        private void ApplicationBarIconButton_Click(object sender, EventArgs e)
+        #endregion 
+
+        #region AppBar
+
+        private void ListBox_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadWatchlistStringCompleted);
-            WatchlistAuth auth = new WatchlistAuth();
-            auth.Movies = new TraktMovie[1];
-            auth.Movies[0] = new TraktMovie();
-            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
-            auth.Movies[0].Title = App.MovieViewModel.Name;
-            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth),auth));
+            InitAppBar();
         }
 
-        private void ApplicationBarIconButton2_Click(object sender, EventArgs e)
+        private void InitAppBar()
+        {
+            ApplicationBar appBar = new ApplicationBar();
+
+            if (!App.MovieViewModel.InWatchlist)
+                CreateAddToWatchlist(appBar);
+            else
+                CreateRemoveFromWatchlist(appBar); ;
+
+            CreateRatingButton(appBar);
+
+            if (App.MovieViewModel.Watched)
+                CreateUnSeenButton(appBar);
+            else
+                CreateSeenButton(appBar);
+
+            CreateCheckingButton(appBar);
+
+            this.ApplicationBar = appBar;
+        }
+
+        private void CreateRatingButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton ratingButton = new ApplicationBarIconButton();
+            ratingButton = new ApplicationBarIconButton(new Uri("Images/appbar.favs.rest.png", UriKind.Relative));
+            ratingButton.IsEnabled = true;
+            ratingButton.Text = "Rate";
+            ratingButton.Click += new EventHandler(RateClick);
+
+            appBar.Buttons.Add(ratingButton);
+        }
+
+        private void RateClick(object sender, EventArgs e)
         {
             IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
     
             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + App.MovieViewModel.Imdb + "&year=" + App.MovieViewModel.Year + "&title=" + App.MovieViewModel.Name, UriKind.Relative));
         }
 
-        void client_UploadWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                App.MovieViewModel.InWatchlist = true;
-                MessageBox.Show("Movie added to watchlist.");
-
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
-                InitAppBar();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-        }
-
-        private void CreatedRemoveFromWatchlist(ApplicationBar appBar)
+        private void CreateRemoveFromWatchlist(ApplicationBar appBar)
         {
             ApplicationBarIconButton removeFromWatchlist = new ApplicationBarIconButton();
             removeFromWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.removevideo.rest.png", UriKind.Relative));
@@ -129,12 +142,14 @@ namespace WPtrakt
             var watchlistClient = new WebClient();
             progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadRemoveFromWatchlistStringCompleted);
+
             WatchlistAuth auth = new WatchlistAuth();
             auth.Movies = new TraktMovie[1];
             auth.Movies[0] = new TraktMovie();
             auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
             auth.Movies[0].Title = App.MovieViewModel.Name;
             auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
+
             watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
         }
 
@@ -155,23 +170,48 @@ namespace WPtrakt
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
-        private void InitAppBarShouts()
+        private void CreateAddToWatchlist(ApplicationBar appBar)
         {
-            ApplicationBar appBar = new ApplicationBar();
+            ApplicationBarIconButton enabledAddtoWatchlist = new ApplicationBarIconButton();
 
-            CreateRefreshShoutsButton(appBar);
-            CreateSendButton(appBar);
-            this.ApplicationBar = appBar;
+            enabledAddtoWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.video.rest.png", UriKind.Relative));
+            enabledAddtoWatchlist.IsEnabled = true;
+            enabledAddtoWatchlist.Click += new EventHandler(AddToWatchList_Click);
+            enabledAddtoWatchlist.Text = "Watchlist +";
+            appBar.Buttons.Add(enabledAddtoWatchlist);
         }
 
-        private void CreateRefreshShoutsButton(ApplicationBar appBar)
+        private void AddToWatchList_Click(object sender, EventArgs e)
         {
-            ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
-            watchedButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
-            watchedButton.Text = "Refresh";
-            watchedButton.Click += new EventHandler(ShoutsIconButton_Click);
+            var watchlistClient = new WebClient();
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadWatchlistStringCompleted);
+            WatchlistAuth auth = new WatchlistAuth();
+            auth.Movies = new TraktMovie[1];
+            auth.Movies[0] = new TraktMovie();
+            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
+            auth.Movies[0].Title = App.MovieViewModel.Name;
+            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+        }
 
-            appBar.Buttons.Add(watchedButton);
+        void client_UploadWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                App.MovieViewModel.InWatchlist = true;
+                MessageBox.Show("Movie added to watchlist.");
+
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
+                InitAppBar();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         private void CreateCheckingButton(ApplicationBar appBar)
@@ -223,123 +263,18 @@ namespace WPtrakt
             App.MovieViewModel.LoadShoutData(App.MovieViewModel.Imdb);
         }
 
-        private void ListBox_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            InitAppBar();
-        }
-
-        private void InitAppBar()
-        {
-            ApplicationBar appBar = new ApplicationBar();
-
-            if (!App.MovieViewModel.InWatchlist)
-                CreateAddToWatchlist(appBar);
-            else
-                CreatedRemoveFromWatchlist(appBar); ;
-
-            CreateRatingButton(appBar);
-
-            if (App.MovieViewModel.Watched)
-                CreateUnSeenButton(appBar);
-            else
-                CreateSeenButton(appBar);
-
-            CreateCheckingButton(appBar);
-
-            this.ApplicationBar = appBar;
-        }
-
-        private void CreateAddToWatchlist(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton enabledAddtoWatchlist = new ApplicationBarIconButton();
-            enabledAddtoWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.video.rest.png", UriKind.Relative));
-            enabledAddtoWatchlist.IsEnabled = true;
-            enabledAddtoWatchlist.Click += new EventHandler(ApplicationBarIconButton_Click);
-            enabledAddtoWatchlist.Text = "Watchlist +";
-            appBar.Buttons.Add(enabledAddtoWatchlist);
-        }
-
-        private void CreateRatingButton(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton ratingButton = new ApplicationBarIconButton();
-            ratingButton = new ApplicationBarIconButton(new Uri("Images/appbar.favs.rest.png", UriKind.Relative));
-            ratingButton.IsEnabled = true;
-            ratingButton.Text = "Rate";
-            ratingButton.Click += new EventHandler(ApplicationBarIconButton2_Click);
-
-            appBar.Buttons.Add(ratingButton);
-        }
-
-        private void CreateSendButton(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton sendButton = new ApplicationBarIconButton();
-            sendButton = new ApplicationBarIconButton(new Uri("Images/appbar.send.text.rest.png", UriKind.Relative));
-            sendButton.IsEnabled = true;
-            sendButton.Text = "Send";
-            sendButton.Click += new EventHandler(sendButton_Click);
-
-            appBar.Buttons.Add(sendButton);
-        }
-
-        void sendButton_Click(object sender, EventArgs e)
-        {
-            if (!String.IsNullOrEmpty((ShoutText.Text)))
-            {
-                var watchlistClient = new WebClient();
-                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-                ShoutAuth auth = new ShoutAuth();
-
-                auth.Imdb = App.MovieViewModel.Imdb;
-                auth.Title = App.MovieViewModel.Name;
-                auth.Year = Int16.Parse(App.MovieViewModel.Year);
-
-                auth.Shout = (ShoutText.Text);
-         
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
-            }
-        }
-
+    
         private void CreateSeenButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
             watchedButton = new ApplicationBarIconButton(new Uri("Images/appbar.seen.rest.png", UriKind.Relative));
             watchedButton.Text = "Seen";
-            watchedButton.Click += new EventHandler(ApplicationBarIconButton_Click_3);
+            watchedButton.Click += new EventHandler(SeenClick);
 
             appBar.Buttons.Add(watchedButton);
         }
 
-        private void CreateUnSeenButton(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton unseeButton = new ApplicationBarIconButton();
-            unseeButton = new ApplicationBarIconButton(new Uri("Images/appbar.unseen.rest.png", UriKind.Relative));
-            unseeButton.Text = "Seen";
-            unseeButton.Click += new EventHandler(unseeButton_Click);
-
-            appBar.Buttons.Add(unseeButton);
-        }
-
-        void unseeButton_Click(object sender, EventArgs e)
-        {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadUnSeenStringCompleted);
-            WatchedAuth auth = new WatchedAuth();
-            auth.Movies = new TraktMovieRequest[1];
-            auth.Movies[0] = new TraktMovieRequest();
-            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
-            auth.Movies[0].Title = App.MovieViewModel.Name;
-            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
-            auth.Movies[0].Plays = 1;
-
-            DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-        }
-
-
-        private void ApplicationBarIconButton_Click_3(object sender, EventArgs e)
+        private void SeenClick(object sender, EventArgs e)
         {
             var watchlistClient = new WebClient();
             progressBarLoading.Visibility = System.Windows.Visibility.Visible;
@@ -375,6 +310,36 @@ namespace WPtrakt
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
+
+        private void CreateUnSeenButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton unseeButton = new ApplicationBarIconButton();
+            unseeButton = new ApplicationBarIconButton(new Uri("Images/appbar.unseen.rest.png", UriKind.Relative));
+            unseeButton.Text = "Seen";
+            unseeButton.Click += new EventHandler(unseeButton_Click);
+
+            appBar.Buttons.Add(unseeButton);
+        }
+
+        void unseeButton_Click(object sender, EventArgs e)
+        {
+            var watchlistClient = new WebClient();
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadUnSeenStringCompleted);
+            WatchedAuth auth = new WatchedAuth();
+            auth.Movies = new TraktMovieRequest[1];
+            auth.Movies[0] = new TraktMovieRequest();
+            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
+            auth.Movies[0].Title = App.MovieViewModel.Name;
+            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
+            auth.Movies[0].Plays = 1;
+
+            DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
+
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+        }
+
         void client_UploadUnSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
             try
@@ -392,6 +357,60 @@ namespace WPtrakt
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
+        #endregion
+
+        #region Shouts AppBar
+
+        private void InitAppBarShouts()
+        {
+            ApplicationBar appBar = new ApplicationBar();
+
+            CreateRefreshShoutsButton(appBar);
+            CreateSendButton(appBar);
+            this.ApplicationBar = appBar;
+        }
+
+        private void CreateRefreshShoutsButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
+            watchedButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
+            watchedButton.Text = "Refresh";
+            watchedButton.Click += new EventHandler(ShoutsIconButton_Click);
+
+            appBar.Buttons.Add(watchedButton);
+        }
+
+
+        private void CreateSendButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton sendButton = new ApplicationBarIconButton();
+            sendButton = new ApplicationBarIconButton(new Uri("Images/appbar.send.text.rest.png", UriKind.Relative));
+            sendButton.IsEnabled = true;
+            sendButton.Text = "Send";
+            sendButton.Click += new EventHandler(sendButton_Click);
+
+            appBar.Buttons.Add(sendButton);
+        }
+
+        void sendButton_Click(object sender, EventArgs e)
+        {
+            if (!String.IsNullOrEmpty((ShoutText.Text)))
+            {
+                var watchlistClient = new WebClient();
+                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
+                ShoutAuth auth = new ShoutAuth();
+
+                auth.Imdb = App.MovieViewModel.Imdb;
+                auth.Title = App.MovieViewModel.Name;
+                auth.Year = Int16.Parse(App.MovieViewModel.Year);
+
+                auth.Shout = (ShoutText.Text);
+
+                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+            }
+        }
+
+      
         void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
             try
@@ -408,5 +427,8 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
         }
+
+        #endregion
+
     }
 }

@@ -175,13 +175,13 @@ namespace WPtrakt
             }
         }
         #region Menu
+
         private void CancelCheckin_Click(object sender, EventArgs e)
         {
             var cancelCheckinClient = new WebClient();
             cancelCheckinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(cancelCheckinClient_UploadStringCompleted);
 
             cancelCheckinClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/cancelcheckin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
-
         }
 
         void cancelCheckinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -189,13 +189,21 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Cancelled any active check in.");
+                var toast = new ToastPrompt
+                {
+                    Title = "Cancel",
+                    TextOrientation = System.Windows.Controls.Orientation.Vertical,
+                    Message = "Cancelled any active check in!",
+                };
+
+                toast.Show();
             }
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
         }
+
         #endregion
     }
 }

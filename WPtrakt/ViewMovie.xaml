@@ -14,7 +14,6 @@
     SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False"  BackKeyPress="PhoneApplicationPage_BackKeyPress">
 
-    <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <Grid.Background>
             <ImageBrush Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill" />
@@ -22,7 +21,7 @@
         
         <controls:Panorama  Title="{Binding Name}" Name="MoviePanorama" SelectionChanged="MoviePanorama_SelectionChanged">
             <controls:PanoramaItem Header="Overview" Margin="0, -50" Canvas.ZIndex="2">
-                <StackPanel>
+                <StackPanel Margin="0 -20">
                     <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusMovie}" Name="progressBarLoading" IsIndeterminate="True" />
                     <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}"/>
                     <ListBox Margin="0, 0,0,-3"  Height="575" Width="430" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
@@ -59,8 +58,6 @@
                     </ListBox>
                 </StackPanel>
             </controls:PanoramaItem>
-
-            <!--Panorama item two-->
             <controls:PanoramaItem Header="Shouts" Margin="0, -50">
                 <Grid>
                     <ListBox VerticalAlignment="Top" Margin="0,0,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" Height="400">
@@ -83,8 +80,7 @@
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
-    <!--Panorama-based applications should not show an ApplicationBar-->
-    
+      
     <phone:PhoneApplicationPage.ApplicationBar >
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Default">
         </shell:ApplicationBar>
