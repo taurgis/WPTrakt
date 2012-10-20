@@ -83,7 +83,7 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <StackPanel VerticalAlignment="Bottom" Height="Auto" Margin="0,0,0,23" Name="ShoutSubmitText">
-                        <TextBox Name="ShoutText" VerticalAlignment="Bottom" />
+                        <TextBox  InputScope="Text" Name="ShoutText" VerticalAlignment="Bottom" />
                     </StackPanel>
                 </Grid>
             </controls:PanoramaItem>
