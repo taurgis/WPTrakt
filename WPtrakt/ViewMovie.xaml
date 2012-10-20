@@ -19,12 +19,12 @@
             <ImageBrush Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill" />
         </Grid.Background>
         
-        <controls:Panorama  Title="{Binding Name}" Name="MoviePanorama" SelectionChanged="MoviePanorama_SelectionChanged">
-            <controls:PanoramaItem Header="Overview" Margin="0, -50" Canvas.ZIndex="2">
-                <StackPanel Margin="0 -20">
+        <controls:Panorama   Title="{Binding Name}" Name="MoviePanorama" SelectionChanged="MoviePanorama_SelectionChanged">
+            <controls:PanoramaItem Header="Overview" Margin="0, -25" Canvas.ZIndex="2">
+                <StackPanel Margin="0 -30">
                     <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusMovie}" Name="progressBarLoading" IsIndeterminate="True" />
                     <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}"/>
-                    <ListBox Margin="0, 0,0,-3"  Height="575" Width="430" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
+                    <ListBox Margin="0, 0,0,-3"  Height="590" Width="430" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
                         <ListBoxItem Height="Auto"  Width="430">
                             <StackPanel  Width="430">
                                 <StackPanel Orientation="Horizontal">
@@ -51,16 +51,18 @@
                              </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Height="150">
-                                <TextBlock Text="IDMB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="ImdbButton" Tap="ImdbButton_Tap" />
-                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Height="170">
+                                <TextBlock VerticalAlignment="Top" Text="IDMB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="ImdbButton" Tap="ImdbButton_Tap" />
+                                <TextBlock VerticalAlignment="Top" Text="TMDB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="TmdbButton" Tap="TmdbButton_Tap" />
+                                <TextBlock VerticalAlignment="Top" Text="Trailer" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="TrailerButton" Tap="TrailerButton_Tap" />
+                            </StackPanel>
                         </ListBoxItem>
                     </ListBox>
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Header="Shouts" Margin="0, -50">
+            <controls:PanoramaItem Header="Shouts" Margin="0, -25">
                 <Grid>
-                    <ListBox VerticalAlignment="Top" Margin="0,0,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" Height="400">
+                    <ListBox VerticalAlignment="Top" Margin="0,-30,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" Height="420">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Height="Auto">
@@ -73,7 +75,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <StackPanel VerticalAlignment="Bottom" Height="Auto" Margin="0,0,0,55">
+                    <StackPanel VerticalAlignment="Bottom" Height="Auto" Margin="0,0,0,23">
                         <TextBox Name="ShoutText" VerticalAlignment="Bottom" />
                     </StackPanel>
                 </Grid>

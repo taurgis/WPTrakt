@@ -71,6 +71,23 @@ namespace WPtrakt
             }
         }
 
+        private string _tmdb;
+        public string Tmdb
+        {
+            get
+            {
+                return _tmdb;
+            }
+            set
+            {
+                if (value != _tmdb)
+                {
+                    _tmdb = value;
+                    NotifyPropertyChanged("Tmdb");
+                }
+            }
+        }
+
         private Int16 _myRatingAdvanced;
         public Int16 MyRatingAdvanced
         {
@@ -83,6 +100,8 @@ namespace WPtrakt
                 if (value != _myRatingAdvanced)
                 {
                     _myRatingAdvanced = value;
+                    NotifyPropertyChanged("MyRatingAdvanced");
+                    NotifyPropertyChanged("RatingString");
                 }
             }
         }
@@ -150,7 +169,7 @@ namespace WPtrakt
                 if (value != _InWatchlist)
                 {
                     _InWatchlist = value;
-                  
+                    NotifyPropertyChanged("InWatchlist");
                 }
             }
         }
@@ -185,6 +204,7 @@ namespace WPtrakt
                 {
                     _genres = value;
                     NotifyPropertyChanged("Genres");
+                    NotifyPropertyChanged("GenreString");
                 }
             }
         }
@@ -218,6 +238,7 @@ namespace WPtrakt
                 if (value != _rating)
                 {
                     _rating = value;
+                    NotifyPropertyChanged("Rating");
                 }
             }
         }
@@ -234,6 +255,7 @@ namespace WPtrakt
                 if (value != _watched)
                 {
                     _watched = value;
+                    NotifyPropertyChanged("Watched");
                 }
             }
         }
@@ -250,6 +272,7 @@ namespace WPtrakt
                 if (value != _votes)
                 {
                     _votes = value;
+                    NotifyPropertyChanged("Votes");
                 }
             }
         }
@@ -306,6 +329,23 @@ namespace WPtrakt
                 {
                     _fanart = value;
                     NotifyPropertyChanged("Fanart");
+                }
+            }
+        }
+
+        private string _trailer;
+        public string Trailer
+        {
+            get
+            {
+                return _trailer;
+            }
+            set
+            {
+                if (value != _trailer)
+                {
+                    _trailer = value;
+                    NotifyPropertyChanged("Trailer");
                 }
             }
         }
@@ -452,31 +492,25 @@ namespace WPtrakt
 
         private void UpdateMovieView(TraktMovie movie)
         {
-            _name = movie.Title;
-            _fanart = movie.Images.Fanart;
-            _genres = movie.Genres;
-            _overview = movie.Overview;
-            _runtime = movie.Runtime.ToString();
-            _certification = movie.Certification;
-            _year = movie.year.ToString();
-            _InWatchlist = movie.InWatchlist;
-            _rating = movie.Ratings.Percentage;
-            _votes = movie.Ratings.Votes;
-            _myRating = movie.MyRating;
-            _myRatingAdvanced = movie.MyRatingAdvanced;
-            _watched = movie.Watched;
-            _imdb = movie.imdb_id;
+            this.Name = movie.Title;
+            this.Fanart = movie.Images.Fanart;
+            this.Genres = movie.Genres;
+            this.Overview = movie.Overview;
+            this.Runtime = movie.Runtime.ToString();
+            this.Certification = movie.Certification;
+            this.Year = movie.year.ToString();
+            this.InWatchlist = movie.InWatchlist;
+            this.Rating = movie.Ratings.Percentage;
+            this.Votes = movie.Ratings.Votes;
+            this.MyRating = movie.MyRating;
+            this.MyRatingAdvanced = movie.MyRatingAdvanced;
+            this.Watched = movie.Watched;
+            this.Imdb = movie.imdb_id;
+            this.Tmdb = movie.Tmdb;
+            this.Trailer = movie.Trailer;
 
-            NotifyPropertyChanged("Name");
-            NotifyPropertyChanged("Fanart");
-            NotifyPropertyChanged("GenreString");
-            NotifyPropertyChanged("Overview");
-            NotifyPropertyChanged("Certification");
-            NotifyPropertyChanged("Year");
-            NotifyPropertyChanged("Runtime");
             NotifyPropertyChanged("LoadingStatusMovie");
             NotifyPropertyChanged("DetailVisibility");
-            NotifyPropertyChanged("RatingString");
 
             LoadBackgroundImage();
         }

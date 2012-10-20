@@ -14,6 +14,7 @@ using System.Windows.Media.Animation;
 using System.IO.IsolatedStorage;
 using System.Windows.Input;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace WPtrakt
 {
@@ -78,6 +79,32 @@ namespace WPtrakt
             task.Uri = new Uri( "http://www.imdb.com/title/" + App.MovieViewModel.Imdb);
 
             task.Show();
+        }
+
+        private void TmdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            WebBrowserTask task = new WebBrowserTask();
+            task.Uri = new Uri("http://www.themoviedb.org/movie/" + App.MovieViewModel.Tmdb);
+
+            task.Show();
+        }
+
+        private void TrailerButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+   
+
+            Regex Youtube = new Regex("youtu(?:\\.be|be\\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)");
+
+            Match youtubeMatch = Youtube.Match(App.MovieViewModel.Trailer);
+
+            string id = string.Empty;
+
+            if (youtubeMatch.Success)
+                id = youtubeMatch.Groups[1].Value;
+
+            WebBrowserTask webBrowserTask = new WebBrowserTask();
+            webBrowserTask.Uri = new Uri("http://www.youtube.com/embed/" + id +"?autoplay=1");
+            webBrowserTask.Show();
         }
 
         #endregion 
@@ -429,6 +456,9 @@ namespace WPtrakt
         }
 
         #endregion
+
+
+
 
     }
 }

@@ -46,6 +46,9 @@ namespace WPtrakt.Model.Trakt
         [DataMember(Name = "imdb_id")]
         public String imdb_id { get; set; }
 
+        [DataMember(Name = "tmdb_id")]
+        public String Tmdb { get; set; }
+
         [DataMember(Name = "images")]
         public TraktImage Images { get; set; }
 
