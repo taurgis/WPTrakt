@@ -89,7 +89,7 @@ namespace WPtrakt
         private void TvdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             WebBrowserTask task = new WebBrowserTask();
-            task.Uri = new Uri("http://http://thetvdb.com/?tab=series&id=" + App.EpisodeViewModel.Tvdb);
+            task.Uri = new Uri("http://thetvdb.com/?tab=series&id=" + App.EpisodeViewModel.Tvdb);
 
             task.Show();
         }
