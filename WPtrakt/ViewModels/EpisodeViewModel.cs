@@ -10,6 +10,7 @@ using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using System.Windows;
+using VPtrakt.Controllers;
 
 namespace WPtrakt
 {
@@ -59,6 +60,7 @@ namespace WPtrakt
                 if (value != _showName)
                 {
                     _showName = value;
+                    NotifyPropertyChanged("ShowName");
                 }
             }
         }
@@ -76,6 +78,7 @@ namespace WPtrakt
                 if (value != _showYear)
                 {
                     _showYear = value;
+                    NotifyPropertyChanged("ShowYear");
                 }
             }
         }
@@ -189,6 +192,7 @@ namespace WPtrakt
                 if (value != _watched)
                 {
                     _watched = value;
+                    NotifyPropertyChanged("Watched");
                 }
             }
         }
@@ -205,6 +209,7 @@ namespace WPtrakt
                 if (value != _rating)
                 {
                     _rating = value;
+                    NotifyPropertyChanged("Rating");
                 }
             }
         }
@@ -221,6 +226,7 @@ namespace WPtrakt
                 if (value != _year)
                 {
                     _year = value;
+                    NotifyPropertyChanged("Year");
                 }
             }
         }
@@ -237,6 +243,7 @@ namespace WPtrakt
                 if (value != _votes)
                 {
                     _votes = value;
+                    NotifyPropertyChanged("Votes");
                 }
             }
         }
@@ -460,8 +467,6 @@ namespace WPtrakt
                 worker.DoWork += new DoWorkEventHandler(episodeworker_DoWork);
 
                 worker.RunWorkerAsync();
-
-             
             }
             else
             {
@@ -500,47 +505,50 @@ namespace WPtrakt
 
         void client_UploadEpisodeStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
-            String jsonString = e.Result;
-
-            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            try
             {
-                var ser = new DataContractJsonSerializer(typeof(TraktWatched));
-                TraktWatched episode = (TraktWatched)ser.ReadObject(ms);
-                StorageController.saveObject(episode, typeof(TraktWatched));
-                UpdateEpisodeView(episode);
-                IsDataLoaded = true;
+                String jsonString = e.Result;
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktWatched));
+                    TraktWatched episode = (TraktWatched)ser.ReadObject(ms);
+                    StorageController.saveObject(episode, typeof(TraktWatched));
+                    UpdateEpisodeView(episode);
+                    IsDataLoaded = true;
+                }
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
             }
         }
 
         private void UpdateEpisodeView(TraktWatched episode)
         {
-            _showName = episode.Show.Title;
-            _showYear = episode.Show.year;
-            _name = episode.Episode.Title;
-            _fanart = episode.Show.Images.Fanart;
-            _overview = episode.Episode.Overview;
-            _season = episode.Episode.Season;
-            _number = episode.Episode.Number;
-            _screen = episode.Episode.Images.Screen;
-            _imdb = episode.Show.imdb_id;
-            _airDate = episode.Episode.FirstAired;
-            _watched = episode.Episode.Watched;
-            _InWatchlist = episode.Episode.InWatchlist;
-            _year = episode.Show.year;
+            this.ShowName = episode.Show.Title;
+            this.ShowYear = episode.Show.year;
+            this.Name = episode.Episode.Title;
+            this.Fanart = episode.Show.Images.Fanart;
+            this.Overview = episode.Episode.Overview;
+            this.Season = episode.Episode.Season;
+            this.Number = episode.Episode.Number;
+            this.Screen = episode.Episode.Images.Screen;
+            this.Imdb = episode.Show.imdb_id;
+            this._airDate = episode.Episode.FirstAired;
+            this.Watched = episode.Episode.Watched;
+            this.InWatchlist = episode.Episode.InWatchlist;
+            this.Year = episode.Show.year;
+
             if (episode.Episode.Ratings != null)
             {
-                _rating = episode.Episode.Ratings.Percentage;
-                _votes = episode.Episode.Ratings.Votes;
-                _myRating = episode.Episode.MyRating;
-                _myRatingAdvanced = episode.Episode.MyRatingAdvanced;
+                this.Rating = episode.Episode.Ratings.Percentage;
+                this.Votes = episode.Episode.Ratings.Votes;
+                this.MyRating = episode.Episode.MyRating;
+                this.MyRatingAdvanced = episode.Episode.MyRatingAdvanced;
                 NotifyPropertyChanged("RatingString");
             }
-            NotifyPropertyChanged("Name");
-            NotifyPropertyChanged("Fanart");
-            NotifyPropertyChanged("Overview");
-            NotifyPropertyChanged("Season");
-            NotifyPropertyChanged("Number");
-            NotifyPropertyChanged("AirDate");
+          
             NotifyPropertyChanged("LoadingStatusEpisode");
             NotifyPropertyChanged("DetailVisibility");
 
@@ -566,24 +574,6 @@ namespace WPtrakt
             }
         }
 
-        private void LoadScreenImage()
-        {
-            String fileName = _imdb + _season + _number + "screenlarge" + ".jpg";
-
-            if (StorageController.doesFileExist(fileName))
-            {
-                _screenImage = ImageController.getImageFromStorage(fileName);
-                NotifyPropertyChanged("ScreenImage");
-            }
-            else
-            {
-                WebClient client = new WebClient();
-                client.OpenReadCompleted += new OpenReadCompletedEventHandler(client_OpenReadScreenCompleted);
-                client.OpenReadAsync(new Uri(Screen));
-
-            }
-        }
-
         void request_OpenReadFanartCompleted(IAsyncResult r)
         {
             object[] param = (object[])r.AsyncState;
@@ -600,6 +590,24 @@ namespace WPtrakt
                     _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
                     NotifyPropertyChanged("BackgroundImage");
                 }));
+            }
+        }
+
+        private void LoadScreenImage()
+        {
+            String fileName = _imdb + _season + _number + "screenlarge" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName))
+            {
+                _screenImage = ImageController.getImageFromStorage(fileName);
+                NotifyPropertyChanged("ScreenImage");
+            }
+            else
+            {
+                WebClient client = new WebClient();
+                client.OpenReadCompleted += new OpenReadCompletedEventHandler(client_OpenReadScreenCompleted);
+                client.OpenReadAsync(new Uri(Screen));
+
             }
         }
 

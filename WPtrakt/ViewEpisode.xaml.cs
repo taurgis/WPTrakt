@@ -78,6 +78,8 @@ namespace WPtrakt
             storyboard.Begin();
         }
 
+        #region Taps
+
         private void ImdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             WebBrowserTask task = new WebBrowserTask();
@@ -93,6 +95,8 @@ namespace WPtrakt
 
             task.Show();
         }
+
+        #endregion
 
         #region AppBar
 
