@@ -26,6 +26,9 @@ namespace WPtrakt.Model.Trakt.Request
         [DataMember(Name = "imdb_id")]
         public String imdb_id { get; set; }
 
+        [DataMember(Name = "tvdb_id")]
+        public String tvdb_id { get; set; }
+
         [DataMember(Name = "last_played")]
         public Int64 LastPlayed { get; set; }
 
@@ -37,5 +40,11 @@ namespace WPtrakt.Model.Trakt.Request
 
         [DataMember(Name = "app_date")]
         public String AppDate { get; set; }
+
+        [DataMember(Name = "season")]
+        public Int16 Season { get; set; }
+
+        [DataMember(Name = "episode")]
+        public Int16 Episode { get; set; }
     }
 }

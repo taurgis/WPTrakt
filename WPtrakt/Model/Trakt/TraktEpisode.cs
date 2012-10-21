@@ -37,6 +37,9 @@ namespace WPtrakt.Model.Trakt
         [DataMember(Name = "watched")]
         public Boolean Watched { get; set; }
 
+        [DataMember(Name = "in_watchlist")]
+        public Boolean InWatchlist { get; set; }
+
         [DataMember(Name = "ratings")]
         public TraktRating Ratings { get; set; }
 

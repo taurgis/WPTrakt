@@ -209,6 +209,22 @@ namespace WPtrakt
             }
         }
 
+        private Int16 _year;
+        public Int16 Year
+        {
+            get
+            {
+                return _year;
+            }
+            set
+            {
+                if (value != _year)
+                {
+                    _year = value;
+                }
+            }
+        }
+
         private Int16 _votes;
         public Int16 Votes
         {
@@ -277,6 +293,23 @@ namespace WPtrakt
                 if (value != _myRating)
                 {
                     _myRating = value;
+                }
+            }
+        }
+
+        private Boolean _InWatchlist;
+        public Boolean InWatchlist
+        {
+            get
+            {
+                return _InWatchlist;
+            }
+            set
+            {
+                if (value != _InWatchlist)
+                {
+                    _InWatchlist = value;
+                    NotifyPropertyChanged("InWatchlist");
                 }
             }
         }
@@ -492,6 +525,8 @@ namespace WPtrakt
             _imdb = episode.Show.imdb_id;
             _airDate = episode.Episode.FirstAired;
             _watched = episode.Episode.Watched;
+            _InWatchlist = episode.Episode.InWatchlist;
+            _year = episode.Show.year;
             if (episode.Episode.Ratings != null)
             {
                 _rating = episode.Episode.Ratings.Percentage;
