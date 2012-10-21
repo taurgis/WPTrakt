@@ -11,8 +11,8 @@
     xmlns:controlsPrimitives="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls" 
     x:Class="WPtrakt.Main"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
-    SupportedOrientations="Portrait"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded">
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
     <!--LayoutRoot is the root grid where all page content is placed-->
     <phone:PhoneApplicationPage.FontFamily>
         <StaticResource ResourceKey="PhoneFontFamilyNormal"/>
@@ -26,11 +26,9 @@
     <Grid x:Name="LayoutRoot" >
         <!--Panorama control-->
         <controls:Panorama  Title="WPtrakt" IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
-            
-            <!--Panorama item one-->
-            <controls:PanoramaItem Header="Profile" Margin="0 -50">
+            <controls:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
                 <!--Double line list with text wrapping-->
-                <StackPanel Margin="0,-90,-12,0" Width="432" Height="539">
+                <StackPanel HorizontalAlignment="Left">
                     <ProgressBar Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
                     <TextBlock x:Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
                     <StackPanel Margin="0,0,0,17"  Width="432" Height="150" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -55,13 +53,13 @@
                 </StackPanel>
             </controls:PanoramaItem>
 
-            <controls:PanoramaItem Visibility="{Binding TrendingVisibility}"  Margin="0 -50" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
+            <controls:PanoramaItem Visibility="{Binding TrendingVisibility}"  Margin="0 -25" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
                 <!--Double line list with image placeholder and text wrapping-->
-                <StackPanel>
-                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding TrendingItems}" Height="519" Width="700">
+                <StackPanel Margin="0 -30">
+                    <ListBox Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
+                                <toolkit:WrapPanel ItemWidth="160" ItemHeight="250" Name="WrapPanelTrending"/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate >
@@ -73,19 +71,19 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <ProgressBar Visibility="{Binding LoadingStatusTrending}" x:Name="progressBarImages" Margin="0 -20" IsIndeterminate="True" />
+                    <ProgressBar Visibility="{Binding LoadingStatusTrending}" x:Name="progressBarImages" Margin="0 -20" IsIndeterminate="True" VerticalAlignment="Bottom" />
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -50" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
+            <controls:PanoramaItem Margin="0 -25" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
                 <!--Double line list with text wrapping-->
-                <ListBox Margin="0,0,-12,0" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Height="519" VerticalAlignment="Top" >
+                <ListBox Margin="0 -25" Height="520" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" VerticalAlignment="Top" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Tap="StackPanel_Tap">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Tap="StackPanel_Tap">
                                 <Image delay:LowProfileImageLoader.UriSource="{Binding ImageSource}" Width="150"/>
-                                <StackPanel Orientation="Vertical" Width="280">
-                                    <TextBlock Width="280" TextWrapping="Wrap"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                    <TextBlock Width="280" Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock  TextWrapping="Wrap"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                    <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                 </StackPanel>
                             </StackPanel>
                         </DataTemplate>

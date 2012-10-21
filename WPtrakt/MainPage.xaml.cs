@@ -205,5 +205,21 @@ namespace WPtrakt
         }
 
         #endregion
+
+        private void PhoneApplicationPage_OrientationChanged(object sender, OrientationChangedEventArgs e)
+        {
+            if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
+            {
+                this.MainPanorama.Margin = new Thickness(0, 0, 0, 0);
+                ListTrending.Width = 700;
+                HistoryList.Height = 520;
+            }
+            else
+            {
+                this.MainPanorama.Margin = new Thickness(0, -180, 0, 0);
+                ListTrending.Width = 1300;
+                HistoryList.Height = 400;
+            }
+        }
     }
 }
