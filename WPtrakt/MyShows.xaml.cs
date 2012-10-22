@@ -141,6 +141,24 @@ namespace WPtrakt
 
             App.MyShowsViewModel.LoadData();
         }
+
+        private void PhoneApplicationPage_OrientationChanged(object sender, OrientationChangedEventArgs e)
+        {
+            if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
+            {
+                this.MyShowsPanorama.Margin = new Thickness(0, 0, 0, 0);
+                ListSuggestions.Width = 700;
+                ListMyShows.Height = 590;
+                ListUpcomming.Height = 519;
+            }
+            else
+            {
+                this.MyShowsPanorama.Margin = new Thickness(0, -180, 0, 0);
+                ListSuggestions.Width = 1300;
+                ListMyShows.Height = 480;
+                ListUpcomming.Height = 480;
+            }
+        }
     }
 
     public class ShowNameSelector : IQuickJumpGridSelector

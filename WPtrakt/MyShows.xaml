@@ -15,19 +15,19 @@
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
-    SupportedOrientations="Portrait"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="False"  BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded">
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="False"  BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <controls:Panorama Name="MyShowsPanorama" Title="My Shows" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
-              <controls:PanoramaItem Margin="0 -50" Orientation="Horizontal">
+              <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
                 <StackPanel>
                     <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusShows}" Name="progressBar" IsIndeterminate="True" />
                     <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShows}"/>
                     <cc:QuickJumpGrid DataSource="{Binding ShowItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,0,0,0" Height="620">
+                                  Margin="12,0,0,0" Height="590" Name="ListMyShows">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -46,11 +46,11 @@
                     </cc:QuickJumpGrid>
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -20" Orientation="Horizontal" Header="Upcoming">
+            <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal" Header="Upcoming">
                 <StackPanel>
                     <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusCalendar}" Name="progressBarCalendar" IsIndeterminate="True" />
                     <TextBlock Margin="0 -30" Name="loadingTextCalendar" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusCalendar}"/>
-                    <ListBox  Margin="0,-20,-10,0" ItemsSource="{Binding CalendarItems}" Height="519" MaxWidth="1000">
+                    <ListBox  Margin="0,-20,-10,0" ItemsSource="{Binding CalendarItems}" Height="519" MaxWidth="1000" Name="ListUpcomming">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Margin="0,0,0,17" MaxWidth="1000" MaxHeight="2000">
@@ -75,9 +75,9 @@
                     </ListBox>
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -50" Header="Suggestions" Visibility="{Binding SuggestionsVisibility}" Orientation="Horizontal">
+            <controls:PanoramaItem Margin="0 -30" Header="Suggestions" Visibility="{Binding SuggestionsVisibility}" Orientation="Horizontal">
                 <StackPanel>
-                    <delay:DeferredLoadListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Height="519" Width="700">
+                    <delay:DeferredLoadListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions">
                         <delay:DeferredLoadListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="160" ItemHeight="250"/>
@@ -94,7 +94,7 @@
                             </DataTemplate>
                         </delay:DeferredLoadListBox.ItemTemplate>
                     </delay:DeferredLoadListBox>
-                    <ProgressBar  HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSuggestions}" Name="progressBarSuggest" IsIndeterminate="True" />
+                    <ProgressBar VerticalAlignment="Bottom"  Visibility="{Binding LoadingStatusSuggestions}" Name="progressBarSuggest" IsIndeterminate="True" />
 
                 </StackPanel>
             </controls:PanoramaItem>
