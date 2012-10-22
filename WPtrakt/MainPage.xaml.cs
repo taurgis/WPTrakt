@@ -49,6 +49,26 @@ namespace WPtrakt
             }
         }
 
+        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.Opacity = 1;
+        }
+
+        private void MainPanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (MainPanorama.SelectedIndex == 1)
+            {
+                if (App.ViewModel.TrendingItems.Count == 0)
+                {
+                    if (!App.ViewModel.LoadingTrendingItems)
+                    {
+                        App.ViewModel.LoadingTrendingItems = true;
+                        App.ViewModel.loadTrending();
+                    }
+                }
+            }
+        }
+
         #region Taps
 
         private void ApplicationBarSettingsButton_Click(object sender, EventArgs e)
@@ -155,25 +175,6 @@ namespace WPtrakt
 
         #endregion
 
-        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
-        {
-            this.Opacity = 1;
-        }
-
-        private void MainPanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (MainPanorama.SelectedIndex == 1)
-            {
-                if (App.ViewModel.TrendingItems.Count == 0)
-                {
-                    if (!App.ViewModel.LoadingTrendingItems)
-                    {
-                        App.ViewModel.LoadingTrendingItems = true;
-                        App.ViewModel.loadTrending();
-                    }
-                }
-            }
-        }
         #region Menu
 
         private void CancelCheckin_Click(object sender, EventArgs e)

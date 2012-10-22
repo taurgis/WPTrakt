@@ -110,6 +110,22 @@ namespace WPtrakt
         {
             this.Opacity = 1;
         }
+
+        private void PhoneApplicationPage_OrientationChanged(object sender, OrientationChangedEventArgs e)
+        {
+            if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
+            {
+                this.MyMoviesPanorama.Margin = new Thickness(0, 0, 0, 0);
+                ListSuggestions.Width = 700;
+                ListMyMovies.Height = 590;
+            }
+            else
+            {
+                this.MyMoviesPanorama.Margin = new Thickness(0, -180, 0, 0);
+                ListSuggestions.Width = 1300;
+                ListMyMovies.Height = 480;
+            }
+        }
     }
 
     public class MovieNameSelector : IQuickJumpGridSelector
