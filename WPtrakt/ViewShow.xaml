@@ -6,65 +6,67 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
-  
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
-    SupportedOrientations="Portrait"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded">
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <Grid.Background>
             <ImageBrush Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill" />
         </Grid.Background>
-        <controls:Panorama  Title="{Binding Name}" Name="MoviePanorama" SelectionChanged="MoviePanorama_SelectionChanged">
-            <controls:PanoramaItem Header="Overview" Margin="0, -50">
-                <StackPanel>
-                    <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusShow}" Name="progressBarLoading" IsIndeterminate="True" />
-                    <TextBlock  Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShow}"/>
-                    <ListBox Margin="0,0,0,-3" Height="575" Width="430" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
-                        <ListBoxItem Height="Auto"  Width="430">
-                        <StackPanel  Width="430">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Year:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                            <TextBlock Text="{Binding Year}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Runtime:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                            <TextBlock Text="{Binding Runtime}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Certification:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                            <TextBlock Text="{Binding Certification}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Genre:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                            <TextBlock Text="{Binding GenreString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"   />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Rating:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                            <TextBlock Text="{Binding RatingString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
-                        </StackPanel>
-                                <TextBlock Margin="10" Text="{Binding Overview}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" Width="410" />
-                            </StackPanel>
-                        </ListBoxItem>
-                        <ListBoxItem>
-                            <StackPanel Orientation="Horizontal" Height="150">
+        <controls:Panorama  Title="{Binding Name}" Name="ShowPanorama" SelectionChanged="MoviePanorama_SelectionChanged">
+            <controls:PanoramaItem Header="Overview" Margin="0, -25">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Grid.Column="1" Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusShow}" Name="progressBarLoading" IsIndeterminate="True" />
+                    <TextBlock Grid.Column="1"  Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShow}"/>
+                    <ListBox Grid.Column="1" Margin="0,0,0,-3" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
+                        <ListBoxItem Height="Auto">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Year:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                                    <TextBlock Text="{Binding Year}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Runtime:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                                    <TextBlock Text="{Binding Runtime}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Certification:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                                    <TextBlock Text="{Binding Certification}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Genre:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                                    <TextBlock Text="{Binding GenreString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"   />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Rating:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                                    <TextBlock Text="{Binding RatingString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
+                                </StackPanel>
+                                        <TextBlock Margin="10" Text="{Binding Overview}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </ListBoxItem>
+                             <ListBoxItem>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Height="150">
                                 <TextBlock Text="IDMB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="ImdbButton" Tap="ImdbButton_Tap" />
                             </StackPanel>
                         </ListBoxItem>
                     </ListBox>
-                </StackPanel>
+                </Grid>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -50" Header="Episodes" Orientation="Horizontal">
+            <controls:PanoramaItem Margin="0 -25" Header="Episodes" Orientation="Horizontal">
                 <StackPanel>
                     <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSeason}" Name="progressBarSeason" IsIndeterminate="True" />
                     <TextBlock  Name="loadingTextSeason" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusSeason}"/>
-                    <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList" Height="550">
+                    <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
@@ -80,23 +82,27 @@
                 </StackPanel>
             </controls:PanoramaItem>
             <!--Panorama item two-->
-            <controls:PanoramaItem Header="Shouts" Margin="0, -50">
+            <controls:PanoramaItem Header="Shouts" Margin="0, -25">
                 <Grid>
-                    <ListBox VerticalAlignment="Top" Margin="0,0,-12,0" ItemsSource="{Binding ShoutItems}" Name="HistoryList" Height="400">
+                    <ListBox VerticalAlignment="Top" Margin="0,-30,15,0" ItemsSource="{Binding ShoutItems}" Name="ShoutList" Height="420" Width="405">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Width="432" Height="Auto">
-                                    <Image Source="{Binding ImageSource}" VerticalAlignment="Top" Margin="0,12" Width="60" Height="60"/>
-                                    <StackPanel Orientation="Vertical" Width="370" Height="Auto">
-                                        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left" Width="280" Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                        <TextBlock VerticalAlignment="Top"  HorizontalAlignment="Left" Width="330" Height="Auto" TextWrapping="Wrap" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                <Grid  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="1" Source="{Binding ImageSource}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-60 12" Height="60"/>
+                                    <StackPanel Grid.Column="2" Orientation="Vertical" Height="Auto">
+                                        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left"  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                        <TextBlock VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}"  Name="ShoutText" MaxWidth="550" />
                                     </StackPanel>
-                                </StackPanel>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <StackPanel VerticalAlignment="Bottom" Height="Auto" Margin="0,0,0,55">
-                        <TextBox Name="ShoutText" VerticalAlignment="Bottom" />
+                    <StackPanel VerticalAlignment="Bottom" Height="Auto" Margin="0,0,0,23" Name="ShoutSubmitText">
+                        <TextBox  InputScope="Text" Name="ShoutText" VerticalAlignment="Bottom" />
                     </StackPanel>
                 </Grid>
             </controls:PanoramaItem>

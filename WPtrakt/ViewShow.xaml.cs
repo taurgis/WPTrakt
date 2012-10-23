@@ -48,11 +48,11 @@ namespace WPtrakt
 
         private void RefreshBottomBar()
         {
-            if (this.MoviePanorama.SelectedIndex == 0)
+            if (this.ShowPanorama.SelectedIndex == 0)
             {
                 InitAppBarMain(false);
             }
-            else if (this.MoviePanorama.SelectedIndex == 1)
+            else if (this.ShowPanorama.SelectedIndex == 1)
             {
                 if (App.ShowViewModel.EpisodeItems.Count == 0)
                 {
@@ -65,7 +65,7 @@ namespace WPtrakt
                 InitAppBarSeasons();
 
             }
-            else if (this.MoviePanorama.SelectedIndex == 2)
+            else if (this.ShowPanorama.SelectedIndex == 2)
             {
                 if (!App.ShowViewModel.ShoutsLoaded)
                 {
@@ -369,6 +369,26 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+        }
+
+        private void PhoneApplicationPage_OrientationChanged(object sender, OrientationChangedEventArgs e)
+        {
+            if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
+            {
+                this.ShowPanorama.Margin = new Thickness(0, 0, 0, 0);
+                ShoutList.Width = 405;
+                ShoutList.Height = 420;
+                EpisodeList.Height = 440;
+            }
+            else
+            {
+                this.ShowPanorama.Margin = new Thickness(0, -180, 0, 0);
+                ShoutList.Width = 800;
+                ShoutList.Height = 340;
+                EpisodeList.Height = 360;
+            }
+
+            ShowPanorama.DefaultItem = ShowPanorama.Items[0];
         }
     }
 }
