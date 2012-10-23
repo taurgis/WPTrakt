@@ -63,7 +63,7 @@
                 </Grid>
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" Header="Episodes" Orientation="Horizontal">
-                <StackPanel>
+                <Grid>
                     <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSeason}" Name="progressBarSeason" IsIndeterminate="True" />
                     <TextBlock  Name="loadingTextSeason" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusSeason}"/>
                     <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList">
@@ -79,7 +79,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </StackPanel>
+                </Grid>
             </controls:PanoramaItem>
             <!--Panorama item two-->
             <controls:PanoramaItem Header="Shouts" Margin="0, -25">
