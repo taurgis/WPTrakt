@@ -22,7 +22,7 @@
         </Grid.Background>
         <controls:Panorama  Title="{Binding Name}" Name="ShowPanorama" SelectionChanged="MoviePanorama_SelectionChanged">
             <controls:PanoramaItem Header="Overview" Margin="0, -25">
-                <Grid>
+                <Grid Margin="0 -30">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
