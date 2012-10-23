@@ -12,7 +12,7 @@
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
-    SupportedOrientations="Portrait"  Orientation="Portrait"
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False">
 
     <!--LayoutRoot contains the root grid where all other page content is placed-->
@@ -22,8 +22,8 @@
         <controls:Panorama Margin="0,66,0,50">
             
             <!--Panorama item one-->
-            <controls:PanoramaItem Header="Movies" Width="480">
-                <delay:DeferredLoadListBox ItemsSource="{Binding MovieItems}">
+            <controls:PanoramaItem Header="Movies">
+                <delay:DeferredLoadListBox ItemsSource="{Binding MovieItems}"  Height="Auto" Margin="0 -30">
                     <delay:DeferredLoadListBox.ItemTemplate>
                         <DataTemplate>
                             <Canvas Margin="0,6,0,6" Height="103" Tap="MovieCanvas_Tap">
@@ -54,8 +54,8 @@
             </controls:PanoramaItem>
 
             <!--Panorama item two-->
-            <controls:PanoramaItem Header="Shows" Width="480">
-                <delay:DeferredLoadListBox ItemsSource="{Binding ShowItems}">
+            <controls:PanoramaItem Header="Shows">
+                <delay:DeferredLoadListBox ItemsSource="{Binding ShowItems}" Height="Auto" Margin="0 -30">
                     <delay:DeferredLoadListBox.ItemTemplate>
                         <DataTemplate>
                             <Canvas Margin="0,6,0,6" Height="103" Tap="ShowCanvas_Tap">
@@ -63,7 +63,7 @@
                                     <Image
                                         delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Height="75" Width="50"/>
                                     <StackPanel VerticalAlignment="Top" Orientation="Vertical">
-                                    <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" MaxWidth="430" />
+                                    <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" MaxWidth="830" />
                                     <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                     <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                 </StackPanel>
