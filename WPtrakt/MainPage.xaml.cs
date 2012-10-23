@@ -217,7 +217,15 @@ namespace WPtrakt
             }
             else
             {
-                this.MainPanorama.Margin = new Thickness(0, -180, 0, 0);
+                if (e.Orientation == PageOrientation.LandscapeRight)
+                {
+                    this.MainPanorama.Margin = new Thickness(40, -180, 0, 0);
+                }
+                else
+                {
+                    this.MainPanorama.Margin = new Thickness(0, -180, 0, 0);
+                }
+
                 ListTrending.Width = 1300;
                 HistoryList.Height = 400;
             }

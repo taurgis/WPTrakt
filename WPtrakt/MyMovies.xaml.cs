@@ -121,7 +121,15 @@ namespace WPtrakt
             }
             else
             {
-                this.MyMoviesPanorama.Margin = new Thickness(0, -180, 0, 0);
+                if (e.Orientation == PageOrientation.LandscapeRight)
+                {
+                    this.MyMoviesPanorama.Margin = new Thickness(50, -180, 0, 0);
+                }
+                else
+                {
+                    this.MyMoviesPanorama.Margin = new Thickness(0, -180, 0, 0);
+                }
+
                 ListSuggestions.Width = 1300;
                 ListMyMovies.Height = 480;
             }
