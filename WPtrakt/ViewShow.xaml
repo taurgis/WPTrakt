@@ -56,7 +56,8 @@
                                 </ListBoxItem>
                              <ListBoxItem>
                             <StackPanel Grid.Column="1" Orientation="Horizontal" Height="150">
-                                <TextBlock Text="IDMB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="ImdbButton" Tap="ImdbButton_Tap" />
+                                <TextBlock Text="IMDB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="ImdbButton" Tap="ImdbButton_Tap" />
+                                <TextBlock Text="TVDB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="TvdbButton" Tap="TvdbButton_Tap" />
                             </StackPanel>
                         </ListBoxItem>
                     </ListBox>
@@ -64,21 +65,39 @@
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" Header="Episodes" Orientation="Horizontal">
                 <Grid>
-                    <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSeason}" Name="progressBarSeason" IsIndeterminate="True" />
-                    <TextBlock  Name="loadingTextSeason" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusSeason}"/>
-                    <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
-                                    <Image Source="{Binding ScreenImage}" Width="150" Height="84"/>
-                                    <StackPanel Orientation="Vertical"  Height="113">
-                                        <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                        <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                    <Grid Name="EpisodeGrid">
+                        <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSeason}" Name="progressBarSeason" IsIndeterminate="True" />
+                        <TextBlock  Name="loadingTextSeason" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusSeason}"/>
+                        <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
+                                        <Image Source="{Binding ScreenImage}" Width="150" Height="84"/>
+                                        <StackPanel Orientation="Vertical"  Height="113">
+                                            <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                            <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                    <Grid Name="SeasonGrid" Visibility="Collapsed">
+                        <ListBox ItemsSource="{Binding SeasonItems}" Name="SeasonsList" Width="400">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <toolkit:WrapPanel ItemWidth="200" ItemHeight="200"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="SeasonPanel" Background="{StaticResource PhoneAccentBrush}" Orientation="Horizontal" Margin="0,0,0,17"  Height="150" Width="150" Tap="SeasonPanel_Tap">
+                                        <TextBlock TextAlignment="Center" HorizontalAlignment="Center" Width="150" VerticalAlignment="Center" Text="{Binding}" Foreground="{StaticResource PhoneContrastBackgroundBrush}" FontSize="100" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
                 </Grid>
             </controls:PanoramaItem>
             <!--Panorama item two-->

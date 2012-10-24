@@ -125,14 +125,19 @@ namespace WPtrakt
         #endregion
 
         #region Main Appbar
-
+        private Boolean ChangedSizeAlready = false;
         private void ListBox_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            InitAppBarMain();
+            if (!ChangedSizeAlready)
+            {
+                InitAppBarMain();
+                ChangedSizeAlready = true;
+            }
         }
 
         private void InitAppBarMain()
         {
+
             ApplicationBar appBar = new ApplicationBar();
 
             if (!App.ShowViewModel.InWatchlist)
@@ -307,12 +312,25 @@ namespace WPtrakt
 
             appBar.Buttons.Add(previousSeason);
 
+            ApplicationBarIconButton showSeasons = new ApplicationBarIconButton(new Uri("Images/appbar.phone.numbersign.rest.png", UriKind.Relative));
+            showSeasons.Click += new EventHandler(showSeasons_Click);
+            showSeasons.Text = "Seasons";
+
+            appBar.Buttons.Add(showSeasons);
+
+
             nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
             nextSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeForward);
 
             nextSeason.Text = "Next";
             appBar.Buttons.Add(nextSeason);
             this.ApplicationBar = appBar;
+        }
+
+        void showSeasons_Click(object sender, EventArgs e)
+        {
+            EpisodeGrid.Visibility = System.Windows.Visibility.Collapsed;
+            SeasonGrid.Visibility = System.Windows.Visibility.Visible;
         }
 
 
@@ -444,6 +462,8 @@ namespace WPtrakt
                 ShoutList.Width = 405;
                 ShoutList.Height = 420;
                 EpisodeList.Height = 440;
+                SeasonsList.Width = 400;
+                
             }
             else
             {
@@ -451,9 +471,37 @@ namespace WPtrakt
                 ShoutList.Width = 800;
                 ShoutList.Height = 340;
                 EpisodeList.Height = 360;
+                SeasonsList.Width = 700;
             }
 
             ShowPanorama.DefaultItem = ShowPanorama.Items[0];
+        }
+
+        private void SeasonPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            StackPanel seasonPanel = (StackPanel)sender;
+
+            short season = Int16.Parse((String)seasonPanel.DataContext);
+
+            App.ShowViewModel.currentSeason = season;
+
+            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+            String id;
+            NavigationContext.QueryString.TryGetValue("id", out id);
+            App.ShowViewModel.LoadEpisodeData(id);
+
+           
+
+            EpisodeGrid.Visibility = System.Windows.Visibility.Visible;
+            SeasonGrid.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        private void TvdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            WebBrowserTask task = new WebBrowserTask();
+            task.Uri = new Uri("http://thetvdb.com/?tab=series&id=" + App.ShowViewModel.Tvdb);
+
+            task.Show();
         }
     }
 }

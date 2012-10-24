@@ -193,6 +193,7 @@
     <Content Include="Images\appbar.feature.settings.rest.png" />
     <Content Include="Images\appbar.next.rest.png" />
     <Content Include="Images\appbar.feature.video.rest.png" />
+    <Content Include="Images\appbar.phone.numbersign.rest.png" />
     <Content Include="Images\appbar.refresh.rest.png" />
     <Content Include="ApplicationIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

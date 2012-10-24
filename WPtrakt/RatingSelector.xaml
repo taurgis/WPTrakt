@@ -6,8 +6,7 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-   xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls.Toolkit"
-  
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls.Toolkit"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
@@ -27,7 +26,6 @@
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             <TextBlock Style="{StaticResource PhoneTextExtraLargeStyle}" VerticalAlignment="Center" Text="Rating: " />
-
             <toolkit:LoopingSelector VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="selector" ItemMargin="2,3,3,2" ItemSize="100,100" FontSize="50">
                 <toolkit:LoopingSelector.ItemTemplate>
                     <DataTemplate>
@@ -36,7 +34,6 @@
                         </Grid>
                     </DataTemplate>
                 </toolkit:LoopingSelector.ItemTemplate>
-
             </toolkit:LoopingSelector>
         </Grid>
     </Grid>
@@ -47,5 +44,4 @@
             <shell:ApplicationBarIconButton IconUri="Images/appbar.cancel.rest.png" Text="Cancel" Click="ApplicationBarIconButton_Click" />
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
-
 </phone:PhoneApplicationPage>

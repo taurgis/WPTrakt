@@ -12,6 +12,7 @@ using WPtrakt.Model;
 using VPtrakt.Controllers;
 using System.Threading;
 using System.Windows;
+using System.Collections.Generic;
 
 namespace WPtrakt
 {
@@ -32,6 +33,27 @@ namespace WPtrakt
         }
 
         #region Getters/Setters
+
+        public List<String> SeasonItems
+        {
+            get
+            {
+                if(this.numberOfSeasons > 0)
+                {
+                    List<String> seasons = new List<string>();
+                    for (int i = 1; i <= this.numberOfSeasons;i++ )
+                    {
+                        seasons.Add(i.ToString());
+                    }
+
+                    return seasons;
+                }
+                else
+                    return new List<string>();
+            }
+
+        }
+
 
         private string _name;
         public string Name
@@ -539,6 +561,8 @@ namespace WPtrakt
                         }
                     }
                 }
+
+                NotifyPropertyChanged("SeasonItems");
             }
             catch (WebException)
             {
