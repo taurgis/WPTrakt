@@ -65,7 +65,7 @@ namespace WPtrakt.Controllers
                 var bi = new BitmapImage();
                 bi.SetSource(pic);
 
-                if ((!AppUser.UserIsHighEndDevice()) && width > 150)
+                if (!AppUser.UserIsHighEndDevice())
                     return bi;
 
                 try
