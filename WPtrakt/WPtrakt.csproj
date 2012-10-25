@@ -70,7 +70,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\AnimateOrientationChangesFrame.cs" />
     <Compile Include="Controllers\ErrorManager.cs" />
+    <Compile Include="Controllers\FadeOrientationChangesFrame.cs" />
+    <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
