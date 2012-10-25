@@ -354,7 +354,7 @@ namespace WPtrakt
             auth.year = App.EpisodeViewModel.Year;
             auth.Season = Int16.Parse(App.EpisodeViewModel.Season);
             auth.Episode = Int16.Parse(App.EpisodeViewModel.Number);
-            auth.AppDate = "19/10/2012";
+            auth.AppDate = AppUser.getReleaseDate();
 
             var assembly = Assembly.GetExecutingAssembly().FullName;
             var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];

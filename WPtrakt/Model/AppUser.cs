@@ -66,8 +66,6 @@ namespace WPtrakt.Model
                     return settings["UserName"].ToString();
                 else
                     return "";
-                
-       
             }
             set
             {
@@ -159,6 +157,11 @@ namespace WPtrakt.Model
             {
                 return true;
             }
+        }
+
+        public static String getReleaseDate()
+        {
+            return "25/10/2012";
         }
 
     }

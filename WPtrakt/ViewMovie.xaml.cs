@@ -261,7 +261,7 @@ namespace WPtrakt
             auth.imdb_id = App.MovieViewModel.Imdb;
             auth.Title = App.MovieViewModel.Name;
             auth.year = Int16.Parse(App.MovieViewModel.Year);
-            auth.AppDate = "19/10/2012";
+            auth.AppDate = AppUser.getReleaseDate();
 
             var assembly = Assembly.GetExecutingAssembly().FullName;
             var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
