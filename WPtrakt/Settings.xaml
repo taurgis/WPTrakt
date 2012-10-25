@@ -68,7 +68,7 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="Version:" />
-                        <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="1.1" />
+                        <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="1.2" />
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0 50">
                         <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="Support:" />
