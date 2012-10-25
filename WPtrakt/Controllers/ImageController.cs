@@ -34,18 +34,6 @@ namespace WPtrakt.Controllers
         public Boolean isFetching {get; set;}
 
        
-
-        public static void copyImageToShellContent(String filename, String uniquekey)
-        {
-            using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                if(!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey +".jpg"))
-                {
-                  store.CopyFile(filename, "/Shared/ShellContent/wptraktbg" + uniquekey +".jpg");
-                }
-            }
-        }
-
         public static BitmapImage getImageFromStorage(String filename)
         {
             using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
@@ -80,20 +68,24 @@ namespace WPtrakt.Controllers
                 if ((!AppUser.UserIsHighEndDevice()) && width > 150)
                     return bi;
 
-                var wb = new WriteableBitmap(bi);
-
-           
-                using (var isoFileStream = isoStore.CreateFile(fileName))
+                try
                 {
-                    try
+
+                    var wb = new WriteableBitmap(bi);
+
+                    using (var isoFileStream = isoStore.CreateFile(fileName))
                     {
-                        Extensions.SaveJpeg(wb, isoFileStream, width, height, 0, quality);
-                    }
-                    catch (IsolatedStorageException)
-                    {
-                       //Do nothing for now.
+                        try
+                        {
+                            Extensions.SaveJpeg(wb, isoFileStream, width, height, 0, quality);
+                        }
+                        catch (IsolatedStorageException)
+                        {
+                            //Do nothing for now.
+                        }
                     }
                 }
+                catch (IsolatedStorageException) {  }
 
                return bi;
             }
