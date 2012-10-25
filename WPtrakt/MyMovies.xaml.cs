@@ -87,9 +87,20 @@ namespace WPtrakt
 
         private void ApplicationBarIconButton_Click(object sender, EventArgs e)
         {
-            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("mymovies.json");
- 
-            App.MyMoviesViewModel.LoadData();
+            if (this.MyMoviesPanorama.SelectedIndex == 0)
+            {
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("mymovies.json");
+
+                App.MyMoviesViewModel.LoadData();
+            }
+            else
+            {
+                if (!App.MyMoviesViewModel.LoadingSuggestItems)
+                {
+                    App.MyMoviesViewModel.LoadingSuggestItems = true;
+                    App.MyMoviesViewModel.LoadSuggestData();
+                } 
+            }
         }
 
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)

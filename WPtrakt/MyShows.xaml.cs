@@ -137,9 +137,21 @@ namespace WPtrakt
 
         private void ApplicationBarIconButton_Click(object sender, EventArgs e)
         {
-            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("myshows.json");
+            if (this.MyShowsPanorama.SelectedIndex == 0)
+            {
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("myshows.json");
 
-            App.MyShowsViewModel.LoadData();
+                App.MyShowsViewModel.LoadData();
+            }
+            else if (this.MyShowsPanorama.SelectedIndex == 2)
+            {
+
+                if (!App.MyShowsViewModel.LoadingSuggestItems)
+                {
+                    App.MyShowsViewModel.LoadingSuggestItems = true;
+                    App.MyShowsViewModel.LoadSuggestData();
+                } 
+            }
         }
 
         private void PhoneApplicationPage_OrientationChanged(object sender, OrientationChangedEventArgs e)

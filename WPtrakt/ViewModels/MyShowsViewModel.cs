@@ -331,6 +331,10 @@ namespace WPtrakt
 
         public void LoadSuggestData()
         {
+            this.SuggestItems = new ObservableCollection<ListItemViewModel>();
+            NotifyPropertyChanged("SuggestItems");
+            NotifyPropertyChanged("LoadingStatusSuggestions");
+
             HttpWebRequest request;
 
             request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/shows/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
@@ -384,6 +388,10 @@ namespace WPtrakt
 
                             Thread.Sleep(1500);
                         }
+
+
+                        LoadingSuggestItems = false;
+
 
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
