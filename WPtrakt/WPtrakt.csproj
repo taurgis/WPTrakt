@@ -77,6 +77,7 @@
     <Compile Include="FriendActivity.xaml.cs">
       <DependentUpon>FriendActivity.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Model\Trakt\Request\RegisterAuth.cs" />
     <Compile Include="Model\Trakt\TraktFriendsActivity.cs" />
     <Compile Include="Model\Trakt\TraktElapsed.cs" />
     <Compile Include="Model\Trakt\TraktWhen.cs" />

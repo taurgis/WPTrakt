@@ -23,6 +23,17 @@ namespace WPtrakt
             this.IsDataLoaded = true;
         }
 
+        public String ShowCreateAccount
+        {
+
+            get
+            {
+
+                return "Visible";
+
+            }
+        }
+
         private String _usage;
         public String Usage
         {
@@ -74,6 +85,23 @@ namespace WPtrakt
                 _userName = value;
                 AppUser.Instance.UserName = value;
                 NotifyPropertyChanged("UserName");
+            }
+        }
+
+         
+
+        private String _email;
+        public String Email
+        {
+            get
+            {
+
+                return _email;
+            }
+            set
+            {
+                _email = value;
+                NotifyPropertyChanged("_email");
             }
         }
 

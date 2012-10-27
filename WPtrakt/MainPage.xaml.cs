@@ -79,7 +79,11 @@ namespace WPtrakt
 
         private void ApplicationBarRefreshButton_Click(object sender, EventArgs e)
         {
-            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
+            try
+            {
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
+            }
+            catch (IsolatedStorageException) { }
             App.ViewModel.Profile = null;
             App.ViewModel.LoadData();
         }

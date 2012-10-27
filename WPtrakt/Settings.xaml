@@ -23,7 +23,12 @@
             <controls:PanoramaItem Header="Login" Width="480">
                 <!--TitlePanel contains the name of the application and page title-->
                 <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-                   
+                    <ListBoxItem>
+                        <StackPanel Width="465" Height="60" Orientation="Horizontal" Visibility="{Binding ShowCreateAccount}">
+                            <TextBlock Margin="10 2" HorizontalAlignment="Left" Height="30"  Text="Don't have an account yet?" TextWrapping="Wrap" Width="250" />
+                            <TextBlock Margin="10 2" HorizontalAlignment="Left" Height="30"  Text="Create one!" TextDecorations="Underline"  TextWrapping="Wrap" Width="317" Tap="TextBlock_Tap_1" />
+                        </StackPanel>
+                    </ListBoxItem>
                     <ListBox Height="586" HorizontalAlignment="Left" Name="listBox1" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBoxItem>
                             <StackPanel Width="465" Height="100" Orientation="Horizontal">
@@ -38,10 +43,18 @@
                                 <PasswordBox Password="{Binding Password, Mode=TwoWay}" Width="255" Height="70" />
                             </StackPanel>
                         </ListBoxItem>
+                        <ListBoxItem  Name="EmailText" Visibility="Collapsed">
+                            <StackPanel Width="465" Height="100" Orientation="Horizontal">
+                                <TextBlock Text="Email:" Width="163" Height="46" Style="{StaticResource PhoneTextLargeStyle}"/>
+                                <TextBox Name="txtEmail" Text="{Binding Email, Mode=TwoWay}" Width="255" Height="70" />
+                            </StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Width="200" Name="CreateButton" Visibility="Collapsed">
+                            <Button HorizontalAlignment="Center" Content="Create" Click="Button_Click" Name="btnCreate"  />
+                        </ListBoxItem>
                         <ListBoxItem>
                             <toolkit:ToggleSwitch  Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="320" />
                         </ListBoxItem>
-                        <ListBoxItem></ListBoxItem>
                     </ListBox>
                     <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" />
                 </StackPanel>
