@@ -31,7 +31,16 @@ namespace WPtrakt.Controllers
 
         }
 
-        public Boolean isFetching {get; set;}
+        public static void copyImageToShellContent(String filename, String uniquekey)
+        {
+            using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg"))
+                {
+                    store.CopyFile(filename, "/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg");
+                }
+            }
+        }
 
        
         public static BitmapImage getImageFromStorage(String filename)

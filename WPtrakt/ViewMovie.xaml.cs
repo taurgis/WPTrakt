@@ -15,6 +15,7 @@ using System.IO.IsolatedStorage;
 using System.Windows.Input;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using WPtrakt.Controllers;
 
 namespace WPtrakt
 {
@@ -134,7 +135,35 @@ namespace WPtrakt
 
             CreateCheckingButton(appBar);
 
+            CreateTileMenuItem(appBar);
+
             this.ApplicationBar = appBar;
+        }
+
+        private void CreateTileMenuItem(ApplicationBar appBar)
+        {
+            ApplicationBarMenuItem tileMenuItem = new ApplicationBarMenuItem();
+            tileMenuItem.Text = "Pin to start";
+            tileMenuItem.Click += new EventHandler(tileMenuItem_Click);
+            appBar.MenuItems.Add(tileMenuItem);
+        }
+
+        void tileMenuItem_Click(object sender, EventArgs e)
+        {
+            ImageController.copyImageToShellContent(App.MovieViewModel.Imdb + "background.jpg", App.MovieViewModel.Imdb);
+            StandardTileData NewTileData = new StandardTileData
+            {
+                BackgroundImage =
+                     new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.MovieViewModel.Imdb + ".jpg", UriKind.Absolute),
+                BackContent = App.MovieViewModel.Name,
+            };
+
+            ShellTile.Create(
+            new Uri(
+                "/ViewMovie.xaml?id=" + App.MovieViewModel.Imdb,
+                UriKind.Relative),
+                NewTileData);
+
         }
 
         private void CreateRatingButton(ApplicationBar appBar)

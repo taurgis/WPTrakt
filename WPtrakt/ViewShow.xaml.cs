@@ -12,6 +12,7 @@ using VPtrakt.Controllers;
 using VPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtrakt.Controllers;
 
 namespace WPtrakt
 {
@@ -149,7 +150,35 @@ namespace WPtrakt
 
             CreateWatchedButton(appBar, !App.ShowViewModel.Watched);
 
+            CreateTileMenuItem(appBar);
+
             this.ApplicationBar = appBar;
+        }
+
+        private void CreateTileMenuItem(ApplicationBar appBar)
+        {
+            ApplicationBarMenuItem tileMenuItem = new ApplicationBarMenuItem();
+            tileMenuItem.Text = "Pin to start";
+            tileMenuItem.Click += new EventHandler(tileMenuItem_Click);
+            appBar.MenuItems.Add(tileMenuItem);
+        }
+
+        void tileMenuItem_Click(object sender, EventArgs e)
+        {
+            ImageController.copyImageToShellContent(App.ShowViewModel.Tvdb + "background.jpg", App.ShowViewModel.Tvdb);
+            StandardTileData NewTileData = new StandardTileData
+            {
+                BackgroundImage =
+                     new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg", UriKind.Absolute),
+                BackContent = App.ShowViewModel.Name,
+            };
+
+            ShellTile.Create(
+            new Uri(
+                "/ViewShow.xaml?id=" + App.ShowViewModel.Tvdb,
+                UriKind.Relative),
+                NewTileData);
+
         }
 
         private void CreateAddToWatchlist(ApplicationBar appBar)
