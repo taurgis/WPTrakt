@@ -199,23 +199,27 @@ namespace Delay
                             var pendingCompletion = pendingCompletions.Dequeue();
                             if (GetUriSource(pendingCompletion.Image) == pendingCompletion.Uri)
                             {
-                                Image resizedImage = new Image();
-                                WriteableBitmap bitmap = new WriteableBitmap(pendingCompletion.Image, null);
-                                bitmap.SetSource(pendingCompletion.Stream);
+                                try
+                                {
+                                    Image resizedImage = new Image();
+                                    WriteableBitmap bitmap = new WriteableBitmap(pendingCompletion.Image, null);
+                                    bitmap.SetSource(pendingCompletion.Stream);
 
-                                double newWidth = 138;
-                                double newHeight = bitmap.PixelHeight * (newWidth / bitmap.PixelWidth);
+                                    double newWidth = 138;
+                                    double newHeight = bitmap.PixelHeight * (newWidth / bitmap.PixelWidth);
 
-                                var tempImage = new Image();
-                                tempImage.Source = bitmap;
+                                    var tempImage = new Image();
+                                    tempImage.Source = bitmap;
 
-                                WriteableBitmap resize = ResizeWriteableBitmap(bitmap, newWidth, newHeight, tempImage);
+                                    WriteableBitmap resize = ResizeWriteableBitmap(bitmap, newWidth, newHeight, tempImage);
 
-                                pendingCompletion.Image.Source = resize;
+                                    pendingCompletion.Image.Source = resize;
 
-                                tempImage = null;
-                                bitmap = null;
-                                resizedImage = null;
+                                    tempImage = null;
+                                    bitmap = null;
+                                    resizedImage = null;
+                                }
+                                catch (Exception) { }
                             }
                             else
                             {

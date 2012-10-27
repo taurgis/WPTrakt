@@ -84,6 +84,27 @@ namespace WPtrakt
             App.ViewModel.LoadData();
         }
 
+
+        private void FriendActivity_Click(object sender, EventArgs e)
+        {
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+
+            completedHandlerMainPage = delegate
+            {
+                Uri theUri = new Uri("/FriendActivity.xaml", UriKind.Relative);
+                NavigationService.Navigate(theUri);
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
+            
+        }
+
         private void MyMovies(object sender, System.Windows.Input.GestureEventArgs e)
         {
             Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
@@ -124,8 +145,21 @@ namespace WPtrakt
 
         private void StackPanel_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Uri theUri = new Uri("/Search.xaml", UriKind.Relative);
-            NavigationService.Navigate(theUri);
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, LayoutRoot);
+            EventHandler completedHandlerMainPage = delegate { };
+
+            completedHandlerMainPage = delegate
+            {
+                Uri theUri = new Uri("/Search.xaml", UriKind.Relative);
+                NavigationService.Navigate(theUri);
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+                this.Opacity = 0;
+            };
+
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
         }
 
         private void Image_Tap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -230,5 +264,7 @@ namespace WPtrakt
                 HistoryList.Height = 400;
             }
         }
+
+
     }
 }

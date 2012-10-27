@@ -246,6 +246,7 @@ namespace WPtrakt
                     };
 
                     toast.Show();
+                    tmr.Stop();
                     _profile = new TraktProfile();
                     NotifyPropertyChanged("LoadingStatus");
                 });

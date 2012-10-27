@@ -1,26 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Collections.ObjectModel;
-using System.Net;
 using System.IO;
-using System.Runtime.Serialization.Json;
-using WPtrakt.Model.Trakt;
-using System.Windows.Threading;
-using System.Threading;
 using System.IO.IsolatedStorage;
-using WPtrakt.Model;
 using Microsoft.Phone.Info;
+using WPtrakt.Model;
 
 
 namespace WPtrakt
@@ -40,21 +23,18 @@ namespace WPtrakt
             this.IsDataLoaded = true;
         }
 
+        private String _usage;
         public String Usage
         {
             get
             {
-                IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication();
-                long usage = 0;
+                return _usage;
+            }
 
-                foreach (String file in myIsolatedStorage.GetFileNames())
-                {
-                   IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
-                   usage += stream.Length;
-                   stream.Close();
-                }
-
-                return (((usage / 1024))).ToString() + " kB";
+            set
+            {
+                _usage = value;
+                NotifyPropertyChanged("Usage");
             }
         }
 

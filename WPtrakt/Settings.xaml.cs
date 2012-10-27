@@ -16,6 +16,8 @@ using WPtrakt.Model;
 using Microsoft.Phone.Tasks;
 using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Shell;
+using System.ComponentModel;
+using System.IO;
 
 namespace WPtrakt
 {
@@ -43,7 +45,33 @@ namespace WPtrakt
             if (!App.SettingsViewModel.IsDataLoaded)
             {
                 App.SettingsViewModel.LoadData();
+               
             }
+            App.SettingsViewModel.Usage = "Calculating...";
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+            worker.RunWorkerAsync();
+        }
+
+        void worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+
+                IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication();
+                long usage = 0;
+
+                foreach (String file in myIsolatedStorage.GetFileNames())
+                {
+                   IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
+                   usage += stream.Length;
+                   stream.Close();
+                }
+
+               
+
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    App.SettingsViewModel.Usage = (((usage / 1024))).ToString() + " kB";
+                });
         }
 
         private void ClearCacheButton_Click(object sender, RoutedEventArgs e)

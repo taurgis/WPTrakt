@@ -635,20 +635,24 @@ namespace WPtrakt
 
         void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
-            String jsonString = e.Result;
-            this.ShoutItems = new ObservableCollection<ListItemViewModel>();
-            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            try
             {
-                var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
-                foreach(TraktShout shout in shouts)
-                  this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
-            }
+                String jsonString = e.Result;
+                this.ShoutItems = new ObservableCollection<ListItemViewModel>();
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
+                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
+                    foreach (TraktShout shout in shouts)
+                        this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
+                }
 
-            if(this.ShoutItems.Count == 0)
-                this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
-            ShoutsLoaded = true;
-            NotifyPropertyChanged("ShoutItems");
+                if (this.ShoutItems.Count == 0)
+                    this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
+                ShoutsLoaded = true;
+                NotifyPropertyChanged("ShoutItems");
+            }
+            catch (WebException) { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

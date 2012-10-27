@@ -74,6 +74,12 @@
     <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\StorageController.cs" />
+    <Compile Include="FriendActivity.xaml.cs">
+      <DependentUpon>FriendActivity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Model\Trakt\TraktFriendsActivity.cs" />
+    <Compile Include="Model\Trakt\TraktElapsed.cs" />
+    <Compile Include="Model\Trakt\TraktWhen.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
     <Compile Include="Model\Trakt\Request\TraktMovieRequest.cs" />
     <Compile Include="Model\Trakt\Request\ShoutAuth.cs" />
@@ -83,6 +89,7 @@
     <Compile Include="Model\Trakt\Request\WatchedAuth.cs" />
     <Compile Include="Model\Trakt\Request\RatingAuth.cs" />
     <Compile Include="Model\Trakt\Request\WatchlistAuth.cs" />
+    <Compile Include="Model\Trakt\TraktActivity.cs" />
     <Compile Include="Model\Trakt\TraktObject.cs" />
     <Compile Include="Model\Trakt\TraktRating.cs" />
     <Compile Include="Model\Trakt\TraktSeason.cs" />
@@ -96,6 +103,8 @@
     <Compile Include="ViewEpisode.xaml.cs">
       <DependentUpon>ViewEpisode.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ActivityListItemViewModel.cs" />
+    <Compile Include="ViewModels\ActivityViewModel.cs" />
     <Compile Include="ViewModels\SearchViewModel.cs" />
     <Compile Include="ViewModels\EpisodeViewModel.cs" />
     <Compile Include="ViewModels\ShowViewModel.cs" />
@@ -141,6 +150,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="FriendActivity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="RatingSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

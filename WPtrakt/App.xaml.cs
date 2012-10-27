@@ -25,7 +25,9 @@ namespace WPtrakt
         private static MovieViewModel movieViewModel = null;
         private static ShowViewModel showViewModel = null;
         private static EpisodeViewModel episodeViewModel = null;
+        private static ActivityViewModel activityViewModel = null;
         public PhoneApplicationFrame RootFrame { get; private set; }
+        
 
         #region Getters/Setters
 
@@ -53,6 +55,17 @@ namespace WPtrakt
                     searchViewModel = new SearchViewModel();
 
                 return searchViewModel;
+            }
+        }
+
+        public static ActivityViewModel ActivityViewModel
+        {
+            get
+            {
+                if (activityViewModel == null)
+                    activityViewModel = new ActivityViewModel();
+
+                return activityViewModel;
             }
         }
 
