@@ -111,6 +111,44 @@ namespace WPtrakt.Controllers
             }
         }
 
+        public static BitmapImage saveImage(String fileName, Stream pic, Int16 width, Int16 quality)
+        {
+            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                var bi = new BitmapImage();
+                bi.SetSource(pic);
+
+                if (!AppUser.UserIsHighEndDevice())
+                    return bi;
+
+                try
+                {
+
+                    var wb = new WriteableBitmap(bi);
+
+                    double newHeight = wb.PixelHeight * ((double)width / wb.PixelWidth);
+
+                    using (var isoFileStream = isoStore.CreateFile(fileName))
+                    {
+                        try
+                        {
+                            Extensions.SaveJpeg(wb, isoFileStream, width, (int)newHeight, 0, quality);
+                            isoFileStream.Close();
+                        }
+                        catch (IsolatedStorageException)
+                        {
+                            //Do nothing for now.
+                        }
+                    }
+                }
+                catch (IsolatedStorageException)
+                {
+                }
+
+                return bi;
+            }
+        }
+
    
     }
 }

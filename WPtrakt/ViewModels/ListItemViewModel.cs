@@ -458,7 +458,7 @@ namespace WPtrakt
 
                 Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    _screenImage = ImageController.saveImage(_imdb + "screen.jpg", str, 100, 56, 90);
+                    _screenImage = ImageController.saveImage(_imdb + "screen.jpg", str, 150, 90);
             
                     NotifyPropertyChanged("ScreenImage");
                 }));

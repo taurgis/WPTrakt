@@ -76,10 +76,9 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <Image Grid.Column="0" Source="{Binding ScreenImage}"  Height="84"/>
+                                            <Image Grid.Column="0" Source="{Binding ScreenImage}" HorizontalAlignment="Right"  Height="84"/>
                                             <Image Margin="0 3" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
                                             <Image Margin="0 3" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
-
                                         </Grid>
                                         <StackPanel Orientation="Vertical"  Height="113">
                                             <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
