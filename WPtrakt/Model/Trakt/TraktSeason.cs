@@ -13,8 +13,11 @@ using System.Runtime.Serialization;
 namespace WPtrakt.Model.Trakt
 {
     [DataContract]
-    public class TraktSeason
+    public class TraktSeason : TraktObject
     {
+        [DataMember(Name = "tvdb")]
+        public String Tvdb;
+
         [DataMember(Name = "season")]
         public String Season { get; set; }
 
@@ -26,6 +29,22 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "images")]
         public TraktImage Images { get; set; }
+
+
+        public override String getFolder()
+        {
+            return "season";
+        }
+
+        public static String getFolderStatic()
+        {
+            return "season";
+        }
+
+        public override String getIdentifier()
+        {
+            return this.Tvdb;
+        }
     }
 
 }

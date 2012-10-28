@@ -346,7 +346,7 @@ namespace WPtrakt
             showSeasons.Text = "Seasons";
 
             appBar.Buttons.Add(showSeasons);
-
+            CreateRefreshEpisodesButton(appBar);
 
             nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
             nextSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeForward);
@@ -354,6 +354,28 @@ namespace WPtrakt
             nextSeason.Text = "Next";
             appBar.Buttons.Add(nextSeason);
             this.ApplicationBar = appBar;
+        }
+
+        private void CreateRefreshEpisodesButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton refreshButton = new ApplicationBarIconButton();
+            refreshButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
+            refreshButton.Text = "Refresh";
+            refreshButton.Click += new EventHandler(refreshButton_Click);
+
+            appBar.Buttons.Add(refreshButton);
+        }
+
+        void refreshButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                String fileNameEpisodes = TraktEpisode.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + App.ShowViewModel.currentSeason + ".json";
+
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(fileNameEpisodes);
+            }
+            catch (IsolatedStorageException) { }
+            App.ShowViewModel.LoadEpisodeData(App.ShowViewModel.Tvdb);
         }
 
         void showSeasons_Click(object sender, EventArgs e)

@@ -36,12 +36,12 @@ namespace WPtrakt.Model.Trakt
 
         public static String getFolderStatic()
         {
-            return "episode";
+            return "episodesingle";
         }
 
         public override String getFolder()
         {
-            return "episode";
+            return "episodesingle";
         }
 
         public override String getIdentifier()

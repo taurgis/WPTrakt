@@ -14,8 +14,11 @@ using VPtrakt.Model.Trakt;
 namespace WPtrakt.Model.Trakt
 {
     [DataContract]
-    public class TraktEpisode 
+    public class TraktEpisode : TraktObject
     {
+        [DataMember(Name = "tvdb")]
+        public String Tvdb;
+
         [DataMember(Name = "season")]
         public String Season { get; set; }
 
@@ -48,20 +51,20 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "rating")]
         public String MyRating { get; set; }
-    
-    }
 
-    /*
-      "episode": {
-                "season": 1,
-                "number": 7,
-                "title": "Free Fall",
-                "overview": "The FBI investigates a spectacular jewelry heist and all the clues point to Neal. Now Peter must figure out if his \"partner\" is telling the truth or if Neal is pulling a con of his own.",
-                "first_aired": 1259913600,
-                "url": "http://trakt.tv/show/white-collar/season/1/episode/7",
-                "images": {
-                    "screen": "http://trakt.us/images/episodes/25-1-7.3.jpg"
-                }
-            }
-     */
+        public override String getFolder()
+        {
+            return "episode";
+        }
+
+        public static String getFolderStatic()
+        {
+            return "episode";
+        }
+
+        public override String getIdentifier()
+        {
+            return this.Tvdb + this.Season;
+        }
+    }
 }

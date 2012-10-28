@@ -49,6 +49,32 @@ namespace WPtrakt.Controllers
             return traktObject;
         }
 
+        public static TraktObject[] saveObject(TraktObject[] traktObject, Type type)
+        {
+            traktObject[0].DownloadTime = DateTime.Now;
+            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+
+                if (!isoStore.DirectoryExists(traktObject[0].getFolder()))
+                {
+                    isoStore.CreateDirectory(traktObject[0].getFolder());
+                }
+
+                String fileName = traktObject[0].getFolder() + "/" + traktObject[0].getIdentifier() + ".json";
+                using (var isoFileStream = isoStore.CreateFile(fileName))
+                {
+                    DataContractJsonSerializer ser = new DataContractJsonSerializer(type);
+
+                    ser.WriteObject(isoFileStream, traktObject);
+
+                    isoFileStream.Close();
+                }
+
+            }
+
+            return traktObject;
+        }
+
         public static void saveObjectInMainFolder(Object theObject, Type type, String fileName)
         {
             using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
@@ -75,6 +101,19 @@ namespace WPtrakt.Controllers
                 {
                     var ser = new DataContractJsonSerializer(type);
                    return (TraktObject)ser.ReadObject(stream);
+                }
+
+            }
+        }
+
+        public static TraktObject[] LoadObjects(String file, Type type)
+        {
+            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                using (IsolatedStorageFileStream stream = isoStore.OpenFile(file, FileMode.Open))
+                {
+                    var ser = new DataContractJsonSerializer(type);
+                    return (TraktObject[])ser.ReadObject(stream);
                 }
 
             }

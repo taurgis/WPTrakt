@@ -19,9 +19,9 @@ namespace WPtrakt
     public class ShowViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
-        public ObservableCollection<ListItemViewModel> EpisodeItems { get;  set; }
+        public ObservableCollection<ListItemViewModel> EpisodeItems { get; set; }
         public Int16 numberOfSeasons { get; set; }
-        public Int16 currentSeason {get; set;}
+        public Int16 currentSeason { get; set; }
         public Boolean ShoutsLoaded { get; set; }
 
         public ShowViewModel()
@@ -38,10 +38,10 @@ namespace WPtrakt
         {
             get
             {
-                if(this.numberOfSeasons > 0)
+                if (this.numberOfSeasons > 0)
                 {
                     List<String> seasons = new List<string>();
-                    for (int i = 1; i <= this.numberOfSeasons;i++ )
+                    for (int i = 1; i <= this.numberOfSeasons; i++)
                     {
                         seasons.Add(i.ToString());
                     }
@@ -60,7 +60,7 @@ namespace WPtrakt
         {
             get
             {
-                if(String.IsNullOrEmpty(_name))
+                if (String.IsNullOrEmpty(_name))
                     return "Loading..";
                 return _name;
             }
@@ -204,8 +204,8 @@ namespace WPtrakt
                 {
                     genreString += genre + ", ";
                 }
-                if(!String.IsNullOrEmpty(genreString))
-                genreString = genreString.Remove(genreString.Length - 2, 2);
+                if (!String.IsNullOrEmpty(genreString))
+                    genreString = genreString.Remove(genreString.Length - 2, 2);
                 return genreString;
             }
         }
@@ -438,9 +438,9 @@ namespace WPtrakt
 
         public void LoadData(String tvdb)
         {
-           
-            if(currentSeason == 0)
-             currentSeason = 1;
+
+            if (currentSeason == 0)
+                currentSeason = 1;
             this._tvdb = tvdb;
 
             String fileName = TraktShow.getFolderStatic() + "/" + tvdb + ".json";
@@ -458,29 +458,73 @@ namespace WPtrakt
                 CallShowService(tvdb);
             }
 
-            var seasonClient = new WebClient();
-            seasonClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadSeasonsStringCompleted);
-            seasonClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb));
+            String fileNameSeasons = TraktSeason.getFolderStatic() + "/" + tvdb + ".json";
+            if (StorageController.doesFileExist(fileName))
+            {
+                BackgroundWorker seasonsWorker = new BackgroundWorker();
+                seasonsWorker.WorkerReportsProgress = false;
+                seasonsWorker.WorkerSupportsCancellation = false;
+                seasonsWorker.DoWork += new DoWorkEventHandler(seasonsWorker_DoWork);
+
+                seasonsWorker.RunWorkerAsync();
+            }
+            else
+            {
+                CallSeasonService(tvdb);
+            }
         }
 
-        void showworker_DoWork(object sender, DoWorkEventArgs e)
+        void seasonsWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep(1000);
-            String fileName = TraktShow.getFolderStatic() + "/" + _tvdb + ".json";
-            TraktShow show = (TraktShow)StorageController.LoadObject(fileName, typeof(TraktShow));
-            if ((DateTime.Now - show.DownloadTime).Days < 1)
+            String fileName = TraktSeason.getFolderStatic() + "/" + _tvdb + ".json";
+            TraktSeason[] seasons = (TraktSeason[])StorageController.LoadObjects(fileName, typeof(TraktSeason[]));
+
+            if ((DateTime.Now - seasons[0].DownloadTime).Days < 1)
+            {
+                numberOfSeasons = 0;
+                foreach (TraktSeason season in seasons)
+                {
+                    if (!String.IsNullOrEmpty(this.Tvdb))
+                        season.Tvdb = this.Tvdb;
+
+                    if (season.Season != "0")
+                    {
+                        numberOfSeasons += 1;
+                    }
+                }
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+               {
+                   NotifyPropertyChanged("SeasonItems");
+               });
+            }
+            else
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                 UpdateShowView(show);
+                    CallSeasonService(_tvdb);
+                });
+            }
+        }
+
+
+        void showworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String fileName = TraktShow.getFolderStatic() + "/" + _tvdb + ".json";
+            TraktShow show = (TraktShow)StorageController.LoadObject(fileName, typeof(TraktShow));
+
+            if ((DateTime.Now - show.DownloadTime).Days < 7)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    UpdateShowView(show);
                 });
             }
             else
             {
-                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                 {
-                     CallShowService(_tvdb);
-                 });
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    CallShowService(_tvdb);
+                });
             }
         }
 
@@ -543,6 +587,13 @@ namespace WPtrakt
             LoadBackgroundImage();
         }
 
+        private void CallSeasonService(String tvdb)
+        {
+            var seasonClient = new WebClient();
+            seasonClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadSeasonsStringCompleted);
+            seasonClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb));
+        }
+
         void client_DownloadSeasonsStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             try
@@ -555,11 +606,19 @@ namespace WPtrakt
                     numberOfSeasons = 0;
                     foreach (TraktSeason season in seasons)
                     {
+                        if (!String.IsNullOrEmpty(this.Tvdb))
+                            season.Tvdb = this.Tvdb;
+
                         if (season.Season != "0")
                         {
                             numberOfSeasons += 1;
                         }
                     }
+
+                    seasons[0].DownloadTime = DateTime.Now;
+
+                    if (!String.IsNullOrEmpty(this.Tvdb))
+                        StorageController.saveObject(seasons, typeof(TraktSeason[]));
                 }
 
                 NotifyPropertyChanged("SeasonItems");
@@ -616,12 +675,63 @@ namespace WPtrakt
             {
                 if (currentSeason <= numberOfSeasons)
                 {
-                    var showClient = new WebClient();
-                    this._tvdb = tvdb;
-                    showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeStringCompleted);
-                    showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + currentSeason), AppUser.createJsonStringForAuthentication());
+                    String fileNameEpisodes = TraktEpisode.getFolderStatic() + "/" + tvdb + currentSeason + ".json";
+                    if (StorageController.doesFileExist(fileNameEpisodes))
+                    {
+                        BackgroundWorker episodesWorker = new BackgroundWorker();
+                        episodesWorker.WorkerReportsProgress = false;
+                        episodesWorker.WorkerSupportsCancellation = false;
+                        episodesWorker.DoWork += new DoWorkEventHandler(episodesWorker_DoWork);
+
+                        episodesWorker.RunWorkerAsync();
+                    }
+                    else
+                    {
+                        CallEpisodesService(tvdb);
+                    }
                 }
             }
+        }
+
+        void episodesWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String fileName = TraktEpisode.getFolderStatic() + "/" + this.Tvdb + this.currentSeason + ".json";
+            TraktEpisode[] episodes = (TraktEpisode[])StorageController.LoadObjects(fileName, typeof(TraktEpisode[]));
+
+            if ((DateTime.Now - episodes[0].DownloadTime).Days < 7)
+            {
+                foreach (TraktEpisode episodeIt in episodes)
+                {
+                    episodeIt.Tvdb = this.Tvdb;
+                    TraktEpisode episode = episodeIt;
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                     {
+                    this.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = _imdb + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = _tvdb });
+                        });
+                }
+                
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    this.EpisodeItems.Add(new ListItemViewModel());
+                    NotifyPropertyChanged("EpisodeItems");
+                    NotifyPropertyChanged("LoadingStatusSeason");
+                });
+            }
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    CallSeasonService(_tvdb);
+                });
+            }
+        }
+
+        private void CallEpisodesService(String tvdb)
+        {
+            var showClient = new WebClient();
+            this._tvdb = tvdb;
+            showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeStringCompleted);
+            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + currentSeason), AppUser.createJsonStringForAuthentication());
         }
 
         void client_UploadEpisodeStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -637,9 +747,22 @@ namespace WPtrakt
 
                     foreach (TraktEpisode episode in episodes)
                     {
+                        episode.Tvdb = this.Tvdb;
                         this.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = _imdb + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = _tvdb });
                     }
+                    episodes[0].DownloadTime = DateTime.Now;
+
+                    DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                    airTime = airTime.AddSeconds(episodes[episodes.Length-1].FirstAired);
+
+                   int daysSinceRelease = (DateTime.Now - airTime).Days;
+
                     this.EpisodeItems.Add(new ListItemViewModel());
+
+
+
+                    if (!String.IsNullOrEmpty(this.Tvdb) && !(daysSinceRelease < 30))
+                        StorageController.saveObject(episodes, typeof(TraktEpisode[]));
 
                 }
                 NotifyPropertyChanged("EpisodeItems");
