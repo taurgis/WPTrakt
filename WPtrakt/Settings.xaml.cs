@@ -65,15 +65,10 @@ namespace WPtrakt
 
                 foreach (String file in myIsolatedStorage.GetFileNames())
                 {
-                    if (file.EndsWith(".jpg"))
-                    {
-                        IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
-                        usage += stream.Length;
-                        stream.Close();
-                    }
+                    IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
+                    usage += stream.Length;
+                    stream.Close();
                 }
-
-               
 
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
@@ -90,14 +85,24 @@ namespace WPtrakt
 
             foreach (String file in myIsolatedStorage.GetFileNames())
             {
-                if (file.EndsWith(".jpg"))
-                {
-                    myIsolatedStorage.DeleteFile(file);
-                }
+               myIsolatedStorage.DeleteFile(file);
             }
+
             IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;
             IsolatedStorageSettings.ApplicationSettings["Password"] = tempPassword;
             IsolatedStorageSettings.ApplicationSettings.Save();
+
+            foreach(String dir in myIsolatedStorage.GetDirectoryNames())
+            {
+                if (!dir.Contains("Shared"))
+                {
+                    foreach (String file in myIsolatedStorage.GetFileNames(dir + "/*"))
+                    {
+                        myIsolatedStorage.DeleteFile(dir + "/" + file);
+                    }
+                }
+            }
+      
 
             App.SettingsViewModel.Usage = "Cleared";
             App.SettingsViewModel.NotifyPropertyChanged("Usage");
