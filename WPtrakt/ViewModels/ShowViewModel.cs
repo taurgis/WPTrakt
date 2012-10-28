@@ -479,7 +479,7 @@ namespace WPtrakt
             String fileName = TraktSeason.getFolderStatic() + "/" + _tvdb + ".json";
             TraktSeason[] seasons = (TraktSeason[])StorageController.LoadObjects(fileName, typeof(TraktSeason[]));
 
-            if ((DateTime.Now - seasons[0].DownloadTime).Days < 1)
+            if ((DateTime.Now - seasons[0].DownloadTime).Days < 7)
             {
                 numberOfSeasons = 0;
                 foreach (TraktSeason season in seasons)

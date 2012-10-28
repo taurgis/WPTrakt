@@ -441,10 +441,9 @@ namespace WPtrakt
 
         void movieworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep(1000);
             String fileName = TraktMovie.getFolderStatic() + "/" + _imdb + ".json";
             TraktMovie movie = (TraktMovie)StorageController.LoadObject(fileName, typeof(TraktMovie));
-            if ((DateTime.Now - movie.DownloadTime).Days < 1)
+            if ((DateTime.Now - movie.DownloadTime).Days < 7)
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                {

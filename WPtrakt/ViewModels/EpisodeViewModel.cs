@@ -480,7 +480,23 @@ namespace WPtrakt
         {
             String fileName = TraktWatched.getFolderStatic() + "/" + _tvdb + _season + _number + ".json";
             TraktWatched episodeCache = (TraktWatched)StorageController.LoadObject(fileName, typeof(TraktWatched));
-            if ((DateTime.Now - episodeCache.DownloadTime).Days < 1)
+
+            int cacheLength = 1;
+
+            DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+            airTime = airTime.AddSeconds(episodeCache.Episode.FirstAired);
+
+            int daysSinceRelease = (DateTime.Now - airTime).Days;
+
+            if (daysSinceRelease > 100)
+                cacheLength = 30;
+            else if (daysSinceRelease > 7)
+                cacheLength = 7;
+            else if (daysSinceRelease < 1)
+                cacheLength = 0;
+
+
+            if ((DateTime.Now - episodeCache.DownloadTime).Days < cacheLength)
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
