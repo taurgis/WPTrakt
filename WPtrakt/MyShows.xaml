@@ -85,7 +85,7 @@
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate >
                             <DataTemplate>
-                                <Image delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Margin="5 5 5 5" Width="160" Height="250" Tap="Image_Tap" />
+                                <Image Source="{Binding MediumImage}" Margin="5 5 5 5" Width="160" Height="250" Tap="Image_Tap" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
