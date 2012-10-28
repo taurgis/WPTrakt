@@ -33,13 +33,20 @@ namespace WPtrakt.Controllers
 
         public static void copyImageToShellContent(String filename, String uniquekey)
         {
-            using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
+            try
             {
-                if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg"))
+                using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
                 {
-                    store.CopyFile(filename, "/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg");
+                    if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg"))
+                    {
+                        IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open);
+                       saveImage("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 800, 450, 100);
+                       stream.Close();
+                       // store.CopyFile(filename, "/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg");
+                    }
                 }
             }
+            catch (IsolatedStorageException) { }
         }
 
        
@@ -53,6 +60,8 @@ namespace WPtrakt.Controllers
                     using (IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open))
                     {
                         bi.SetSource(stream);
+
+                        stream.Close();
                     }
                     return bi;
                 }
@@ -87,6 +96,7 @@ namespace WPtrakt.Controllers
                         try
                         {
                             Extensions.SaveJpeg(wb, isoFileStream, width, height, 0, quality);
+                            isoFileStream.Close();
                         }
                         catch (IsolatedStorageException)
                         {
@@ -94,7 +104,8 @@ namespace WPtrakt.Controllers
                         }
                     }
                 }
-                catch (IsolatedStorageException) {  }
+                catch (IsolatedStorageException) { 
+                }
 
                return bi;
             }

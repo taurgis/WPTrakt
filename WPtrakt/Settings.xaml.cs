@@ -65,9 +65,12 @@ namespace WPtrakt
 
                 foreach (String file in myIsolatedStorage.GetFileNames())
                 {
-                   IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
-                   usage += stream.Length;
-                   stream.Close();
+                    if (file.EndsWith(".jpg"))
+                    {
+                        IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
+                        usage += stream.Length;
+                        stream.Close();
+                    }
                 }
 
                
@@ -83,10 +86,20 @@ namespace WPtrakt
             String tempUsername = AppUser.Instance.UserName;
             String tempPassword = AppUser.Instance.Password;
 
-            IsolatedStorageFile.GetUserStoreForApplication().Remove();
+            IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication();
+
+            foreach (String file in myIsolatedStorage.GetFileNames())
+            {
+                if (file.EndsWith(".jpg"))
+                {
+                    myIsolatedStorage.DeleteFile(file);
+                }
+            }
             IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;
             IsolatedStorageSettings.ApplicationSettings["Password"] = tempPassword;
             IsolatedStorageSettings.ApplicationSettings.Save();
+
+            App.SettingsViewModel.Usage = "Cleared";
             App.SettingsViewModel.NotifyPropertyChanged("Usage");
         }
 
@@ -265,8 +278,6 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-
-
         }
     }
 }

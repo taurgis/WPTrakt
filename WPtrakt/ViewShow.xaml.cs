@@ -165,6 +165,8 @@ namespace WPtrakt
 
         void tileMenuItem_Click(object sender, EventArgs e)
         {
+            if(StorageController.doesFileExist(App.ShowViewModel.Tvdb + "background.jpg"))
+            {
             ImageController.copyImageToShellContent(App.ShowViewModel.Tvdb + "background.jpg", App.ShowViewModel.Tvdb);
             StandardTileData NewTileData = new StandardTileData
             {
@@ -173,11 +175,17 @@ namespace WPtrakt
                 BackContent = App.ShowViewModel.Name,
             };
 
+            if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg"))
+            {
+                NewTileData.BackgroundImage = new Uri("appdata:background.png");;
+            }
+
             ShellTile.Create(
             new Uri(
                 "/ViewShow.xaml?id=" + App.ShowViewModel.Tvdb,
                 UriKind.Relative),
                 NewTileData);
+            }
 
         }
 
