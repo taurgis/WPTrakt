@@ -629,7 +629,7 @@ namespace WPtrakt
 
         void client_OpenReadScreenCompleted(object sender, OpenReadCompletedEventArgs e)
         {
-            _screenImage = ImageController.saveImage(_imdb + _season + _number + "screenlarge.jpg", e.Result, 218, 123, 70);
+            _screenImage = ImageController.saveImage(_imdb + _season + _number + "screenlarge.jpg", e.Result, 218, 70);
             NotifyPropertyChanged("ScreenImage");
 
         }
