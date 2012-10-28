@@ -200,23 +200,33 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Background.png" />
+    <Content Include="ApplicationIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\appbar.back.rest.png" />
     <Content Include="Images\appbar.cancel.rest.png" />
     <Content Include="Images\appbar.check.rest.png" />
     <Content Include="Images\appbar.favs.rest.png" />
     <Content Include="Images\appbar.feature.removevideo.rest.png" />
     <Content Include="Images\appbar.feature.settings.rest.png" />
-    <Content Include="Images\appbar.next.rest.png" />
     <Content Include="Images\appbar.feature.video.rest.png" />
+    <Content Include="Images\appbar.next.rest.png" />
     <Content Include="Images\appbar.phone.numbersign.rest.png" />
     <Content Include="Images\appbar.refresh.rest.png" />
-    <Content Include="ApplicationIcon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Images\appbar.seen.rest.png" />
-    <Resource Include="Images\EmptyPanoramaBackground.png" />
     <Content Include="Images\appbar.send.text.rest.png" />
     <Content Include="Images\appbar.unseen.rest.png" />
+    <Content Include="Images\badge-1.png" />
+    <Content Include="Images\badge-10.png" />
+    <Content Include="Images\badge-2.png" />
+    <Content Include="Images\badge-3.png" />
+    <Content Include="Images\badge-4.png" />
+    <Content Include="Images\badge-5.png" />
+    <Content Include="Images\badge-6.png" />
+    <Content Include="Images\badge-7.png" />
+    <Content Include="Images\badge-8.png" />
+    <Content Include="Images\badge-9.png" />
+    <Content Include="Images\episode-watched.png" />
     <Content Include="Images\heart-love.png" />
     <Content Include="Images\seen.png" />
     <Content Include="SplashScreenImage.jpg" />

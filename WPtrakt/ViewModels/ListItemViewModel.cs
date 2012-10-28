@@ -82,6 +82,42 @@ namespace WPtrakt
             }
         }
 
+        public String SeenVisibility
+        {
+            get
+            {
+                if (this.Watched)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+           
+        }
+
+        public String RatingVisibility
+        {
+            get
+            {
+                if (this.Rating > 0)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+
+        }
+
+        public Uri RatingImage
+        {
+            get
+            {
+                if (this.Rating > 0)
+                    return new Uri("Images/badge-" + this.Rating + ".png", UriKind.Relative);
+                else
+                    return new Uri("Images/badge-1.png", UriKind.Relative) ;
+            }
+
+        }
+
         public String WatchedVisible
         {
             get
