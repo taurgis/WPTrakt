@@ -37,7 +37,7 @@
                                 <ColumnDefinition Width="60"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="1" Source="{Binding Avatar}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-60 10" Height="60"/>
+                            <Image Grid.Column="1" Source="{Binding AvatarImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-60 10" Height="60"/>
                             <Grid Grid.Column="2" Height="Auto">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>

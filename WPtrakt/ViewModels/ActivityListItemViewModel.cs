@@ -9,6 +9,9 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.ComponentModel;
+using System.Windows.Media.Imaging;
+using WPtrakt.Controllers;
+using System.IO;
 
 namespace WPtrakt.ViewModels
 {
@@ -53,6 +56,60 @@ namespace WPtrakt.ViewModels
                     _avatar = value;
                     NotifyPropertyChanged("Avatar");
                 }
+            }
+        }
+
+        private BitmapImage _avatarImage;
+        public BitmapImage AvatarImage
+        {
+            get
+            {
+                if (_avatarImage == null)
+                {
+                    String fileName = this.Name + "thumb" + ".jpg";
+
+                    if (StorageController.doesFileExist(fileName))
+                    {
+                        _avatarImage = ImageController.getImageFromStorage(fileName);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            HttpWebRequest request;
+
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(this.Avatar));
+                            request.BeginGetResponse(new AsyncCallback(request_OpenReadThumbCompleted), new object[] { request });
+                        }
+                        catch (NullReferenceException) { }
+                        return null;
+                    }
+
+                    return _avatarImage;
+                }
+                else
+                {
+                    return _avatarImage;
+                }
+            }
+        }
+
+        private void request_OpenReadThumbCompleted(IAsyncResult r)
+        {
+            object[] param = (object[])r.AsyncState;
+            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+            if (status == System.Net.HttpStatusCode.OK)
+            {
+                Stream str = httpResoponse.GetResponseStream();
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _avatarImage = ImageController.saveImage(this.Name + "thumb.jpg", str, 50, 50, 70);
+                    NotifyPropertyChanged("AvatarImage");
+                }));
             }
         }
 

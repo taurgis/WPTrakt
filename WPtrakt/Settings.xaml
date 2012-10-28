@@ -24,6 +24,9 @@
                 <!--TitlePanel contains the name of the application and page title-->
                 <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
                     <ListBoxItem>
+                        <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" />
+                    </ListBoxItem>
+                    <ListBoxItem>
                         <StackPanel Width="465" Height="60" Orientation="Horizontal" Visibility="{Binding ShowCreateAccount}">
                             <TextBlock Margin="10 2" HorizontalAlignment="Left" Height="30"  Text="Don't have an account yet?" TextWrapping="Wrap" Width="250" />
                             <TextBlock Margin="10 2" HorizontalAlignment="Left" Height="30"  Text="Create one!" TextDecorations="Underline"  TextWrapping="Wrap" Width="317" Tap="TextBlock_Tap_1" />
@@ -56,8 +59,7 @@
                             <toolkit:ToggleSwitch  Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="320" />
                         </ListBoxItem>
                     </ListBox>
-                    <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" />
-                </StackPanel>
+                     </StackPanel>
             </controls:PanoramaItem>
             <controls:PanoramaItem Header="Cache" Width="480">
                 <StackPanel>
