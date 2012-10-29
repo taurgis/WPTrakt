@@ -141,7 +141,7 @@ namespace WPtrakt
                     this.MyMoviesPanorama.Margin = new Thickness(0, -180, 0, 0);
                 }
 
-                ListSuggestions.Width = 1300;
+                ListSuggestions.Width = 1370;
                 ListMyMovies.Height = 480;
             }
         }

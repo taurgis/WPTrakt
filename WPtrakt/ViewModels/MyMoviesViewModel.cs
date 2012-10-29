@@ -274,25 +274,19 @@ namespace WPtrakt
                         suggestedMovies = new List<TraktMovie>();
                         this.SuggestItems = new ObservableCollection<ListItemViewModel>();
 
-                        foreach (TraktMovie movieInList in obj)
+                        foreach (TraktMovie movie in obj)
                         {
                             if (counter++ > 8)
                                 break;
 
-                            var movie = movieInList;
-                            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                           {
-                               this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie" });
-                               NotifyPropertyChanged("SuggestItems");
-                           });
-
-                            Thread.Sleep(1500);
+                            this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie", InWatchList = movie.InWatchlist });   
                         }
 
                         LoadingSuggestItems = false;
 
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
+                            NotifyPropertyChanged("SuggestItems");
                             NotifyPropertyChanged("LoadingStatusSuggestions");
                         });
                     }

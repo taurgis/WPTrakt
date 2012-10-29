@@ -80,12 +80,15 @@
                     <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <toolkit:WrapPanel ItemWidth="160" ItemHeight="250" Name="WrapPanelTrending"/>
+                                <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate >
                             <DataTemplate>
-                                <Image Source="{Binding MediumImage}" Margin="5 5 5 5" Width="160" Height="250" Tap="Image_Tap" />
+                                <Grid>
+                                    <Image Source="{Binding MediumImage}" Width="160" Height="250" Tap="Image_Tap" VerticalAlignment="Top" />
+                                    <Image Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

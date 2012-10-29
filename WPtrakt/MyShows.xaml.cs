@@ -174,7 +174,7 @@ namespace WPtrakt
                     this.MyShowsPanorama.Margin = new Thickness(0, -180, 0, 0);
                 }
 
-                ListSuggestions.Width = 1300;
+                ListSuggestions.Width = 1370;
                 ListMyShows.Height = 480;
                 ListUpcomming.Height = 425;
             }

@@ -373,28 +373,19 @@ namespace WPtrakt
                         int counter = 1;
                         this.SuggestItems = new ObservableCollection<ListItemViewModel>();
 
-                        foreach (TraktShow showInList in obj)
+                        foreach (TraktShow show in obj)
                         {
                             if (counter++ > 8)
                                 break;
 
-                            var show = showInList;
-
-                            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                            {
-                                this.SuggestItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, Type = "Show" });
-                                NotifyPropertyChanged("SuggestItems");
-                            });
-
-                            Thread.Sleep(1500);
+                            this.SuggestItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, Type = "Show", InWatchList = show.InWatchlist });
                         }
-
 
                         LoadingSuggestItems = false;
 
-
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
+                            NotifyPropertyChanged("SuggestItems");
                             NotifyPropertyChanged("LoadingStatusSuggestions");
                         });
                     }
