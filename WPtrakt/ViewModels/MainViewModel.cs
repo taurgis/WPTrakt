@@ -385,7 +385,7 @@ namespace WPtrakt
             foreach (TraktWatched watched in _profile.Watched)
             {
                 if (watched.Episode != null)
-                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Episode.Title, ImageSource = watched.Episode.Images.Screen, Imdb = watched.Show.imdb_id + watched.Episode.Season + watched.Episode.Number, SubItemText = "Season " + watched.Episode.Season + ", Episode " + watched.Episode.Number, Episode = watched.Episode.Number, Season = watched.Episode.Season, Tvdb = watched.Show.tvdb_id, Type="episode" });
+                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Episode.Title, ImageSource = watched.Episode.Images.Screen, Imdb = watched.Show.imdb_id + watched.Episode.Season + watched.Episode.Number, SubItemText = "Season " + watched.Episode.Season + ", Episode " + watched.Episode.Number, Episode = watched.Episode.Number, Season = watched.Episode.Season, Tvdb = watched.Show.tvdb_id, Type="episode", WatchedTime = Int32.Parse(watched.Watched) });
                 else if( watched.Movie != null)
                     this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Movie.Title, ImageSource = watched.Movie.Images.Poster, Imdb = watched.Movie.imdb_id, SubItemText =  "Runtime: " + watched.Movie.Runtime + " mins\r\n" + watched.Movie.year.ToString() , Type="movie" });
             }

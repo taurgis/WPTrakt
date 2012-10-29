@@ -82,10 +82,11 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Tap="StackPanel_Tap">
-                                <Image delay:LowProfileImageLoader.UriSource="{Binding ImageSource}" Width="150"/>
+                                <Image Source="{Binding ScreenImage}" Width="150"/>
                                 <StackPanel Orientation="Vertical">
-                                    <TextBlock  TextWrapping="Wrap"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                    <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    <TextBlock TextWrapping="Wrap"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                    <TextBlock Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                    <TextBlock Text="{Binding WatchedDate}" Style="{StaticResource PhoneTextSubtleStyle}"  />
                                 </StackPanel>
                             </StackPanel>
                         </DataTemplate>

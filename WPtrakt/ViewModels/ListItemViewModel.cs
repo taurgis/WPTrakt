@@ -134,6 +134,17 @@ namespace WPtrakt
 
         }
 
+        public long WatchedTime { get; set; }
+
+        public String WatchedDate
+        {
+            get
+            {
+                DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                return baseTime.AddSeconds(WatchedTime).ToString("dd/MM") + " " + baseTime.AddSeconds(WatchedTime).ToShortTimeString();
+            }
+        }
+
         public String WatchedVisible
         {
             get
