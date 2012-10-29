@@ -1,16 +1,15 @@
 ﻿using System;
 using System.IO.IsolatedStorage;
+using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using Coding4Fun.Phone.Controls;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
+using VPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using Coding4Fun.Phone.Controls;
-using System.Net;
-using VPtrakt.Model.Trakt.Request;
-using VPtrakt.Controllers;
 
 namespace WPtrakt
 {

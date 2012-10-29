@@ -1,21 +1,20 @@
 ﻿using System;
+using System.IO.IsolatedStorage;
 using System.Net;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using VPtrakt.Controllers;
 using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
-using System.Windows.Media.Animation;
-using System.IO.IsolatedStorage;
-using System.Windows.Input;
-using System.Reflection;
-using System.Text.RegularExpressions;
-using WPtrakt.Controllers;
 
 namespace WPtrakt
 {

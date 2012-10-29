@@ -1,18 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Windows.Media.Imaging;
-using WPtrakt.Controllers;
-using WPtrakt.Model.Trakt;
-using WPtrakt.Model;
-using VPtrakt.Controllers;
-using System.Threading;
 using System.Windows;
-using System.Collections.Generic;
+using System.Windows.Media.Imaging;
+using VPtrakt.Controllers;
+using WPtrakt.Controllers;
+using WPtrakt.Model;
+using WPtrakt.Model.Trakt;
 
 namespace WPtrakt
 {

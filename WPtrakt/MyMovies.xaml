@@ -18,7 +18,6 @@
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
-    
     <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}" Name="MyMoviesPanorama">

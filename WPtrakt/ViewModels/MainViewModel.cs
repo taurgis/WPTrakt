@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -7,15 +6,12 @@ using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading;
+using System.Windows.Threading;
+using Coding4Fun.Phone.Controls;
 using VPtrakt.Controllers;
+using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using WPtrakt.Controllers;
-using System.Windows.Media;
-using System.Windows;
-using Microsoft.Phone.Shell;
-using Coding4Fun.Phone.Controls;
-using System.Windows.Threading;
 
 
 namespace WPtrakt

@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading;
 using VPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;

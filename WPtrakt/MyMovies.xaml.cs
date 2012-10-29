@@ -1,13 +1,11 @@
 ﻿using System;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using Clarity.Phone.Controls;
 using Microsoft.Phone.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.IO.IsolatedStorage;
-using System.Windows.Media.Animation;
 
 namespace WPtrakt
 {

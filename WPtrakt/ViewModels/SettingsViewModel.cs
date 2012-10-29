@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.IO;
-using System.IO.IsolatedStorage;
 using Microsoft.Phone.Info;
 using WPtrakt.Model;
 

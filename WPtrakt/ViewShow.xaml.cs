@@ -10,9 +10,9 @@ using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using VPtrakt.Controllers;
 using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using WPtrakt.Controllers;
 
 namespace WPtrakt
 {
