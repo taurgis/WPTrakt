@@ -264,7 +264,7 @@ namespace WPtrakt
                     this.MainPanorama.Margin = new Thickness(0, -180, 0, 0);
                 }
 
-                ListTrending.Width = 1300;
+                ListTrending.Width = 1370;
                 HistoryList.Height = 400;
             }
         }
