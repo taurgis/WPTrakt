@@ -82,6 +82,20 @@ namespace WPtrakt
             }
         }
 
+        private Boolean _inWatchList;
+        public Boolean InWatchList
+        {
+            get
+            {
+                return _inWatchList;
+            }
+            set
+            {
+                _inWatchList = value;
+                this.NotifyPropertyChanged("InWatchList");
+            }
+        }
+
         public String SeenVisibility
         {
             get
@@ -99,6 +113,18 @@ namespace WPtrakt
             get
             {
                 if (this.Rating > 0)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+
+        }
+
+        public String WatchlistVisibility
+        {
+            get
+            {
+                if (this.InWatchList)
                     return "Visible";
                 else
                     return "Collapsed";

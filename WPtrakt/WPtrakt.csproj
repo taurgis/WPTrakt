@@ -229,6 +229,7 @@
     <Content Include="Images\episode-watched.png" />
     <Content Include="Images\heart-love.png" />
     <Content Include="Images\seen.png" />
+    <Content Include="Images\watchlist.png" />
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
   <ItemGroup>
