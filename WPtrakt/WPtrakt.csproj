@@ -226,8 +226,10 @@
     <Content Include="Images\badge-7.png" />
     <Content Include="Images\badge-8.png" />
     <Content Include="Images\badge-9.png" />
+    <Content Include="Images\collection.png" />
     <Content Include="Images\episode-watched.png" />
     <Content Include="Images\heart-love.png" />
+    <Content Include="Images\poster-small.jpg" />
     <Content Include="Images\seen.png" />
     <Content Include="Images\watchlist.png" />
     <Content Include="SplashScreenImage.jpg" />

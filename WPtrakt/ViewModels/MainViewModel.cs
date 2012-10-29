@@ -454,14 +454,15 @@ namespace WPtrakt
                             TraktMovie movie = traktMovie;
                             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                             {
-                                this.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.Ratings.Percentage, NumberOfRatings = movie.Ratings.Votes.ToString(), Type = "Movie" });
-                                NotifyPropertyChanged("TrendingItems");
+                                this.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.MyRatingAdvanced, NumberOfRatings = movie.Ratings.Votes.ToString(), Type = "Movie", InWatchList = movie.InWatchlist });
+                              
                             });
-                            Thread.Sleep(1500);
+                         
                         }
                        
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
+                            NotifyPropertyChanged("TrendingItems");
                             this.LoadingStatusTrending = "Collapsed";
                         });
                     }

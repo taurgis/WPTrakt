@@ -439,8 +439,8 @@ namespace WPtrakt
                         request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
                         request.BeginGetResponse(new AsyncCallback(request_OpenReadMediumCompleted), new object[] { request });
 
-
-                        return null;
+                        BitmapImage tempImage = new BitmapImage(new Uri("Images/poster-small.jpg", UriKind.Relative));
+                        return tempImage;
                     }
                     return _mediumImage;  
                 }
@@ -464,7 +464,7 @@ namespace WPtrakt
 
                 Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", str, 120, 179, 70);
+                    _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", str, 160, 90);
                     NotifyPropertyChanged("MediumImage");
                 }));
             }

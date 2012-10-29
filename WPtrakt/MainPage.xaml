@@ -53,22 +53,23 @@
                   
                 </StackPanel>
             </controls:PanoramaItem>
-
             <controls:PanoramaItem Visibility="{Binding TrendingVisibility}"  Margin="0 -25" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
                 <!--Double line list with image placeholder and text wrapping-->
-                <StackPanel Margin="0 -30">
+                <StackPanel Margin="0 -20">
                     <ListBox Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <toolkit:WrapPanel ItemWidth="160" ItemHeight="250" Name="WrapPanelTrending"/>
+                                <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                         <ListBox.ItemTemplate >
                             <DataTemplate>
-                                <StackPanel Margin="0 5">
-                                    <Image Canvas.ZIndex="3" HorizontalAlignment="Left" Margin="0 15"  Source="Images/seen.png" Width="{Binding WatchedVisible}" Height="23" />
-                                    <Image Canvas.ZIndex="2" delay:LowProfileImageLoader.UriSource="{Binding ImageSourceMedium}" Margin="0 -45 5 5" Width="160" Height="250" Tap="Image_Tap" />
-                                </StackPanel>
+                                <Grid>
+                                    <Image Source="{Binding MediumImage}" Width="160" Height="250" Tap="Image_Tap" VerticalAlignment="Top" />
+                                    <Image Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
+                                    <Image Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="60" Height="60"  Grid.Column="0" Source="Images/episode-watched.png"/>
+                                    <Image Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="30" Height="30"  Grid.Column="0" Source="{Binding RatingImage}"/>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
