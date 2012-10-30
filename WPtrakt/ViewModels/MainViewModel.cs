@@ -12,6 +12,8 @@ using VPtrakt.Controllers;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using System.Windows.Media.Imaging;
+using System.Windows;
 
 
 namespace WPtrakt
@@ -48,16 +50,57 @@ namespace WPtrakt
             }
         }
 
-        public String UserAvatar
+        private BitmapImage _userAvatar;
+        public BitmapImage UserAvatar
         {
             get
             {
-                if (_profile != null)
-                    return _profile.Avatar;
+                if (_userAvatar == null && (_profile != null))
+                {
+                    String fileName = "profile.jpg";
+
+                    if (StorageController.doesFileExist(fileName))
+                    {
+                        _userAvatar = ImageController.getImageFromStorage(fileName);
+                    }
+                    else
+                    {
+                        HttpWebRequest request;
+
+                        request = (HttpWebRequest)WebRequest.Create(new Uri(_profile.Avatar));
+                        request.BeginGetResponse(new AsyncCallback(request_OpenAvatarCompleted), new object[] { request });
+
+                        return null;
+                    }
+                    return _userAvatar;
+                }
                 else
-                    return "";
+                {
+                    return _userAvatar;
+                }
             }
         }
+
+        void request_OpenAvatarCompleted(IAsyncResult r)
+        {
+            object[] param = (object[])r.AsyncState;
+            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+            if (status == System.Net.HttpStatusCode.OK)
+            {
+                Stream str = httpResoponse.GetResponseStream();
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _userAvatar = ImageController.saveImage("profile.jpg", str, 100, 90);
+                    NotifyPropertyChanged("UserAvatar");
+                }));
+            }
+
+        }
+
 
         public String UserName
         {
