@@ -78,13 +78,21 @@ namespace WPtrakt
 
         private void ApplicationBarRefreshButton_Click(object sender, EventArgs e)
         {
-            try
+            if ((MainPanorama.SelectedIndex == 0) || (MainPanorama.SelectedIndex == 2))
             {
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
+                try
+                {
+                    IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
+                }
+                catch (IsolatedStorageException) { }
+                App.ViewModel.Profile = null;
+                App.ViewModel.LoadData();
             }
-            catch (IsolatedStorageException) { }
-            App.ViewModel.Profile = null;
-            App.ViewModel.LoadData();
+            else if (MainPanorama.SelectedIndex == 1)
+            {
+                App.ViewModel.loadTrending();
+
+            }
         }
 
 

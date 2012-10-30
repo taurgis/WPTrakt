@@ -403,6 +403,9 @@ namespace WPtrakt
             if (TrendingEnabled)
             {
                 this.LoadingStatusTrending = "Visible";
+                this.TrendingItems = new ObservableCollection<ListItemViewModel>();
+                NotifyPropertyChanged("TrendingItems");
+                NotifyPropertyChanged("LoadingStatusTrending");
                 HttpWebRequest request;
 
                 request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/movies/trending.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
