@@ -22,31 +22,28 @@ namespace WPtrakt
     {
         public ObservableCollection<ListItemViewModel> TrendingItems { get; private set; }
         public ObservableCollection<ListItemViewModel> HistoryItems { get; private set; }
-        private TraktProfile _profile;
+
         private DateTime firstCall { get; set; }
         public Boolean LoadingTrendingItems { get; set; }
-      
+
         public MainViewModel()
         {
             this.TrendingItems = new ObservableCollection<ListItemViewModel>();
-          
+
         }
 
         #region Getters/Setters
 
-     
-
+        private TraktProfile _profile;
         public TraktProfile Profile
         {
             get
             {
-               return _profile;
+                return _profile;
             }
             set
             {
                 _profile = value;
-                NotifyPropertyChanged("LoadingStatus");
-                NotifyPropertyChanged("MainVisibility");
             }
         }
 
@@ -55,7 +52,7 @@ namespace WPtrakt
         {
             get
             {
-                if (_userAvatar == null && (_profile != null))
+                if (_userAvatar == null && (Profile != null))
                 {
                     String fileName = "profile.jpg";
 
@@ -67,17 +64,24 @@ namespace WPtrakt
                     {
                         HttpWebRequest request;
 
-                        request = (HttpWebRequest)WebRequest.Create(new Uri(_profile.Avatar));
+                        request = (HttpWebRequest)WebRequest.Create(new Uri(Profile.Avatar));
                         request.BeginGetResponse(new AsyncCallback(request_OpenAvatarCompleted), new object[] { request });
 
                         return null;
                     }
+
                     return _userAvatar;
                 }
                 else
                 {
                     return _userAvatar;
                 }
+            }
+
+            set
+            {
+                _userAvatar = value;
+                NotifyPropertyChanged("UserAvatar");
             }
         }
 
@@ -94,20 +98,18 @@ namespace WPtrakt
 
                 Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    _userAvatar = ImageController.saveImage("profile.jpg", str, 100, 90);
-                    NotifyPropertyChanged("UserAvatar");
+                    this.UserAvatar = ImageController.saveImage("profile.jpg", str, 100, 90);
                 }));
             }
 
         }
 
-
         public String UserName
         {
             get
             {
-                if (_profile != null)
-                    return _profile.Username;
+                if (Profile != null)
+                    return Profile.Username;
                 else
                     return "";
             }
@@ -117,33 +119,10 @@ namespace WPtrakt
         {
             get
             {
-                if (_profile != null)
-                    return (!String.IsNullOrEmpty(_profile.Location) ? _profile.Location : "Omicron Persei 8") + ((!String.IsNullOrEmpty(_profile.About) ? ", " + _profile.About : ""));
+                if (Profile != null)
+                    return (!String.IsNullOrEmpty(Profile.Location) ? Profile.Location : "Omicron Persei 8") + ((!String.IsNullOrEmpty(Profile.About) ? ", " + Profile.About : ""));
                 else
                     return "";
-            }
-        }
-
-        public bool TrendingEnabled
-        {
-            get
-            {
-                return AppUser.UserIsHighEndDevice();
-            }
-        }
-
-        public String TrendingVisibility
-        {
-            get
-            {
-                if (TrendingEnabled)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
             }
         }
 
@@ -151,7 +130,7 @@ namespace WPtrakt
         {
             get
             {
-                if (_profile != null)
+                if (Profile != null)
                 {
                     return "Visible";
                 }
@@ -166,7 +145,7 @@ namespace WPtrakt
         {
             get
             {
-                if (_profile == null)
+                if (Profile == null)
                 {
                     return "Visible";
                 }
@@ -195,7 +174,7 @@ namespace WPtrakt
         {
             get
             {
-                if (_profile == null)
+                if (Profile == null)
                 {
                     return false;
                 }
@@ -214,24 +193,25 @@ namespace WPtrakt
 
         #endregion
 
-        public void LoadData()
-        {
-            CallValidationService();
-    
-            this.IsDataLoaded = true;
-        }
-
         #region Profile
 
-        DispatcherTimer tmr;
+        DispatcherTimer userValidationTimer;
+
+        public void LoadData()
+        {
+            this.Profile = null;
+            this.IsDataLoaded = true;
+
+            CallValidationService();
+        }
 
         private void CallValidationService()
         {
             firstCall = DateTime.Now;
-            tmr = new DispatcherTimer();
-            tmr.Interval = TimeSpan.FromSeconds(2);
-            tmr.Tick += OnTimerTick;
-            tmr.Start();
+            userValidationTimer = new DispatcherTimer();
+            userValidationTimer.Interval = TimeSpan.FromSeconds(2);
+            userValidationTimer.Tick += OnTimerTick;
+            userValidationTimer.Start();
 
             HttpWebRequest request;
 
@@ -260,33 +240,26 @@ namespace WPtrakt
             {
                 HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
                 HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                HttpStatusCode status = httpResoponse.StatusCode;
+
                 if (status == System.Net.HttpStatusCode.OK)
                 {
                     System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                     {
-                       tmr.Stop();
-                    
+                        userValidationTimer.Stop();
+
                         LoadProfile();
                     });
                 }
-
             }
             catch (WebException)
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    var toast = new ToastPrompt()
-                    {
-                        Title = "User incorrect!",
-                        TextOrientation = System.Windows.Controls.Orientation.Vertical,
+                    ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
+                    userValidationTimer.Stop();
 
-                        Message = "Login data incorrect, or server connection problems.",
-                    };
-
-                    toast.Show();
-                    tmr.Stop();
-                    _profile = new TraktProfile();
+                    Profile = new TraktProfile();
                     NotifyPropertyChanged("LoadingStatus");
                 });
             }
@@ -298,15 +271,8 @@ namespace WPtrakt
 
             if (seconds > 10)
             {
-                var toast = new ToastPrompt
-                {
-                    Title = "Connection",
-                    TextOrientation = System.Windows.Controls.Orientation.Vertical,
-                    Message = "Slow connection to trakt!",
-                };
-
-                toast.Show();
-                tmr.Stop();
+                ToastNotification.ShowToast("Connection", "Slow connection to trakt!");
+                userValidationTimer.Stop();
             }
         }
 
@@ -330,9 +296,9 @@ namespace WPtrakt
 
         void profileworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep(300);
-            _profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
-            if ((DateTime.Now - _profile.DownloadTime).Days < 1)
+            Profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
+            //Cache the profile for 4 hours, the history is prone to quick change. Though 4 hours is enough to catch server problems.
+            if ((DateTime.Now - Profile.DownloadTime).Hours < 4)
             {
                 loadHistory();
 
@@ -385,12 +351,14 @@ namespace WPtrakt
                     using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                     {
                         var ser = new DataContractJsonSerializer(typeof(TraktProfile));
-                        _profile = (TraktProfile)ser.ReadObject(ms);
+                       
+                        this.Profile = (TraktProfile)ser.ReadObject(ms);
 
-                        StorageController.saveObject(_profile, typeof(TraktProfile));
+                        StorageController.saveObject(this.Profile, typeof(TraktProfile));
+                        loadHistory();
+
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            loadHistory();
+                        {                     
                             NotifyPropertyChanged("HistoryItems");
                             RefreshProfile();
                         });
@@ -400,7 +368,7 @@ namespace WPtrakt
             }
             catch (WebException)
             {
-                _profile = new TraktProfile();
+                Profile = new TraktProfile();
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
                     NotifyPropertyChanged("MainVisibility");
@@ -425,12 +393,12 @@ namespace WPtrakt
         {
             this.HistoryItems = new ObservableCollection<ListItemViewModel>();
 
-            foreach (TraktWatched watched in _profile.Watched)
+            foreach (TraktWatched watched in Profile.Watched)
             {
                 if (watched.Episode != null)
-                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Episode.Title, ImageSource = watched.Episode.Images.Screen, Imdb = watched.Show.imdb_id + watched.Episode.Season + watched.Episode.Number, SubItemText = "Season " + watched.Episode.Season + ", Episode " + watched.Episode.Number, Episode = watched.Episode.Number, Season = watched.Episode.Season, Tvdb = watched.Show.tvdb_id, Type="episode", WatchedTime = Int32.Parse(watched.Watched) });
-                else if( watched.Movie != null)
-                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Movie.Title, ImageSource = watched.Movie.Images.Poster, Imdb = watched.Movie.imdb_id, SubItemText =  "Runtime: " + watched.Movie.Runtime + " mins\r\n" + watched.Movie.year.ToString() , Type="movie" });
+                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Episode.Title, ImageSource = watched.Episode.Images.Screen, Imdb = watched.Show.imdb_id + watched.Episode.Season + watched.Episode.Number, SubItemText = "Season " + watched.Episode.Season + ", Episode " + watched.Episode.Number, Episode = watched.Episode.Number, Season = watched.Episode.Season, Tvdb = watched.Show.tvdb_id, Type = "episode", WatchedTime = Int32.Parse(watched.Watched) });
+                else if (watched.Movie != null)
+                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Movie.Title, ImageSource = watched.Movie.Images.Poster, Imdb = watched.Movie.imdb_id, SubItemText = "Runtime: " + watched.Movie.Runtime + " mins\r\n" + watched.Movie.year.ToString(), Type = "movie" });
             }
 
             if (this.HistoryItems.Count == 0)
@@ -443,12 +411,15 @@ namespace WPtrakt
 
         public void loadTrending()
         {
-            if (TrendingEnabled)
+            if (!LoadingTrendingItems)
             {
+                this.LoadingTrendingItems = true;
                 this.LoadingStatusTrending = "Visible";
                 this.TrendingItems = new ObservableCollection<ListItemViewModel>();
+
                 NotifyPropertyChanged("TrendingItems");
                 NotifyPropertyChanged("LoadingStatusTrending");
+
                 HttpWebRequest request;
 
                 request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/movies/trending.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
@@ -494,10 +465,12 @@ namespace WPtrakt
                                 break;
 
                             TraktMovie movie = traktMovie;
-                       
+
                             this.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.MyRatingAdvanced, NumberOfRatings = movie.Ratings.Votes.ToString(), Type = "Movie", InWatchList = movie.InWatchlist });
                         }
-                       
+
+                        this.LoadingTrendingItems = false;
+
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
                             NotifyPropertyChanged("TrendingItems");
@@ -511,7 +484,6 @@ namespace WPtrakt
                 //Do nothing yet
             }
         }
-
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;

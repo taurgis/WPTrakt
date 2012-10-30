@@ -14,30 +14,20 @@
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
     <!--LayoutRoot is the root grid where all page content is placed-->
-    <phone:PhoneApplicationPage.FontFamily>
-        <StaticResource ResourceKey="PhoneFontFamilyNormal"/>
-    </phone:PhoneApplicationPage.FontFamily>
-    <phone:PhoneApplicationPage.FontSize>
-        <StaticResource ResourceKey="PhoneFontSizeNormal"/>
-    </phone:PhoneApplicationPage.FontSize>
-    <phone:PhoneApplicationPage.Foreground>
-        <StaticResource ResourceKey="PhoneForegroundBrush"/>
-    </phone:PhoneApplicationPage.Foreground>
+  
     <Grid x:Name="LayoutRoot" >
-        <!--Panorama control-->
         <controls:Panorama  Title="WPtrakt" IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
             <controls:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
-                <!--Double line list with text wrapping-->
                 <StackPanel HorizontalAlignment="Left">
-                    <ProgressBar Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
-                    <TextBlock x:Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
-                    <StackPanel Margin="0,0,0,17"  Width="432" Height="150" Orientation="Horizontal" HorizontalAlignment="Center">
+                     <StackPanel Margin="0,0,0,17"  Width="432" Height="150" Orientation="Horizontal" HorizontalAlignment="Center">
                         <Image Width="138" Height="138" Margin="20 5 10 5" Source="{Binding UserAvatar}"/>
                         <StackPanel Margin="0,5,0,17"  Width="260" Height="138" Orientation="Vertical" HorizontalAlignment="Center">
                             <TextBlock Text="{Binding UserName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Height="57" />
                             <TextBlock Text="{Binding UserAbout}" TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Height="77" />
                         </StackPanel>
                     </StackPanel>
+                    <ProgressBar Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
+                    <TextBlock x:Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
                     <StackPanel Visibility="{Binding MainVisibility}" Tap="MyShows_Tap" Margin="0,0,0,17" Width="426" Height="80">
                         <TextBlock Text="My Shows" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Height="57" />
                         <TextBlock Text="A list of shows you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
@@ -46,14 +36,13 @@
                         <TextBlock Text="My Movies" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
                         <TextBlock Text="A list of movies you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
                     </StackPanel>
-                    <StackPanel Visibility="{Binding MainVisibility}" Tap="StackPanel_Tap_1" Margin="0,0,0,17" Width="426" Height="80">
+                    <StackPanel Visibility="{Binding MainVisibility}" Tap="Search_Tap" Margin="0,0,0,17" Width="426" Height="80">
                         <TextBlock Text="Search" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
                         <TextBlock Text="Search for movies, shows or episodes." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
                     </StackPanel>
-                  
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Visibility="{Binding TrendingVisibility}"  Margin="0 -25" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
+            <controls:PanoramaItem  Margin="0 -25" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
                 <!--Double line list with image placeholder and text wrapping-->
                 <StackPanel Margin="0 -20">
                     <ListBox Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700">
@@ -65,7 +54,7 @@
                         <ListBox.ItemTemplate >
                             <DataTemplate>
                                 <Grid>
-                                    <Image Source="{Binding MediumImage}" Width="160" Height="250" Tap="Image_Tap" VerticalAlignment="Top" />
+                                    <Image Source="{Binding MediumImage}" Width="160" Height="250" Tap="TrendingImage_Tap" VerticalAlignment="Top" />
                                     <Image Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
                                     <Image Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="60" Height="60"  Grid.Column="0" Source="Images/episode-watched.png"/>
                                     <Image Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="30" Height="30"  Grid.Column="0" Source="{Binding RatingImage}"/>
@@ -81,7 +70,7 @@
                 <ListBox Margin="0 -25" Height="520" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" VerticalAlignment="Top" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Tap="StackPanel_Tap">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Tap="HistoryListItem_Tap">
                                 <Image Source="{Binding ScreenImage}" Width="150"/>
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock TextWrapping="Wrap"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />

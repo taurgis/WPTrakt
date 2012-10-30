@@ -13,6 +13,14 @@ namespace WPtrakt.Controllers
             return IsolatedStorageFile.GetUserStoreForApplication().FileExists(filename);
         }
 
+        public static void DeleteFile(String file)
+        {
+            try
+            {
+            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(file);
+            }
+            catch (IsolatedStorageException) { }
+        }
 
         public static TraktObject saveObject(TraktObject traktObject, Type type)
         {
