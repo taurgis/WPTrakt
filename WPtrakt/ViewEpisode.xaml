@@ -5,22 +5,14 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
-    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}"
-    Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" OrientationChanged="PhoneApplicationPage_OrientationChanged">
-
-    <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <Grid.Background>
             <ImageBrush  Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill"  />
         </Grid.Background>
         <controls:Panorama  Title="{Binding Name}" Name="EpisodePanorama" SelectionChanged="EpisodePanorama_SelectionChanged">
-            <!--Panorama item one-->
             <controls:PanoramaItem Header="Overview" Margin="0, -25">
                 <Grid Margin="0 -30">
                     <Grid.ColumnDefinitions>
@@ -35,8 +27,8 @@
                                     <Image VerticalAlignment="Bottom" Source="{Binding ScreenImage}" Margin="15" Height="246" Width="436"  />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="Season:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                                <TextBlock Text="{Binding Season}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
+                                    <TextBlock Text="Season:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
+                                    <TextBlock Text="{Binding Season}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Episode:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
@@ -50,7 +42,6 @@
                                     <TextBlock Text="Rating:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
                                     <TextBlock Text="{Binding RatingString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
                                 </StackPanel>
-
                                 <TextBlock Margin="10" Text="{Binding Overview}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" />
                             </StackPanel>
                         </ListBoxItem>
@@ -63,7 +54,6 @@
                     </ListBox>
                 </Grid>
             </controls:PanoramaItem>
-
             <controls:PanoramaItem Header="Shouts" Margin="0, -25">
                 <Grid>
                     <ListBox VerticalAlignment="Top" Margin="0,-30,15,0" ItemsSource="{Binding ShoutItems}" Name="ShoutList" Height="420" Width="405">
@@ -90,7 +80,6 @@
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
-
     <phone:PhoneApplicationPage.ApplicationBar >
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
         </shell:ApplicationBar>

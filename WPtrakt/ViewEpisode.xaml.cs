@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
+using System;
 using System.IO.IsolatedStorage;
 using System.Net;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
 using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using Microsoft.Phone.Tasks;
 using VPtrakt.Controllers;
 using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
@@ -60,21 +60,6 @@ namespace WPtrakt
             {
                 InitAppBar();
             }
-        }
-
-        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            App.EpisodeViewModel = null;
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandler = delegate { };
-            completedHandler = delegate
-            {
-                storyboard.Completed -= completedHandler;
-                storyboard.Stop();
-            };
-            storyboard.Completed += completedHandler;
-            storyboard.Begin();
         }
 
         #region Taps
@@ -233,7 +218,6 @@ namespace WPtrakt
             IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number  + ".json");
            
             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + App.EpisodeViewModel.Imdb + "&year=" + App.EpisodeViewModel.ShowYear + "&title=" + App.EpisodeViewModel.ShowName + "&season=" + App.EpisodeViewModel.Season + "&episode=" + App.EpisodeViewModel.Number, UriKind.Relative));
-
         }
 
         private void CreateAddToWatchlist(ApplicationBar appBar)
@@ -472,6 +456,9 @@ namespace WPtrakt
             EpisodePanorama.DefaultItem = EpisodePanorama.Items[0];
         }
 
-
+        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Animation.FadeOut(LayoutRoot);
+        }
     }
 }

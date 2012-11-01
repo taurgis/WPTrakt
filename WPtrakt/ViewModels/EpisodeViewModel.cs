@@ -453,12 +453,11 @@ namespace WPtrakt
 
         public void LoadData(String tvdb, String season, String episode)
         {
-            
             this._tvdb = tvdb;
             this._season = season;
             this._number = episode;
-
             String fileName = TraktWatched.getFolderStatic() + "/" + tvdb + season + episode + ".json";
+           
             if (StorageController.doesFileExist(fileName))
             {
                 BackgroundWorker worker = new BackgroundWorker();
@@ -472,8 +471,6 @@ namespace WPtrakt
             {
                 CallEpisodeService(tvdb, season, episode);
             }
-
-   
         }
 
         void episodeworker_DoWork(object sender, DoWorkEventArgs e)
@@ -494,7 +491,6 @@ namespace WPtrakt
                 cacheLength = 7;
             else if (daysSinceRelease < 1)
                 cacheLength = 0;
-
 
             if ((DateTime.Now - episodeCache.DownloadTime).Days < cacheLength)
             {
