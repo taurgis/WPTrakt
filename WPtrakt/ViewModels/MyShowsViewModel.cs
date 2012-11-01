@@ -20,7 +20,9 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> ShowItems { get; private set; }
         public ObservableCollection<CalendarListItemViewModel> CalendarItems { get; private set; }
         public ObservableCollection<ListItemViewModel> SuggestItems { get; private set; }
-        public Boolean LoadingSuggestItems { get; set; }
+        private Boolean LoadingSuggestItems { get; set; }
+        private Boolean LoadingCalendar { get; set; }
+        private Boolean LoadingMyShows { get; set; }
         private BackgroundWorker worker = new BackgroundWorker();
 
         public MyShowsViewModel()
@@ -112,24 +114,28 @@ namespace WPtrakt
 
         public void LoadData()
         {
-            this.ShowItems = new ObservableCollection<ListItemViewModel>();
-            RefreshMyShowsView();
-            String fileName = "myshows.json";
-            if (StorageController.doesFileExist(fileName))
+            if (!this.LoadingMyShows)
             {
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(myShowsworker_DoWork);
+                this.LoadingMyShows = true;
+                this.ShowItems = new ObservableCollection<ListItemViewModel>();
+                RefreshMyShowsView();
+                String fileName = "myshows.json";
+                if (StorageController.doesFileExist(fileName))
+                {
+                    BackgroundWorker worker = new BackgroundWorker();
+                    worker.WorkerReportsProgress = false;
+                    worker.WorkerSupportsCancellation = false;
+                    worker.DoWork += new DoWorkEventHandler(myShowsworker_DoWork);
 
-                worker.RunWorkerAsync();
-            }
-            else
-            {
-                CallMyShowService();
-            }
+                    worker.RunWorkerAsync();
+                }
+                else
+                {
+                    CallMyShowService();
+                }
 
-            this.IsDataLoaded = true;
+                this.IsDataLoaded = true;
+            }
         }
 
         void myShowsworker_DoWork(object sender, DoWorkEventArgs e)
@@ -152,6 +158,7 @@ namespace WPtrakt
                     tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
                 }
 
+                this.LoadingMyShows = false;
               
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
@@ -218,6 +225,7 @@ namespace WPtrakt
                             tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
                         }
 
+                        this.LoadingMyShows = false;
                         this.ShowItems = tempItems;
 
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -240,13 +248,18 @@ namespace WPtrakt
 
         public void LoadCalendarData()
         {
-            HttpWebRequest request;
+            if (!this.LoadingCalendar)
+            {
+                this.LoadingCalendar = true;
+                this.CalendarItems = new ObservableCollection<CalendarListItemViewModel>();
+                NotifyPropertyChanged("CalendarItems");
+                NotifyPropertyChanged("LoadingStatusCalendar");
+                HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/calendar/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"));
-            request.Method = "POST";
-            request.BeginGetRequestStream(new AsyncCallback(GetCalendarRequestStreamCallback), request);
-
-            this.IsDataLoaded = true;
+                request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/calendar/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"));
+                request.Method = "POST";
+                request.BeginGetRequestStream(new AsyncCallback(GetCalendarRequestStreamCallback), request);
+            }
         }
 
         void GetCalendarRequestStreamCallback(IAsyncResult asynchronousResult)
@@ -299,7 +312,7 @@ namespace WPtrakt
                         }
 
                         this.CalendarItems = tempItems;
-
+                        this.LoadingCalendar = false;
 
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
@@ -329,15 +342,19 @@ namespace WPtrakt
 
         public void LoadSuggestData()
         {
-            this.SuggestItems = new ObservableCollection<ListItemViewModel>();
-            NotifyPropertyChanged("SuggestItems");
-            NotifyPropertyChanged("LoadingStatusSuggestions");
+            if (!this.LoadingSuggestItems)
+            {
+                this.LoadingSuggestItems = true;
+                this.SuggestItems = new ObservableCollection<ListItemViewModel>();
+                NotifyPropertyChanged("SuggestItems");
+                NotifyPropertyChanged("LoadingStatusSuggestions");
 
-            HttpWebRequest request;
+                HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/shows/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
-            request.Method = "POST";
-            request.BeginGetRequestStream(new AsyncCallback(GetSuggestRequestStreamCallback), request);
+                request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/shows/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
+                request.Method = "POST";
+                request.BeginGetRequestStream(new AsyncCallback(GetSuggestRequestStreamCallback), request);
+            }
         }
 
         void GetSuggestRequestStreamCallback(IAsyncResult asynchronousResult)

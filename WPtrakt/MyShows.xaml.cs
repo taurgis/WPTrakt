@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using Clarity.Phone.Controls;
 using Microsoft.Phone.Controls;
+using WPtrakt.Controllers;
 
 namespace WPtrakt
 {
@@ -26,101 +27,32 @@ namespace WPtrakt
             }
         }
 
-        private void Panorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (this.MyShowsPanorama.SelectedIndex == 1)
-            {
-                if (App.MyShowsViewModel.CalendarItems.Count == 0)
-                {
-                    App.MyShowsViewModel.LoadCalendarData();
-                }
-            }
-            else if (this.MyShowsPanorama.SelectedIndex == 2)
-            {
-                if (App.MyShowsViewModel.SuggestItems.Count == 0)
-                {
-                    if (!App.MyShowsViewModel.LoadingSuggestItems)
-                    {
-                        App.MyShowsViewModel.LoadingSuggestItems = true;
-                        App.MyShowsViewModel.LoadSuggestData();
-                    }
-                }
-            }
-        }
-
         #region Taps
 
         private void Canvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandlerMainPage = delegate { };
-            completedHandlerMainPage = delegate
-            {
-                Canvas senderCanvas = (Canvas)sender;
-                ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
-                NavigationService.Navigate(new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
-                storyboard.Completed -= completedHandlerMainPage;
-                storyboard.Stop();
-                this.Opacity = 0;
-            };
-            storyboard.Completed += completedHandlerMainPage;
-            storyboard.Begin();
+            ListItemViewModel model = (ListItemViewModel)((Canvas)sender).DataContext;
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
         }
 
         private void StackPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandlerMainPage = delegate { };
-            completedHandlerMainPage = delegate
-            {
-                StackPanel senderPanel = (StackPanel)sender;
-                ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
-                NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-                storyboard.Completed -= completedHandlerMainPage;
-                storyboard.Stop();
-                this.Opacity = 0;
-            };
-            storyboard.Completed += completedHandlerMainPage;
-            storyboard.Begin();
-        
+            ListItemViewModel model = (ListItemViewModel)((StackPanel)sender).DataContext;
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
         }
 
 
         private void Image_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandlerMainPage = delegate { };
-            completedHandlerMainPage = delegate
-            {
-                Image senderCanvas = (Image)sender;
-                ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
-                NavigationService.Navigate(new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
-                storyboard.Completed -= completedHandlerMainPage;
-                storyboard.Stop();
-                this.Opacity = 0;
-            };
-            storyboard.Completed += completedHandlerMainPage;
-            storyboard.Begin();
-
+            ListItemViewModel model = (ListItemViewModel)((Image)sender).DataContext;
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
         }
 
         #endregion
 
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandler = delegate { };
-            completedHandler = delegate
-            {
-                storyboard.Completed -= completedHandler;
-                storyboard.Stop();
-            };
-            storyboard.Completed += completedHandler;
-            storyboard.Begin();
+            Animation.FadeOut(LayoutRoot);
         }
 
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
@@ -136,14 +68,31 @@ namespace WPtrakt
 
                 App.MyShowsViewModel.LoadData();
             }
+            else if (this.MyShowsPanorama.SelectedIndex == 1)
+            {
+                App.MyShowsViewModel.LoadCalendarData();
+            }
             else if (this.MyShowsPanorama.SelectedIndex == 2)
             {
+                App.MyShowsViewModel.LoadSuggestData();
+            }
+        }
 
-                if (!App.MyShowsViewModel.LoadingSuggestItems)
+        private void Panorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.MyShowsPanorama.SelectedIndex == 1)
+            {
+                if (App.MyShowsViewModel.CalendarItems.Count == 0)
                 {
-                    App.MyShowsViewModel.LoadingSuggestItems = true;
+                    App.MyShowsViewModel.LoadCalendarData();
+                }
+            }
+            else if (this.MyShowsPanorama.SelectedIndex == 2)
+            {
+                if (App.MyShowsViewModel.SuggestItems.Count == 0)
+                {
                     App.MyShowsViewModel.LoadSuggestData();
-                } 
+                }
             }
         }
 

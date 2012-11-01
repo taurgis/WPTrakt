@@ -5,20 +5,13 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
     xmlns:local="clr-namespace:WPtrakt"
-    xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
-    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}"
-    Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False"  BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
-    <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <controls:Panorama Name="MyShowsPanorama" Title="My Shows" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
               <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
@@ -93,7 +86,6 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                     <ProgressBar VerticalAlignment="Bottom"  Visibility="{Binding LoadingStatusSuggestions}" Name="progressBarSuggest" IsIndeterminate="True" />
-
                 </StackPanel>
             </controls:PanoramaItem>
         </controls:Panorama>

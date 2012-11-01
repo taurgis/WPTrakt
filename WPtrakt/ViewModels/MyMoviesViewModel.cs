@@ -284,7 +284,6 @@ namespace WPtrakt
 
         #endregion
 
-
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
         {
