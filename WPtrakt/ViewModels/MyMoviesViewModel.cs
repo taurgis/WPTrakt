@@ -7,7 +7,6 @@ using System.IO.IsolatedStorage;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading;
 using VPtrakt.Controllers;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
@@ -19,8 +18,6 @@ namespace WPtrakt
     {
         public ObservableCollection<ListItemViewModel> MovieItems { get; private set; }
         public ObservableCollection<ListItemViewModel> SuggestItems { get; private set; }
-        private List<TraktMovie> suggestedMovies;
-        private BackgroundWorker worker;
         private Boolean LoadingSuggestItems { get; set; }
         private Boolean LoadingMovies { get; set; }
 
@@ -28,7 +25,7 @@ namespace WPtrakt
         {
             this.MovieItems = new ObservableCollection<ListItemViewModel>();
             this.SuggestItems = new ObservableCollection<ListItemViewModel>();
-            worker = new BackgroundWorker(); 
+
         }
 
         #region Getters/Setters
@@ -59,29 +56,6 @@ namespace WPtrakt
             get
             {
                 if (SuggestItems.Count == 0)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        public bool SuggestionsEnabled
-        {
-            get
-            {
-                return AppUser.UserIsHighEndDevice();
-            }
-        }
-
-        public String SuggestionsVisibility
-        {
-            get
-            {
-                if (SuggestionsEnabled)
                 {
                     return "Visible";
                 }
@@ -128,10 +102,9 @@ namespace WPtrakt
             String fileName = "mymovies.json";
             if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
             {
-
                 TraktMovie[] myMovies = (TraktMovie[])StorageController.LoadObjectFromMain(fileName, typeof(TraktMovie[]));
-
                 ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+
                 foreach (TraktMovie movie in myMovies)
                 {
                     tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
@@ -282,7 +255,6 @@ namespace WPtrakt
                         var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
                         TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
                         int counter = 1;
-                        suggestedMovies = new List<TraktMovie>();
                         this.SuggestItems = new ObservableCollection<ListItemViewModel>();
 
                         foreach (TraktMovie movie in obj)
@@ -312,11 +284,6 @@ namespace WPtrakt
 
         #endregion
 
-        public void ClearItems()
-        {
-            this.MovieItems.Clear();
-            this.IsDataLoaded = false;
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
