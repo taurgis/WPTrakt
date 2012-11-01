@@ -43,6 +43,7 @@ namespace WPtrakt
             this.ShowItems = null;
             NotifyPropertyChanged("MovieItems");
             NotifyPropertyChanged("ShowItems");
+
             var movieClient = new WebClient();
             movieClient.Encoding = Encoding.GetEncoding("UTF-8");
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);

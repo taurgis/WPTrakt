@@ -22,11 +22,11 @@ namespace WPtrakt
         public Settings()
         {
             InitializeComponent();
-
             DataContext = App.SettingsViewModel;
            
             this.Loaded += new RoutedEventHandler(SettingsPage_Loaded);
             var taskName = "WPtraktLiveTile";
+
             var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
             if (oldTask != null)
             {
@@ -51,21 +51,20 @@ namespace WPtrakt
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication();
+            long usage = 0;
 
-                IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication();
-                long usage = 0;
+            foreach (String file in myIsolatedStorage.GetFileNames())
+            {
+                IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
+                usage += stream.Length;
+                stream.Close();
+            }
 
-                foreach (String file in myIsolatedStorage.GetFileNames())
-                {
-                    IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
-                    usage += stream.Length;
-                    stream.Close();
-                }
-
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    App.SettingsViewModel.Usage = (((usage / 1024))).ToString() + " kB";
-                });
+            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                App.SettingsViewModel.Usage = (((usage / 1024))).ToString() + " kB";
+            });
         }
 
         private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
@@ -94,8 +93,7 @@ namespace WPtrakt
                     }
                 }
             }
-      
-
+     
             App.SettingsViewModel.Usage = "Cleared";
             App.SettingsViewModel.NotifyPropertyChanged("Usage");
         }
@@ -107,14 +105,11 @@ namespace WPtrakt
                 var taskName = "WPtraktLiveTile";
                 PeriodicTask task = new PeriodicTask(taskName);
                 task.Description = "This task updates the WPtrakt live tile.";
-                //at this point there are no tasks in background tasks of phone settings
                 try
                 {
                     ScheduledActionService.Add(task);
                 }
                 catch (InvalidOperationException) { }
-                //at this point, there are two tasks with app title, same description
-                //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
             }
             else
             {

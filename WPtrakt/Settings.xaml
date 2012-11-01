@@ -4,24 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
-   
-    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}"
-    Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
-    shell:SystemTray.IsVisible="True">
-
-    <!--LayoutRoot is the root grid where all page content is placed-->
+    shell:SystemTray.IsVisible="False">
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <controls:Panorama Margin="0,12,0,0" Name="SettingsPanorama">   
-            <!--Panorama item one-->
-            <controls:PanoramaItem Header="Login" Width="480">
-                <!--TitlePanel contains the name of the application and page title-->
+           <controls:PanoramaItem Header="Login" Width="480">
                 <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
                     <ListBoxItem>
                         <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" />
@@ -83,13 +73,12 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="Version:" />
-                        <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="1.2" />
+                        <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="1.3" />
                     </StackPanel>
                     <StackPanel Orientation="Vertical" Margin="0 50">
                         <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="Support:" />
                         <TextBlock Foreground="CadetBlue" TextDecorations="Underline" Style="{StaticResource PhoneTextLargeStyle}" Text="wptrakt@outlook.com" Tap="TextBlock_Tap"/>
                     </StackPanel>
-
                 </StackPanel>
             </controls:PanoramaItem>
         </controls:Panorama>
