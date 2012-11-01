@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.IO.IsolatedStorage;
+using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WPtrakt.Model;
+using System.Linq;
 
 namespace WPtrakt.Controllers
 {
@@ -19,7 +22,6 @@ namespace WPtrakt.Controllers
 
                 return imageController;
             }
-
         }
 
         public static void copyImageToShellContent(String filename, String uniquekey)
@@ -75,7 +77,11 @@ namespace WPtrakt.Controllers
                 bi.SetSource(pic);
 
                 if (!AppUser.UserIsHighEndDevice())
-                    return bi;
+                {
+                    BitmapImage lowEndDeviceImage = resizeImage(bi, pic, width, height);
+                    pic.Close();
+                    return lowEndDeviceImage;
+                }
 
                 try
                 {
@@ -97,10 +103,45 @@ namespace WPtrakt.Controllers
                 }
                 catch (IsolatedStorageException) { 
                 }
-
+                pic.Close();
                return bi;
             }
         }
+
+        private static BitmapImage resizeImage(BitmapImage bi, Stream stream, int width, int height)
+        {
+            Image resizedImage = new Image();
+            WriteableBitmap bitmap = new WriteableBitmap(resizedImage, null);
+            BitmapImage bmp = new BitmapImage();
+            bitmap.SetSource(stream);
+
+            double newHeight = bitmap.PixelHeight * ((double)width / bitmap.PixelWidth);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                bitmap.SaveJpeg(ms, width, height, 0, 80);
+                bmp.SetSource(ms);
+                ms.Close();
+            }
+            return bmp;
+        }
+
+        private static BitmapImage resizeImage(BitmapImage bi, Stream stream, int width)
+        {
+            Image resizedImage = new Image();
+            WriteableBitmap bitmap = new WriteableBitmap(resizedImage, null);
+            BitmapImage bmp = new BitmapImage();
+            bitmap.SetSource(stream);
+            using (MemoryStream ms = new MemoryStream())
+            {
+                double newHeight = bitmap.PixelHeight * ((double)width / bitmap.PixelWidth);
+                bitmap.SaveJpeg(ms, width, (int)newHeight, 0, 80);
+                bmp.SetSource(ms);
+
+            }
+            return bmp;
+        }
+
+     
 
         public static BitmapImage saveImage(String fileName, Stream pic, Int16 width, Int16 quality)
         {
@@ -110,7 +151,7 @@ namespace WPtrakt.Controllers
                 bi.SetSource(pic);
 
                 if (!AppUser.UserIsHighEndDevice())
-                    return bi;
+                    return resizeImage(bi, pic, width);
 
                 try
                 {

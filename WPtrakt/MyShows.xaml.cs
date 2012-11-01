@@ -57,7 +57,7 @@ namespace WPtrakt
 
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
         {
-            this.Opacity = 1;
+            LayoutRoot.Opacity = 1;
         }
 
         private void ApplicationBarIconButton_Click(object sender, EventArgs e)
