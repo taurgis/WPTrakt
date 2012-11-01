@@ -23,7 +23,6 @@ namespace WPtrakt
         private Boolean LoadingSuggestItems { get; set; }
         private Boolean LoadingCalendar { get; set; }
         private Boolean LoadingMyShows { get; set; }
-        private BackgroundWorker worker = new BackgroundWorker();
 
         public MyShowsViewModel()
         {
@@ -38,29 +37,6 @@ namespace WPtrakt
         {
             get;
             private set;
-        }
-
-        public bool SuggestionsEnabled
-        {
-            get
-            {
-                return AppUser.UserIsHighEndDevice();
-            }
-        }
-
-        public String SuggestionsVisibility
-        {
-            get
-            {
-                if (SuggestionsEnabled)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
         }
 
         public String LoadingStatusShows
