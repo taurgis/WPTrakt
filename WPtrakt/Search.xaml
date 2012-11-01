@@ -5,23 +5,14 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
-    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}"
-    Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="False">
-
-    <!--LayoutRoot contains the root grid where all other page content is placed-->
-    <Grid x:Name="LayoutRoot">
+    shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded">
+   <Grid x:Name="LayoutRoot">
         <TextBox Text="Search..." Height="75"  VerticalAlignment="Top" Name="SearchText" GotFocus="SearchText_GotFocus" LostFocus="SearchText_LostFocus" KeyDown="SearchText_KeyDown" />
         <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatus}" Name="progressBarSuggest" IsIndeterminate="True" />
         <controls:Panorama Margin="0,66,0,50">
-            
-            <!--Panorama item one-->
             <controls:PanoramaItem Header="Movies">
                 <delay:DeferredLoadListBox ItemsSource="{Binding MovieItems}"  Height="Auto" Margin="0 -30">
                     <delay:DeferredLoadListBox.ItemTemplate>
@@ -49,11 +40,8 @@
                             <StackPanel/>
                         </ItemsPanelTemplate>
                     </delay:DeferredLoadListBox.ItemsPanel>
-
                 </delay:DeferredLoadListBox>
             </controls:PanoramaItem>
-
-            <!--Panorama item two-->
             <controls:PanoramaItem Header="Shows">
                 <delay:DeferredLoadListBox ItemsSource="{Binding ShowItems}" Height="Auto" Margin="0 -30">
                     <delay:DeferredLoadListBox.ItemTemplate>
@@ -81,12 +69,8 @@
                             <StackPanel/>
                         </ItemsPanelTemplate>
                     </delay:DeferredLoadListBox.ItemsPanel>
-
                 </delay:DeferredLoadListBox>
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
-
-    <!--Panorama-based applications should not show an ApplicationBar-->
-
 </phone:PhoneApplicationPage>

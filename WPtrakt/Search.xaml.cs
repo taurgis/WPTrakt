@@ -1,25 +1,19 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Phone.Controls;
 using WPtrakt;
+using WPtrakt.Controllers;
 
 namespace VPtrakt
 {
     public partial class Search : PhoneApplicationPage
     {
-
         public Search()
         {
             InitializeComponent();
             DataContext = App.SearchViewModel;
-            this.Loaded += new RoutedEventHandler(SearchPage_Loaded);
-        }
-
-        private void SearchPage_Loaded(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void SearchText_GotFocus(object sender, RoutedEventArgs e)
@@ -48,16 +42,19 @@ namespace VPtrakt
 
         private void MovieCanvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Canvas senderCanvas = (Canvas)sender;
-            ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
-            NavigationService.Navigate(new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+            ListItemViewModel model = (ListItemViewModel)((Canvas)sender).DataContext;
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
         }
 
         private void ShowCanvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Canvas senderCanvas = (Canvas)sender;
-            ListItemViewModel model = (ListItemViewModel)senderCanvas.DataContext;
-            NavigationService.Navigate(new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+            ListItemViewModel model = (ListItemViewModel)((Canvas)sender).DataContext;
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+        }
+
+        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            LayoutRoot.Opacity = 1;
         }
     }
 }
