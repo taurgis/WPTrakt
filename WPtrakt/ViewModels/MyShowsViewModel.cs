@@ -116,7 +116,6 @@ namespace WPtrakt
 
         void myShowsworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep(1000);
             String fileName = "myshows.json";
             if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
             {
