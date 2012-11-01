@@ -17,7 +17,6 @@ namespace WPtrakt
     {
         public ObservableCollection<ActivityListItemViewModel> Activity { get; private set; }
 
-
         public ActivityViewModel()
         {
             _loadingStatus = "Collapsed";

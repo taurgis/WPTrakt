@@ -102,55 +102,23 @@ namespace WPtrakt
 
         protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = true;
-            this.SettingsPanorama.DefaultItem = this.SettingsPanorama.Items[0];
-            progressBar.Visibility = System.Windows.Visibility.Visible;
-            var profileClient = new WebClient();
-
-            profileClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_DownloadProfileStringCompleted);
-            profileClient.UploadStringAsync(new Uri("http://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-        }
-
-        void client_DownloadProfileStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            progressBar.Visibility = System.Windows.Visibility.Collapsed;
-            try
+            if (toggle.IsChecked == true)
             {
-                String jsonString = e.Result;
-
-                if (toggle.IsChecked == true)
-                {
-                    var taskName = "WPtraktLiveTile";
-                    PeriodicTask task = new PeriodicTask(taskName);
-                    task.Description = "This task updates the WPtrakt live tile.";
-                    //at this point there are no tasks in background tasks of phone settings
-                    try
-                    {
-                        ScheduledActionService.Add(task);
-                    }
-                    catch (InvalidOperationException) { }
-                    //at this point, there are two tasks with app title, same description
-                   //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
-                }
-                else
-                {
-                    DisableLiveTile();
-                }
-
+                var taskName = "WPtraktLiveTile";
+                PeriodicTask task = new PeriodicTask(taskName);
+                task.Description = "This task updates the WPtrakt live tile.";
+                //at this point there are no tasks in background tasks of phone settings
                 try
                 {
-                    NavigationService.GoBack();
+                    ScheduledActionService.Add(task);
                 }
                 catch (InvalidOperationException) { }
-               
+                //at this point, there are two tasks with app title, same description
+                //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
             }
-            catch (WebException)
+            else
             {
                 DisableLiveTile();
-                if (MessageBox.Show("Invalid login data. Press cancel to exit.", "Error", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
-                {
-                    throw new Exception("ExitAppException");
-                }
             }
         }
 
