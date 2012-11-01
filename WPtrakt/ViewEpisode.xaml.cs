@@ -459,6 +459,7 @@ namespace WPtrakt
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Animation.FadeOut(LayoutRoot);
+            App.EpisodeViewModel = null;
         }
     }
 }
