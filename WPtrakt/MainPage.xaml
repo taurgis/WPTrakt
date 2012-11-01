@@ -4,17 +4,12 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
     xmlns:controlsPrimitives="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls" 
     x:Class="WPtrakt.Main"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
-    <!--LayoutRoot is the root grid where all page content is placed-->
-  
+
     <Grid x:Name="LayoutRoot" >
         <controls:Panorama  Title="WPtrakt" IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
             <controls:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
@@ -43,8 +38,7 @@
                 </StackPanel>
             </controls:PanoramaItem>
             <controls:PanoramaItem  Margin="0 -25" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
-                <!--Double line list with image placeholder and text wrapping-->
-                <StackPanel Margin="0 -20">
+                 <StackPanel Margin="0 -20">
                     <ListBox Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -66,7 +60,6 @@
                 </StackPanel>
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
-                <!--Double line list with text wrapping-->
                 <ListBox Margin="0 -25" Height="520" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" VerticalAlignment="Top" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -84,8 +77,6 @@
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
-
-  
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
             <shell:ApplicationBarIconButton IconUri="Images/appbar.feature.settings.rest.png" Text="Settings" Click="ApplicationBarSettingsButton_Click" />
@@ -95,6 +86,5 @@
                 <shell:ApplicationBarMenuItem x:Name="FriendActivity" Text="Friend Activity" Click="FriendActivity_Click"></shell:ApplicationBarMenuItem>
              </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
-        
     </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>

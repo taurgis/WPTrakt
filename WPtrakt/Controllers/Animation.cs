@@ -31,5 +31,22 @@ namespace WPtrakt.Controllers
             storyboard.Completed += completedHandlerMainPage;
             storyboard.Begin();
         }
+
+
+        public static void FadeOut(UIElement targetElement)
+        {
+            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
+            Storyboard.SetTarget(storyboard, targetElement);
+            EventHandler completedHandlerMainPage = delegate { };
+
+            completedHandlerMainPage = delegate
+            {
+                storyboard.Completed -= completedHandlerMainPage;
+                storyboard.Stop();
+            };
+
+            storyboard.Completed += completedHandlerMainPage;
+            storyboard.Begin();
+        }
     }
 }

@@ -11,7 +11,7 @@
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
     xmlns:local="clr-namespace:WPtrakt"
     xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="728"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"

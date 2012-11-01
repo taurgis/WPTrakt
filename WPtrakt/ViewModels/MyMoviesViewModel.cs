@@ -21,7 +21,8 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> SuggestItems { get; private set; }
         private List<TraktMovie> suggestedMovies;
         private BackgroundWorker worker;
-        public Boolean LoadingSuggestItems { get; set; }
+        private Boolean LoadingSuggestItems { get; set; }
+        private Boolean LoadingMovies { get; set; }
 
         public MyMoviesViewModel()
         {
@@ -97,30 +98,33 @@ namespace WPtrakt
 
         public void LoadData()
         {
-            this.MovieItems = new ObservableCollection<ListItemViewModel>();
-            RefreshMyMoviesView();
-            String fileName ="mymovies.json";
-            if (StorageController.doesFileExist(fileName))
+            if (!this.LoadingMovies)
             {
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(myMoviesworker_DoWork);
+                this.LoadingMovies = true;
+                this.MovieItems = new ObservableCollection<ListItemViewModel>();
+                RefreshMyMoviesView();
+                String fileName = "mymovies.json";
+                if (StorageController.doesFileExist(fileName))
+                {
+                    BackgroundWorker worker = new BackgroundWorker();
+                    worker.WorkerReportsProgress = false;
+                    worker.WorkerSupportsCancellation = false;
+                    worker.DoWork += new DoWorkEventHandler(myMoviesworker_DoWork);
 
-                worker.RunWorkerAsync();
+                    worker.RunWorkerAsync();
+                }
+                else
+                {
+                    CallMyMoviesService();
+                }
+
+
+                this.IsDataLoaded = true;
             }
-            else
-            {
-                CallMyMoviesService();
-            }
-
-
-            this.IsDataLoaded = true;
         }
 
         void myMoviesworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Thread.Sleep(1000);
             String fileName = "mymovies.json";
             if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
             {
@@ -137,6 +141,9 @@ namespace WPtrakt
                 {
                     tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
                 }
+
+                this.LoadingMovies = false;
+
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                {
                    UpdateMyMovieView(tempItems);
@@ -198,6 +205,8 @@ namespace WPtrakt
                             tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
                         }
 
+                        this.LoadingMovies = false;
+
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
                             UpdateMyMovieView(tempItems);
@@ -214,7 +223,6 @@ namespace WPtrakt
 
         private void UpdateMyMovieView(ObservableCollection<ListItemViewModel> tempItems)
         {
-
             this.MovieItems = tempItems;
             RefreshMyMoviesView();
         }
@@ -231,15 +239,18 @@ namespace WPtrakt
 
         public void LoadSuggestData()
         {
-            this.SuggestItems = new ObservableCollection<ListItemViewModel>();
-            NotifyPropertyChanged("SuggestItems");
-            NotifyPropertyChanged("LoadingStatusSuggestions");
-            HttpWebRequest request;
+            if (!this.LoadingSuggestItems)
+            {
+                this.LoadingSuggestItems = true;
+                this.SuggestItems = new ObservableCollection<ListItemViewModel>();
+                NotifyPropertyChanged("SuggestItems");
+                NotifyPropertyChanged("LoadingStatusSuggestions");
+                HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/movies/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
-            request.Method = "POST";
-            request.BeginGetRequestStream(new AsyncCallback(GetSuggestionsRequestStreamCallback), request);
-
+                request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/movies/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
+                request.Method = "POST";
+                request.BeginGetRequestStream(new AsyncCallback(GetSuggestionsRequestStreamCallback), request);
+            }
         }
 
         void GetSuggestionsRequestStreamCallback(IAsyncResult asynchronousResult)
