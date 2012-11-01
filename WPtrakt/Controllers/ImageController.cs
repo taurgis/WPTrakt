@@ -151,7 +151,11 @@ namespace WPtrakt.Controllers
                 bi.SetSource(pic);
 
                 if (!AppUser.UserIsHighEndDevice())
-                    return resizeImage(bi, pic, width);
+                {
+                    BitmapImage lowEndDeviceImage = resizeImage(bi, pic, width);
+                    pic.Close();
+                    return lowEndDeviceImage;
+                }
 
                 try
                 {
