@@ -84,25 +84,17 @@ namespace WPtrakt.Controllers
 
                 try
                 {
-
                     var wb = new WriteableBitmap(bi);
 
                     using (var isoFileStream = isoStore.CreateFile(fileName))
                     {
-                        try
-                        {
-                            Extensions.SaveJpeg(wb, isoFileStream, width, height, 0, quality);
-                            isoFileStream.Close();
-                        }
-                        catch (IsolatedStorageException)
-                        {
-                            //Do nothing for now.
-                        }
+                        wb.SaveJpeg(isoFileStream, width, height, 0, quality);
+                        bi.SetSource(isoFileStream);
+                        isoFileStream.Close();
+                        wb = null;
                     }
                 }
-                catch (IsolatedStorageException)
-                {
-                }
+                catch (IsolatedStorageException){ }
                 pic.Close();
                 return bi;
             }
@@ -159,22 +151,16 @@ namespace WPtrakt.Controllers
 
                 try
                 {
-
                     var wb = new WriteableBitmap(bi);
 
                     double newHeight = wb.PixelHeight * ((double)width / wb.PixelWidth);
 
                     using (var isoFileStream = isoStore.CreateFile(fileName))
                     {
-                        try
-                        {
-                            Extensions.SaveJpeg(wb, isoFileStream, width, (int)newHeight, 0, quality);
-                            isoFileStream.Close();
-                        }
-                        catch (IsolatedStorageException)
-                        {
-                            //Do nothing for now.
-                        }
+                        wb.SaveJpeg(isoFileStream, width, (int)newHeight, 0, quality);
+                        bi.SetSource(isoFileStream);
+                        isoFileStream.Close();
+                        wb = null;
                     }
                 }
                 catch (IsolatedStorageException)
@@ -184,7 +170,5 @@ namespace WPtrakt.Controllers
                 return bi;
             }
         }
-
-
     }
 }
