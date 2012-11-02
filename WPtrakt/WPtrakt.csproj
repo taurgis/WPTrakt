@@ -201,6 +201,8 @@
     <None Include="Properties\WMAppManifest.xml">
       <SubType>Designer</SubType>
     </None>
+    <None Include="WPtrakt_2012_11_02_16_33_08.sap" />
+    <None Include="WPtrakt_2012_11_02_16_36_21.sap" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Background.png" />
