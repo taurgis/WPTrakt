@@ -64,6 +64,7 @@ namespace WPtrakt
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
                 App.SettingsViewModel.Usage = (((usage / 1024))).ToString() + " kB";
+                ClearCacheButton.IsEnabled = true;
             });
         }
 
