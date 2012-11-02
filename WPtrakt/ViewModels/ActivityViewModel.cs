@@ -85,6 +85,8 @@ namespace WPtrakt
                         }
                         catch (NullReferenceException) { }
                     }
+
+                    ms.Close();
                     _loadingStatus = "Collapsed";
                     NotifyPropertyChanged("Activity");
                     NotifyPropertyChanged("LoadingStatus");

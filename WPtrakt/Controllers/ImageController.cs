@@ -33,16 +33,15 @@ namespace WPtrakt.Controllers
                     if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg"))
                     {
                         IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open);
-                       saveImage("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 800, 450, 100);
-                       stream.Close();
-                       // store.CopyFile(filename, "/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg");
+                        saveImage("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 800, 450, 100);
+                        stream.Close();
                     }
                 }
             }
             catch (IsolatedStorageException) { }
         }
 
-       
+
         public static BitmapImage getImageFromStorage(String filename)
         {
             using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
@@ -62,7 +61,7 @@ namespace WPtrakt.Controllers
                 {
                     return null;
                 }
-                catch(ArgumentException)
+                catch (ArgumentException)
                 {
                     return null;
                 }
@@ -101,10 +100,11 @@ namespace WPtrakt.Controllers
                         }
                     }
                 }
-                catch (IsolatedStorageException) { 
+                catch (IsolatedStorageException)
+                {
                 }
                 pic.Close();
-               return bi;
+                return bi;
             }
         }
 
@@ -141,7 +141,7 @@ namespace WPtrakt.Controllers
             return bmp;
         }
 
-     
+
 
         public static BitmapImage saveImage(String fileName, Stream pic, Int16 width, Int16 quality)
         {
@@ -185,6 +185,6 @@ namespace WPtrakt.Controllers
             }
         }
 
-   
+
     }
 }

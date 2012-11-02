@@ -23,7 +23,7 @@ namespace WPtrakt
         {
             ShoutsLoaded = false;
             ShoutItems = new ObservableCollection<ListItemViewModel>();
-            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." }); 
+            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
         }
 
         #region Getters/Setters
@@ -33,7 +33,7 @@ namespace WPtrakt
         {
             get
             {
-                if(String.IsNullOrEmpty(_name))
+                if (String.IsNullOrEmpty(_name))
                     return "Loading..";
                 return _name;
             }
@@ -128,7 +128,7 @@ namespace WPtrakt
             }
         }
 
-            private string _tvdb;
+        private string _tvdb;
         public string Tvdb
         {
             get
@@ -457,7 +457,7 @@ namespace WPtrakt
             this._season = season;
             this._number = episode;
             String fileName = TraktWatched.getFolderStatic() + "/" + tvdb + season + episode + ".json";
-           
+
             if (StorageController.doesFileExist(fileName))
             {
                 BackgroundWorker worker = new BackgroundWorker();
@@ -528,6 +528,7 @@ namespace WPtrakt
                     StorageController.saveObject(episode, typeof(TraktWatched));
                     UpdateEpisodeView(episode);
                     IsDataLoaded = true;
+                    ms.Close();
                 }
             }
             catch (WebException)
@@ -560,7 +561,7 @@ namespace WPtrakt
                 this.MyRatingAdvanced = episode.Episode.MyRatingAdvanced;
                 NotifyPropertyChanged("RatingString");
             }
-          
+
             NotifyPropertyChanged("LoadingStatusEpisode");
             NotifyPropertyChanged("DetailVisibility");
 
@@ -633,16 +634,16 @@ namespace WPtrakt
         public void LoadShoutData(String tvdb, String season, String episode)
         {
 
-             ShoutItems = new ObservableCollection<ListItemViewModel>();
+            ShoutItems = new ObservableCollection<ListItemViewModel>();
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
 
             NotifyPropertyChanged("ShoutItems");
 
             var movieClient = new WebClient();
-            
+
             this._tvdb = tvdb;
             movieClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadShoutStringCompleted);
-            movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb+ "/" + season + "/" + episode));
+            movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + season + "/" + episode));
         }
 
         void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)
@@ -656,7 +657,11 @@ namespace WPtrakt
                     var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
                     TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
                     foreach (TraktShout shout in shouts)
+                    {
                         this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
+                    }
+
+                    ms.Close();
                 }
 
                 if (this.ShoutItems.Count == 0)

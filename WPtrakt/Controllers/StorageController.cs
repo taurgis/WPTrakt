@@ -17,7 +17,7 @@ namespace WPtrakt.Controllers
         {
             try
             {
-            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(file);
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(file);
             }
             catch (IsolatedStorageException) { }
         }
@@ -27,8 +27,7 @@ namespace WPtrakt.Controllers
             traktObject.DownloadTime = DateTime.Now;
             using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
             {
-
-                if(!isoStore.DirectoryExists(traktObject.getFolder()))
+                if (!isoStore.DirectoryExists(traktObject.getFolder()))
                 {
                     isoStore.CreateDirectory(traktObject.getFolder());
                 }
@@ -42,7 +41,6 @@ namespace WPtrakt.Controllers
 
                     isoFileStream.Close();
                 }
-
             }
 
             return traktObject;
@@ -53,7 +51,6 @@ namespace WPtrakt.Controllers
             traktObject[0].DownloadTime = DateTime.Now;
             using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
             {
-
                 if (!isoStore.DirectoryExists(traktObject[0].getFolder()))
                 {
                     isoStore.CreateDirectory(traktObject[0].getFolder());
@@ -68,7 +65,6 @@ namespace WPtrakt.Controllers
 
                     isoFileStream.Close();
                 }
-
             }
 
             return traktObject;
@@ -78,7 +74,6 @@ namespace WPtrakt.Controllers
         {
             using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
             {
-               
                 using (var isoFileStream = isoStore.CreateFile(fileName))
                 {
                     DataContractJsonSerializer ser = new DataContractJsonSerializer(type);
@@ -87,21 +82,22 @@ namespace WPtrakt.Controllers
 
                     isoFileStream.Close();
                 }
-
             }
         }
 
 
         public static TraktObject LoadObject(String file, Type type)
-        {  
+        {
             using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
             {
                 using (IsolatedStorageFileStream stream = isoStore.OpenFile(file, FileMode.Open))
                 {
                     var ser = new DataContractJsonSerializer(type);
-                   return (TraktObject)ser.ReadObject(stream);
-                }
+                    TraktObject traktObject = (TraktObject)ser.ReadObject(stream);
+                    stream.Close();
 
+                    return traktObject;
+                }
             }
         }
 
@@ -112,12 +108,14 @@ namespace WPtrakt.Controllers
                 using (IsolatedStorageFileStream stream = isoStore.OpenFile(file, FileMode.Open))
                 {
                     var ser = new DataContractJsonSerializer(type);
-                    return (TraktObject[])ser.ReadObject(stream);
+                    TraktObject[] objects = (TraktObject[])ser.ReadObject(stream);
+
+                    stream.Close();
+                    return objects;
                 }
 
             }
         }
-
 
         public static Object LoadObjectFromMain(String file, Type type)
         {
@@ -126,9 +124,10 @@ namespace WPtrakt.Controllers
                 using (IsolatedStorageFileStream stream = isoStore.OpenFile(file, FileMode.Open))
                 {
                     var ser = new DataContractJsonSerializer(type);
-                    return ser.ReadObject(stream);
+                    Object tempObject = ser.ReadObject(stream);
+                    stream.Close();
+                    return tempObject;
                 }
-
             }
         }
     }
