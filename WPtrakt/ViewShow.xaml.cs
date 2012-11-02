@@ -349,9 +349,12 @@ namespace WPtrakt
 
             appBar.Buttons.Add(previousSeason);
 
+            CreateSeasonsWatchedButton(appBar);
+
             ApplicationBarIconButton showSeasons = new ApplicationBarIconButton(new Uri("Images/appbar.phone.numbersign.rest.png", UriKind.Relative));
             showSeasons.Click += new EventHandler(showSeasons_Click);
             showSeasons.Text = "Seasons";
+
 
             appBar.Buttons.Add(showSeasons);
             CreateRefreshEpisodesButton(appBar);
@@ -362,6 +365,48 @@ namespace WPtrakt
             nextSeason.Text = "Next";
             appBar.Buttons.Add(nextSeason);
             this.ApplicationBar = appBar;
+        }
+
+        private void CreateSeasonsWatchedButton(ApplicationBar appBar)
+        {
+            ApplicationBarMenuItem watchedMenuItem = new ApplicationBarMenuItem();
+            watchedMenuItem.Text = "Mark season as seen.";
+            watchedMenuItem.Click += new EventHandler(SeasonWatchedIconButton_Click);
+
+            appBar.MenuItems.Add(watchedMenuItem);
+        }
+
+        private void SeasonWatchedIconButton_Click(object sender, EventArgs e)
+        {
+            var watchlistClient = new WebClient();
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeasonSeenStringCompleted);
+            WatchedSeasonAuth auth = new WatchedSeasonAuth();
+
+            auth.Imdb = App.ShowViewModel.Imdb;
+            auth.Title = App.ShowViewModel.Name;
+            auth.Year = Int16.Parse(App.ShowViewModel.Year);
+            auth.Season = App.ShowViewModel.currentSeason;
+
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/season/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedSeasonAuth), auth));
+        }
+
+        void client_UploadSeasonSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                MessageBox.Show("Season marked as watched.");
+                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktEpisode.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + App.ShowViewModel.currentSeason + ".json");
+                String id;
+                NavigationContext.QueryString.TryGetValue("id", out id);
+                App.ShowViewModel.LoadEpisodeData(id);
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         private void CreateRefreshEpisodesButton(ApplicationBar appBar)
