@@ -36,6 +36,7 @@ namespace WPtrakt
             NavigationContext.QueryString.TryGetValue("season", out season);
             NavigationContext.QueryString.TryGetValue("episode", out episode);
             App.EpisodeViewModel.LoadData(id, season, episode);
+            LayoutRoot.Opacity = 1;
         }
 
         private void EpisodePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -105,6 +106,8 @@ namespace WPtrakt
                 CreateSeenButton(appBar);
 
             CreateCheckingButton(appBar);
+
+            CreateBackToShowMenuItem(appBar);
 
             this.ApplicationBar = appBar;
         }
@@ -359,6 +362,20 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        private void CreateBackToShowMenuItem(ApplicationBar appBar)
+        {
+            ApplicationBarMenuItem backtoShowMenuItem = new ApplicationBarMenuItem();
+            backtoShowMenuItem.Text = "view show";
+            backtoShowMenuItem.Click += backtoShowMenuItem_Click;
+            appBar.MenuItems.Add(backtoShowMenuItem);
+           
+        }
+
+        void backtoShowMenuItem_Click(object sender, EventArgs e)
+        {
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + App.EpisodeViewModel.Tvdb, UriKind.Relative));
         }
 
         #endregion
