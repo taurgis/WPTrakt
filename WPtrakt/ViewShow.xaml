@@ -5,17 +5,10 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
-    FontFamily="{StaticResource PhoneFontFamilyNormal}"
-    FontSize="{StaticResource PhoneFontSizeNormal}"
-    Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
-
-    <!--LayoutRoot contains the root grid where all other page content is placed-->
     <Grid x:Name="LayoutRoot">
         <Grid.Background>
             <ImageBrush Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill" />
@@ -108,7 +101,6 @@
                     </Grid>
                 </Grid>
             </controls:PanoramaItem>
-            <!--Panorama item two-->
             <controls:PanoramaItem Header="Shouts" Margin="0, -25">
                 <Grid>
                     <ListBox VerticalAlignment="Top" Margin="0,-30,15,0" ItemsSource="{Binding ShoutItems}" Name="ShoutList" Height="420" Width="405">
@@ -135,12 +127,8 @@
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
-    
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar    IsVisible="False" IsMenuEnabled="True">
-           
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
-    <!--Panorama-based applications should not show an ApplicationBar-->
-
 </phone:PhoneApplicationPage>

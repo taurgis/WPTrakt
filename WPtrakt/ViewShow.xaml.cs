@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
+using System;
 using System.Collections.ObjectModel;
 using System.IO.IsolatedStorage;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using Microsoft.Phone.Tasks;
 using VPtrakt.Controllers;
 using VPtrakt.Model.Trakt.Request;
 using WPtrakt.Controllers;
@@ -18,9 +17,6 @@ namespace WPtrakt
 {
     public partial class ViewShow : PhoneApplicationPage
     {
-        private ApplicationBarIconButton previousSeason;
-        private ApplicationBarIconButton nextSeason;
-
         public ViewShow()
         {
             InitializeComponent();
@@ -33,13 +29,12 @@ namespace WPtrakt
         {
             String id;
             NavigationContext.QueryString.TryGetValue("id", out id);
-            if (!String.IsNullOrEmpty(App.ShowViewModel.GenreString))
+            if (!String.IsNullOrEmpty(App.ShowViewModel.Tvdb))
             {
                 RefreshBottomBar();
             }
 
-            App.ShowViewModel.LoadData(id);
-            
+            App.ShowViewModel.LoadData(id);  
         }
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -81,20 +76,6 @@ namespace WPtrakt
 
         #region Taps
 
-        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            App.ShowViewModel = null;
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandler = delegate { };
-            completedHandler = delegate
-            {
-                storyboard.Completed -= completedHandler;
-                storyboard.Stop();
-            };
-            storyboard.Completed += completedHandler;
-            storyboard.Begin();
-        }
 
         private void ImdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
@@ -106,26 +87,41 @@ namespace WPtrakt
 
         private void StackPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandlerMainPage = delegate { };
-            completedHandlerMainPage = delegate
-            {
+            ListItemViewModel model = (ListItemViewModel)((StackPanel)sender).DataContext;
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative)); 
+        }
 
-                StackPanel senderPanel = (StackPanel)sender;
-                ListItemViewModel model = (ListItemViewModel)senderPanel.DataContext;
-                NavigationService.Navigate(new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-                storyboard.Completed -= completedHandlerMainPage;
-                storyboard.Stop();
-                this.Opacity = 0;
-            };
-            storyboard.Completed += completedHandlerMainPage;
-            storyboard.Begin();
+        private void SeasonPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            StackPanel seasonPanel = (StackPanel)sender;
+
+            short season = Int16.Parse((String)seasonPanel.DataContext);
+
+            App.ShowViewModel.currentSeason = season;
+
+            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+            String id;
+            NavigationContext.QueryString.TryGetValue("id", out id);
+            App.ShowViewModel.LoadEpisodeData(id);
+
+
+
+            EpisodeGrid.Visibility = System.Windows.Visibility.Visible;
+            SeasonGrid.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        private void TvdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            WebBrowserTask task = new WebBrowserTask();
+            task.Uri = new Uri("http://thetvdb.com/?tab=series&id=" + App.ShowViewModel.Tvdb);
+
+            task.Show();
         }
 
         #endregion
 
         #region Main Appbar
+
         private Boolean ChangedSizeAlready = false;
         private void ListBox_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -275,7 +271,6 @@ namespace WPtrakt
 
         private void CreateRating(ApplicationBar appBar)
         {
-
             ApplicationBarIconButton ratingButton = new ApplicationBarIconButton();
             ratingButton = new ApplicationBarIconButton(new Uri("Images/appbar.favs.rest.png", UriKind.Relative));
             ratingButton.IsEnabled = true;
@@ -343,7 +338,7 @@ namespace WPtrakt
         {
             ApplicationBar appBar = new ApplicationBar();
 
-            previousSeason = new ApplicationBarIconButton(new Uri("Images/appbar.back.rest.png", UriKind.Relative));
+            ApplicationBarIconButton previousSeason = new ApplicationBarIconButton(new Uri("Images/appbar.back.rest.png", UriKind.Relative));
             previousSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeBack);
             previousSeason.Text = "Previous";
 
@@ -359,7 +354,7 @@ namespace WPtrakt
             appBar.Buttons.Add(showSeasons);
             CreateRefreshEpisodesButton(appBar);
 
-            nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
+            ApplicationBarIconButton nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
             nextSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeForward);
 
             nextSeason.Text = "Next";
@@ -555,7 +550,7 @@ namespace WPtrakt
 
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
         {
-            this.Opacity = 1;
+            LayoutRoot.Opacity = 1;
         }
 
         private void PhoneApplicationPage_OrientationChanged(object sender, OrientationChangedEventArgs e)
@@ -581,31 +576,10 @@ namespace WPtrakt
             ShowPanorama.DefaultItem = ShowPanorama.Items[0];
         }
 
-        private void SeasonPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            StackPanel seasonPanel = (StackPanel)sender;
-
-            short season = Int16.Parse((String)seasonPanel.DataContext);
-
-            App.ShowViewModel.currentSeason = season;
-
-            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
-            String id;
-            NavigationContext.QueryString.TryGetValue("id", out id);
-            App.ShowViewModel.LoadEpisodeData(id);
-
-           
-
-            EpisodeGrid.Visibility = System.Windows.Visibility.Visible;
-            SeasonGrid.Visibility = System.Windows.Visibility.Collapsed;
-        }
-
-        private void TvdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            WebBrowserTask task = new WebBrowserTask();
-            task.Uri = new Uri("http://thetvdb.com/?tab=series&id=" + App.ShowViewModel.Tvdb);
-
-            task.Show();
+            App.ShowViewModel = null;
+            Animation.FadeOut(LayoutRoot);
         }
     }
 }
