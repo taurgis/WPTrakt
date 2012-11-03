@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace VPtrakt.Model.Trakt
+namespace WPtrakt.Model.Trakt
 {
     [DataContract]
     public class TraktRating

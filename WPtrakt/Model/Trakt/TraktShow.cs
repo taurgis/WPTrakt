@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using VPtrakt.Model.Trakt;
+using WPtrakt.Model.Trakt;
 
 namespace WPtrakt.Model.Trakt
 {

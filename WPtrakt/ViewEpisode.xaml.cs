@@ -8,12 +8,10 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
-using VPtrakt.Controllers;
-using VPtrakt.Model.Trakt.Request;
 using WPtrakt.Controllers;
+using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using WPtrakt.Model.Trakt.Request;
 
 namespace WPtrakt
 {
@@ -124,9 +122,9 @@ namespace WPtrakt
 
         private void Seen_Click(object sender, EventArgs e)
         {
-            var watchlistClient = new WebClient();
+            var seenClient = new WebClient();
             progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeenStringCompleted);
+            seenClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeenStringCompleted);
             WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
             auth.Episodes = new TraktRequestEpisode[1];
             auth.Episodes[0] = new TraktRequestEpisode();
@@ -136,7 +134,7 @@ namespace WPtrakt
             auth.Title = App.EpisodeViewModel.ShowName;
             auth.Year = App.EpisodeViewModel.ShowYear;
 
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+            seenClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
         }
 
         void client_UploadSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)

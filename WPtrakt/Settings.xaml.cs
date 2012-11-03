@@ -10,8 +10,8 @@ using Microsoft.Phone.Controls;
 using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
-using VPtrakt.Controllers;
-using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Controllers;
+using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 

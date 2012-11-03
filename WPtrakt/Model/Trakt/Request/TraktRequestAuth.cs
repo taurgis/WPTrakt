@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace VPtrakt.Model.Trakt.Request
+namespace WPtrakt.Model.Trakt.Request
 {
     [DataContract]
     public abstract class TraktRequestAuth

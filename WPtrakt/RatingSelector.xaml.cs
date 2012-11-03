@@ -4,11 +4,11 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Controls.Primitives;
-using VPtrakt.Controllers;
-using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Controllers;
+using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 
-namespace VPtrakt
+namespace WPtrakt
 {
     public partial class RatingSelector : PhoneApplicationPage
     {

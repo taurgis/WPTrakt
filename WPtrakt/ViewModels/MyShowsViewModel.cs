@@ -7,7 +7,6 @@ using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading;
-using VPtrakt.Controllers;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;

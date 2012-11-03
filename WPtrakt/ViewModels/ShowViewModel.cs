@@ -8,7 +8,6 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using VPtrakt.Controllers;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;

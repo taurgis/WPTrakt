@@ -7,11 +7,12 @@ using System.IO.IsolatedStorage;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-using VPtrakt.Controllers;
-using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Controllers;
+using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using System.Reflection;
 
 namespace WPtrakt
 {
@@ -416,14 +417,7 @@ namespace WPtrakt
 
         void refreshButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                String fileNameEpisodes = TraktEpisode.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + App.ShowViewModel.currentSeason + ".json";
-
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(fileNameEpisodes);
-            }
-            catch (IsolatedStorageException) { }
-            App.ShowViewModel.LoadEpisodeData(App.ShowViewModel.Tvdb);
+            ReloadSeason();
         }
 
         void showSeasons_Click(object sender, EventArgs e)
@@ -581,5 +575,123 @@ namespace WPtrakt
             App.ShowViewModel = null;
             Animation.FadeOut(LayoutRoot);
         }
+
+        #region EpisodeContextMenu
+
+        private void SeenEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+            var seenClient = new WebClient();
+
+            seenClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeSeenStringCompleted);
+            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
+            auth.Episodes = new TraktRequestEpisode[1];
+            auth.Episodes[0] = new TraktRequestEpisode();
+            auth.Episodes[0].Season = model.Season;
+            auth.Episodes[0].Episode = model.Episode;
+            auth.Imdb = App.ShowViewModel.Imdb;
+            auth.Title = App.ShowViewModel.Name;
+            auth.Year = Int16.Parse(App.ShowViewModel.Year);
+
+            seenClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+        }
+
+        private void client_UploadEpisodeSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+
+                MessageBox.Show("Episode marked as watched.");
+                ReloadSeason();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+
+        }
+
+        private static void ReloadSeason()
+        {
+            StorageController.DeleteFile(TraktEpisode.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + App.ShowViewModel.currentSeason + ".json");
+            App.ShowViewModel.LoadEpisodeData(App.ShowViewModel.Tvdb);
+        }
+
+        private void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            var watchlistClient = new WebClient();
+            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeWatchlistStringCompleted);
+           
+            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
+            auth.Episodes = new TraktRequestEpisode[1];
+            auth.Episodes[0] = new TraktRequestEpisode();
+            auth.Episodes[0].Season = model.Season;
+            auth.Episodes[0].Episode = model.Episode;
+            auth.Imdb = App.ShowViewModel.Imdb;
+            auth.Title = App.ShowViewModel.Name;
+            auth.Year = Int16.Parse(App.ShowViewModel.Year);
+
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+
+        }
+
+        void client_UploadEpisodeWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+
+                MessageBox.Show("Episode added to watchlist.");
+                ReloadSeason();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+
+        private void CheckinEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            var checkinClient = new WebClient();
+            checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
+            CheckinAuth auth = new CheckinAuth();
+
+            auth.tvdb_id = App.ShowViewModel.Tvdb;
+            auth.Title = App.ShowViewModel.Name;
+            auth.year = Int16.Parse(App.ShowViewModel.Year);
+            auth.Season = Int16.Parse(model.Season);
+            auth.Episode = Int16.Parse(model.Episode);
+            auth.AppDate = AppUser.getReleaseDate();
+
+            var assembly = Assembly.GetExecutingAssembly().FullName;
+            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+            auth.AppVersion = fullVersionNumber;
+
+            checkinClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
+
+        }
+
+        void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                MessageBox.Show("Checked in!");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+
+        #endregion
+
+
+
     }
 }

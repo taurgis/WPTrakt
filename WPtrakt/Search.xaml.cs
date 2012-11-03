@@ -6,7 +6,7 @@ using System.Windows.Input;
 using WPtrakt;
 using WPtrakt.Controllers;
 
-namespace VPtrakt
+namespace WPtrakt
 {
     public partial class Search : PhoneApplicationPage
     {

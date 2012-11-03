@@ -15,7 +15,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.Phone.Info;
-using VPtrakt.Model.Trakt.Request;
+using WPtrakt.Model.Trakt.Request;
 
 namespace WPtrakt.Model
 {

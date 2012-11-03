@@ -1,5 +1,5 @@
 ﻿
-namespace VPtrakt.Model.Trakt.Request
+namespace WPtrakt.Model.Trakt.Request
 {
     public class BasicAuth : TraktRequestAuth
     {

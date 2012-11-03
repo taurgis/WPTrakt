@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace VPtrakt.Controllers
+namespace WPtrakt.Controllers
 {
     public class ErrorManager
     {

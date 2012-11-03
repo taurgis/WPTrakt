@@ -64,7 +64,7 @@
                         <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
+                                    <StackPanel  Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
                                         <Grid Width="150">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
@@ -78,6 +78,13 @@
                                             <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
                                             <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                         </StackPanel>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinEpisode_Click" />
+                                                <toolkit:MenuItem Header="Mark as seen." Name="SeenEpisode" Click="SeenEpisode_Click" />
+                                                <toolkit:MenuItem Header="Add to watchlist." Name="WatchlistEpisode" Click="WatchlistEpisode_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
