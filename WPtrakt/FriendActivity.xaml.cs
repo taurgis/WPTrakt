@@ -19,6 +19,7 @@ namespace WPtrakt
 
         void FriendActivity_Loaded(object sender, RoutedEventArgs e)
         {
+            LayoutRoot.Opacity = 1;
             if(App.ActivityViewModel.Activity == null)
              App.ActivityViewModel.LoadData();
         }
@@ -43,10 +44,6 @@ namespace WPtrakt
             App.ActivityViewModel.LoadData();
         }
 
-        private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
-        {
-            LayoutRoot.Opacity = 1;
-        }
 
         private void PhoneApplicationPage_BackKeyPress_1(object sender, System.ComponentModel.CancelEventArgs e)
         {
