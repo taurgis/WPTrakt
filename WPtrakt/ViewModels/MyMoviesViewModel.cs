@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -8,9 +7,9 @@ using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using WPtrakt.Controllers;
-using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+
 
 namespace WPtrakt
 {

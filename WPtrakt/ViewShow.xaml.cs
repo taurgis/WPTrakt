@@ -9,10 +9,9 @@ using System.Windows;
 using System.Windows.Controls;
 using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt.Request;
-using WPtrakt.Controllers;
-using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using System.Reflection;
+using WPtrakt.Model;
 
 namespace WPtrakt
 {

@@ -56,5 +56,10 @@ namespace WPtrakt
         {
             LayoutRoot.Opacity = 1;
         }
+
+        private void PhoneApplicationPage_BackKeyPress_1(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Animation.FadeOut(LayoutRoot);
+        }
     }
 }

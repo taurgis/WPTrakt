@@ -5,11 +5,10 @@ using System.Windows.Controls;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using WPtrakt.Controllers;
-using WPtrakt.Controllers;
 using WPtrakt.Model;
-using WPtrakt.Model.Trakt;
-using WPtrakt.Model.Trakt.Request;
 using System.Reflection;
+using WPtrakt.Model.Trakt.Request;
+using WPtrakt.Model.Trakt;
 
 namespace WPtrakt
 {

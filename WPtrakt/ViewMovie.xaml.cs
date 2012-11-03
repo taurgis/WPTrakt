@@ -55,18 +55,7 @@ namespace WPtrakt
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
             App.MovieViewModel = null;
-            Storyboard storyboard = Application.Current.Resources["FadeOut"] as Storyboard;
-            Storyboard.SetTarget(storyboard, LayoutRoot);
-            EventHandler completedHandler = delegate { };
-
-            completedHandler = delegate
-            {
-                storyboard.Completed -= completedHandler;
-                storyboard.Stop();
-            };
-
-            storyboard.Completed += completedHandler;
-            storyboard.Begin();
+            Animation.FadeOut(LayoutRoot);
         }
 
         #region Taps
@@ -160,7 +149,6 @@ namespace WPtrakt
                 "/ViewMovie.xaml?id=" + App.MovieViewModel.Imdb,
                 UriKind.Relative),
                 NewTileData);
-
         }
 
         private void CreateRatingButton(ApplicationBar appBar)
