@@ -69,6 +69,7 @@ namespace WPtrakt
             set
             {
                 _watched = value;
+                this.NotifyPropertyChanged("SeenVisibility");
             }
         }
 
@@ -83,6 +84,7 @@ namespace WPtrakt
             {
                 _inWatchList = value;
                 this.NotifyPropertyChanged("InWatchList");
+                this.NotifyPropertyChanged("WatchlistVisibility");
             }
         }
 

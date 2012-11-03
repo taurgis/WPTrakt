@@ -88,8 +88,11 @@ namespace WPtrakt
 
         private void StackPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            ListItemViewModel model = (ListItemViewModel)((StackPanel)sender).DataContext;
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative)); 
+            if (lastModel == null)
+            {
+                ListItemViewModel model = (ListItemViewModel)((StackPanel)sender).DataContext;
+                Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+            }
         }
 
         private void SeasonPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -578,17 +581,19 @@ namespace WPtrakt
 
         #region EpisodeContextMenu
 
+        private ListItemViewModel lastModel;
+
         private void SeenEpisode_Click(object sender, RoutedEventArgs e)
         {
-            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
             var seenClient = new WebClient();
 
             seenClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeSeenStringCompleted);
             WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
             auth.Episodes = new TraktRequestEpisode[1];
             auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = model.Season;
-            auth.Episodes[0].Episode = model.Episode;
+            auth.Episodes[0].Season = lastModel.Season;
+            auth.Episodes[0].Episode = lastModel.Episode;
             auth.Imdb = App.ShowViewModel.Imdb;
             auth.Title = App.ShowViewModel.Name;
             auth.Year = Int16.Parse(App.ShowViewModel.Year);
@@ -601,15 +606,15 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-
+                lastModel.Watched = true;
                 MessageBox.Show("Episode marked as watched.");
-                ReloadSeason();
+                
             }
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-
+            lastModel = null; 
         }
 
         private static void ReloadSeason()
@@ -620,7 +625,7 @@ namespace WPtrakt
 
         private void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
         {
-            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             var watchlistClient = new WebClient();
             watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeWatchlistStringCompleted);
@@ -628,8 +633,8 @@ namespace WPtrakt
             WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
             auth.Episodes = new TraktRequestEpisode[1];
             auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = model.Season;
-            auth.Episodes[0].Episode = model.Episode;
+            auth.Episodes[0].Season = lastModel.Season;
+            auth.Episodes[0].Episode = lastModel.Episode;
             auth.Imdb = App.ShowViewModel.Imdb;
             auth.Title = App.ShowViewModel.Name;
             auth.Year = Int16.Parse(App.ShowViewModel.Year);
@@ -643,19 +648,20 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-
+                lastModel.InWatchList = true;
                 MessageBox.Show("Episode added to watchlist.");
-                ReloadSeason();
+                
             }
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            lastModel = null;
         }
 
         private void CheckinEpisode_Click(object sender, RoutedEventArgs e)
         {
-            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             var checkinClient = new WebClient();
             checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
@@ -664,8 +670,8 @@ namespace WPtrakt
             auth.tvdb_id = App.ShowViewModel.Tvdb;
             auth.Title = App.ShowViewModel.Name;
             auth.year = Int16.Parse(App.ShowViewModel.Year);
-            auth.Season = Int16.Parse(model.Season);
-            auth.Episode = Int16.Parse(model.Episode);
+            auth.Season = Int16.Parse(lastModel.Season);
+            auth.Episode = Int16.Parse(lastModel.Episode);
             auth.AppDate = AppUser.getReleaseDate();
 
             var assembly = Assembly.GetExecutingAssembly().FullName;
@@ -687,6 +693,7 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            lastModel = null;
         }
 
         #endregion
