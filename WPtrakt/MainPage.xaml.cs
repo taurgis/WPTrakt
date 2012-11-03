@@ -9,6 +9,7 @@ using WPtrakt.Model;
 using System.Reflection;
 using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model.Trakt;
+using System.ComponentModel;
 
 namespace WPtrakt
 {
@@ -37,6 +38,16 @@ namespace WPtrakt
                 }
                 else
                 {
+                    var assembly = Assembly.GetExecutingAssembly().FullName;
+                    var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+
+                    if (AppUser.Instance.AppVersion != fullVersionNumber)
+                    {
+                        MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
+                        AppUser.ClearCache();
+                        AppUser.Instance.AppVersion = fullVersionNumber;
+                    }
+
                     App.ViewModel.LoadData();
                 }
             }

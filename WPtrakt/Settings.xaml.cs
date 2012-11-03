@@ -66,34 +66,12 @@ namespace WPtrakt
                 App.SettingsViewModel.Usage = (((usage / 1024))).ToString() + " kB";
                 ClearCacheButton.IsEnabled = true;
             });
+         
         }
 
         private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
         {
-            String tempUsername = AppUser.Instance.UserName;
-            String tempPassword = AppUser.Instance.Password;
-
-            IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication();
-
-            foreach (String file in myIsolatedStorage.GetFileNames())
-            {
-               myIsolatedStorage.DeleteFile(file);
-            }
-
-            IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;
-            IsolatedStorageSettings.ApplicationSettings["Password"] = tempPassword;
-            IsolatedStorageSettings.ApplicationSettings.Save();
-
-            foreach(String dir in myIsolatedStorage.GetDirectoryNames())
-            {
-                if (!dir.Contains("Shared"))
-                {
-                    foreach (String file in myIsolatedStorage.GetFileNames(dir + "/*"))
-                    {
-                        myIsolatedStorage.DeleteFile(dir + "/" + file);
-                    }
-                }
-            }
+            AppUser.ClearCache();
      
             App.SettingsViewModel.Usage = "Cleared";
             App.SettingsViewModel.NotifyPropertyChanged("Usage");

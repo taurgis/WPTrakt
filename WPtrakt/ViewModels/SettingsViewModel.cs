@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Microsoft.Phone.Info;
 using WPtrakt.Model;
+using System.Reflection;
 
 
 namespace WPtrakt
@@ -65,6 +66,16 @@ namespace WPtrakt
                 long applicationCurrentMemoryUsage = (long)DeviceExtendedProperties.GetValue("ApplicationCurrentMemoryUsage") / (1024 * 1024);
                 long applicationPeakMemoryUsage = ((long)DeviceExtendedProperties.GetValue("ApplicationPeakMemoryUsage")) / (1024*1024);
                 return "Current Memory Usage: " + applicationCurrentMemoryUsage + " MB\n Peak memory Usage: " + applicationPeakMemoryUsage + " MB";
+            }
+        }
+
+        public String Version
+        {
+            get
+            {
+                var assembly = Assembly.GetExecutingAssembly().FullName;
+                var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+                return fullVersionNumber;
             }
         }
 

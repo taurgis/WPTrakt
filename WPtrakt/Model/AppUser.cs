@@ -37,25 +37,22 @@ namespace WPtrakt.Model
             settings = IsolatedStorageSettings.ApplicationSettings;
         }
 
-        public DateTime LastExcecutedLiveTileUpdate
+        public String AppVersion
         {
             get
             {
 
-                if (settings.Contains("LastTileUpdate"))
-                    return DateTime.Parse(settings["LastTileUpdate"].ToString());
-
-                return DateTime.Now;
-              
+                if (settings.Contains("AppVersion"))
+                    return settings["AppVersion"].ToString();
+                else
+                    return "";
             }
             set
             {
-                String valueString = value.ToString();
-                settings.Add("LastTileUpdate", valueString);
+                settings["AppVersion"] = value;
                 settings.Save();
             }
         }
-
 
         public String UserName
         {
@@ -164,5 +161,45 @@ namespace WPtrakt.Model
             return "25/10/2012";
         }
 
+
+        public static void ClearCache()
+        {
+            String tempUsername = AppUser.Instance.UserName;
+            String tempPassword = AppUser.Instance.Password;
+
+            IsolatedStorageFile myIsolatedStorage = IsolatedStorageFile.GetUserStoreForApplication();
+
+            foreach (String file in myIsolatedStorage.GetFileNames())
+            {
+                
+                     try
+                     {
+                         myIsolatedStorage.DeleteFile(file);
+                     }
+                     catch (IsolatedStorageException) { };
+           
+            }
+
+            IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;
+            IsolatedStorageSettings.ApplicationSettings["Password"] = tempPassword;
+            IsolatedStorageSettings.ApplicationSettings.Save();
+
+            foreach (String dir in myIsolatedStorage.GetDirectoryNames())
+            {
+                if (!dir.Contains("Shared"))
+                {
+                    foreach (String file in myIsolatedStorage.GetFileNames(dir + "/*"))
+                    {
+                       
+                             try
+                             {
+                                 myIsolatedStorage.DeleteFile(dir + "/" + file);
+                             }
+                             catch (IsolatedStorageException) { };
+                    
+                    }
+                }
+            }
+        }
     }
 }
