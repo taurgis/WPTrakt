@@ -352,7 +352,10 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Checked in!");
+                if (jsonString.Contains("failure"))
+                    MessageBox.Show("There is already a checkin in progress.");
+                else
+                    MessageBox.Show("Checked in!");
                 InitAppBar();
             }
             catch (WebException)

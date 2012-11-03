@@ -262,7 +262,7 @@ namespace WPtrakt
                             if (counter++ > 8)
                                 break;
 
-                            this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie", InWatchList = movie.InWatchlist });   
+                            this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie", InWatchList = movie.InWatchlist, SubItemText = movie.year.ToString() });   
                         }
 
                         LoadingSuggestItems = false;

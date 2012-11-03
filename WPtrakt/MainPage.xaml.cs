@@ -8,6 +8,8 @@ using WPtrakt.Controllers;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtrakt.Model.Trakt.Request;
+using System.Reflection;
 
 namespace WPtrakt
 {
@@ -84,8 +86,11 @@ namespace WPtrakt
 
         private void TrendingImage_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            ListItemViewModel model = (ListItemViewModel)((Image)sender).DataContext;
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+            if (lastModel == null)
+            {
+                ListItemViewModel model = (ListItemViewModel)((Image)sender).DataContext;
+                Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+            }
         }
 
         private void HistoryListItem_Tap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -133,6 +138,114 @@ namespace WPtrakt
             Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/FriendActivity.xaml", UriKind.Relative));
         }
 
+
+        #endregion
+
+        #region MovieContextMenu
+
+        private ListItemViewModel lastModel;
+
+        private void SeenMovie_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+            var seenClient = new WebClient();
+
+            seenClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieSeenStringCompleted);
+            WatchedAuth auth = new WatchedAuth();
+            auth.Movies = new TraktMovieRequest[1];
+            auth.Movies[0] = new TraktMovieRequest();
+            auth.Movies[0].imdb_id = lastModel.Imdb;
+            auth.Movies[0].Title = lastModel.Name;
+            auth.Movies[0].year = Int16.Parse(lastModel.SubItemText);
+            auth.Movies[0].Plays = 1;
+
+            DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
+
+            seenClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+        }
+
+        private void client_UploadMovieSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                lastModel.Watched = true;
+                MessageBox.Show("Movie marked as watched.");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            lastModel = null;
+        }
+
+        private void WatchlistMovie_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+            var watchlistClient = new WebClient();
+            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieWatchlistStringCompleted);
+            WatchlistAuth auth = new WatchlistAuth();
+            auth.Movies = new TraktMovie[1];
+            auth.Movies[0] = new TraktMovie();
+            auth.Movies[0].imdb_id =lastModel.Imdb;
+            auth.Movies[0].Title = lastModel.Name;
+            auth.Movies[0].year = Int16.Parse(lastModel.SubItemText);
+            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+        }
+
+        void client_UploadMovieWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                lastModel.InWatchList = true;
+                MessageBox.Show("Movie added to watchlist.");
+
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            lastModel = null;
+        }
+
+        private void CheckinMovie_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            var checkinClient = new WebClient();
+             checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
+            CheckinAuth auth = new CheckinAuth();
+
+            auth.imdb_id = lastModel.Imdb;
+            auth.Title = lastModel.Name;
+            auth.year = Int16.Parse(lastModel.SubItemText);
+            auth.AppDate = AppUser.getReleaseDate();
+
+            var assembly = Assembly.GetExecutingAssembly().FullName;
+            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+            auth.AppVersion = fullVersionNumber;
+
+            checkinClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
+        }
+
+        void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                if (jsonString.Contains("failure"))
+                    MessageBox.Show("There is already a checkin in progress.");
+                else
+                    MessageBox.Show("Checked in!");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            lastModel = null;
+        }
 
         #endregion
 

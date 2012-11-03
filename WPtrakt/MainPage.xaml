@@ -52,6 +52,13 @@
                                     <Image Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
                                     <Image Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="60" Height="60"  Grid.Column="0" Source="Images/episode-watched.png"/>
                                     <Image Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="30" Height="30"  Grid.Column="0" Source="{Binding RatingImage}"/>
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu>
+                                            <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinMovie_Click" />
+                                            <toolkit:MenuItem Header="Mark as seen." Name="SeenEpisode" Click="SeenMovie_Click" />
+                                            <toolkit:MenuItem Header="Add to watchlist." Name="WatchlistEpisode" Click="WatchlistMovie_Click" />
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
