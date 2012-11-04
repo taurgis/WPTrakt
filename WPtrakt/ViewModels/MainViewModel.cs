@@ -295,7 +295,7 @@ namespace WPtrakt
         {
             Profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
             //Cache the profile for 4 hours, the history is prone to quick change. Though 4 hours is enough to catch server problems.
-            if ((DateTime.Now - Profile.DownloadTime).Hours < 4)
+            if ((DateTime.Now - Profile.DownloadTime).Hours < 2)
             {
                 loadHistory();
 
@@ -390,12 +390,21 @@ namespace WPtrakt
         {
             this.HistoryItems = new ObservableCollection<ListItemViewModel>();
 
+            if (Profile.Watching != null)
+            {
+                if (Profile.Watching.Episode != null)
+                    this.HistoryItems.Add(new ListItemViewModel() { Name = Profile.Watching.Episode.Title, ImageSource = Profile.Watching.Episode.Images.Screen, Imdb = Profile.Watching.Show.imdb_id + Profile.Watching.Episode.Season + Profile.Watching.Episode.Number, SubItemText = "Season " + Profile.Watching.Episode.Season + ", Episode " + Profile.Watching.Episode.Number, Episode = Profile.Watching.Episode.Number, Season = Profile.Watching.Episode.Season, Tvdb = Profile.Watching.Show.tvdb_id, Type = "episode"});
+                else if (Profile.Watching.Movie != null)
+                    this.HistoryItems.Add(new ListItemViewModel() { Name = Profile.Watching.Movie.Title, ImageSource = Profile.Watching.Movie.Images.Poster, Imdb = Profile.Watching.Movie.imdb_id, SubItemText = "Runtime: " + Profile.Watching.Movie.Runtime + " mins\r\n" + Profile.Watching.Movie.year.ToString(), Type = "movie" });
+         
+            }
+            
             foreach (TraktWatched watched in Profile.Watched)
             {
                 if (watched.Episode != null)
                     this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Episode.Title, ImageSource = watched.Episode.Images.Screen, Imdb = watched.Show.imdb_id + watched.Episode.Season + watched.Episode.Number, SubItemText = "Season " + watched.Episode.Season + ", Episode " + watched.Episode.Number, Episode = watched.Episode.Number, Season = watched.Episode.Season, Tvdb = watched.Show.tvdb_id, Type = "episode", WatchedTime = Int32.Parse(watched.Watched) });
                 else if (watched.Movie != null)
-                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Movie.Title, ImageSource = watched.Movie.Images.Poster, Imdb = watched.Movie.imdb_id, SubItemText = "Runtime: " + watched.Movie.Runtime + " mins\r\n" + watched.Movie.year.ToString(), Type = "movie" });
+                    this.HistoryItems.Add(new ListItemViewModel() { Name = watched.Movie.Title, ImageSource = watched.Movie.Images.Poster, Imdb = watched.Movie.imdb_id, SubItemText = "Runtime: " + watched.Movie.Runtime + " mins\r\n" + watched.Movie.year.ToString(), Type = "movie", WatchedTime = Int32.Parse(watched.Watched) });
             }
 
             if (this.HistoryItems.Count == 0)
