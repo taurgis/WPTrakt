@@ -339,41 +339,6 @@ namespace WPtrakt
             }
         }
 
-        private BitmapImage _thumbImage;
-        public BitmapImage ThumbImage
-        {
-            get
-            {
-                if (_thumbImage == null)
-                {
-                    String fileName = this._imdb + "thumb" + ".jpg";
-
-                    if (StorageController.doesFileExist(fileName))
-                    {
-                        _thumbImage = ImageController.getImageFromStorage(fileName);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            HttpWebRequest request;
-
-                            request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
-                            request.BeginGetResponse(new AsyncCallback(request_OpenReadThumbCompleted), new object[] { request });
-                        }
-                        catch (NullReferenceException) { }
-                        return null;
-                    }
-
-                    return _thumbImage;
-                }
-                else
-                {
-                    return _thumbImage;
-                }
-            }
-        }
-
         private BitmapImage _screenImage;
         public BitmapImage ScreenImage
         {
@@ -483,29 +448,6 @@ namespace WPtrakt
 
                         NotifyPropertyChanged("ScreenImage");
                     }));
-                }
-            }
-            catch (WebException) { }
-        }
-
-        private void request_OpenReadThumbCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                     {
-                         _thumbImage = ImageController.saveImage(_imdb + "thumb.jpg", str, 61, 91, 70);
-                         NotifyPropertyChanged("ThumbImage");
-                     }));
                 }
             }
             catch (WebException) { }

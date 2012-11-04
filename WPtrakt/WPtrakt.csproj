@@ -236,6 +236,7 @@
     <Content Include="Images\poster-small.jpg" />
     <Content Include="Images\screen-small.jpg" />
     <Content Include="Images\seen.png" />
+    <Content Include="Images\thumb-small.jpg" />
     <Content Include="Images\watchlist.png" />
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>

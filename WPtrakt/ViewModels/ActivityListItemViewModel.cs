@@ -75,7 +75,8 @@ namespace WPtrakt.ViewModels
                             request.BeginGetResponse(new AsyncCallback(request_OpenReadThumbCompleted), new object[] { request });
                         }
                         catch (NullReferenceException) { }
-                        return null;
+                        BitmapImage tempImage = new BitmapImage(new Uri("Images/thumb-small.jpg", UriKind.Relative));
+                        return tempImage;
                     }
 
                     return _avatarImage;
