@@ -631,7 +631,7 @@ namespace WPtrakt
         {
             try
             {
-                _screenImage = ImageController.saveImage(_imdb + _season + _number + "screenlarge.jpg", e.Result, 218, 70);
+                _screenImage = ImageController.saveImage(_imdb + _season + _number + "screenlarge.jpg", e.Result, 218, 90);
                 NotifyPropertyChanged("ScreenImage");
             }
             catch (WebException) { }

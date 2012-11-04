@@ -395,9 +395,10 @@ namespace WPtrakt
 
                             request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource));
                             request.BeginGetResponse(new AsyncCallback(request_OpenReadScreenCompleted), new object[] { request });
-
+                           
+                            BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
+                            return tempImage;
                         }
-                        return null;
                     }
 
                     return _screenImage;

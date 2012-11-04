@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Scheduler;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.IO.IsolatedStorage;
@@ -6,14 +10,10 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Scheduler;
-using Microsoft.Phone.Shell;
-using Microsoft.Phone.Tasks;
 using WPtrakt.Controllers;
-using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtrakt.Model.Trakt.Request;
 
 namespace WPtrakt
 {
