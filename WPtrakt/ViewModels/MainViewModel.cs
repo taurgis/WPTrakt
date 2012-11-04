@@ -256,7 +256,7 @@ namespace WPtrakt
                     ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
                     userValidationTimer.Stop();
 
-                    Profile = new TraktProfile();
+                    Profile = new TraktProfileWithWatching();
                     NotifyPropertyChanged("LoadingStatus");
                 });
             }
@@ -293,8 +293,11 @@ namespace WPtrakt
 
         void profileworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfile));
-            //Cache the profile for 4 hours, the history is prone to quick change. Though 4 hours is enough to catch server problems.
+            
+            Profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfileWithWatching));
+   
+
+                //Cache the profile for 4 hours, the history is prone to quick change. Though 4 hours is enough to catch server problems.
             if ((DateTime.Now - Profile.DownloadTime).Hours < 2)
             {
                 loadHistory();
@@ -347,15 +350,25 @@ namespace WPtrakt
 
                     using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                     {
-                        var ser = new DataContractJsonSerializer(typeof(TraktProfile));
-                       
-                        this.Profile = (TraktProfile)ser.ReadObject(ms);
+                        if (jsonString.Contains("watching\":[]"))
+                        {
+                            var ser = new DataContractJsonSerializer(typeof(TraktProfile));
 
-                        StorageController.saveObject(this.Profile, typeof(TraktProfile));
+                            this.Profile = (TraktProfile)ser.ReadObject(ms);
+
+                            StorageController.saveObject(this.Profile, typeof(TraktProfile));
+                        }
+                        else
+                        {
+                            var ser = new DataContractJsonSerializer(typeof(TraktProfileWithWatching));
+
+                            this.Profile = (TraktProfileWithWatching)ser.ReadObject(ms);
+
+                            StorageController.saveObject(this.Profile, typeof(TraktProfileWithWatching));
+                        }
                         loadHistory();
-
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {                     
+                        {
                             NotifyPropertyChanged("HistoryItems");
                             RefreshProfile();
                         });
@@ -365,7 +378,7 @@ namespace WPtrakt
             }
             catch (WebException)
             {
-                Profile = new TraktProfile();
+                Profile = new TraktProfileWithWatching();
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
                     NotifyPropertyChanged("MainVisibility");
@@ -390,13 +403,15 @@ namespace WPtrakt
         {
             this.HistoryItems = new ObservableCollection<ListItemViewModel>();
 
-            if (Profile.Watching != null)
+            if (Profile.GetType() == typeof(TraktProfileWithWatching))
             {
-                if (Profile.Watching.Episode != null)
-                    this.HistoryItems.Add(new ListItemViewModel() { Name = Profile.Watching.Episode.Title, ImageSource = Profile.Watching.Episode.Images.Screen, Imdb = Profile.Watching.Show.imdb_id + Profile.Watching.Episode.Season + Profile.Watching.Episode.Number, SubItemText = "Season " + Profile.Watching.Episode.Season + ", Episode " + Profile.Watching.Episode.Number, Episode = Profile.Watching.Episode.Number, Season = Profile.Watching.Episode.Season, Tvdb = Profile.Watching.Show.tvdb_id, Type = "episode"});
-                else if (Profile.Watching.Movie != null)
-                    this.HistoryItems.Add(new ListItemViewModel() { Name = Profile.Watching.Movie.Title, ImageSource = Profile.Watching.Movie.Images.Poster, Imdb = Profile.Watching.Movie.imdb_id, SubItemText = "Runtime: " + Profile.Watching.Movie.Runtime + " mins\r\n" + Profile.Watching.Movie.year.ToString(), Type = "movie" });
-         
+                if (((TraktProfileWithWatching)Profile).Watching != null)
+                {
+                    if (((TraktProfileWithWatching)Profile).Watching.Episode != null)
+                        this.HistoryItems.Add(new ListItemViewModel() { Name = ((TraktProfileWithWatching)Profile).Watching.Episode.Title, ImageSource = ((TraktProfileWithWatching)Profile).Watching.Episode.Images.Screen, Imdb = ((TraktProfileWithWatching)Profile).Watching.Show.imdb_id + ((TraktProfileWithWatching)Profile).Watching.Episode.Season + ((TraktProfileWithWatching)Profile).Watching.Episode.Number, SubItemText = "Season " + ((TraktProfileWithWatching)Profile).Watching.Episode.Season + ", Episode " + ((TraktProfileWithWatching)Profile).Watching.Episode.Number, Episode = ((TraktProfileWithWatching)Profile).Watching.Episode.Number, Season = ((TraktProfileWithWatching)Profile).Watching.Episode.Season, Tvdb = ((TraktProfileWithWatching)Profile).Watching.Show.tvdb_id, Type = "episode" });
+                    else if (((TraktProfileWithWatching)Profile).Watching.Movie != null)
+                        this.HistoryItems.Add(new ListItemViewModel() { Name = ((TraktProfileWithWatching)Profile).Watching.Movie.Title, ImageSource = ((TraktProfileWithWatching)Profile).Watching.Movie.Images.Poster, Imdb = ((TraktProfileWithWatching)Profile).Watching.Movie.imdb_id, SubItemText = "Runtime: " + ((TraktProfileWithWatching)Profile).Watching.Movie.Runtime + " mins\r\n" + ((TraktProfileWithWatching)Profile).Watching.Movie.year.ToString(), Type = "movie" });
+                }
             }
             
             foreach (TraktWatched watched in Profile.Watched)

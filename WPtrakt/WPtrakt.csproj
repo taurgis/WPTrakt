@@ -49,9 +49,6 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Coding4Fun.Phone.Controls">
-      <HintPath>.\Coding4Fun.Phone.Controls.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Phone.Controls, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls.Toolkit">
@@ -71,34 +68,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\ErrorManager.cs" />
-    <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
-    <Compile Include="Controllers\ImageController.cs" />
-    <Compile Include="Controllers\StorageController.cs" />
-    <Compile Include="Controllers\Animation.cs" />
-    <Compile Include="Controllers\ToastNotification.cs" />
     <Compile Include="FriendActivity.xaml.cs">
       <DependentUpon>FriendActivity.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Model\Trakt\Request\WatchedSeasonAuth.cs" />
-    <Compile Include="Model\Trakt\Request\RegisterAuth.cs" />
-    <Compile Include="Model\Trakt\TraktFriendsActivity.cs" />
-    <Compile Include="Model\Trakt\TraktElapsed.cs" />
-    <Compile Include="Model\Trakt\TraktWhen.cs" />
-    <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
-    <Compile Include="Model\Trakt\Request\TraktMovieRequest.cs" />
-    <Compile Include="Model\Trakt\Request\ShoutAuth.cs" />
-    <Compile Include="Model\Trakt\Request\TraktEpisode.cs" />
-    <Compile Include="Model\Trakt\Request\WatchedEpisodeAuth.cs" />
-    <Compile Include="Model\Trakt\Request\CheckinAuth.cs" />
-    <Compile Include="Model\Trakt\Request\WatchedAuth.cs" />
-    <Compile Include="Model\Trakt\Request\RatingAuth.cs" />
-    <Compile Include="Model\Trakt\Request\WatchlistAuth.cs" />
-    <Compile Include="Model\Trakt\TraktActivity.cs" />
-    <Compile Include="Model\Trakt\TraktObject.cs" />
-    <Compile Include="Model\Trakt\TraktRating.cs" />
-    <Compile Include="Model\Trakt\TraktSeason.cs" />
-    <Compile Include="Model\Trakt\Request\TraktRequestAuth.cs" />
     <Compile Include="RatingSelector.xaml.cs">
       <DependentUpon>RatingSelector.xaml</DependentUpon>
     </Compile>
@@ -116,22 +88,12 @@
     <Compile Include="ViewShow.xaml.cs">
       <DependentUpon>ViewShow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Model\Trakt\TraktCalendar.cs" />
-    <Compile Include="Model\Trakt\TraktCalendarEpisode.cs" />
-    <Compile Include="Model\Trakt\TraktEpisode.cs" />
-    <Compile Include="Model\Trakt\TraktShout.cs" />
-    <Compile Include="Model\Trakt\TraktShow.cs" />
-    <Compile Include="Model\Trakt\TraktWatched.cs" />
     <Compile Include="MyShows.xaml.cs">
       <DependentUpon>MyShows.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Model\AppUser.cs" />
-    <Compile Include="Model\Trakt\TraktImage.cs" />
-    <Compile Include="Model\Trakt\TraktMovie.cs" />
-    <Compile Include="Model\Trakt\TraktProfile.cs" />
     <Compile Include="MyMovies.xaml.cs">
       <DependentUpon>MyMovies.xaml</DependentUpon>
     </Compile>
@@ -248,6 +210,10 @@
     <ProjectReference Include="..\PhonePerformance\PhonePerformance.csproj">
       <Project>{FCF263CD-388B-44E4-8A92-A4C5F670394F}</Project>
       <Name>PhonePerformance</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WPtraktBase\WPtraktBase.csproj">
+      <Project>{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}</Project>
+      <Name>WPtraktBase</Name>
     </ProjectReference>
     <ProjectReference Include="..\WPtraktLiveTile\WPtraktLiveTile.csproj">
       <Project>{EF30EF9C-FE16-4795-B541-71CAFB5B158B}</Project>

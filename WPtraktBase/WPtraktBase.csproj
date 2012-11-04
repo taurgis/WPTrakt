@@ -5,12 +5,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{EF30EF9C-FE16-4795-B541-71CAFB5B158B}</ProjectGuid>
+    <ProjectGuid>{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}</ProjectGuid>
     <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WPtraktLiveTile</RootNamespace>
-    <AssemblyName>WPtraktLiveTile</AssemblyName>
+    <RootNamespace>WPtraktBase</RootNamespace>
+    <AssemblyName>WPtraktBase</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
     <TargetFrameworkProfile>WindowsPhone71</TargetFrameworkProfile>
@@ -18,7 +18,6 @@
     <SilverlightApplication>false</SilverlightApplication>
     <ValidateXaml>true</ValidateXaml>
     <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
-    <BackgroundAgentType>ScheduledTaskAgent</BackgroundAgentType>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,7 +41,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Coding4Fun.Phone.Controls">
+      <HintPath>.\Coding4Fun.Phone.Controls.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Phone" />
+    <Reference Include="Microsoft.Phone.Controls, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Servicemodel.Web" />
     <Reference Include="System.Windows" />
@@ -51,20 +54,45 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Net" />
     <Reference Include="mscorlib.extensions" />
-    <Reference Include="System.Xml.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ScheduledAgent.cs" />
+    <Compile Include="Controllers\Animation.cs" />
+    <Compile Include="Controllers\ErrorManager.cs" />
+    <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
+    <Compile Include="Controllers\ImageController.cs" />
+    <Compile Include="Controllers\StorageController.cs" />
+    <Compile Include="Controllers\ToastNotification.cs" />
+    <Compile Include="Model\AppUser.cs" />
+    <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
+    <Compile Include="Model\Trakt\Request\CheckinAuth.cs" />
+    <Compile Include="Model\Trakt\Request\RatingAuth.cs" />
+    <Compile Include="Model\Trakt\Request\RegisterAuth.cs" />
+    <Compile Include="Model\Trakt\Request\ShoutAuth.cs" />
+    <Compile Include="Model\Trakt\Request\TraktEpisode.cs" />
+    <Compile Include="Model\Trakt\Request\TraktMovieRequest.cs" />
+    <Compile Include="Model\Trakt\Request\TraktRequestAuth.cs" />
+    <Compile Include="Model\Trakt\Request\WatchedAuth.cs" />
+    <Compile Include="Model\Trakt\Request\WatchedEpisodeAuth.cs" />
+    <Compile Include="Model\Trakt\Request\WatchedSeasonAuth.cs" />
+    <Compile Include="Model\Trakt\Request\WatchlistAuth.cs" />
+    <Compile Include="Model\Trakt\TraktActivity.cs" />
+    <Compile Include="Model\Trakt\TraktCalendar.cs" />
+    <Compile Include="Model\Trakt\TraktCalendarEpisode.cs" />
+    <Compile Include="Model\Trakt\TraktElapsed.cs" />
+    <Compile Include="Model\Trakt\TraktEpisode.cs" />
+    <Compile Include="Model\Trakt\TraktFriendsActivity.cs" />
+    <Compile Include="Model\Trakt\TraktImage.cs" />
+    <Compile Include="Model\Trakt\TraktMovie.cs" />
+    <Compile Include="Model\Trakt\TraktObject.cs" />
+    <Compile Include="Model\Trakt\TraktProfile.cs" />
+    <Compile Include="Model\Trakt\TraktProfileWithWatching.cs" />
+    <Compile Include="Model\Trakt\TraktRating.cs" />
+    <Compile Include="Model\Trakt\TraktSeason.cs" />
+    <Compile Include="Model\Trakt\TraktShout.cs" />
+    <Compile Include="Model\Trakt\TraktShow.cs" />
+    <Compile Include="Model\Trakt\TraktWatched.cs" />
+    <Compile Include="Model\Trakt\TraktWhen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WPtraktBase\WPtraktBase.csproj">
-      <Project>{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}</Project>
-      <Name>WPtraktBase</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />

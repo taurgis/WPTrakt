@@ -11,6 +11,8 @@ using System.Text;
 using System.Collections.Generic;
 using System.Windows.Media.Imaging;
 using System.Net.NetworkInformation;
+using WPtrakt.Model.Trakt;
+using WPtrakt.Model.Trakt.Request;
 
 namespace WPtraktLiveTile
 {

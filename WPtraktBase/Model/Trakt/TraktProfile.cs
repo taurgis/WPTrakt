@@ -32,13 +32,9 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "url")]
         public String Url { get; set; }
-
-        [DataMember(Name = "watching")]
-        public TraktWatched Watching {get; set;}
-
+      
         [DataMember(Name = "watched")]
         public TraktWatched[] Watched {get; set;}
-
 
         public static String getFolderStatic()
         {

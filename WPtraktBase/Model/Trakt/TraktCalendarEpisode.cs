@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Net;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using System.Runtime.Serialization;
 
-namespace WPtraktLiveTile
+namespace WPtrakt.Model.Trakt
 {
     [DataContract]
     public class TraktCalendarEpisode
@@ -20,6 +11,7 @@ namespace WPtraktLiveTile
 
         [DataMember(Name = "episode")]
         public TraktEpisode Episode { get; set; }
+
 
         public DateTime Date { get; set; }
     }

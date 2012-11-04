@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010 Express for Windows Phone
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Phone
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPtrakt", "WPtrakt\WPtrakt.csproj", "{E33498F4-4FA6-40BC-818B-2B68860F3B2B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clarity.Phone", "Clarity.Phone\Clarity.Phone.csproj", "{282CA4CA-0FF6-4A14-9FB2-1A14261A3953}"
@@ -8,6 +8,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPtraktLiveTile", "WPtraktLiveTile\WPtraktLiveTile.csproj", "{EF30EF9C-FE16-4795-B541-71CAFB5B158B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhonePerformance", "PhonePerformance\PhonePerformance.csproj", "{FCF263CD-388B-44E4-8A92-A4C5F670394F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPtraktBase", "WPtraktBase\WPtraktBase.csproj", "{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{FCF263CD-388B-44E4-8A92-A4C5F670394F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCF263CD-388B-44E4-8A92-A4C5F670394F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCF263CD-388B-44E4-8A92-A4C5F670394F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EF59A23-FA66-4D74-95BF-D5719D60AFAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
