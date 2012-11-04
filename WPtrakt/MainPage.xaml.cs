@@ -29,17 +29,19 @@ namespace WPtrakt
                 ToastNotification.ShowToast("Connection", "No connection available!");
                 return;
             }
+            var assembly = Assembly.GetExecutingAssembly().FullName;
+            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
 
             if (!App.ViewModel.IsDataLoaded)
             {
                 if (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password))
                 {
+                    AppUser.Instance.AppVersion = fullVersionNumber;
                     NavigationService.Navigate(new Uri("/Settings.xaml", UriKind.Relative));
                 }
                 else
                 {
-                    var assembly = Assembly.GetExecutingAssembly().FullName;
-                    var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+                    
 
                     if (AppUser.Instance.AppVersion != fullVersionNumber)
                     {

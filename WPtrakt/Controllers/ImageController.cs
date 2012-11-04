@@ -2,10 +2,8 @@
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WPtrakt.Model;
-using System.Linq;
 
 namespace WPtrakt.Controllers
 {
@@ -44,11 +42,12 @@ namespace WPtrakt.Controllers
 
         public static BitmapImage getImageFromStorage(String filename)
         {
-            using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
+            try
             {
-                BitmapImage bi = new BitmapImage();
-                try
+                using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
                 {
+                    BitmapImage bi = new BitmapImage();
+
                     using (IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open))
                     {
                         bi.SetSource(stream);
@@ -57,14 +56,14 @@ namespace WPtrakt.Controllers
                     }
                     return bi;
                 }
-                catch (IsolatedStorageException)
-                {
-                    return null;
-                }
-                catch (ArgumentException)
-                {
-                    return null;
-                }
+            }
+            catch (IsolatedStorageException)
+            {
+                return null;
+            }
+            catch (ArgumentException)
+            {
+                return null;
             }
         }
 
@@ -133,8 +132,6 @@ namespace WPtrakt.Controllers
             return bmp;
         }
 
-
-
         public static BitmapImage saveImage(String fileName, Stream pic, Int16 width, Int16 quality)
         {
             using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
@@ -164,8 +161,7 @@ namespace WPtrakt.Controllers
                     }
                 }
                 catch (IsolatedStorageException)
-                {
-                }
+                { }
 
                 return bi;
             }
