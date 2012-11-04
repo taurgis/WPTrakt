@@ -44,9 +44,6 @@
                         <ListBoxItem Width="200" Name="CreateButton" Visibility="Collapsed">
                             <Button HorizontalAlignment="Center" Content="Create" Click="Button_Click" Name="btnCreate"  />
                         </ListBoxItem>
-                        <ListBoxItem>
-                            <toolkit:ToggleSwitch  Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="320" />
-                        </ListBoxItem>
                     </ListBox>
                      </StackPanel>
             </controls:PanoramaItem>
@@ -66,6 +63,21 @@
                         <TextBlock TextDecorations="Underline" Text="Debug Info:" Width="114" />
                         <TextBlock Margin="10 2" Height="114"  Text="Since this application has quite a few images. This debug info is here untill the next version to keep the usage in check." TextWrapping="Wrap" Width="317" />
                     </StackPanel>
+                </StackPanel>
+            </controls:PanoramaItem>
+            <controls:PanoramaItem Header="Live Tile" Width="480">
+                <StackPanel>
+                    <ListBox Height="586" HorizontalAlignment="Left" Name="listBoxLiveTile" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <ListBoxItem>
+                            <toolkit:ToggleSwitch  Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="420" />
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <toolkit:ToggleSwitch x:Name="toggleRandom"  Content="Disabled" IsChecked="false"  Header="Randomise" Checked="toggleRandom_Checked_1" Unchecked="toggleRandom_Unchecked_1" Height="120" Width="420" />
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <toolkit:ToggleSwitch x:Name="togglePoster"  Content="Disabled" IsChecked="false"  Header="Use Show/Movie poster" Checked="togglePoster_Checked_1" Unchecked="togglePoster_Unchecked_1" Height="120" Width="420" />
+                        </ListBoxItem>
+                    </ListBox>
                 </StackPanel>
             </controls:PanoramaItem>
             <controls:PanoramaItem Header="About" Width="480">

@@ -164,26 +164,26 @@ namespace WPtrakt
 
         void tileMenuItem_Click(object sender, EventArgs e)
         {
-            if(StorageController.doesFileExist(App.ShowViewModel.Tvdb + "background.jpg"))
+            if (StorageController.doesFileExist(App.ShowViewModel.Tvdb + "largebackground.jpg"))
             {
-            ImageController.copyImageToShellContent(App.ShowViewModel.Tvdb + "background.jpg", App.ShowViewModel.Tvdb);
-            StandardTileData NewTileData = new StandardTileData
-            {
-                BackgroundImage =
-                     new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg", UriKind.Absolute),
-                BackContent = App.ShowViewModel.Name,
-            };
+                ImageController.copyImageToShellContent(App.ShowViewModel.Tvdb + "largebackground.jpg", App.ShowViewModel.Tvdb);
+                StandardTileData NewTileData = new StandardTileData
+                {
+                    BackgroundImage =
+                         new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg", UriKind.Absolute),
+                    BackContent = App.ShowViewModel.Name,
+                };
 
-            if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg"))
-            {
-                NewTileData.BackgroundImage = new Uri("appdata:background.png");;
-            }
+                if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg"))
+                {
+                    NewTileData.BackgroundImage = new Uri("appdata:background.png"); ;
+                }
 
-            ShellTile.Create(
-            new Uri(
-                "/ViewShow.xaml?id=" + App.ShowViewModel.Tvdb,
-                UriKind.Relative),
-                NewTileData);
+                ShellTile.Create(
+                new Uri(
+                    "/ViewShow.xaml?id=" + App.ShowViewModel.Tvdb,
+                    UriKind.Relative),
+                    NewTileData);
             }
 
         }

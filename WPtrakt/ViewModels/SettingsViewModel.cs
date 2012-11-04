@@ -48,16 +48,6 @@ namespace WPtrakt
             }
         }
 
-        public String TimeUntillNextLiveUpdate
-        {
-        get{
-            //  int hoursSinceLastCall = (DateTime.Now - AppUser.Instance.LastExcecutedLiveTileUpdate).Hours;
-
-           // return "Next live tile update: " + (((4 - hoursSinceLastCall ) > 0) ? 4 - hoursSinceLastCall + " Hours." : "Under 60 minutes");
-            return "";
-            }
-        }
-
         public String DebugInfo
         {
             get

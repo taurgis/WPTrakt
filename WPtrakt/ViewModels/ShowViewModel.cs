@@ -642,6 +642,7 @@ namespace WPtrakt
 
                 request = (HttpWebRequest)WebRequest.Create(new Uri(Fanart));
                 request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
+
             }
         }
 
@@ -662,6 +663,34 @@ namespace WPtrakt
                     {
                         _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
                         NotifyPropertyChanged("BackgroundImage");
+                    }));
+
+
+                    HttpWebRequest largeRequest;
+
+                    largeRequest = (HttpWebRequest)WebRequest.Create(new Uri(Fanart));
+                    largeRequest.BeginGetResponse(new AsyncCallback(request_OpenReadFanartLargeCompleted), new object[] { largeRequest });
+                }
+            }
+            catch (WebException) { }
+        }
+
+        void request_OpenReadFanartLargeCompleted(IAsyncResult r)
+        {
+            try
+            {
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                       ImageController.saveImage(_tvdb + "largebackground.jpg", str, 1920, 100);
                     }));
                 }
             }

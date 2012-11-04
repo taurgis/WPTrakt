@@ -31,7 +31,7 @@ namespace WPtrakt.Controllers
                     if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg"))
                     {
                         IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open);
-                        saveImage("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 800, 450, 100);
+                        saveImage("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 1920, 100);
                         stream.Close();
                     }
                 }

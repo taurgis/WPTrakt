@@ -63,6 +63,7 @@
     <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Controllers\ToastNotification.cs" />
     <Compile Include="Model\AppUser.cs" />
+    <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
     <Compile Include="Model\Trakt\Request\CheckinAuth.cs" />
     <Compile Include="Model\Trakt\Request\RatingAuth.cs" />

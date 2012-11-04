@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Net.NetworkInformation;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
+using WPtrakt.Model;
+using WPtrakt.Controllers;
 
 namespace WPtraktLiveTile
 {
@@ -83,7 +85,14 @@ namespace WPtraktLiveTile
                         {
                             TraktCalendarEpisode nextEpisode = null;
 
-                            nextEpisode = LookupRandomNextEpisode(cal, nextEpisode);
+                            if (AppUser.Instance.LiveTileType == LiveTileType.Random)
+                            {
+                                nextEpisode = LookupRandomNextEpisode(cal, nextEpisode);
+                            }
+                            else
+                            {
+                                nextEpisode = LookupNextEpisode(cal, nextEpisode);
+                            }
 
                             if (nextEpisode != null)
                             {
@@ -133,6 +142,33 @@ namespace WPtraktLiveTile
             return nextEpisode;
         }
 
+        private static TraktCalendarEpisode LookupNextEpisode(TraktCalendar[] cal, TraktCalendarEpisode nextEpisode)
+        {
+            List<TraktCalendarEpisode> upcommingEpisodes = new List<TraktCalendarEpisode>();
+
+
+            foreach (TraktCalendar calendar in cal)
+            {
+                DateTime calDate = DateTime.Parse(calendar.Date);
+
+                if ((DateTime.UtcNow.Year <= calDate.Year) && (DateTime.UtcNow.Month <= calDate.Month) && (DateTime.UtcNow.DayOfYear <= calDate.DayOfYear))
+                {
+                    if ((calDate - DateTime.Now).Days > 7)
+                        break;
+
+                    foreach (TraktCalendarEpisode episode in calendar.Episodes)
+                    {
+                        episode.Date = calDate;
+                        upcommingEpisodes.Add(episode);
+                    }
+                }
+
+            }
+
+            nextEpisode = upcommingEpisodes[0];
+            return nextEpisode;
+        }
+
         private void CreateEpisodeTile(TraktCalendarEpisode nextEpisode)
         {
             ShellTile appTile = ShellTile.ActiveTiles.First();
@@ -141,11 +177,58 @@ namespace WPtraktLiveTile
             {
                 StandardTileData newTileData = new StandardTileData();
                 newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
-                newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today") : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
-                newTileData.BackgroundImage = new Uri("appdata:background.png");
+                newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today," + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
+                if (AppUser.Instance.LiveTileUsePoster)
+                {
+                    if (StorageController.doesFileExist(nextEpisode.Show.tvdb_id + "largebackground.jpg"))
+                    {
+                        ImageController.copyImageToShellContent(nextEpisode.Show.tvdb_id + "largebackground.jpg", nextEpisode.Show.tvdb_id);
+                        newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
+                    }
+                    else
+                    {
+                        this.LastTvDB = nextEpisode.Show.tvdb_id;
+
+                        HttpWebRequest request;
+
+                        request = (HttpWebRequest)WebRequest.Create(new Uri(nextEpisode.Show.Images.Fanart));
+                        request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
+
+                        newTileData.BackgroundImage = new Uri("appdata:background.png");
+                    }
+                }
+                else
+                {
+                    newTileData.BackgroundImage = new Uri("appdata:background.png");
+                }
+
                 appTile.Update(newTileData);
                 NotifyComplete();
             }
+        }
+
+        private String LastTvDB { get; set; }
+
+        void request_OpenReadFanartCompleted(IAsyncResult r)
+        {
+            try
+            {
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        ImageController.saveImage(LastTvDB + "largebackground.jpg", str, 1920, 100);
+                    }));
+                }
+            }
+            catch (WebException) { }
         }
 
         private void createNoUpcommingTile()
@@ -169,33 +252,9 @@ namespace WPtraktLiveTile
             {
                 var calendarClient = new WebClient();
                 calendarClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadCalendartringCompleted);
-                calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + IsolatedStorageSettings.ApplicationSettings["UserName"] + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"), createJsonStringForAuthentication());
+                calendarClient.UploadStringAsync(new Uri("http://api.trakt.tv/user/calendar/shows.json/5eaaacc7a64121f92b15acf5ab4d9a0b/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"), AppUser.createJsonStringForAuthentication());
             }
         }
-
-        private String createJsonStringForAuthentication()
-        {
-
-            //Create User object.
-            TraktRequestAuth user = new BasicAuth();
-
-            user.Username = (String)IsolatedStorageSettings.ApplicationSettings["UserName"];
-
-            user.Password = (String)IsolatedStorageSettings.ApplicationSettings["Password"];
-            //Create a stream to serialize the object to.
-            MemoryStream ms = new MemoryStream();
-
-            // Serializer the User object to the stream.
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(BasicAuth));
-            ser.WriteObject(ms, user);
-            byte[] json = ms.ToArray();
-            ms.Close();
-            String jsonString = Encoding.UTF8.GetString(json, 0, json.Length);
-            return jsonString;
-
-        }
-
-
 
         void client_UploadCalendartringCompleted(object sender, UploadStringCompletedEventArgs e)
         {

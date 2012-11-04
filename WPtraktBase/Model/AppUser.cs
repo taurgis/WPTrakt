@@ -61,6 +61,38 @@ namespace WPtrakt.Model
             }
         }
 
+        public LiveTileType LiveTileType
+        {
+            get
+            {
+                if (settings.Contains("LiveTileType"))
+                    return (LiveTileType)settings["LiveTileType"];
+                else
+                    return LiveTileType.Random;
+            }
+            set
+            {
+                settings["LiveTileType"] = value;
+                settings.Save();
+            }
+        }
+
+        public Boolean LiveTileUsePoster
+        {
+            get
+            {
+                if (settings.Contains("LiveTileUsePoster"))
+                    return (Boolean)settings["LiveTileUsePoster"];
+                else
+                    return false;
+            }
+            set
+            {
+                settings["LiveTileUsePoster"] = value;
+                settings.Save();
+            }
+        }
+
         private string _oldPassword;
         public String Password
         {

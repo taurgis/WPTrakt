@@ -31,9 +31,33 @@ namespace WPtrakt
             if (oldTask != null)
             {
                 this.toggle.IsChecked = true;
+                this.toggleRandom.IsEnabled = true;
+                this.togglePoster.IsEnabled = true;
+                if (AppUser.Instance.LiveTileType == LiveTileType.Random)
+                {
+                    toggleRandom.IsChecked = true;
+                    this.toggleRandom.Content = "Enabled";
+                }
+                else
+                {
+                    toggleRandom.IsChecked = false;
+                    this.toggleRandom.Content = "Disabled";
+                }
+
+                if (AppUser.Instance.LiveTileUsePoster)
+                {
+                    togglePoster.IsChecked = true;
+                    this.togglePoster.Content = "Enabled";
+                }
+                else
+                    this.togglePoster.Content = "Disabled";
             }
             else
+            {
                 this.toggle.IsChecked = false;
+                this.toggleRandom.IsEnabled = false;
+                this.togglePoster.IsEnabled = false;
+            }
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -89,6 +113,19 @@ namespace WPtrakt
                     ScheduledActionService.Add(task);
                 }
                 catch (InvalidOperationException) { }
+
+
+                AppUser.Instance.LiveTileUsePoster = (Boolean)togglePoster.IsChecked;
+
+                if ((Boolean)toggleRandom.IsChecked)
+                {
+                    AppUser.Instance.LiveTileType = LiveTileType.Random;
+                }
+                else
+                {
+                    AppUser.Instance.LiveTileType = LiveTileType.ByDate;
+                }
+        
             }
             else
             {
@@ -120,12 +157,19 @@ namespace WPtrakt
         private void toggle_Checked(object sender, RoutedEventArgs e)
         {
             this.toggle.Content = "Enabled";
+            this.toggleRandom.IsEnabled = true;
+            this.togglePoster.IsEnabled = true;
         }
 
         private void toggle_Unchecked(object sender, RoutedEventArgs e)
         {
             this.toggle.Content = "Disabled";
-           
+            this.toggleRandom.IsEnabled = false;
+            this.toggleRandom.IsChecked = false;
+            this.toggleRandom.Content = "Disabled";
+            this.togglePoster.IsEnabled = false;
+            this.togglePoster.IsChecked = false;
+            this.togglePoster.Content = "Disabled";
         }
 
         private void updateTileToStandard()
@@ -217,6 +261,26 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+        }
+
+        private void toggleRandom_Checked_1(object sender, RoutedEventArgs e)
+        {
+            toggleRandom.Content = "Enabled";
+        }
+
+        private void toggleRandom_Unchecked_1(object sender, RoutedEventArgs e)
+        {
+            toggleRandom.Content = "Disabled";
+        }
+
+        private void togglePoster_Checked_1(object sender, RoutedEventArgs e)
+        {
+            togglePoster.Content = "Enabled";
+        }
+
+        private void togglePoster_Unchecked_1(object sender, RoutedEventArgs e)
+        {
+            togglePoster.Content = "Disabled";
         }
     }
 }
