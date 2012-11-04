@@ -477,9 +477,7 @@ namespace WPtrakt
                 }
             }
             catch (WebException)
-            {
-                //Do nothing yet
-            }
+            { }
         }
         #endregion
 

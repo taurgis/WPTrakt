@@ -368,15 +368,7 @@ namespace WPtrakt
                                 break;
 
                             this.SuggestItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, Type = "Show", InWatchList = show.InWatchlist });
-                        }
-
-                        LoadingSuggestItems = false;
-
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            NotifyPropertyChanged("SuggestItems");
-                            NotifyPropertyChanged("LoadingStatusSuggestions");
-                        });
+                        }                 
                     }
                 }
             }
@@ -384,6 +376,14 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+
+            LoadingSuggestItems = false;
+
+            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                NotifyPropertyChanged("SuggestItems");
+                NotifyPropertyChanged("LoadingStatusSuggestions");
+            });
         }
 
         public void ClearItems()

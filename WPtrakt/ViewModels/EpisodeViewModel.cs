@@ -588,21 +588,25 @@ namespace WPtrakt
 
         void request_OpenReadFanartCompleted(IAsyncResult r)
         {
-            object[] param = (object[])r.AsyncState;
-            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-            if (status == System.Net.HttpStatusCode.OK)
+            try
             {
-                Stream str = httpResoponse.GetResponseStream();
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
 
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
-                    NotifyPropertyChanged("BackgroundImage");
-                }));
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
+                        NotifyPropertyChanged("BackgroundImage");
+                    }));
+                }
             }
+            catch (WebException) { }
         }
 
         private void LoadScreenImage()
@@ -625,9 +629,12 @@ namespace WPtrakt
 
         void client_OpenReadScreenCompleted(object sender, OpenReadCompletedEventArgs e)
         {
-            _screenImage = ImageController.saveImage(_imdb + _season + _number + "screenlarge.jpg", e.Result, 218, 70);
-            NotifyPropertyChanged("ScreenImage");
-
+            try
+            {
+                _screenImage = ImageController.saveImage(_imdb + _season + _number + "screenlarge.jpg", e.Result, 218, 70);
+                NotifyPropertyChanged("ScreenImage");
+            }
+            catch (WebException) { }
         }
 
         public void LoadShoutData(String tvdb, String season, String episode)

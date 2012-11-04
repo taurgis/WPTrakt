@@ -1,15 +1,14 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Net.NetworkInformation;
+using System;
 using System.Net;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Net.NetworkInformation;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
-using System.Reflection;
-using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model.Trakt;
-using System.ComponentModel;
+using WPtrakt.Model.Trakt.Request;
 
 namespace WPtrakt
 {

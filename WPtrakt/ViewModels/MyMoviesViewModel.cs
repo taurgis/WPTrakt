@@ -264,21 +264,21 @@ namespace WPtrakt
                             this.SuggestItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Type = "Movie", InWatchList = movie.InWatchlist, SubItemText = movie.year.ToString() });   
                         }
 
-                        LoadingSuggestItems = false;
-
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            NotifyPropertyChanged("SuggestItems");
-                            NotifyPropertyChanged("LoadingStatusSuggestions");
-                        });
                     }
                 }
-
             }
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+
+            LoadingSuggestItems = false;
+
+            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                NotifyPropertyChanged("SuggestItems");
+                NotifyPropertyChanged("LoadingStatusSuggestions");
+            });
         }
 
         #endregion

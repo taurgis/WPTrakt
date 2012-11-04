@@ -339,19 +339,6 @@ namespace WPtrakt
             }
         }
 
-        /// <summary>
-        /// Sample ViewModel property; this property is used in the view to display its value using a Binding.
-        /// </summary>
-        /// <returns></returns>
-
-
-
-
-        /// <summary>
-        /// Sample ViewModel property; this property is used in the view to display its value using a Binding.
-        /// </summary>
-        /// <returns></returns>
-        /// 
         private BitmapImage _thumbImage;
         public BitmapImage ThumbImage
         {
@@ -456,61 +443,71 @@ namespace WPtrakt
 
         void request_OpenReadMediumCompleted(IAsyncResult r)
         {
-            object[] param = (object[])r.AsyncState;
-            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-            if (status == System.Net.HttpStatusCode.OK)
+            try
             {
-                Stream str = httpResoponse.GetResponseStream();
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
 
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", str, 160, 90);
-                    NotifyPropertyChanged("MediumImage");
-                }));
-            }
+                    Stream str = httpResoponse.GetResponseStream();
 
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", str, 160, 90);
+                        NotifyPropertyChanged("MediumImage");
+                    }));
+                }
+            }
+            catch (WebException) { }
         }
         void request_OpenReadScreenCompleted(IAsyncResult r)
         {
-           
-            object[] param = (object[])r.AsyncState;
-            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-            if (status == System.Net.HttpStatusCode.OK)
+            try
             {
-                Stream str = httpResoponse.GetResponseStream();
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
 
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    _screenImage = ImageController.saveImage(_imdb + "screen.jpg", str, 150, 90);
-            
-                    NotifyPropertyChanged("ScreenImage");
-                }));
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        _screenImage = ImageController.saveImage(_imdb + "screen.jpg", str, 150, 90);
+
+                        NotifyPropertyChanged("ScreenImage");
+                    }));
+                }
             }
+            catch (WebException) { }
         }
 
         private void request_OpenReadThumbCompleted(IAsyncResult r)
         {
-            object[] param = (object[])r.AsyncState;
-            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-            if (status == System.Net.HttpStatusCode.OK)
+            try
             {
-                Stream str = httpResoponse.GetResponseStream();
-               
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                 {
-                     _thumbImage = ImageController.saveImage(_imdb + "thumb.jpg", str, 61, 91, 70);
-                    NotifyPropertyChanged("ThumbImage");
-                }));
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                     {
+                         _thumbImage = ImageController.saveImage(_imdb + "thumb.jpg", str, 61, 91, 70);
+                         NotifyPropertyChanged("ThumbImage");
+                     }));
+                }
             }
+            catch (WebException) { }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

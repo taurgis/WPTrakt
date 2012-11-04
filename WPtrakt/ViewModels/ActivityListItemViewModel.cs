@@ -89,21 +89,25 @@ namespace WPtrakt.ViewModels
 
         private void request_OpenReadThumbCompleted(IAsyncResult r)
         {
-            object[] param = (object[])r.AsyncState;
-            HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-            HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-            System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-            if (status == System.Net.HttpStatusCode.OK)
+            try
             {
-                Stream str = httpResoponse.GetResponseStream();
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
 
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
                 {
-                    _avatarImage = ImageController.saveImage(this.Name + "thumb.jpg", str, 50, 50, 70);
-                    NotifyPropertyChanged("AvatarImage");
-                }));
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        _avatarImage = ImageController.saveImage(this.Name + "thumb.jpg", str, 50, 50, 70);
+                        NotifyPropertyChanged("AvatarImage");
+                    }));
+                }
             }
+            catch (WebException) { }
         }
 
         private String _activity;
