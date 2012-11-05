@@ -183,9 +183,9 @@ namespace WPtrakt.Controllers
                     using (var isoFileStream = isoStore.CreateFile(fileName))
                     {
                         wb.SaveJpeg(isoFileStream, width, (int)newHeight, 0, quality);
-                        bi.SetSource(isoFileStream);
                         isoFileStream.Close();
                         wb = null;
+                        bi = null;
                     }
                 }
                 catch (IsolatedStorageException)
