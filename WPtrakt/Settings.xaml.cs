@@ -114,7 +114,7 @@ namespace WPtrakt
                   
                 }
                 catch (InvalidOperationException) { }
-               // ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+                //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
 
                 AppUser.Instance.LiveTileUsePoster = (Boolean)togglePoster.IsChecked;
 

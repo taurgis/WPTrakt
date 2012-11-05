@@ -156,7 +156,7 @@ namespace WPtraktLiveTile
                     if ((calDate - DateTime.Now).Days > 7)
                         break;
 
-
+                    calendar.Episodes[0].Date = calDate;
                     return calendar.Episodes[0];
                     
                 }
