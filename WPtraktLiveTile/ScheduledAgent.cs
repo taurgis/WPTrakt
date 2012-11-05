@@ -228,12 +228,13 @@ namespace WPtraktLiveTile
                     Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         ImageController.saveImageForTile(LastTvDB + "largebackground.jpg", str, 1920, 100);
+                        CreateTile();
                     }));
                 }
             }
             catch (WebException) { }
 
-            CreateTile();
+          
         }
 
         private void createNoUpcommingTile()
