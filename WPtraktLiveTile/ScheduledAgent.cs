@@ -156,17 +156,14 @@ namespace WPtraktLiveTile
                     if ((calDate - DateTime.Now).Days > 7)
                         break;
 
-                    foreach (TraktCalendarEpisode episode in calendar.Episodes)
-                    {
-                        episode.Date = calDate;
-                        upcommingEpisodes.Add(episode);
-                    }
+
+                    return calendar.Episodes[0];
+                    
                 }
 
             }
 
-            nextEpisode = upcommingEpisodes[0];
-            return nextEpisode;
+            return null;
         }
 
         private void CreateEpisodeTile(TraktCalendarEpisode nextEpisode)
@@ -182,28 +179,34 @@ namespace WPtraktLiveTile
                 {
                     if (StorageController.doesFileExist(nextEpisode.Show.tvdb_id + "largebackground.jpg"))
                     {
-                        ImageController.copyImageToShellContent(nextEpisode.Show.tvdb_id + "largebackground.jpg", nextEpisode.Show.tvdb_id);
-                        newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
+                         Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            ImageController.copyImageToShellContent(nextEpisode.Show.tvdb_id + "largebackground.jpg", nextEpisode.Show.tvdb_id);
+                            newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
+                            appTile.Update(newTileData);
+                            NotifyComplete();
+                        }));         
                     }
                     else
                     {
                         this.LastTvDB = nextEpisode.Show.tvdb_id;
-
+                        newTileData.BackgroundImage = new Uri("appdata:background.png");
+                        appTile.Update(newTileData);
                         HttpWebRequest request;
 
                         request = (HttpWebRequest)WebRequest.Create(new Uri(nextEpisode.Show.Images.Fanart));
                         request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-
-                        newTileData.BackgroundImage = new Uri("appdata:background.png");
                     }
                 }
                 else
                 {
                     newTileData.BackgroundImage = new Uri("appdata:background.png");
+                    appTile.Update(newTileData);
+                    NotifyComplete();
                 }
 
-                appTile.Update(newTileData);
-                NotifyComplete();
+               
+              
             }
         }
 
@@ -224,11 +227,13 @@ namespace WPtraktLiveTile
 
                     Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        ImageController.saveImage(LastTvDB + "largebackground.jpg", str, 1920, 100);
+                        ImageController.saveImageForTile(LastTvDB + "largebackground.jpg", str, 1920, 100);
                     }));
                 }
             }
             catch (WebException) { }
+
+            CreateTile();
         }
 
         private void createNoUpcommingTile()

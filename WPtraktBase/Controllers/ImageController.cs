@@ -31,7 +31,7 @@ namespace WPtrakt.Controllers
                     if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg"))
                     {
                         IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open);
-                        saveImage("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 1920, 100);
+                        saveImageForTile("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 1920, 100);
                         stream.Close();
                     }
                 }
@@ -164,6 +164,32 @@ namespace WPtrakt.Controllers
                 { }
 
                 return bi;
+            }
+        }
+
+        public static void saveImageForTile(String fileName, Stream pic, Int16 width, Int16 quality)
+        {
+            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
+            {
+                var bi = new BitmapImage();
+                bi.SetSource(pic);
+
+                try
+                {
+                    var wb = new WriteableBitmap(bi);
+
+                    double newHeight = wb.PixelHeight * ((double)width / wb.PixelWidth);
+
+                    using (var isoFileStream = isoStore.CreateFile(fileName))
+                    {
+                        wb.SaveJpeg(isoFileStream, width, (int)newHeight, 0, quality);
+                        bi.SetSource(isoFileStream);
+                        isoFileStream.Close();
+                        wb = null;
+                    }
+                }
+                catch (IsolatedStorageException)
+                { }
             }
         }
     }
