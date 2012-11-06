@@ -54,8 +54,8 @@
                                     <toolkit:ContextMenuService.ContextMenu>
                                         <toolkit:ContextMenu>
                                             <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinMovie_Click" />
-                                            <toolkit:MenuItem Header="Mark as seen." Name="SeenEpisode" Click="SeenMovie_Click" />
-                                            <toolkit:MenuItem Header="Add to watchlist." Name="WatchlistEpisode" Click="WatchlistMovie_Click" />
+                                            <toolkit:MenuItem Header="Mark as seen" Name="SeenEpisode" Click="SeenMovie_Click" />
+                                            <toolkit:MenuItem Header="Add to watchlist" Name="WatchlistEpisode" Click="WatchlistMovie_Click" />
                                         </toolkit:ContextMenu>
                                     </toolkit:ContextMenuService.ContextMenu>
                                 </Grid>
