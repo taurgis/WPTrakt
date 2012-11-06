@@ -136,9 +136,9 @@ namespace WPtrakt
 
         void tileMenuItem_Click(object sender, EventArgs e)
         {
-            if (StorageController.doesFileExist(App.MovieViewModel.Imdb + "largebackground.jpg"))
+            if (StorageController.doesFileExist(App.MovieViewModel.Imdb + "background.jpg"))
             {
-                ImageController.copyImageToShellContent(App.MovieViewModel.Imdb + "largebackground.jpg", App.MovieViewModel.Imdb);
+                ImageController.copyImageToShellContent(App.MovieViewModel.Imdb + "background.jpg", App.MovieViewModel.Imdb);
                 StandardTileData NewTileData = new StandardTileData
                 {
                     BackgroundImage =
