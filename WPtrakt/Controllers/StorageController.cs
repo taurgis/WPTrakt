@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Phone.Info;
+using System;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization.Json;
@@ -8,6 +9,24 @@ namespace WPtrakt.Controllers
 {
     public class StorageController
     {
+        public static Boolean UserIsHighEndDevice()
+        {
+
+            // Place call in a try block in case the user is not running the most recent version of the Windows Phone OS and this method call is not supported.
+            try
+            {
+                long result =
+                (long)DeviceExtendedProperties.GetValue("ApplicationWorkingSetLimit");
+
+                return (result > 94371840);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return true;
+            }
+        }
+
+
         public static Boolean doesFileExist(String filename)
         {
             try

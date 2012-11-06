@@ -74,7 +74,7 @@ namespace WPtrakt.Controllers
                 var bi = new BitmapImage();
                 bi.SetSource(pic);
 
-                if (!AppUser.UserIsHighEndDevice())
+                if (!StorageController.UserIsHighEndDevice())
                 {
                     BitmapImage lowEndDeviceImage = resizeImage(bi, pic, width, height);
                     pic.Close();
@@ -139,7 +139,7 @@ namespace WPtrakt.Controllers
                 var bi = new BitmapImage();
                 bi.SetSource(pic);
 
-                if (!AppUser.UserIsHighEndDevice())
+                if (!StorageController.UserIsHighEndDevice())
                 {
                     BitmapImage lowEndDeviceImage = resizeImage(bi, pic, width);
                     pic.Close();

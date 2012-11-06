@@ -14,7 +14,6 @@ using System.Net.NetworkInformation;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
-using WPtrakt.Controllers;
 
 namespace WPtraktLiveTile
 {

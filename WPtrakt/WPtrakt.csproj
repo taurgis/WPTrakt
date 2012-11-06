@@ -49,6 +49,10 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Coding4Fun.Phone.Controls, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\WPtraktBase\Coding4Fun.Phone.Controls.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Phone.Controls, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Controls.Toolkit">
@@ -68,6 +72,12 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\Animation.cs" />
+    <Compile Include="Controllers\ErrorManager.cs" />
+    <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
+    <Compile Include="Controllers\ImageController.cs" />
+    <Compile Include="Controllers\StorageController.cs" />
+    <Compile Include="Controllers\ToastNotification.cs" />
     <Compile Include="FriendActivity.xaml.cs">
       <DependentUpon>FriendActivity.xaml</DependentUpon>
     </Compile>

@@ -1,5 +1,4 @@
-﻿using Microsoft.Phone.Info;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization.Json;
@@ -159,23 +158,6 @@ namespace WPtrakt.Model
             String jsonString = Encoding.UTF8.GetString(json, 0, json.Length);
             return jsonString;
 
-        }
-
-        public static Boolean UserIsHighEndDevice()
-        {
-
-            // Place call in a try block in case the user is not running the most recent version of the Windows Phone OS and this method call is not supported.
-            try
-            {
-                long result =
-                (long)DeviceExtendedProperties.GetValue("ApplicationWorkingSetLimit");
-
-                return (result > 94371840);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return true;
-            }
         }
 
         public static String getReleaseDate()
