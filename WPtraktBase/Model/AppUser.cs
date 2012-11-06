@@ -180,7 +180,7 @@ namespace WPtrakt.Model
 
         public static String getReleaseDate()
         {
-            return "25/10/2012";
+            return "06/11/2012";
         }
 
 
