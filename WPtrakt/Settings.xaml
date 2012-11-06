@@ -69,19 +69,19 @@
                 <StackPanel>
                     <ListBox Height="620" HorizontalAlignment="Left" Name="listBoxLiveTile" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBoxItem>
-                            <toolkit:ToggleSwitch  Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="420" />
+                            <toolkit:ToggleSwitch Foreground="{StaticResource PhoneForegroundBrush}"   Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="420" />
                         </ListBoxItem>
                         <ListBoxItem>
-                            <toolkit:ToggleSwitch x:Name="toggleRandom"  Content="Disabled" IsChecked="false"  Header="Randomise" Checked="toggleRandom_Checked_1" Unchecked="toggleRandom_Unchecked_1" Height="120" Width="420" />
+                            <toolkit:ToggleSwitch x:Name="toggleRandom" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Disabled" IsChecked="false"  Header="Randomise" Checked="toggleRandom_Checked_1" Unchecked="toggleRandom_Unchecked_1" Height="120" Width="420" />
                         </ListBoxItem>
                         <ListBoxItem >
                             <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="A random episode in the next week appears every 30 mins, otherwise the next episode in line is shown." TextWrapping="Wrap" Width="420" />
                         </ListBoxItem>
-                        <ListBoxItem Height="50"></ListBoxItem>
-                        <ListBoxItem>
-                            <toolkit:ToggleSwitch x:Name="togglePoster"  Content="Disabled" IsChecked="false"  Header="Use Show/Movie poster" Checked="togglePoster_Checked_1" Unchecked="togglePoster_Unchecked_1" Height="120" Width="420" />
+                        <ListBoxItem Visibility="Collapsed" Height="50"></ListBoxItem>
+                        <ListBoxItem Visibility="Collapsed">
+                            <toolkit:ToggleSwitch x:Name="togglePoster" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Disabled" IsChecked="false"  Header="Use Show/Movie poster" Checked="togglePoster_Checked_1" Unchecked="togglePoster_Unchecked_1" Height="120" Width="420" />
                         </ListBoxItem>
-                        <ListBoxItem>
+                        <ListBoxItem Visibility="Collapsed">
                             <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="Attempts to show the poster of the show as the live tile image. If images do not appear, try opening the show in the application to make sure the image is downloaded." TextWrapping="Wrap" Width="420" />
                         </ListBoxItem>
                     </ListBox>

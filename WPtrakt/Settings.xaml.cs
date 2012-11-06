@@ -25,6 +25,11 @@ namespace WPtrakt
             DataContext = App.SettingsViewModel;
            
             this.Loaded += new RoutedEventHandler(SettingsPage_Loaded);
+            
+        }
+
+        private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
+        {
             var taskName = "WPtraktLiveTile";
 
             var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
@@ -58,10 +63,7 @@ namespace WPtrakt
                 this.toggleRandom.IsEnabled = false;
                 this.togglePoster.IsEnabled = false;
             }
-        }
 
-        private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
-        {
             if (!App.SettingsViewModel.IsDataLoaded)
             {
                 App.SettingsViewModel.LoadData();
@@ -116,7 +118,7 @@ namespace WPtrakt
                 catch (InvalidOperationException) { }
                 //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
 
-                AppUser.Instance.LiveTileUsePoster = (Boolean)togglePoster.IsChecked;
+                AppUser.Instance.LiveTileUsePoster = false;
 
                 if ((Boolean)toggleRandom.IsChecked)
                 {

@@ -175,67 +175,13 @@ namespace WPtraktLiveTile
                 StandardTileData newTileData = new StandardTileData();
                 newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
                 newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today," + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
-                if (AppUser.Instance.LiveTileUsePoster)
-                {
-                    if (StorageController.doesFileExist(nextEpisode.Show.tvdb_id + "largebackground.jpg"))
-                    {
-                         Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            ImageController.copyImageToShellContent(nextEpisode.Show.tvdb_id + "largebackground.jpg", nextEpisode.Show.tvdb_id);
-                            newTileData.BackgroundImage = new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
-                            appTile.Update(newTileData);
-                            NotifyComplete();
-                        }));         
-                    }
-                    else
-                    {
-                        this.LastTvDB = nextEpisode.Show.tvdb_id;
-                        newTileData.BackgroundImage = new Uri("appdata:background.png");
-                        appTile.Update(newTileData);
-                        HttpWebRequest request;
-
-                        request = (HttpWebRequest)WebRequest.Create(new Uri(nextEpisode.Show.Images.Fanart));
-                        request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-                    }
-                }
-                else
-                {
-                    newTileData.BackgroundImage = new Uri("appdata:background.png");
-                    appTile.Update(newTileData);
-                    NotifyComplete();
-                }
-
                
-              
+                newTileData.BackgroundImage = new Uri("appdata:background.png");
+                appTile.Update(newTileData);
+                NotifyComplete();
             }
         }
 
-        private String LastTvDB { get; set; }
-
-        void request_OpenReadFanartCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        ImageController.saveImageForTile(LastTvDB + "largebackground.jpg", str, 1920, 100);
-                        NotifyComplete();
-                    }));
-                }
-            }
-            catch (WebException) { NotifyComplete(); }
-
-          
-        }
 
         private void createNoUpcommingTile()
         {
