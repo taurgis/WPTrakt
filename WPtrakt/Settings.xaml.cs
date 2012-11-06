@@ -198,8 +198,7 @@ namespace WPtrakt
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            btnCreate.IsEnabled = false;
-            btnCreate.Content = "Creating..";
+         
             string MatchEmailPattern =
             @"^(([\w-]+\.)+[\w-]+|([a-zA-Z]{1}|[\w-]{2,}))@"
      + @"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\.([0-1]?
@@ -216,6 +215,8 @@ namespace WPtrakt
 
             if (Regex.IsMatch(txtEmail.Text, MatchEmailPattern))
             {
+                btnCreate.IsEnabled = false;
+                btnCreate.Content = "Creating..";
                 progressBar.Visibility = System.Windows.Visibility.Visible;
                 var registerClient = new WebClient();
                 registerClient.UploadStringCompleted += new UploadStringCompletedEventHandler(registerClient_UploadStringCompleted);
