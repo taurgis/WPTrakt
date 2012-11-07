@@ -243,8 +243,8 @@ namespace WPtrakt
             }
         }
 
-        private BitmapImage _backgroundImage;
-        public BitmapImage BackgroundImage
+        private WriteableBitmap _backgroundImage;
+        public WriteableBitmap BackgroundImage
         {
             get
             {
@@ -629,11 +629,11 @@ namespace WPtrakt
 
         private void LoadBackgroundImage()
         {
-            String fileName = this._tvdb + "background" + ".jpg";
+            String fileName = this.Tvdb + "background." + ImageController.getExtentionFromUrl(this.Fanart);
 
             if (StorageController.doesFileExist(fileName))
             {
-                _backgroundImage = ImageController.getImageFromStorage(fileName);
+                _backgroundImage = ImageController.loadImageFromStream(this.Tvdb + "background", ImageController.getExtentionFromUrl(this.Fanart), 800, 600);
                 NotifyPropertyChanged("BackgroundImage");
             }
             else
@@ -642,7 +642,6 @@ namespace WPtrakt
 
                 request = (HttpWebRequest)WebRequest.Create(new Uri(Fanart));
                 request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-
             }
         }
 
@@ -658,10 +657,10 @@ namespace WPtrakt
                 if (status == System.Net.HttpStatusCode.OK)
                 {
                     Stream str = httpResoponse.GetResponseStream();
+                    ImageController.saveImageAsStream(_tvdb + "background", ImageController.getExtentionFromUrl(this.Fanart), str);
 
                     Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
                         NotifyPropertyChanged("BackgroundImage");
                     }));
                 }
