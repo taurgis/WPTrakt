@@ -344,18 +344,21 @@ namespace WPtrakt
             }
         }
 
-        private BitmapImage _screenImage;
-        public BitmapImage ScreenImage
+        private WriteableBitmap _screenImage;
+        public WriteableBitmap ScreenImage
         {
             get
             {
+                if (this.ImageSource == null)
+                    return null;
+
                 if (_screenImage == null)
                 {
-                    String fileName = this._imdb + "screen" + ".jpg";
+                    String fileName = this.Imdb + "screen." + ImageController.getExtentionFromUrl(this.ImageSource);
 
                     if (StorageController.doesFileExist(fileName))
                     {
-                        _screenImage = ImageController.getImageFromStorage(fileName);
+                        _screenImage = ImageController.loadImageFromStream(this._imdb + "screen", ImageController.getExtentionFromUrl(this.ImageSource), 230, 129);
                     }
                     else
                     {
@@ -367,7 +370,13 @@ namespace WPtrakt
                             request.BeginGetResponse(new AsyncCallback(request_OpenReadScreenCompleted), new object[] { request });
                            
                             BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
-                            return tempImage;
+                            tempImage.CreateOptions = BitmapCreateOptions.None;
+                            WriteableBitmap tempBitmap = null;
+                            tempImage.ImageOpened += (s, e) =>
+                            {
+                                tempBitmap = new WriteableBitmap(tempImage);
+                            };
+                            return tempBitmap;
                         }
                     }
 
@@ -380,18 +389,19 @@ namespace WPtrakt
             }
         }
 
-        private BitmapImage _mediumImage;
-        public BitmapImage MediumImage
+        private WriteableBitmap _mediumImage;
+        public WriteableBitmap MediumImage
         {
             get
             {
                 if (_mediumImage == null)
                 {
-                    String fileName = this._imdb + "medium" + ".jpg";
+
+                    String fileName = this.Imdb + "medium." + ImageController.getExtentionFromUrl(this.ImageSource);
 
                     if (StorageController.doesFileExist(fileName))
                     {
-                        _mediumImage = ImageController.getImageFromStorage(fileName);
+                        _mediumImage = ImageController.loadImageFromStream(this._imdb + "medium", ImageController.getExtentionFromUrl(this.ImageSource), 200, 289);
                     }
                     else
                     {
@@ -400,8 +410,14 @@ namespace WPtrakt
                         request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
                         request.BeginGetResponse(new AsyncCallback(request_OpenReadMediumCompleted), new object[] { request });
 
-                        BitmapImage tempImage = new BitmapImage(new Uri("Images/poster-small.jpg", UriKind.Relative));
-                        return tempImage;
+                        BitmapImage tempImage = new BitmapImage(new Uri("Images/poster-small.jpg", UriKind.RelativeOrAbsolute));
+                        tempImage.CreateOptions = BitmapCreateOptions.None;
+                        WriteableBitmap tempBitmap = null;
+                        tempImage.ImageOpened += (s, e) =>
+                        {
+                             tempBitmap = new WriteableBitmap(tempImage);
+                        };
+                        return tempBitmap;
                     }
                     return _mediumImage;  
                 }
@@ -425,9 +441,10 @@ namespace WPtrakt
                 {
                     Stream str = httpResoponse.GetResponseStream();
 
+
+                    ImageController.saveImageAsStream(this._imdb + "medium", ImageController.getExtentionFromUrl(this.ImageSource), str);
                     Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", str, 160, 90);
                         NotifyPropertyChanged("MediumImage");
                     }));
                 }
@@ -447,10 +464,10 @@ namespace WPtrakt
                 {
                     Stream str = httpResoponse.GetResponseStream();
 
+                    ImageController.saveImageAsStream(this.Imdb + "screen", ImageController.getExtentionFromUrl(this.ImageSource), str);
+
                     Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        _screenImage = ImageController.saveImage(_imdb + "screen.jpg", str, 150, 90);
-
                         NotifyPropertyChanged("ScreenImage");
                     }));
                 }

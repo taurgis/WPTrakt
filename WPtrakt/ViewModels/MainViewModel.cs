@@ -44,18 +44,18 @@ namespace WPtrakt
             }
         }
 
-        private BitmapImage _userAvatar;
-        public BitmapImage UserAvatar
+        private WriteableBitmap _userAvatar;
+        public WriteableBitmap UserAvatar
         {
             get
             {
                 if (_userAvatar == null && (Profile != null))
                 {
-                    String fileName = "profile.jpg";
+                    String fileName = "profile." + ImageController.getExtentionFromUrl(this.Profile.Avatar);
 
                     if (StorageController.doesFileExist(fileName))
                     {
-                        _userAvatar = ImageController.getImageFromStorage(fileName);
+                        _userAvatar = ImageController.loadImageFromStream("profile", ImageController.getExtentionFromUrl(this.Profile.Avatar), 100, 100);
                     }
                     else
                     {
@@ -91,12 +91,14 @@ namespace WPtrakt
             System.Net.HttpStatusCode status = httpResoponse.StatusCode;
             if (status == System.Net.HttpStatusCode.OK)
             {
-                Stream str = httpResoponse.GetResponseStream();
+               Stream str = httpResoponse.GetResponseStream();
 
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    this.UserAvatar = ImageController.saveImage("profile.jpg", str, 100, 90);
-                }));
+               ImageController.saveImageAsStream("profile", ImageController.getExtentionFromUrl(this.Profile.Avatar), str);
+
+               System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+               {
+                    NotifyPropertyChanged("Avatar");
+               });
             }
 
         }
