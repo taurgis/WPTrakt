@@ -1,5 +1,4 @@
-﻿using Microsoft.Phone;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Windows.Controls;
@@ -192,44 +191,6 @@ namespace WPtrakt.Controllers
                 catch (IsolatedStorageException)
                 { }
             }
-        }
-
-        public static void saveImageAsStream(string filename, String extention, Stream str)
-        {
-            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                if (!store.FileExists(filename + "." + extention)) // Check if file exists
-                {
-                    using (var fs = new IsolatedStorageFileStream(filename + "." + extention, FileMode.Create, store))
-                    {
-                        byte[] bytesInStream = new byte[str.Length];
-                        str.Read(bytesInStream, 0, (int)bytesInStream.Length);
-                        fs.Write(bytesInStream, 0, bytesInStream.Length);
-                        fs.Flush();
-                        fs.Close();
-                    }
-                    str.Close();
-                }
-            }
-        }
-
-        public static WriteableBitmap loadImageFromStream(String filename, String extention, int height, int width)
-        {
-            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                using (var fs = new IsolatedStorageFileStream(filename + "." + extention, FileMode.Open, store))
-                {
-                    WriteableBitmap wBitmap = PictureDecoder.DecodeJpeg(fs, width, height);
-                    fs.Close();
-
-                    return wBitmap;
-                }
-            }
-        }
-
-        public static string getExtentionFromUrl(String url)
-        {
-            return url.Substring(url.Length - 3);
         }
     }
 }

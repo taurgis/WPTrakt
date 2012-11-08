@@ -82,13 +82,9 @@ namespace WPtrakt
 
             foreach (String file in myIsolatedStorage.GetFileNames())
             {
-                try
-                {
-                    IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
-                    usage += stream.Length;
-                    stream.Close();
-                }
-                catch (IsolatedStorageException) { }
+                IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
+                usage += stream.Length;
+                stream.Close();
             }
 
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>

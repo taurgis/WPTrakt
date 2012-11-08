@@ -222,7 +222,7 @@ namespace WPtraktLiveTile
                     {
 
                         using (var isoFileStream = isoStore.CreateFile("upcomming.json"))
-                        { 
+                        {
 
                             ser.WriteObject(isoFileStream, obj);
 
