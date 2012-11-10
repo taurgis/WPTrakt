@@ -198,7 +198,7 @@ namespace WPtraktLiveTile
                 {
                     FlipTileData newTileData = new FlipTileData();
                     newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
-                    newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today," + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
+                    newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today, " + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
                
                
                     newTileData.BackgroundImage = new Uri("appdata:background.png");
