@@ -171,11 +171,13 @@ namespace WPtraktLiveTile
 
             if (appTile != null)
             {
-                StandardTileData newTileData = new StandardTileData();
+                FlipTileData newTileData = new FlipTileData();
                 newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
                 newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today," + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
-               
+              
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
+                newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
+                newTileData.WideBackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number + "\r\n\r\n" + nextEpisode.Episode.Title;
                 appTile.Update(newTileData);
                 NotifyComplete();
             }
@@ -188,9 +190,11 @@ namespace WPtraktLiveTile
 
             if (appTile != null)
             {
-                StandardTileData newTileData = new StandardTileData();
+                FlipTileData newTileData = new FlipTileData();
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
+                newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
                 newTileData.BackContent = "No upcomming episodes";
+                newTileData.WideBackContent = "No upcomming episodes";
                 newTileData.BackTitle = DateTime.Now.ToShortTimeString();
 
                 appTile.Update(newTileData);

@@ -33,7 +33,7 @@ namespace WPtrakt
 
             if (!App.ViewModel.IsDataLoaded)
             {
-                if (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password))
+                if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
                 {
                     AppUser.Instance.AppVersion = fullVersionNumber;
                     NavigationService.Navigate(new Uri("/Settings.xaml", UriKind.Relative));

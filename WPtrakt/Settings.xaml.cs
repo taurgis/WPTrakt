@@ -181,8 +181,9 @@ namespace WPtrakt
 
             if (appTile != null)
             {
-                StandardTileData newTileData = new StandardTileData();
+                FlipTileData newTileData = new FlipTileData();
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
+                newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
                 newTileData.BackContent = "";
                 newTileData.BackTitle = "";
                 
