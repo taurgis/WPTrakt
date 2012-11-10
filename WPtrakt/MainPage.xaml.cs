@@ -40,8 +40,6 @@ namespace WPtrakt
                 }
                 else
                 {
-                    
-
                     if (AppUser.Instance.AppVersion != fullVersionNumber)
                     {
                         MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
