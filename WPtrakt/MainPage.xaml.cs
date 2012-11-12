@@ -1,5 +1,6 @@
 ﻿using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
+using Microsoft.Phone.Scheduler;
 using System;
 using System.Net;
 using System.Reflection;
@@ -33,6 +34,7 @@ namespace WPtrakt
 
             if (!App.ViewModel.IsDataLoaded)
             {
+                ReloadLiveTile();
                 if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
                 {
                     AppUser.Instance.AppVersion = fullVersionNumber;
@@ -50,6 +52,36 @@ namespace WPtrakt
                     App.ViewModel.LoadData();
                 }
             }
+        }
+
+        private static void ReloadLiveTile()
+        {
+            try
+            {
+                //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+
+                if (AppUser.Instance.LiveTileEnabled)
+                {
+                    var taskName = "WPtraktLiveTile";
+
+                    // If the task exists
+                    var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
+                    if (oldTask != null)
+                    {
+                        ScheduledActionService.Remove(taskName);
+                    }
+
+                    // Create the Task
+                    PeriodicTask task = new PeriodicTask(taskName);
+
+                    // Description is required
+                    task.Description = "This task updates the WPtrakt live tile.";
+
+                    // Add it to the service to execute
+                    ScheduledActionService.Add(task);
+                }
+            }
+            catch (InvalidOperationException) { }
         }
 
         private void MainPanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)

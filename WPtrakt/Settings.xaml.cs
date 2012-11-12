@@ -30,10 +30,7 @@ namespace WPtrakt
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
-            var taskName = "WPtraktLiveTile";
-
-            var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
-            if (oldTask != null)
+            if (AppUser.Instance.LiveTileEnabled)
             {
                 this.toggle.IsChecked = true;
                 this.toggleRandom.IsEnabled = true;
@@ -111,17 +108,32 @@ namespace WPtrakt
         {
             if (toggle.IsChecked == true)
             {
-                var taskName = "WPtraktLiveTile";
-                PeriodicTask task = new PeriodicTask(taskName);
-                task.Description = "This task updates the WPtrakt live tile.";
                 try
                 {
+                    //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+
+                    var taskName = "WPtraktLiveTile";
+
+                    // If the task exists
+                    var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
+                    if (oldTask != null)
+                    {
+                        ScheduledActionService.Remove(taskName);
+                    }
+
+                    // Create the Task
+                    PeriodicTask task = new PeriodicTask(taskName);
+
+                    // Description is required
+                    task.Description = "This task updates the WPtrakt live tile.";
+
+                    // Add it to the service to execute
                     ScheduledActionService.Add(task);
-                  
+                   
                 }
                 catch (InvalidOperationException) { }
-                //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
 
+                AppUser.Instance.LiveTileEnabled = true;
                 AppUser.Instance.LiveTileUsePoster = false;
 
                 if ((Boolean)toggleRandom.IsChecked)
@@ -136,6 +148,7 @@ namespace WPtrakt
             }
             else
             {
+                AppUser.Instance.LiveTileEnabled = false;
                 DisableLiveTile();
             }
         }
@@ -189,6 +202,7 @@ namespace WPtrakt
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
                 newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
                 newTileData.BackContent = "";
+                newTileData.WideBackContent = "";
                 newTileData.BackTitle = "";
                 
                 appTile.Update(newTileData);
