@@ -58,7 +58,7 @@ namespace WPtrakt
         {
             try
             {
-                //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+                
 
                 if (AppUser.Instance.LiveTileEnabled)
                 {
@@ -79,6 +79,7 @@ namespace WPtrakt
 
                     // Add it to the service to execute
                     ScheduledActionService.Add(task);
+                   // ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
                 }
             }
             catch (InvalidOperationException) { }

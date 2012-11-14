@@ -39,7 +39,7 @@ namespace WPtrakt
         {
             get
             {
-                if (MovieItems.Count == 0)
+                if (LoadingMovies)
                 {
                     return "Visible";
                 }
@@ -54,7 +54,7 @@ namespace WPtrakt
         {
             get
             {
-                if (SuggestItems.Count == 0)
+                if (LoadingSuggestItems)
                 {
                     return "Visible";
                 }

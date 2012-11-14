@@ -137,7 +137,7 @@ namespace WPtraktLiveTile
 
             }
 
-            nextEpisode = upcommingEpisodes[new Random().Next(upcommingEpisodes.Count -1)];
+            nextEpisode = upcommingEpisodes[new Random().Next(0, upcommingEpisodes.Count)];
             return nextEpisode;
         }
 
@@ -154,8 +154,8 @@ namespace WPtraktLiveTile
                 {
                     if ((calDate - DateTime.Now).Days > 7)
                         break;
-
-                    TraktCalendarEpisode newItem = calendar.Episodes[new Random().Next(calendar.Episodes.Length -1)];
+                    Int32 next = new Random().Next(0, calendar.Episodes.Length);
+                    TraktCalendarEpisode newItem = calendar.Episodes[next];
                     newItem.Date = calDate;
                     return newItem;
                 }
