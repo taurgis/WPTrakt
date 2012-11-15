@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
   <DefaultLanguage xmlns="" code="en-US" />
-  <App xmlns="" ProductID="{869dc9ec-f67d-4f36-b334-86b8bc0405a9}" Title="WPtrakt" RuntimeType="Silverlight" Version="1.4.0.0" Genre="apps.normal" Author="MiniTech Reloaded" Description="A Trakt client for WP" Publisher="MiniTech Reloaded" BitsPerPixel="32" PublisherID="{11ba5537-7b1d-4da2-bfb7-c9a19d31b32c}">
+  <App xmlns="" ProductID="{869dc9ec-f67d-4f36-b334-86b8bc0405a9}" Title="WPtrakt" RuntimeType="Silverlight" Version="1.5.0.0" Genre="apps.normal" Author="MiniTech Reloaded" Description="A Trakt client for WP" Publisher="MiniTech Reloaded" BitsPerPixel="32" PublisherID="{11ba5537-7b1d-4da2-bfb7-c9a19d31b32c}">
     <IconPath IsRelative="true" IsResource="false">ApplicationIcon.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING" />
