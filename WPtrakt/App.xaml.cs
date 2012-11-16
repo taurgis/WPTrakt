@@ -16,7 +16,6 @@ namespace WPtrakt
         private static ShowViewModel showViewModel = null;
         private static EpisodeViewModel episodeViewModel = null;
         private static ActivityViewModel activityViewModel = null;
-        private bool reset;
         public PhoneApplicationFrame RootFrame { get; private set; }
         
 
@@ -208,25 +207,9 @@ namespace WPtrakt
 
             // Handle navigation failures
             RootFrame.NavigationFailed += RootFrame_NavigationFailed;
-            RootFrame.Navigating += RootFrame_Navigating;
-            RootFrame.Navigated += RootFrame_Navigated;
 
             // Ensure we don't initialize again
             phoneApplicationInitialized = true;
-        }
-
-        void RootFrame_Navigating(object sender, NavigatingCancelEventArgs e)
-        {
-            if (reset && e.IsCancelable && e.Uri.OriginalString == "/MainPage.xaml")
-            {
-                e.Cancel = true;
-                reset = false;
-            }
-        }
-
-        void RootFrame_Navigated(object sender, NavigationEventArgs e)
-        {
-            reset = e.NavigationMode == NavigationMode.Reset;
         }
 
         // Do not add any additional code to this method

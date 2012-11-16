@@ -171,46 +171,13 @@ namespace WPtraktLiveTile
 
             if (appTile != null)
             {
-
-
-                if (doesFileExist(nextEpisode.Show.tvdb_id + "background.jpg"))
-                {
-                FlipTileData newTileData = new FlipTileData();
+                StandardTileData newTileData = new StandardTileData();
                 newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
-                newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today, " + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
+                newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today," + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
                
-               
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        copyImageToShellContent(nextEpisode.Show.tvdb_id + "background.jpg", nextEpisode.Show.tvdb_id);
-                        newTileData.BackgroundImage =
-                           new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
-                        newTileData.WideBackgroundImage =
-                        new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
-                        newTileData.WideBackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number + "\r\n\r\n" + nextEpisode.Episode.Title;
-                        appTile.Update(newTileData);
-                        NotifyComplete();
-                    });
-
-                  
-                }
-                else
-                {
-                    FlipTileData newTileData = new FlipTileData();
-                    newTileData.BackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number;
-                    newTileData.BackTitle = ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today, " + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
-               
-               
-                    newTileData.BackgroundImage = new Uri("appdata:background.png");
-                    newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
-                    newTileData.WideBackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number + "\r\n\r\n" + nextEpisode.Episode.Title;
-                    appTile.Update(newTileData);
-
-
-                    NotifyComplete();
-                }
-
-               
+                newTileData.BackgroundImage = new Uri("appdata:background.png");
+                appTile.Update(newTileData);
+                NotifyComplete();
             }
         }
 
@@ -221,11 +188,9 @@ namespace WPtraktLiveTile
 
             if (appTile != null)
             {
-                FlipTileData newTileData = new FlipTileData();
+                StandardTileData newTileData = new StandardTileData();
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
-                newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
                 newTileData.BackContent = "No upcomming episodes";
-                newTileData.WideBackContent = "No upcomming episodes";
                 newTileData.BackTitle = DateTime.Now.ToShortTimeString();
 
                 appTile.Update(newTileData);
@@ -271,62 +236,6 @@ namespace WPtraktLiveTile
             }
             catch (WebException)
             {
-            }
-        }
-
-        private void copyImageToShellContent(String filename, String uniquekey)
-        {
-            try
-            {
-                using (IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForApplication())
-                {
-                    if (!doesFileExist("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg"))
-                    {
-                        IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open);
-                        saveImageForTile("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 1920, 100);
-                        stream.Close();
-                    }
-                }
-            }
-            catch (IsolatedStorageException) { }
-        }
-
-
-        private void saveImageForTile(String fileName, Stream pic, Int16 width, Int16 quality)
-        {
-            using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())
-            {
-                var bi = new BitmapImage();
-                bi.SetSource(pic);
-
-                try
-                {
-                    var wb = new WriteableBitmap(bi);
-
-                    double newHeight = wb.PixelHeight * ((double)width / wb.PixelWidth);
-
-                    using (var isoFileStream = isoStore.CreateFile(fileName))
-                    {
-                        wb.SaveJpeg(isoFileStream, width, (int)newHeight, 0, quality);
-                        isoFileStream.Close();
-                        wb = null;
-                        bi = null;
-                    }
-                }
-                catch (IsolatedStorageException)
-                { }
-            }
-        }
-
-        private  Boolean doesFileExist(String filename)
-        {
-            try
-            {
-                return IsolatedStorageFile.GetUserStoreForApplication().FileExists(filename);
-            }
-            catch (IsolatedStorageException)
-            {
-                return false;
             }
         }
     }

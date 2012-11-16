@@ -64,7 +64,7 @@ namespace WPtrakt
             if (!App.SettingsViewModel.IsDataLoaded)
             {
                 App.SettingsViewModel.LoadData();
-               
+
             }
             App.SettingsViewModel.Usage = "Calculating...";
             BackgroundWorker worker = new BackgroundWorker();
@@ -79,13 +79,9 @@ namespace WPtrakt
 
             foreach (String file in myIsolatedStorage.GetFileNames())
             {
-                try
-                {
-                    IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
-                    usage += stream.Length;
-                    stream.Close();
-                }
-                catch (IsolatedStorageException) { }
+                IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
+                usage += stream.Length;
+                stream.Close();
             }
 
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -110,8 +106,7 @@ namespace WPtrakt
             {
                 try
                 {
-                    //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
-
+                  
                     var taskName = "WPtraktLiveTile";
 
                     // If the task exists
@@ -129,7 +124,9 @@ namespace WPtrakt
 
                     // Add it to the service to execute
                     ScheduledActionService.Add(task);
-                   
+                    //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+
+
                 }
                 catch (InvalidOperationException) { }
 
@@ -144,7 +141,7 @@ namespace WPtrakt
                 {
                     AppUser.Instance.LiveTileType = LiveTileType.ByDate;
                 }
-        
+
             }
             else
             {
@@ -198,11 +195,9 @@ namespace WPtrakt
 
             if (appTile != null)
             {
-                FlipTileData newTileData = new FlipTileData();
+                StandardTileData newTileData = new StandardTileData();
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
-                newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
                 newTileData.BackContent = "";
-                newTileData.WideBackContent = "";
                 newTileData.BackTitle = "";
                 
                 appTile.Update(newTileData);

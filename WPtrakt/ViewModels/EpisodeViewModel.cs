@@ -636,7 +636,7 @@ namespace WPtrakt
                 NotifyPropertyChanged("ScreenImage");
             }
             catch (WebException) { }
-            catch(TargetInvocationException){}
+            catch (TargetInvocationException) { }
         }
 
         public void LoadShoutData(String tvdb, String season, String episode)

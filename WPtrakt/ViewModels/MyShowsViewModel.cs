@@ -57,7 +57,7 @@ namespace WPtrakt
         {
             get
             {
-                if (LoadingCalendar)
+                if (CalendarItems.Count == 0)
                 {
                     return "Visible";
                 }
@@ -72,7 +72,7 @@ namespace WPtrakt
         {
             get
             {
-                if (LoadingSuggestItems)
+                if (SuggestItems.Count == 0)
                 {
                     return "Visible";
                 }

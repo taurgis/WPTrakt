@@ -158,9 +158,6 @@ namespace WPtrakt
         {
             get
             {
-                if (this._loadingStatusTrending == null)
-                    return "Collapsed"; 
-
                 return _loadingStatusTrending;
             }
             set
