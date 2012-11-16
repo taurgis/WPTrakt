@@ -43,6 +43,23 @@ namespace WPtrakt.Model
             }
         }
 
+        public Boolean LiveTileEnabled
+        {
+            get
+            {
+
+                if (settings.Contains("LiveTileEnabled"))
+                    return (Boolean)settings["LiveTileEnabled"];
+                else
+                    return false;
+            }
+            set
+            {
+                settings["LiveTileEnabled"] = value;
+                settings.Save();
+            }
+        }
+
         public String UserName
         {
             get
