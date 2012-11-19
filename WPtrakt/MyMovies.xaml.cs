@@ -26,7 +26,7 @@ namespace WPtrakt
         {
             if (!App.MyMoviesViewModel.IsDataLoaded)
             {
-                App.MyMoviesViewModel.LoadData();
+                App.MyMoviesViewModel.LoadMyMoviesData();
             }
         }
 
@@ -53,7 +53,7 @@ namespace WPtrakt
             if (this.MyMoviesPanorama.SelectedIndex == 0)
             {
                 StorageController.DeleteFile("mymovies.json");
-                App.MyMoviesViewModel.LoadData();
+                App.MyMoviesViewModel.LoadMyMoviesData();
             }
             else
             {
@@ -174,6 +174,13 @@ namespace WPtrakt
         private void Panorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (this.MyMoviesPanorama.SelectedIndex == 1)
+            {
+                if (App.MyMoviesViewModel.WatchListMovieItems.Count == 0)
+                {
+                    App.MyMoviesViewModel.LoadMyWatchListMoviesData();
+                }
+            }
+            else if (this.MyMoviesPanorama.SelectedIndex == 2)
             {
                 if (App.MyMoviesViewModel.SuggestItems.Count == 0)
                 {

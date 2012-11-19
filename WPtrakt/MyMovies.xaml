@@ -37,6 +37,30 @@
                     </cc:QuickJumpGrid>
                 </StackPanel>
             </controls:PanoramaItem>
+            <controls:PanoramaItem Header="My Watchlist" Margin="0 -30" Orientation="Horizontal">
+                <StackPanel>
+                    <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusWatchListMovies}" Name="progressBarWatchList" IsIndeterminate="True" />
+                    <TextBlock Margin="0 -30" Name="loadingWatchlistText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusWatchListMovies}"/>
+                    <cc:QuickJumpGrid DataSource="{Binding WatchListMovieItems}"
+                                    IsAlphaNumeric="True"
+                                    Margin="12,10,0,0" Height="490" Width="Auto"  MaxWidth="880" Name="ListMyWatchListMovies">
+                        <cc:QuickJumpGrid.QuickJumpGridSelector>
+                            <local:MovieNameSelector />
+                        </cc:QuickJumpGrid.QuickJumpGridSelector>
+                        <cc:QuickJumpGrid.ItemTemplate>
+                            <DataTemplate>
+                                <Canvas Margin="0,6,0,6" Height="103" Tap="Canvas_Tap">
+                                    <StackPanel VerticalAlignment="Top" Orientation="Vertical">
+                                        <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </StackPanel>
+                                </Canvas>
+                            </DataTemplate>
+                        </cc:QuickJumpGrid.ItemTemplate>
+                    </cc:QuickJumpGrid>
+                </StackPanel>
+            </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -30" Header="Suggestions" Orientation="Horizontal" Name="SuggestionsPanoramaItem">
                 <StackPanel>
                     <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions">

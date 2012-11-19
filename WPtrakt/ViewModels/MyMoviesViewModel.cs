@@ -16,15 +16,16 @@ namespace WPtrakt
     public class MyMoviesViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ListItemViewModel> MovieItems { get; private set; }
+        public ObservableCollection<ListItemViewModel> WatchListMovieItems { get; private set; }
         public ObservableCollection<ListItemViewModel> SuggestItems { get; private set; }
         private Boolean LoadingSuggestItems { get; set; }
         private Boolean LoadingMovies { get; set; }
-
+        private Boolean LoadingWatchListMovies { get; set; }
         public MyMoviesViewModel()
         {
             this.MovieItems = new ObservableCollection<ListItemViewModel>();
             this.SuggestItems = new ObservableCollection<ListItemViewModel>();
-
+            this.WatchListMovieItems = new ObservableCollection<ListItemViewModel>();
         }
 
         #region Getters/Setters
@@ -33,6 +34,21 @@ namespace WPtrakt
         {
             get;
             private set;
+        }
+
+        public String LoadingStatusWatchListMovies
+        {
+            get
+            {
+                if (WatchListMovieItems.Count == 0)
+                {
+                    return "Visible";
+                }
+                else
+                {
+                    return "Collapsed";
+                }
+            }
         }
 
         public String LoadingStatusMovies
@@ -67,9 +83,146 @@ namespace WPtrakt
 
         #endregion
 
+        #region MyWatchListMovies
+
+        public void LoadMyWatchListMoviesData()
+        {
+            if (!this.LoadingWatchListMovies)
+            {
+                this.LoadingWatchListMovies = true;
+                this.WatchListMovieItems = new ObservableCollection<ListItemViewModel>();
+                RefreshMyWatchListMoviesView();
+                String fileName = "mywatchlistmovies.json";
+                if (StorageController.doesFileExist(fileName))
+                {
+                    BackgroundWorker worker = new BackgroundWorker();
+                    worker.WorkerReportsProgress = false;
+                    worker.WorkerSupportsCancellation = false;
+                    worker.DoWork += new DoWorkEventHandler(myWatchListMoviesworker_DoWork);
+
+                    worker.RunWorkerAsync();
+                }
+                else
+                {
+                    CallMyWatchListMoviesService();
+                }
+            }
+        }
+
+        void myWatchListMoviesworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String fileName = "mywatchlistmovies.json";
+            if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
+            {
+                TraktMovie[] myMovies = (TraktMovie[])StorageController.LoadObjectFromMain(fileName, typeof(TraktMovie[]));
+                ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+
+                foreach (TraktMovie movie in myMovies)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                }
+
+                if (tempItems.Count == 0)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                }
+
+                this.LoadingWatchListMovies = false;
+
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    UpdateMyWatchListMovieView(tempItems);
+                });
+            }
+            else
+            {
+                CallMyWatchListMoviesService();
+            }
+        }
+
+        private void CallMyWatchListMoviesService()
+        {
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/watchlist/movies.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetMyWatchListMoviesRequestStreamCallback), request);
+        }
+
+        void GetMyWatchListMoviesRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadMyWatchListMoviesStringCompleted), webRequest);
+        }
+
+        void client_DownloadMyWatchListMoviesStringCompleted(IAsyncResult r)
+        {
+            try
+            {
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
+
+                    ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                    {
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
+                        TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
+                        StorageController.saveObjectInMainFolder(obj, typeof(TraktMovie[]), "mywatchlistmovies.json");
+                        foreach (TraktMovie movie in obj)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                        }
+
+                        if (tempItems.Count == 0)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                        }
+
+                        this.LoadingWatchListMovies = false;
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            UpdateMyWatchListMovieView(tempItems);
+                        });
+                    }
+                }
+
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+
+        private void UpdateMyWatchListMovieView(ObservableCollection<ListItemViewModel> tempItems)
+        {
+            this.WatchListMovieItems = tempItems;
+            RefreshMyWatchListMoviesView();
+        }
+
+        private void RefreshMyWatchListMoviesView()
+        {
+            NotifyPropertyChanged("WatchListMovieItems");
+            NotifyPropertyChanged("LoadingStatusWatchListMovies");
+        }
+
+        #endregion
+
         #region MyMovies
 
-        public void LoadData()
+        public void LoadMyMoviesData()
         {
             if (!this.LoadingMovies)
             {
