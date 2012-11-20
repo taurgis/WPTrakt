@@ -18,13 +18,13 @@
         <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}" Name="MyMoviesPanorama">
             <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
                 <StackPanel>
-                    <my:ListPicker Height="48" HorizontalAlignment="Left" Name="Filter"
+                    <my:ListPicker Height="48" HorizontalAlignment="Left" Name="Filter" FontSize="10"
                            VerticalAlignment="Top" Width="396" SelectionChanged="Filter_SelectionChanged" >
                         <ListBoxItem>
-                            <TextBlock x:Name="itemAll" Text="All" FontSize="26" Margin="10, 6, 0, 8" />
+                            <TextBlock x:Name="itemAll" Text="All" FontSize="22" Margin="10, 6, 0, 8" />
                         </ListBoxItem>
                         <ListBoxItem>
-                            <TextBlock x:Name="itemWatchList" Text="Watchlist" FontSize="26" Margin="10, 6, 0, 8" />
+                            <TextBlock x:Name="itemWatchList" Text="Watchlist" FontSize="22" Margin="10, 6, 0, 8" />
                         </ListBoxItem>
                     </my:ListPicker>
                     <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusMovies}" Name="progressBar" IsIndeterminate="True" />
