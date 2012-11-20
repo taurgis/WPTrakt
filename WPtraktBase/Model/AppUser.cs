@@ -60,6 +60,24 @@ namespace WPtrakt.Model
             }
         }
 
+        public Int32 MyMoviesFilter
+        {
+            get
+            {
+
+                if (settings.Contains("MyMoviesFilter"))
+                    return (Int32)settings["MyMoviesFilter"];
+                else
+                    return 0;
+            }
+            set
+            {
+                settings["MyMoviesFilter"] = value;
+                settings.Save();
+            }
+        }
+
+
         public String UserName
         {
             get

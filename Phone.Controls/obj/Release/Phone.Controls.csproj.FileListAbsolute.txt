@@ -1,0 +1,6 @@
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt 7.1\Phone.Controls\Bin\Release\Phone.Controls.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt 7.1\Phone.Controls\Bin\Release\Phone.Controls.pdb
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt 7.1\Phone.Controls\obj\Release\Phone.Controls.csprojResolveAssemblyReference.cache
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt 7.1\Phone.Controls\obj\Release\Phone.Controls.g.resources
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt 7.1\Phone.Controls\obj\Release\Phone.Controls.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt 7.1\Phone.Controls\obj\Release\Phone.Controls.pdb

@@ -217,6 +217,10 @@
       <Project>{282CA4CA-0FF6-4A14-9FB2-1A14261A3953}</Project>
       <Name>Clarity.Phone</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Phone.Controls\Phone.Controls.csproj">
+      <Project>{9E2D636F-3ADB-44A8-9065-AFF16128735F}</Project>
+      <Name>Phone.Controls</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PhonePerformance\PhonePerformance.csproj">
       <Project>{FCF263CD-388B-44E4-8A92-A4C5F670394F}</Project>
       <Name>PhonePerformance</Name>

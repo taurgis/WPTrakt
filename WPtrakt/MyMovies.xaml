@@ -1,6 +1,8 @@
 ﻿<phone:PhoneApplicationPage 
     x:Class="WPtrakt.MyMovies"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    
+    xmlns:my="clr-namespace:Phone.Controls;assembly=Phone.Controls"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
@@ -8,6 +10,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
+ 
     xmlns:local="clr-namespace:WPtrakt"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
@@ -15,35 +18,20 @@
         <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}" Name="MyMoviesPanorama">
             <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
                 <StackPanel>
+                    <my:ListPicker Height="48" HorizontalAlignment="Left" Name="Filter"
+                           VerticalAlignment="Top" Width="396" SelectionChanged="Filter_SelectionChanged" >
+                        <ListBoxItem>
+                            <TextBlock x:Name="itemAll" Text="All" FontSize="26" Margin="10, 6, 0, 8" />
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <TextBlock x:Name="itemWatchList" Text="Watchlist" FontSize="26" Margin="10, 6, 0, 8" />
+                        </ListBoxItem>
+                    </my:ListPicker>
                     <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusMovies}" Name="progressBar" IsIndeterminate="True" />
                     <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovies}"/>
                     <cc:QuickJumpGrid DataSource="{Binding MovieItems}"
                                     IsAlphaNumeric="True"
-                                    Margin="12,10,0,0" Height="590" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
-                        <cc:QuickJumpGrid.QuickJumpGridSelector>
-                            <local:MovieNameSelector />
-                        </cc:QuickJumpGrid.QuickJumpGridSelector>
-                        <cc:QuickJumpGrid.ItemTemplate>
-                            <DataTemplate>
-                                <Canvas Margin="0,6,0,6" Height="103" Tap="Canvas_Tap">
-                                    <StackPanel VerticalAlignment="Top" Orientation="Vertical">
-                                        <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
-                                        <TextBlock Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
-                                    </StackPanel>
-                                </Canvas>
-                            </DataTemplate>
-                        </cc:QuickJumpGrid.ItemTemplate>
-                    </cc:QuickJumpGrid>
-                </StackPanel>
-            </controls:PanoramaItem>
-            <controls:PanoramaItem Header="My Watchlist" Margin="0 -30" Orientation="Horizontal">
-                <StackPanel>
-                    <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusWatchListMovies}" Name="progressBarWatchList" IsIndeterminate="True" />
-                    <TextBlock Margin="0 -30" Name="loadingWatchlistText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusWatchListMovies}"/>
-                    <cc:QuickJumpGrid DataSource="{Binding WatchListMovieItems}"
-                                    IsAlphaNumeric="True"
-                                    Margin="12,10,0,0" Height="490" Width="Auto"  MaxWidth="880" Name="ListMyWatchListMovies">
+                                    Margin="12,10,0,0" Height="535" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
