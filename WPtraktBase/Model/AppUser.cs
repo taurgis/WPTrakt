@@ -213,7 +213,7 @@ namespace WPtrakt.Model
 
         public static String getReleaseDate()
         {
-            return "06/11/2012";
+            return "22/11/2012";
         }
 
 
