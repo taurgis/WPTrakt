@@ -7,6 +7,7 @@ using System.Windows.Media.Animation;
 using Clarity.Phone.Controls;
 using Microsoft.Phone.Controls;
 using WPtrakt.Controllers;
+using WPtrakt.Model;
 
 namespace WPtrakt
 {
@@ -17,13 +18,22 @@ namespace WPtrakt
             InitializeComponent();
             DataContext = App.MyShowsViewModel;
             this.Loaded += new RoutedEventHandler(MyShowsPage_Loaded);
+
+            this.Filter.SelectedIndex = AppUser.Instance.MyShowsFilter;
         }
 
         private void MyShowsPage_Loaded(object sender, RoutedEventArgs e)
         {
             if (!App.MyShowsViewModel.IsDataLoaded)
             {
-                App.MyShowsViewModel.LoadData();
+                if (this.Filter.SelectedIndex == 0)
+                {
+                    App.MyShowsViewModel.LoadData();
+                }
+                else if (this.Filter.SelectedIndex == 1)
+                {
+                    App.MyShowsViewModel.LoadMyWatchListShowsData();
+                } 
             }
         }
 
@@ -102,7 +112,7 @@ namespace WPtrakt
             {
                 this.MyShowsPanorama.Margin = new Thickness(0, 0, 0, 0);
                 ListSuggestions.Width = 700;
-                ListMyShows.Height = 590;
+                ListMyShows.Height = 535;
                 ListUpcomming.Height = 519;
             }
             else
@@ -117,8 +127,19 @@ namespace WPtrakt
                 }
 
                 ListSuggestions.Width = 1370;
-                ListMyShows.Height = 480;
+                ListMyShows.Height = 420;
                 ListUpcomming.Height = 425;
+            }
+        }
+
+        private Int32 lastSelection;
+        private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.lastSelection != this.Filter.SelectedIndex)
+            {
+                this.lastSelection = this.Filter.SelectedIndex;
+                AppUser.Instance.MyShowsFilter = this.Filter.SelectedIndex;
+                App.MyShowsViewModel.FilterShows(this.Filter.SelectedIndex);
             }
         }
     }

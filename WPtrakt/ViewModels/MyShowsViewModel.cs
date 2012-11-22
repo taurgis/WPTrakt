@@ -216,6 +216,145 @@ namespace WPtrakt
             }
         }
 
+        public void FilterShows(int type)
+        {
+            if (type == 0)
+            {
+                this.LoadData();
+            }
+            else if (type == 1)
+            {
+                this.LoadMyWatchListShowsData();
+            }
+        }
+        #endregion
+
+        #region MyWatchListShows
+
+        public void LoadMyWatchListShowsData()
+        {
+            if (!this.LoadingMyShows)
+            {
+                this.LoadingMyShows = true;
+                this.ShowItems = new ObservableCollection<ListItemViewModel>();
+                RefreshMyShowsView();
+                String fileName = "mywatchlistshows.json";
+                if (StorageController.doesFileExist(fileName))
+                {
+                    BackgroundWorker worker = new BackgroundWorker();
+                    worker.WorkerReportsProgress = false;
+                    worker.WorkerSupportsCancellation = false;
+                    worker.DoWork += new DoWorkEventHandler(myWatchListShowsworker_DoWork);
+
+                    worker.RunWorkerAsync();
+                }
+                else
+                {
+                    CallMyWatchListShowsService();
+                }
+            }
+        }
+
+        void myWatchListShowsworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String fileName = "mywatchlistshows.json";
+            if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
+            {
+                TraktShow[] myShows = (TraktShow[])StorageController.LoadObjectFromMain(fileName, typeof(TraktShow[]));
+
+                ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                foreach (TraktShow show in myShows)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres });
+                }
+
+                if (tempItems.Count == 0)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                }
+
+                this.LoadingMyShows = false;
+
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    this.ShowItems = tempItems;
+                    RefreshMyShowsView();
+                });
+            }
+            else
+            {
+                CallMyWatchListShowsService();
+            }
+        }
+
+        private void CallMyWatchListShowsService()
+        {
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/watchlist/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetMyWatchListMoviesRequestStreamCallback), request);
+        }
+
+        void GetMyWatchListMoviesRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadMyWatchListShowsStringCompleted), webRequest);
+        }
+
+        void client_DownloadMyWatchListShowsStringCompleted(IAsyncResult r)
+        {
+            try
+            {
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
+
+                    ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                    {
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
+                        TraktShow[] obj = (TraktShow[])ser.ReadObject(ms);
+                        StorageController.saveObjectInMainFolder(obj, typeof(TraktShow[]), "mywatchlistshows.json");
+                        foreach (TraktShow show in obj)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres });
+                        }
+
+                        if (tempItems.Count == 0)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                        }
+
+                        this.LoadingMyShows = false;
+                        this.ShowItems = tempItems;
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            NotifyPropertyChanged("ShowItems");
+                            NotifyPropertyChanged("LoadingStatusShows");
+                        });
+                    }
+                }
+
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+
         #endregion
 
         #region Calendar

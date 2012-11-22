@@ -77,6 +77,22 @@ namespace WPtrakt.Model
             }
         }
 
+        public Int32 MyShowsFilter
+        {
+            get
+            {
+
+                if (settings.Contains("MyShowsFilter"))
+                    return (Int32)settings["MyShowsFilter"];
+                else
+                    return 0;
+            }
+            set
+            {
+                settings["MyShowsFilter"] = value;
+                settings.Save();
+            }
+        }
 
         public String UserName
         {

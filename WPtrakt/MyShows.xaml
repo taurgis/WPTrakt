@@ -2,6 +2,7 @@
     x:Class="WPtrakt.MyShows"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:my="clr-namespace:Phone.Controls;assembly=Phone.Controls"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
@@ -16,11 +17,20 @@
         <controls:Panorama Name="MyShowsPanorama" Title="My Shows" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
               <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
                 <StackPanel>
+                    <my:ListPicker Height="48" HorizontalAlignment="Left" Name="Filter" FontSize="10"
+                           VerticalAlignment="Top" Width="396" SelectionChanged="Filter_SelectionChanged" >
+                        <ListBoxItem>
+                            <TextBlock x:Name="itemAll" Text="All" FontSize="22" Margin="10, 6, 0, 8" />
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <TextBlock x:Name="itemWatchList" Text="Watchlist" FontSize="22" Margin="10, 6, 0, 8" />
+                        </ListBoxItem>
+                    </my:ListPicker>
                     <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusShows}" Name="progressBar" IsIndeterminate="True" />
                     <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShows}"/>
                     <cc:QuickJumpGrid DataSource="{Binding ShowItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,0,0,0" Height="590" Name="ListMyShows">
+                                  Margin="12,0,0,0" Height="535" Name="ListMyShows">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
