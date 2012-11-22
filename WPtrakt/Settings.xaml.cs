@@ -25,6 +25,11 @@ namespace WPtrakt
             DataContext = App.SettingsViewModel;
            
             this.Loaded += new RoutedEventHandler(SettingsPage_Loaded);
+
+            if (String.IsNullOrEmpty(AppUser.Instance.UserName) && String.IsNullOrEmpty(AppUser.Instance.Password))
+            {
+                LoginButton.Visibility = System.Windows.Visibility.Visible;
+            }
             
         }
 
@@ -102,11 +107,15 @@ namespace WPtrakt
 
         protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
         {
+            GoBack();
+        }
+
+        private void GoBack()
+        {
             if (toggle.IsChecked == true)
             {
                 try
                 {
-                  
                     var taskName = "WPtraktLiveTile";
 
                     // If the task exists
@@ -125,8 +134,6 @@ namespace WPtrakt
                     // Add it to the service to execute
                     ScheduledActionService.Add(task);
                     //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
-
-
                 }
                 catch (InvalidOperationException) { }
 
@@ -141,7 +148,6 @@ namespace WPtrakt
                 {
                     AppUser.Instance.LiveTileType = LiveTileType.ByDate;
                 }
-
             }
             else
             {
@@ -299,6 +305,18 @@ namespace WPtrakt
         private void togglePoster_Unchecked_1(object sender, RoutedEventArgs e)
         {
             togglePoster.Content = "Disabled";
+        }
+
+        private void btnLogin_Click_1(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password))
+            {
+                MessageBox.Show("Please fill in all fields");
+                return;
+            }
+
+            GoBack();
+            NavigationService.GoBack();
         }
     }
 }
