@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization.Json;
@@ -14,7 +14,8 @@ namespace WPtrakt.Model
         private IsolatedStorageSettings settings;
         public static AppUser Instance
         {
-            get{
+            get
+            {
                 if (appUser == null)
                     appUser = new AppUser();
                 return appUser;
@@ -60,12 +61,46 @@ namespace WPtrakt.Model
             }
         }
 
+        public Int32 MyMoviesFilter
+        {
+            get
+            {
+
+                if (settings.Contains("MyMoviesFilter"))
+                    return (Int32)settings["MyMoviesFilter"];
+                else
+                    return 0;
+            }
+            set
+            {
+                settings["MyMoviesFilter"] = value;
+                settings.Save();
+            }
+        }
+
+        public Int32 MyShowsFilter
+        {
+            get
+            {
+
+                if (settings.Contains("MyShowsFilter"))
+                    return (Int32)settings["MyShowsFilter"];
+                else
+                    return 0;
+            }
+            set
+            {
+                settings["MyShowsFilter"] = value;
+                settings.Save();
+            }
+        }
+
 
         public String UserName
         {
             get
             {
-               
+
                 if (settings.Contains("UserName"))
                     return settings["UserName"].ToString();
                 else
@@ -123,7 +158,7 @@ namespace WPtrakt.Model
                 }
                 else
                     return "";
-               
+
             }
             set
             {
@@ -145,8 +180,8 @@ namespace WPtrakt.Model
             //Create User object.
             TraktRequestAuth user = new BasicAuth();
 
-            user.Username =AppUser.Instance.UserName;
-        
+            user.Username = AppUser.Instance.UserName;
+
             user.Password = AppUser.Instance.Password;
             //Create a stream to serialize the object to.
             MemoryStream ms = new MemoryStream();
@@ -193,13 +228,13 @@ namespace WPtrakt.Model
 
             foreach (String file in myIsolatedStorage.GetFileNames())
             {
-                
-                     try
-                     {
-                         myIsolatedStorage.DeleteFile(file);
-                     }
-                     catch (IsolatedStorageException) { };
-           
+
+                try
+                {
+                    myIsolatedStorage.DeleteFile(file);
+                }
+                catch (IsolatedStorageException) { };
+
             }
 
             IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;
@@ -212,13 +247,13 @@ namespace WPtrakt.Model
                 {
                     foreach (String file in myIsolatedStorage.GetFileNames(dir + "/*"))
                     {
-                       
-                             try
-                             {
-                                 myIsolatedStorage.DeleteFile(dir + "/" + file);
-                             }
-                             catch (IsolatedStorageException) { };
-                    
+
+                        try
+                        {
+                            myIsolatedStorage.DeleteFile(dir + "/" + file);
+                        }
+                        catch (IsolatedStorageException) { };
+
                     }
                 }
             }

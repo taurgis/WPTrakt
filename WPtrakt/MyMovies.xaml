@@ -6,15 +6,32 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+  xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+   
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
+ 
     xmlns:local="clr-namespace:WPtrakt"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
     <Grid x:Name="LayoutRoot">
         <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}" Name="MyMoviesPanorama">
-            <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
+            <controls:PanoramaItem Margin="0 -20 10 0" Orientation="Horizontal">
                 <StackPanel>
+                    <toolkit:ListPicker  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                        <sys:String>All</sys:String>
+                        <sys:String>Watchlist</sys:String>
+                        <toolkit:ListPicker.FullModeItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="16 21 0 20">
+                                    <TextBlock Text="{Binding}"
+                                       Margin="0 0 0 0"
+                                       FontSize="43" 
+                                       FontFamily="{StaticResource PhoneFontFamilyLight}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </toolkit:ListPicker.FullModeItemTemplate>
+                    </toolkit:ListPicker>
                     <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusMovies}" Name="progressBar" IsIndeterminate="True" />
                     <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovies}"/>
                     <cc:QuickJumpGrid DataSource="{Binding MovieItems}"

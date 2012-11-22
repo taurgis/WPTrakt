@@ -7,6 +7,8 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+       xmlns:sys="clr-namespace:System;assembly=mscorlib"
+  
     xmlns:cc="clr-namespace:Clarity.Phone.Controls;assembly=Clarity.Phone"
     xmlns:local="clr-namespace:WPtrakt"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
@@ -14,15 +16,30 @@
 
     <Grid x:Name="LayoutRoot">
         <controls:Panorama Name="MyShowsPanorama" Title="My Shows" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
-              <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
+              <controls:PanoramaItem Margin="0 -20" Orientation="Horizontal">
                 <StackPanel>
+                    <toolkit:ListPicker  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                        <sys:String>All</sys:String>
+                        <sys:String>Watchlist</sys:String>
+                        <toolkit:ListPicker.FullModeItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="16 21 0 20">
+                                    <TextBlock Text="{Binding}"
+                                       Margin="0 0 0 0"
+                                       FontSize="43" 
+                                       FontFamily="{StaticResource PhoneFontFamilyLight}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </toolkit:ListPicker.FullModeItemTemplate>
+                    </toolkit:ListPicker>
+
                     <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusShows}" Name="progressBar" IsIndeterminate="True" />
                     <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShows}"/>
                     <cc:QuickJumpGrid DataSource="{Binding ShowItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,0,0,0" Height="590" Name="ListMyShows">
+                                  Margin="12,10,0,0" Height="590" Name="ListMyShows">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
-                            <local:MovieNameSelector />
+                            <local:ShowNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
                         <cc:QuickJumpGrid.ItemTemplate>
                             <DataTemplate>

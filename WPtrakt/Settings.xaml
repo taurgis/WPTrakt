@@ -26,13 +26,13 @@
                         <ListBoxItem>
                             <StackPanel Width="465" Height="100" Orientation="Horizontal">
                                 <TextBlock Text="Username:" Width="163" Height="46" Style="{StaticResource PhoneTextLargeStyle}"/>
-                                <TextBox Text="{Binding UserName, Mode=TwoWay}" Width="255" Height="70" />
+                                <TextBox Text="{Binding UserName, Mode=TwoWay}" Name="txtUsername"  Width="255" Height="70" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem>
                             <StackPanel Width="465" Height="100" Orientation="Horizontal">
                                 <TextBlock Text="Password:" Width="163" Height="46" Style="{StaticResource PhoneTextLargeStyle}"/>
-                                <PasswordBox Password="{Binding Password, Mode=TwoWay}" Width="255" Height="70" />
+                                <PasswordBox Name="txtPassword" Password="{Binding Password, Mode=TwoWay}" Width="255" Height="70" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem  Name="EmailText" Visibility="Collapsed">
@@ -43,6 +43,9 @@
                         </ListBoxItem>
                         <ListBoxItem Width="200" Name="CreateButton" Visibility="Collapsed">
                             <Button HorizontalAlignment="Center" Content="Create" Click="Button_Click" Name="btnCreate"  />
+                        </ListBoxItem>
+                        <ListBoxItem Width="200" Name="LoginButton" Visibility="Collapsed">
+                            <Button HorizontalAlignment="Center" Content="Login" Click="btnLogin_Click_1" Name="btnLogin"  />
                         </ListBoxItem>
                     </ListBox>
                      </StackPanel>
@@ -96,6 +99,7 @@
                     <StackPanel Orientation="Vertical" Margin="0 50">
                         <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="Support:" />
                         <TextBlock Foreground="CadetBlue" TextDecorations="Underline" Style="{StaticResource PhoneTextLargeStyle}" Text="wptrakt@outlook.com" Tap="TextBlock_Tap"/>
+                        <TextBlock Margin="50 20"  Foreground="CadetBlue" Name="Twitter" TextDecorations="Underline" Style="{StaticResource PhoneTextLargeStyle}" Text="@theunenth" Tap="Twitter_Tap_1"/>
                     </StackPanel>
                 </StackPanel>
             </controls:PanoramaItem>

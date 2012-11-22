@@ -20,13 +20,23 @@ namespace WPtrakt
             InitializeComponent();
             DataContext = App.MyMoviesViewModel;
             this.Loaded += new RoutedEventHandler(MyMoviesPage_Loaded);
+
+            this.Filter.SelectedIndex = AppUser.Instance.MyMoviesFilter;
         }
 
         private void MyMoviesPage_Loaded(object sender, RoutedEventArgs e)
         {
+
             if (!App.MyMoviesViewModel.IsDataLoaded)
             {
-                App.MyMoviesViewModel.LoadData();
+                if (this.Filter.SelectedIndex == 0)
+                {
+                    App.MyMoviesViewModel.LoadData();
+                }
+                else if (this.Filter.SelectedIndex == 1)
+                {
+                    App.MyMoviesViewModel.LoadMyWatchListMoviesData();
+                }
             }
         }
 
@@ -52,8 +62,16 @@ namespace WPtrakt
         {
             if (this.MyMoviesPanorama.SelectedIndex == 0)
             {
-                StorageController.DeleteFile("mymovies.json");
-                App.MyMoviesViewModel.LoadData();
+                if (this.Filter.SelectedIndex == 0)
+                {
+                    StorageController.DeleteFile("mymovies.json");
+                    App.MyMoviesViewModel.LoadData();
+                }
+                else if (this.Filter.SelectedIndex == 1)
+                {
+                    StorageController.DeleteFile("mywatchlistmovies.json");
+                    App.MyMoviesViewModel.LoadMyWatchListMoviesData();
+                }
             }
             else
             {
@@ -212,7 +230,20 @@ namespace WPtrakt
                 }
 
                 ListSuggestions.Width = 1370;
-                ListMyMovies.Height = 480;
+                ListMyMovies.Height = 420;
+            }
+        }
+        private Int32 lastSelection;
+        private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.Filter != null)
+            {
+                if (this.lastSelection != this.Filter.SelectedIndex)
+                {
+                    this.lastSelection = this.Filter.SelectedIndex;
+                    AppUser.Instance.MyMoviesFilter = this.Filter.SelectedIndex;
+                    App.MyMoviesViewModel.FilterMovies(this.Filter.SelectedIndex);
+                }
             }
         }
     }

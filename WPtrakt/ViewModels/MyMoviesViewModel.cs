@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -205,6 +206,143 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatusMovies");
         }
 
+        public void FilterMovies(int type)
+        {
+             if (type == 0)
+            {
+                this.LoadData();
+            }
+            else if (type == 1)
+            {
+                this.LoadMyWatchListMoviesData();
+            }
+        }
+
+        #endregion
+
+        #region MyWatchListMovies
+
+        public void LoadMyWatchListMoviesData()
+        {
+            if (!this.LoadingMovies)
+            {
+                this.LoadingMovies = true;
+                this.MovieItems = new ObservableCollection<ListItemViewModel>();
+                RefreshMyMoviesView();
+                String fileName = "mywatchlistmovies.json";
+                if (StorageController.doesFileExist(fileName))
+                {
+                    BackgroundWorker worker = new BackgroundWorker();
+                    worker.WorkerReportsProgress = false;
+                    worker.WorkerSupportsCancellation = false;
+                    worker.DoWork += new DoWorkEventHandler(myWatchListMoviesworker_DoWork);
+
+                    worker.RunWorkerAsync();
+                }
+                else
+                {
+                    CallMyWatchListMoviesService();
+                }
+            }
+        }
+
+        void myWatchListMoviesworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String fileName = "mywatchlistmovies.json";
+            if ((DateTime.Now - IsolatedStorageFile.GetUserStoreForApplication().GetLastWriteTime(fileName)).Days < 1)
+            {
+                TraktMovie[] myMovies = (TraktMovie[])StorageController.LoadObjectFromMain(fileName, typeof(TraktMovie[]));
+                ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+
+                foreach (TraktMovie movie in myMovies)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                }
+
+                if (tempItems.Count == 0)
+                {
+                    tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                }
+
+                this.LoadingMovies = false;
+
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    UpdateMyMovieView(tempItems);
+                });
+            }
+            else
+            {
+                CallMyWatchListMoviesService();
+            }
+        }
+
+        private void CallMyWatchListMoviesService()
+        {
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/watchlist/movies.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetMyWatchListMoviesRequestStreamCallback), request);
+        }
+
+        void GetMyWatchListMoviesRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadMyWatchListMoviesStringCompleted), webRequest);
+        }
+
+        void client_DownloadMyWatchListMoviesStringCompleted(IAsyncResult r)
+        {
+            try
+            {
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
+
+                    ObservableCollection<ListItemViewModel> tempItems = new ObservableCollection<ListItemViewModel>();
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                    {
+                        //parse into jsonser
+                        var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
+                        TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
+                        StorageController.saveObjectInMainFolder(obj, typeof(TraktMovie[]), "mywatchlistmovies.json");
+                        foreach (TraktMovie movie in obj)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres });
+                        }
+
+                        if (tempItems.Count == 0)
+                        {
+                            tempItems.Add(new ListItemViewModel() { Name = "Nothing Found" });
+                        }
+
+                        this.LoadingMovies = false;
+
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            UpdateMyMovieView(tempItems);
+                        });
+                    }
+                }
+
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+
         #endregion
 
         #region Suggest
@@ -292,5 +430,6 @@ namespace WPtrakt
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
     }
 }
