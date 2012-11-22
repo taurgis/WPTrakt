@@ -318,5 +318,13 @@ namespace WPtrakt
             GoBack();
             NavigationService.GoBack();
         }
+
+        private void Twitter_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            WebBrowserTask task = new WebBrowserTask();
+            task.Uri = new Uri("https://twitter.com/theunenth");
+
+            task.Show();
+        }
     }
 }

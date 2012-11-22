@@ -74,9 +74,16 @@ namespace WPtrakt
         {
             if (this.MyShowsPanorama.SelectedIndex == 0)
             {
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("myshows.json");
-
-                App.MyShowsViewModel.LoadData();
+                if (this.Filter.SelectedIndex == 0)
+                {
+                    IsolatedStorageFile.GetUserStoreForApplication().DeleteFile("myshows.json");
+                    App.MyShowsViewModel.LoadData();
+                }
+                else if (this.Filter.SelectedIndex == 1)
+                {
+                    StorageController.DeleteFile("mywatchlistshows.json");
+                    App.MyShowsViewModel.LoadMyWatchListShowsData();
+                }
             }
             else if (this.MyShowsPanorama.SelectedIndex == 1)
             {

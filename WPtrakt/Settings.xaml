@@ -99,6 +99,7 @@
                     <StackPanel Orientation="Vertical" Margin="0 50">
                         <TextBlock Style="{StaticResource PhoneTextLargeStyle}" Text="Support:" />
                         <TextBlock Foreground="CadetBlue" TextDecorations="Underline" Style="{StaticResource PhoneTextLargeStyle}" Text="wptrakt@outlook.com" Tap="TextBlock_Tap"/>
+                        <TextBlock Margin="50 20"  Foreground="CadetBlue" Name="Twitter" TextDecorations="Underline" Style="{StaticResource PhoneTextLargeStyle}" Text="@theunenth" Tap="Twitter_Tap_1"/>
                     </StackPanel>
                 </StackPanel>
             </controls:PanoramaItem>
