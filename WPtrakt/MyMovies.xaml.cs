@@ -215,8 +215,9 @@ namespace WPtrakt
             if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
             {
                 this.MyMoviesPanorama.Margin = new Thickness(0, 0, 0, 0);
+                this.Filter.Margin = new Thickness(0, -30, 0, 0);
                 ListSuggestions.Width = 700;
-                ListMyMovies.Height = 535;
+                ListMyMovies.Height = 570;
             }
             else
             {
@@ -229,6 +230,7 @@ namespace WPtrakt
                     this.MyMoviesPanorama.Margin = new Thickness(0, -180, 0, 0);
                 }
 
+                this.Filter.Margin = new Thickness(0, -20, 0, 0);
                 ListSuggestions.Width = 1370;
                 ListMyMovies.Height = 420;
             }
@@ -236,11 +238,14 @@ namespace WPtrakt
         private Int32 lastSelection;
         private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (this.lastSelection != this.Filter.SelectedIndex)
+            if (this.Filter != null)
             {
-                this.lastSelection = this.Filter.SelectedIndex;
-                AppUser.Instance.MyMoviesFilter = this.Filter.SelectedIndex;
-                App.MyMoviesViewModel.FilterMovies(this.Filter.SelectedIndex);
+                if (this.lastSelection != this.Filter.SelectedIndex)
+                {
+                    this.lastSelection = this.Filter.SelectedIndex;
+                    AppUser.Instance.MyMoviesFilter = this.Filter.SelectedIndex;
+                    App.MyMoviesViewModel.FilterMovies(this.Filter.SelectedIndex);
+                }
             }
         }
     }
