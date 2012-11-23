@@ -111,6 +111,100 @@ namespace WPtrakt.ViewModels
             catch (WebException) { }
         }
 
+        private string _screen;
+        public string Screen
+        {
+            get
+            {
+                return _screen;
+            }
+            set
+            {
+                if (value != _screen)
+                {
+                    _screen = value;
+                    NotifyPropertyChanged("Screen");
+                }
+            }
+        }
+
+        private BitmapImage _screenImage;
+        public BitmapImage ScreenImage
+        {
+            get
+            {
+                if (_screenImage == null)
+                {
+                     String fileName = "";
+                     if (!String.IsNullOrEmpty(Imdb))
+                     {
+                         fileName = this.Imdb + "screen" + ".jpg";
+                     }
+                     else
+                     {
+                         fileName = this.Tvdb + "screen" + ".jpg";
+                     }
+
+                    if (StorageController.doesFileExist(fileName))
+                    {
+                        _screenImage = ImageController.getImageFromStorage(fileName);
+                    }
+                    else
+                    {
+                        if (Screen != null)
+                        {
+                            HttpWebRequest request;
+
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(Screen));
+                            request.BeginGetResponse(new AsyncCallback(request_OpenReadScreenCompleted), new object[] { request });
+
+                            BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
+                            return tempImage;
+                        }
+                    }
+
+                    return _screenImage;
+                }
+                else
+                {
+                    return _screenImage;
+                }
+            }
+        }
+
+        void request_OpenReadScreenCompleted(IAsyncResult r)
+        {
+            try
+            {
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        String fileName;
+                        if (!String.IsNullOrEmpty(Imdb))
+                        {
+                            fileName = this.Imdb + "screen" + ".jpg";
+                        }
+                        else
+                        {
+                            fileName = this.Tvdb + "screen" + ".jpg";
+                        }
+                        _screenImage = ImageController.saveImage(fileName, str, 150, 90);
+
+                        NotifyPropertyChanged("ScreenImage");
+                    }));
+                }
+            }
+            catch (WebException) { }
+        }
+
         private String _activity;
         public String Activity
         {

@@ -67,20 +67,39 @@
                 </StackPanel>
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
-                <ListBox Margin="0 -25" Height="520" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" VerticalAlignment="Top" >
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,17" Tap="HistoryListItem_Tap">
-                                <Image Source="{Binding ScreenImage}" Width="150"/>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock TextWrapping="Wrap"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                    <TextBlock Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
-                                    <TextBlock Text="{Binding WatchedDate}" Style="{StaticResource PhoneTextSubtleStyle}"  />
-                                </StackPanel>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+                <StackPanel>
+                     <ProgressBar Visibility="{Binding LoadingStatusHistory}" x:Name="progressBarHistory" Margin="0 -20" IsIndeterminate="True" VerticalAlignment="Bottom" />
+
+                    <ListBox Margin="0 -25" Height="520" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" VerticalAlignment="Top" >
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="1" Source="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 10" Width="100"/>
+                                    <Grid Grid.Column="2" Height="Auto">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"></RowDefinition>
+                                            <RowDefinition Height="30"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Width="300" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                        <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Time}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+                </StackPanel>
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>

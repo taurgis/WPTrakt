@@ -10,6 +10,7 @@ using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
+using WPtrakt.ViewModels;
 
 namespace WPtrakt
 {
@@ -98,13 +99,20 @@ namespace WPtrakt
                     App.ViewModel.loadTrending();
                 }
             }
+            else if (MainPanorama.SelectedIndex == 2)
+            {
+                if (App.ViewModel.HistoryItems.Count == 0)
+                {
+                    App.ViewModel.LoadHistoryData();
+                }
+            }
         }
 
         #region Taps
 
         private void ApplicationBarRefreshButton_Click(object sender, EventArgs e)
         {
-            if ((MainPanorama.SelectedIndex == 0) || (MainPanorama.SelectedIndex == 2))
+            if (MainPanorama.SelectedIndex == 0)
             {
                 StorageController.DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
                 App.ViewModel.LoadData();
@@ -112,6 +120,10 @@ namespace WPtrakt
             else if (MainPanorama.SelectedIndex == 1)
             {
                 App.ViewModel.loadTrending();
+            }
+            else if (MainPanorama.SelectedIndex == 2)
+            {
+                App.ViewModel.LoadHistoryData();
             }
         }
 
@@ -139,15 +151,19 @@ namespace WPtrakt
             }
         }
 
-        private void HistoryListItem_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        private void Grid_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            ListItemViewModel model = (ListItemViewModel)((Panel)sender).DataContext;
-          
-            if (model.Type.Equals("episode"))
-                Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+            ActivityListItemViewModel model = (ActivityListItemViewModel)((Grid)sender).DataContext;
 
+            Uri redirectUri = null;
+            if (model.Type.Equals("episode"))
+                redirectUri = new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative);
+            else if (model.Type.Equals("movie"))
+                redirectUri = new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative);
             else
-                Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+                redirectUri = new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative);
+
+            Animation.NavigateToFadeOut(this, LayoutRoot, redirectUri);
         }
 
         #endregion
@@ -323,5 +339,7 @@ namespace WPtrakt
         {
             LayoutRoot.Opacity = 1;
         }
+
+
     }
 }
