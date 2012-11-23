@@ -136,8 +136,11 @@ namespace WPtraktLiveTile
                 }
 
             }
-
-            nextEpisode = upcommingEpisodes[new Random().Next(0, upcommingEpisodes.Count)];
+            try
+            {
+                nextEpisode = upcommingEpisodes[new Random().Next(0, upcommingEpisodes.Count)];
+            }
+            catch (ArgumentOutOfRangeException) { return null; }
             return nextEpisode;
         }
 

@@ -24,34 +24,38 @@ namespace WPtrakt
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!NetworkInterface.GetIsNetworkAvailable())
+            try
             {
-                ToastNotification.ShowToast("Connection", "No connection available!");
-                return;
-            }
-            var assembly = Assembly.GetExecutingAssembly().FullName;
-            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-
-            if (!App.ViewModel.IsDataLoaded)
-            {
-                ReloadLiveTile();
-                if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
+                if (!NetworkInterface.GetIsNetworkAvailable())
                 {
-                    AppUser.Instance.AppVersion = fullVersionNumber;
-                    NavigationService.Navigate(new Uri("/Settings.xaml", UriKind.Relative));
+                    ToastNotification.ShowToast("Connection", "No connection available!");
+                    return;
                 }
-                else
+                var assembly = Assembly.GetExecutingAssembly().FullName;
+                var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+
+                if (!App.ViewModel.IsDataLoaded)
                 {
-                    if (AppUser.Instance.AppVersion != fullVersionNumber)
+                    ReloadLiveTile();
+                    if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
                     {
-                        MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
-                        AppUser.ClearCache();
                         AppUser.Instance.AppVersion = fullVersionNumber;
+                        NavigationService.Navigate(new Uri("/Settings.xaml", UriKind.Relative));
                     }
+                    else
+                    {
+                        if (AppUser.Instance.AppVersion != fullVersionNumber)
+                        {
+                            MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
+                            AppUser.ClearCache();
+                            AppUser.Instance.AppVersion = fullVersionNumber;
+                        }
 
-                    App.ViewModel.LoadData();
+                        App.ViewModel.LoadData();
+                    }
                 }
             }
+            catch (InvalidOperationException) { }
         }
 
         private static void ReloadLiveTile()

@@ -136,22 +136,26 @@ namespace WPtrakt
 
         void tileMenuItem_Click(object sender, EventArgs e)
         {
-            if (StorageController.doesFileExist(App.MovieViewModel.Imdb + "background.jpg"))
+            try
             {
-                ImageController.copyImageToShellContent(App.MovieViewModel.Imdb + "background.jpg", App.MovieViewModel.Imdb);
-                StandardTileData NewTileData = new StandardTileData
+                if (StorageController.doesFileExist(App.MovieViewModel.Imdb + "background.jpg"))
                 {
-                    BackgroundImage =
-                         new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.MovieViewModel.Imdb + ".jpg", UriKind.Absolute),
-                    BackContent = App.MovieViewModel.Name,
-                };
+                    ImageController.copyImageToShellContent(App.MovieViewModel.Imdb + "background.jpg", App.MovieViewModel.Imdb);
+                    StandardTileData NewTileData = new StandardTileData
+                    {
+                        BackgroundImage =
+                             new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.MovieViewModel.Imdb + ".jpg", UriKind.Absolute),
+                        BackContent = App.MovieViewModel.Name,
+                    };
 
-                ShellTile.Create(
-                new Uri(
-                    "/ViewMovie.xaml?id=" + App.MovieViewModel.Imdb,
-                    UriKind.Relative),
-                    NewTileData);
+                    ShellTile.Create(
+                    new Uri(
+                        "/ViewMovie.xaml?id=" + App.MovieViewModel.Imdb,
+                        UriKind.Relative),
+                        NewTileData);
+                }
             }
+            catch (InvalidOperationException) { MessageBox.Show("Error creating tile, please try again!", "Error!", MessageBoxButton.OK); }
         }
 
         private void CreateRatingButton(ApplicationBar appBar)
