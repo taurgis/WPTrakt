@@ -157,10 +157,7 @@ namespace WPtrakt
                         NewTileData, true);
                 }
             }
-            catch (InvalidOperationException)
-            {
-
-            }
+            catch (InvalidOperationException) { MessageBox.Show("Error creating tile, please try again!", "Error!", MessageBoxButton.OK); }
         }
 
 
