@@ -142,7 +142,14 @@ namespace WPtrakt.ViewModels
                      }
                      else
                      {
-                         fileName = this.Tvdb + "screen" + ".jpg";
+                         if (this.Season > 0)
+                         {
+                             fileName = this.Tvdb + Season + Episode + "screen" + ".jpg";
+                         }
+                         else
+                         {
+                             fileName = this.Tvdb + "screen" + ".jpg";
+                         }
                      }
 
                     if (StorageController.doesFileExist(fileName))
@@ -194,7 +201,14 @@ namespace WPtrakt.ViewModels
                         }
                         else
                         {
-                            fileName = this.Tvdb + "screen" + ".jpg";
+                            if (this.Season > 0)
+                            {
+                                fileName = this.Tvdb + Season + Episode + "screen" + ".jpg";
+                            }
+                            else
+                            {
+                                fileName = this.Tvdb + "screen" + ".jpg";
+                            }
                         }
                         _screenImage = ImageController.saveImage(fileName, str, 150, 90);
 
