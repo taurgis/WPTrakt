@@ -170,14 +170,17 @@ namespace WPtrakt
             ActivityListItemViewModel model = (ActivityListItemViewModel)((Grid)sender).DataContext;
 
             Uri redirectUri = null;
-            if (model.Type.Equals("episode"))
-                redirectUri = new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative);
-            else if (model.Type.Equals("movie"))
-                redirectUri = new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative);
-            else
-                redirectUri = new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative);
+            if (model.Type != null)
+            {
+                if (model.Type.Equals("episode"))
+                    redirectUri = new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative);
+                else if (model.Type.Equals("movie"))
+                    redirectUri = new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative);
+                else
+                    redirectUri = new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative);
 
-            Animation.NavigateToFadeOut(this, LayoutRoot, redirectUri);
+                Animation.NavigateToFadeOut(this, LayoutRoot, redirectUri);
+            }
         }
 
         #endregion

@@ -552,7 +552,10 @@ namespace WPtrakt
                         }
                         catch (NullReferenceException) { }
                     }
-
+                    if (HistoryItems.Count == 0)
+                    {
+                        this.HistoryItems.Add(new ActivityListItemViewModel() { Activity = "No recent actions found. " });
+                    }
                     ms.Close();
                     this.LoadingHistory = false;
                     NotifyPropertyChanged("HistoryItems");
@@ -606,9 +609,15 @@ namespace WPtrakt
                     }
                 }
                 catch (NullReferenceException) { }
-
-                NotifyPropertyChanged("HistoryItems");
             }
+
+
+            if (HistoryItems.Count == 0)
+            {
+                this.HistoryItems.Add(new ActivityListItemViewModel() { Activity = "No recent actions found. " });
+            }
+
+            NotifyPropertyChanged("HistoryItems");
         }
 
         private void Shout(TraktActivity activity)
