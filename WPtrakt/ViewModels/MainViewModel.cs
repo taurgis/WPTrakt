@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
@@ -20,7 +21,7 @@ namespace WPtrakt
     {
         public ObservableCollection<ListItemViewModel> TrendingItems { get; private set; }
         public ObservableCollection<ActivityListItemViewModel> HistoryItems { get; private set; }
-
+        private List<TraktActivity> history;
         private DateTime firstCall { get; set; }
         public Boolean LoadingTrendingItems { get; set; }
         public Boolean LoadingHistory { get; set;} 
@@ -512,36 +513,44 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                HistoryItems = new ObservableCollection<ActivityListItemViewModel>();
+                this.HistoryItems = new ObservableCollection<ActivityListItemViewModel>();
+                this.history = new List<TraktActivity>();
+
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
           
                     TraktFriendsActivity friendsActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                    int counter = 0;
                     foreach (TraktActivity activity in friendsActivity.Activity)
                     {
+                        history.Add(activity);
+
                         try
                         {
-                            switch (activity.Action)
+                            if (counter++ <= 20)
                             {
-                                case "watchlist":
-                                    AddToWatchList(activity);
-                                    break;
-                                case "rating":
-                                    Rated(activity);
-                                    break;
-                                case "checkin":
-                                    Checkin(activity);
-                                    break;
-                                case "scrobble":
-                                    Scrobble(activity);
-                                    break;
-                                case "collection":
-                                    Collection(activity);
-                                    break;
-                                case "shout":
-                                    Shout(activity);
-                                    break;
+                                switch (activity.Action)
+                                {
+                                    case "watchlist":
+                                        AddToWatchList(activity);
+                                        break;
+                                    case "rating":
+                                        Rated(activity);
+                                        break;
+                                    case "checkin":
+                                        Checkin(activity);
+                                        break;
+                                    case "scrobble":
+                                        Scrobble(activity);
+                                        break;
+                                    case "collection":
+                                        Collection(activity);
+                                        break;
+                                    case "shout":
+                                        Shout(activity);
+                                        break;
+                                }
                             }
                         }
                         catch (NullReferenceException) { }
@@ -557,6 +566,51 @@ namespace WPtrakt
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
+
+        public void FilterHistory(int type)
+        {
+            int counter = 0;
+            this.HistoryItems = new ObservableCollection<ActivityListItemViewModel>();
+            foreach (TraktActivity activity in history)
+            {
+                try
+                {
+                    if (counter++ <= 20)
+                    {
+                        switch (activity.Action)
+                        {
+                            case "watchlist":
+                                if (type == 1 || type == 0)
+                                    AddToWatchList(activity);
+                                break;
+                            case "rating":
+                                if (type == 2 || type == 0)
+                                Rated(activity);
+                                break;
+                            case "checkin":
+                                if (type == 3 || type == 0)
+                                Checkin(activity);
+                                break;
+                            case "scrobble":
+                                if (type == 4 || type == 0)
+                                Scrobble(activity);
+                                break;
+                            case "collection":
+                                if (type == 5 || type == 0)
+                                Collection(activity);
+                                break;
+                            case "shout":
+                                if (type == 6 || type == 0)
+                                Shout(activity);
+                                break;
+                        }
+                    }
+                }
+                catch (NullReferenceException) { }
+
+                NotifyPropertyChanged("HistoryItems");
             }
         }
 

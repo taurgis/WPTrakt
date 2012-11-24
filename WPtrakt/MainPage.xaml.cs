@@ -108,6 +108,19 @@ namespace WPtrakt
             }
         }
 
+        private Int32 lastSelection;
+        private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.Filter != null)
+            {
+                if (this.lastSelection != this.Filter.SelectedIndex)
+                {
+                    this.lastSelection = this.Filter.SelectedIndex;
+                    App.ViewModel.FilterHistory(this.Filter.SelectedIndex);
+                }
+            }
+        }
+
         #region Taps
 
         private void ApplicationBarRefreshButton_Click(object sender, EventArgs e)
@@ -123,6 +136,7 @@ namespace WPtrakt
             }
             else if (MainPanorama.SelectedIndex == 2)
             {
+                this.Filter.SelectedIndex = 0;
                 App.ViewModel.LoadHistoryData();
             }
         }
@@ -331,7 +345,7 @@ namespace WPtrakt
                 }
 
                 ListTrending.Width = 1370;
-                HistoryList.Height = 400;
+                HistoryList.Height = 360;
             }
         }
 
