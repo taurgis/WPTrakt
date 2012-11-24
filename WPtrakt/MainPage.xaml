@@ -6,6 +6,7 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:controlsPrimitives="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls" 
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     x:Class="WPtrakt.Main"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
@@ -68,9 +69,28 @@
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
                 <StackPanel>
-                     <ProgressBar Visibility="{Binding LoadingStatusHistory}" x:Name="progressBarHistory" Margin="0 -20" IsIndeterminate="True" VerticalAlignment="Bottom" />
+                    <toolkit:ListPicker Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="60" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                        <sys:String>All</sys:String>
+                        <sys:String>Watchlist</sys:String>
+                        <sys:String>Rating</sys:String>
+                        <sys:String>Checkin</sys:String>
+                        <sys:String>Scrobble</sys:String>
+                        <sys:String>Collection</sys:String>
+                        <sys:String>Shout</sys:String>
+                        <toolkit:ListPicker.FullModeItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="16 21 0 20">
+                                    <TextBlock Text="{Binding}"
+                                       Margin="0 0 0 0"
+                                       FontSize="43" 
+                                       FontFamily="{StaticResource PhoneFontFamilyLight}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </toolkit:ListPicker.FullModeItemTemplate>
+                    </toolkit:ListPicker>
+                    <ProgressBar Visibility="{Binding LoadingStatusHistory}" x:Name="progressBarHistory" Margin="0 -20" IsIndeterminate="True" VerticalAlignment="Bottom" />
 
-                    <ListBox Margin="0 -25" Height="520" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" VerticalAlignment="Top" >
+                    <ListBox  Height="450" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList"  >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
