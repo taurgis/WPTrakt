@@ -237,6 +237,36 @@ namespace WPtrakt.ViewModels
             }
         }
 
+
+
+        private Int32 _timeStamp;
+        public Int32 TimeStamp
+        {
+            get
+            {
+                return _timeStamp;
+            }
+
+            set
+            {
+                if (_timeStamp != value)
+                {
+                    _timeStamp = value;
+                    NotifyPropertyChanged("TimeStamp");
+                }
+            }
+        }
+
+        public String DateTime
+        {
+            get
+            {
+                DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                time = time.AddSeconds(_timeStamp);
+                return time.ToLocalTime().ToShortDateString() + " " + time.ToLocalTime().ToShortTimeString();
+            }
+        }
+
         private String _time;
         public String Time
         {
