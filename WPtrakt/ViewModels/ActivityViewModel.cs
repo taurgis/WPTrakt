@@ -104,13 +104,13 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added shout to movie " + activity.Movie.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added shout to movie " + activity.Movie.Title + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
                     break;
                 case "show":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added shout to show " + activity.Show.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added shout to show " + activity.Show.Title + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
                     break;
                 case "episode":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added shout to episode " + activity.Episode.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added shout to episode " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
                     break;
             }
         }
@@ -120,13 +120,13 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Movie.Title + " to the collection.", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Movie.Title + " to the collection.", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
                     break;
                 case "show":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Show.Title + " to the collection.", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Show.Title + " to the collection.", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
                     break;
                 case "episode":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Episode.Title + "to the collection", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the collection", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
                     break;
             }
         }
@@ -136,13 +136,13 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " scrobbled " + activity.Movie.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " scrobbled " + activity.Movie.Title + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
                     break;
                 case "show":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " scrobbled " + activity.Show.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " scrobbled " + activity.Show.Title + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
                     break;
                 case "episode":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " scrobbled " + activity.Episode.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " scrobbled " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
                     break;
             }
         }
@@ -152,13 +152,13 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " checked in " + activity.Movie.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " checked in " + activity.Movie.Title + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
                     break;
                 case "show":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " checked in " + activity.Show.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " checked in " + activity.Show.Title + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
                     break;
                 case "episode":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " checked in " + activity.Episode.Title + ".", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " checked in " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
                     break;
             }
         }
@@ -168,13 +168,13 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
                     break;
                 case "show":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " rated " + activity.Show.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " rated " + activity.Show.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
                     break;
                 case "episode":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " rated " + activity.Episode.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " rated " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ": " + activity.RatingAdvanced + "/10 .", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
                     break;
             }
         }
@@ -184,13 +184,13 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Movie.Title + " to the watchlist.", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Movie.Title + " to the watchlist.", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Avatar = activity.User.Avatar, Type = "movie" });
                     break;
                 case "show":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Show.Title + " to the watchlist.", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Show.Title + " to the watchlist.", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "show" });
                     break;
                 case "episode":
-                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Episode.Title + "to the watchlist", Name = activity.User.Username, Time = activity.When.Day + " - " + activity.When.Time, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
+                    this.Activity.Add(new ActivityListItemViewModel() { Activity = activity.User.Username + " added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the watchlist", Name = activity.User.Username,TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Avatar = activity.User.Avatar, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number) });
                     break;
             }
         }
