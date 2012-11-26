@@ -218,6 +218,7 @@ namespace WPtrakt
 
         private void TextBlock_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
         {
+            LoginButton.Visibility = System.Windows.Visibility.Collapsed;
             CreateButton.Visibility = System.Windows.Visibility.Visible;
             EmailText.Visibility = System.Windows.Visibility.Visible;
         }

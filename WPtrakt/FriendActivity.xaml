@@ -36,7 +36,7 @@
                                     <RowDefinition Height="30"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
-                                <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding Time}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTime}" Style="{StaticResource PhoneTextSubtleStyle}" />
                             </Grid>
                         </Grid>
                     </DataTemplate>

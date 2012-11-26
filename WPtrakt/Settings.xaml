@@ -60,11 +60,11 @@
                     <TextBlock HorizontalAlignment="Center" Margin="0 50" Text="{Binding DebugInfo}"/>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock TextDecorations="Underline" Text="Cache:" Width="114" />
-                        <TextBlock Margin="10 2" Height="97"  Text="The cache contains all the images downloaded from trakt (Posters, backgrounds, ...)" TextWrapping="Wrap" Width="317" />
+                        <TextBlock Margin="10 2" Height="97"  Text="The cache contains all the images downloaded from trakt (Posters, backgrounds, ...)" TextWrapping="Wrap" Width="300" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock TextDecorations="Underline" Text="Debug Info:" Width="114" />
-                        <TextBlock Margin="10 2" Height="114"  Text="Since this application has quite a few images. This debug info is here untill the next version to keep the usage in check." TextWrapping="Wrap" Width="317" />
+                        <TextBlock Margin="10 2" Height="114"  Text="Since this application has quite a few images. This debug info is here untill the next version to keep the usage in check." TextWrapping="Wrap" Width="300" />
                     </StackPanel>
                 </StackPanel>
             </controls:PanoramaItem>
