@@ -261,7 +261,7 @@ namespace WPtrakt.ViewModels
         {
             get
             {
-                if (_timeStamp != null)
+                if (_timeStamp > 0)
                 {
                     DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                     time = time.AddSeconds(_timeStamp);
