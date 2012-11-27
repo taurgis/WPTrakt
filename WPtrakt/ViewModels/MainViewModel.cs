@@ -144,7 +144,7 @@ namespace WPtrakt
         {
             get
             {
-                if (Profile == null)
+                if (Profile == null || this.LoadingHistory || this.LoadingTrendingItems)
                 {
                     return "Visible";
                 }
@@ -152,35 +152,6 @@ namespace WPtrakt
                 {
                     return "Collapsed";
                 }
-            }
-        }
-
-        public String LoadingStatusHistory
-        {
-            get
-            {
-                if (this.LoadingHistory)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        private String _loadingStatusTrending;
-        public String LoadingStatusTrending
-        {
-            get
-            {
-                return _loadingStatusTrending;
-            }
-            set
-            {
-                _loadingStatusTrending = value;
-                NotifyPropertyChanged("LoadingStatusTrending");
             }
         }
 
@@ -409,7 +380,6 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatus");
             NotifyPropertyChanged("MainVisibility");
             NotifyPropertyChanged("PanoramaEnabled");
-            NotifyPropertyChanged("HistoryItems");
         }
 
         #endregion
@@ -421,11 +391,10 @@ namespace WPtrakt
             if (!LoadingTrendingItems)
             {
                 this.LoadingTrendingItems = true;
-                this.LoadingStatusTrending = "Visible";
                 this.TrendingItems = new ObservableCollection<ListItemViewModel>();
 
                 NotifyPropertyChanged("TrendingItems");
-                NotifyPropertyChanged("LoadingStatusTrending");
+                NotifyPropertyChanged("LoadingStatus");
 
                 HttpWebRequest request;
 
@@ -481,7 +450,7 @@ namespace WPtrakt
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
                             NotifyPropertyChanged("TrendingItems");
-                            this.LoadingStatusTrending = "Collapsed";
+                            NotifyPropertyChanged("LoadingStatus");
                         });
                     }
                 }
@@ -496,7 +465,7 @@ namespace WPtrakt
         public void LoadHistoryData()
         {
             this.LoadingHistory = true;
-            NotifyPropertyChanged("LoadingStatusHistory");
+            NotifyPropertyChanged("LoadingStatus");
            
             var historyClient = new WebClient();
             historyClient.Encoding = Encoding.GetEncoding("UTF-8");
@@ -559,7 +528,7 @@ namespace WPtrakt
                     ms.Close();
                     this.LoadingHistory = false;
                     NotifyPropertyChanged("HistoryItems");
-                    NotifyPropertyChanged("LoadingStatusHistory");
+                    NotifyPropertyChanged("LoadingStatus");
                 }
 
             }
