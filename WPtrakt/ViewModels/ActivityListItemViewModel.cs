@@ -15,6 +15,7 @@ namespace WPtrakt.ViewModels
         public String Type { get; set; }
         public Int16 Season { get; set; }
         public Int16 Episode { get; set; }
+        public Int16 Year { get; set; }
 
         private String _name;
         public String Name

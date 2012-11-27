@@ -55,6 +55,13 @@ namespace WPtrakt
                         App.ViewModel.LoadData();
                     }
                 }
+                else
+                {
+                    if (this.MainPanorama.SelectedIndex == 2)
+                    {
+                        App.ViewModel.LoadHistoryData();
+                    }
+                }
             }
             catch (InvalidOperationException) { }
         }
@@ -328,6 +335,30 @@ namespace WPtrakt
 
         #endregion
 
+        #region HistoryContextMenu
+
+        private void HistoryRate_Click(object sender, RoutedEventArgs e)
+        {
+            ActivityListItemViewModel model = (ActivityListItemViewModel)((MenuItem)sender).DataContext;
+            switch (model.Type)
+            {
+                case "movie":
+                      StorageController.DeleteFile(TraktMovie.getFolderStatic() + "/" + model.Imdb + ".json");
+                      NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                    break;
+                case "show":
+                    StorageController.DeleteFile(TraktShow.getFolderStatic() + "/" + model.Tvdb + ".json");
+                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                    break;
+                case "episode":
+                    StorageController.DeleteFile(TraktWatched.getFolderStatic() + "/" + model.Tvdb + model.Season + model.Episode + ".json");
+                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+                    break;
+            }
+        }
+
+        #endregion
+
         private void PhoneApplicationPage_OrientationChanged(object sender, OrientationChangedEventArgs e)
         {
             if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
@@ -356,7 +387,6 @@ namespace WPtrakt
         {
             LayoutRoot.Opacity = 1;
         }
-
 
     }
 }

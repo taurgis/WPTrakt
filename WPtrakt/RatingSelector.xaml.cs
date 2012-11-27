@@ -88,6 +88,8 @@ namespace WPtrakt
 
         private void RateMovie()
         {
+            this.ApplicationBar.IsVisible = false;
+
             String imdb;
             String year;
             String title;
@@ -114,7 +116,6 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 MessageBox.Show("Rated successfull.");
-
             }
             catch (WebException)
             {

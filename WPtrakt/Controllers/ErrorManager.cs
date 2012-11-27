@@ -8,7 +8,7 @@ namespace WPtrakt.Controllers
         {
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
-                MessageBox.Show("Error connecting to server, please try to refresh (Menu).");
+                ToastNotification.ShowToast("Error!", "Error connecting to server, please try to refresh (Menu).");
             });
         }
     }
