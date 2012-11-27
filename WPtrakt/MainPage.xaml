@@ -107,6 +107,11 @@
                                         <TextBlock Width="300" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
                                         <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTime}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                     </Grid>
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu>
+                                            <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
