@@ -137,7 +137,7 @@ namespace WPtrakt.ViewModels
                 if (_screenImage == null)
                 {
                      String fileName = "";
-                     if (!String.IsNullOrEmpty(Imdb))
+                     if (!String.IsNullOrEmpty(Imdb) && this.Season == 0)
                      {
                          fileName = this.Imdb + "screen" + ".jpg";
                      }
