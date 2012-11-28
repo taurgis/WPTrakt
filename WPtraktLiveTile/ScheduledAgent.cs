@@ -14,6 +14,7 @@ using System.Net.NetworkInformation;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
+using WPtraktBase.Model;
 
 namespace WPtraktLiveTile
 {
@@ -186,12 +187,16 @@ namespace WPtraktLiveTile
                     System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                     {
                         copyImageToShellContent(nextEpisode.Show.tvdb_id + "background.jpg", nextEpisode.Show.tvdb_id);
+                        LockscreenHelper.UpdateLockScreen("ms-appdata:///Local/" + nextEpisode.Show.tvdb_id + "background.jpg");
                         newTileData.BackgroundImage =
                            new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
                         newTileData.WideBackgroundImage =
                         new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
                         newTileData.WideBackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number + "\r\n\r\n" + nextEpisode.Episode.Title;
                         appTile.Update(newTileData);
+
+                       
+
                         NotifyComplete();
                     });
 

@@ -12,7 +12,7 @@
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
     <Grid x:Name="LayoutRoot" >
-        <ProgressBar VerticalAlignment="Top" Margin="0 160" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
+        <ProgressBar VerticalAlignment="Top" Margin="0 150" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
         <controls:Panorama  Title="WPtrakt" IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
             <controls:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
                 <StackPanel HorizontalAlignment="Left">

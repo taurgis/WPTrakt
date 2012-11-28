@@ -44,6 +44,22 @@ namespace WPtrakt.Model
             }
         }
 
+        public DateTime LastUpdateLockScreen
+        {
+            get
+            {
+                if (settings.Contains("LastUpdateLockScreen"))
+                    return DateTime.Parse(settings["LastUpdateLockScreen"].ToString());
+                else
+                    return DateTime.Now.Subtract(new TimeSpan(3,0,0,0,0));
+            }
+            set
+            {
+                settings["LastUpdateLockScreen"] = value.ToString();
+                settings.Save();
+            }
+        }
+
         public Boolean LiveTileEnabled
         {
             get

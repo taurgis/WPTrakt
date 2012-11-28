@@ -99,6 +99,7 @@
   <ItemGroup>
     <Compile Include="Model\AppUser.cs" />
     <Compile Include="Model\Enums.cs" />
+    <Compile Include="Model\LockscreenHelper.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
     <Compile Include="Model\Trakt\Request\CheckinAuth.cs" />
     <Compile Include="Model\Trakt\Request\RatingAuth.cs" />
