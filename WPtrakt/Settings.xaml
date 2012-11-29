@@ -5,6 +5,7 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     SupportedOrientations="Portrait" Orientation="Portrait"
@@ -70,20 +71,33 @@
             </controls:PanoramaItem>
             <controls:PanoramaItem Header="Live Tile" Width="480">
                 <StackPanel>
-                    <ListBox Height="620" HorizontalAlignment="Left" Name="listBoxLiveTile" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <ListBox Height="720" HorizontalAlignment="Left" Name="listBoxLiveTile" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBoxItem>
                             <toolkit:ToggleSwitch Foreground="{StaticResource PhoneForegroundBrush}"   Checked="toggle_Checked"  Unchecked="toggle_Unchecked" x:Name="toggle" Content="Disabled" IsChecked="false"  Header="Live Tile" Height="120" Width="420" />
                         </ListBoxItem>
                         <ListBoxItem>
                             <toolkit:ToggleSwitch x:Name="toggleRandom" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Disabled" IsChecked="false"  Header="Randomise" Checked="toggleRandom_Checked_1" Unchecked="toggleRandom_Unchecked_1" Height="120" Width="420" />
                         </ListBoxItem>
+                        <toolkit:ListPicker Header="Live Wallpaper Update Schedule" Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="100" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="WallpaperSetting" SelectionChanged="WallpaperSetting_SelectionChanged_1">
+                            <sys:String>Together with live tile</sys:String>
+                            <sys:String>Every 6 hours</sys:String>
+                            <sys:String>Every 24 hours</sys:String>
+                            <toolkit:ListPicker.FullModeItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Margin="16 21 0 20">
+                                        <TextBlock Text="{Binding}"
+                                       Margin="0 0 0 0"
+                                       FontSize="43" 
+                                       FontFamily="{StaticResource PhoneFontFamilyLight}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </toolkit:ListPicker.FullModeItemTemplate>
+                        </toolkit:ListPicker>
+                        <ListBoxItem Height="80"></ListBoxItem>
                         <ListBoxItem >
                             <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="A random episode in the next week appears every 30 mins, otherwise the next episode in line is shown." TextWrapping="Wrap" Width="420" />
                         </ListBoxItem>
                         <ListBoxItem Height="50"></ListBoxItem>
-                        <ListBoxItem Visibility="Collapsed">
-                            <toolkit:ToggleSwitch x:Name="togglePoster" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Disabled" IsChecked="false"  Header="Use Show/Movie poster" Checked="togglePoster_Checked_1" Unchecked="togglePoster_Unchecked_1" Height="120" Width="420" />
-                        </ListBoxItem>
                         <ListBoxItem>
                             <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="When a show/episode has been viewed inside the application, the background image shown will be used in the live tile. If it has not been viewed inside the app, the default WPtrakt image will be shown." TextWrapping="Wrap" Width="420" />
                         </ListBoxItem>

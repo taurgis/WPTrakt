@@ -30,51 +30,52 @@ namespace WPtrakt
             {
                 LoginButton.Visibility = System.Windows.Visibility.Visible;
             }
-            
+
+         
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
-            if (AppUser.Instance.LiveTileEnabled)
-            {
-                this.toggle.IsChecked = true;
-                this.toggleRandom.IsEnabled = true;
-                this.togglePoster.IsEnabled = true;
-                if (AppUser.Instance.LiveTileType == LiveTileType.Random)
-                {
-                    toggleRandom.IsChecked = true;
-                    this.toggleRandom.Content = "Enabled";
-                }
-                else
-                {
-                    toggleRandom.IsChecked = false;
-                    this.toggleRandom.Content = "Disabled";
-                }
-
-                if (AppUser.Instance.LiveTileUsePoster)
-                {
-                    togglePoster.IsChecked = true;
-                    this.togglePoster.Content = "Enabled";
-                }
-                else
-                    this.togglePoster.Content = "Disabled";
-            }
-            else
-            {
-                this.toggle.IsChecked = false;
-                this.toggleRandom.IsEnabled = false;
-                this.togglePoster.IsEnabled = false;
-            }
 
             if (!App.SettingsViewModel.IsDataLoaded)
             {
+                if (AppUser.Instance.LiveTileEnabled)
+                {
+                    this.toggle.IsChecked = true;
+                    this.toggleRandom.IsEnabled = true;
+                    if (AppUser.Instance.LiveTileType == LiveTileType.Random)
+                    {
+                        toggleRandom.IsChecked = true;
+                        this.toggleRandom.Content = "Enabled";
+                    }
+                    else
+                    {
+                        toggleRandom.IsChecked = false;
+                        this.toggleRandom.Content = "Disabled";
+                    }
+                }
+                else
+                {
+                    this.toggle.IsChecked = false;
+                    this.toggleRandom.IsEnabled = false;
+                }
+
+                this.WallpaperSetting.SelectedIndex = AppUser.Instance.LiveWallpaperSchedule;
+
                 App.SettingsViewModel.LoadData();
-               
+
+
+                App.SettingsViewModel.Usage = "Calculating...";
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                worker.RunWorkerAsync();
             }
-            App.SettingsViewModel.Usage = "Calculating...";
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-            worker.RunWorkerAsync();
+
+            string lockscreenValue = "";
+
+            bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue("lockscreen", out lockscreenValue);
+            if (lockscreenValueExists)
+                this.SettingsPanorama.DefaultItem = this.SettingsPanorama.Items[2];
         }
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -142,7 +143,7 @@ namespace WPtrakt
                 catch (InvalidOperationException) { }
 
                 AppUser.Instance.LiveTileEnabled = true;
-                AppUser.Instance.LiveTileUsePoster = false;
+                AppUser.Instance.LiveWallpaperSchedule = this.WallpaperSetting.SelectedIndex;
 
                 if ((Boolean)toggleRandom.IsChecked)
                 {
@@ -185,7 +186,6 @@ namespace WPtrakt
         {
             this.toggle.Content = "Enabled";
             this.toggleRandom.IsEnabled = true;
-            this.togglePoster.IsEnabled = true;
         }
 
         private void toggle_Unchecked(object sender, RoutedEventArgs e)
@@ -194,9 +194,6 @@ namespace WPtrakt
             this.toggleRandom.IsEnabled = false;
             this.toggleRandom.IsChecked = false;
             this.toggleRandom.Content = "Disabled";
-            this.togglePoster.IsEnabled = false;
-            this.togglePoster.IsChecked = false;
-            this.togglePoster.Content = "Disabled";
         }
 
         private void updateTileToStandard()
@@ -304,16 +301,6 @@ namespace WPtrakt
             toggleRandom.Content = "Disabled";
         }
 
-        private void togglePoster_Checked_1(object sender, RoutedEventArgs e)
-        {
-            togglePoster.Content = "Enabled";
-        }
-
-        private void togglePoster_Unchecked_1(object sender, RoutedEventArgs e)
-        {
-            togglePoster.Content = "Disabled";
-        }
-
         private void btnLogin_Click_1(object sender, RoutedEventArgs e)
         {
             if (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password))
@@ -332,6 +319,11 @@ namespace WPtrakt
             task.Uri = new Uri("https://twitter.com/theunenth");
 
             task.Show();
+        }
+
+        private void WallpaperSetting_SelectionChanged_1(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

@@ -388,5 +388,21 @@ namespace WPtrakt
             LayoutRoot.Opacity = 1;
         }
 
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            string lockscreenKey = "WallpaperSettings";
+            string lockscreenValue = "0";
+
+            bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue(lockscreenKey, out lockscreenValue);
+
+            if (lockscreenValueExists)
+            {
+                NavigationService.Navigate(new Uri("/Settings.xaml?lockscreen=true", UriKind.Relative));
+            }
+        }
+
+
     }
 }

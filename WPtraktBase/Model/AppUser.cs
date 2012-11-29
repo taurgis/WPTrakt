@@ -145,18 +145,18 @@ namespace WPtrakt.Model
             }
         }
 
-        public Boolean LiveTileUsePoster
+        public int LiveWallpaperSchedule
         {
             get
             {
-                if (settings.Contains("LiveTileUsePoster"))
-                    return (Boolean)settings["LiveTileUsePoster"];
+                if (settings.Contains("LiveWallpaperSchedule"))
+                    return (int)settings["LiveWallpaperSchedule"];
                 else
-                    return false;
+                    return 1;
             }
             set
             {
-                settings["LiveTileUsePoster"] = value;
+                settings["LiveWallpaperSchedule"] = value;
                 settings.Save();
             }
         }

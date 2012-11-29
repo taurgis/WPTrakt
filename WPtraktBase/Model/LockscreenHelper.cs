@@ -24,12 +24,29 @@ namespace WPtraktBase.Model
                 {
 
                     var uri = new Uri(filePathOfTheImage, UriKind.Absolute);
-                    Int32 daysSinceLastUpdate = (DateTime.Now - AppUser.Instance.LastUpdateLockScreen).Days;
-                    if ( daysSinceLastUpdate > 0)
+                   
+                    switch(AppUser.Instance.LiveWallpaperSchedule)
                     {
-                        AppUser.Instance.LastUpdateLockScreen = DateTime.Now;
-                        Windows.Phone.System.UserProfile.LockScreen.SetImageUri(uri);
-                    }
+                        case 0:
+                            Windows.Phone.System.UserProfile.LockScreen.SetImageUri(uri);
+                            break;
+                        case 1:
+                            Int32 hoursSinceLastUpdate = (DateTime.Now - AppUser.Instance.LastUpdateLockScreen).Hours;
+                            if (hoursSinceLastUpdate > 5)
+                            {
+                                AppUser.Instance.LastUpdateLockScreen = DateTime.Now;
+                                Windows.Phone.System.UserProfile.LockScreen.SetImageUri(uri);
+                            }
+                            break;
+                        case 2:
+                            Int32 daysSinceLastUpdate = (DateTime.Now - AppUser.Instance.LastUpdateLockScreen).Days;
+                            if ( daysSinceLastUpdate > 0)
+                            {
+                                AppUser.Instance.LastUpdateLockScreen = DateTime.Now;
+                                Windows.Phone.System.UserProfile.LockScreen.SetImageUri(uri);
+                            }
+                            break;
+                     }
                 }
             }
             catch (System.Exception ex)
