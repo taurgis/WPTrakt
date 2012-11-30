@@ -220,6 +220,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="vcd.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\WideBackground.png" />
     <Content Include="WideBackground.png" />
     <Resource Include="Background.png" />

@@ -192,10 +192,9 @@ namespace WPtraktLiveTile
                            new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
                         newTileData.WideBackgroundImage =
                         new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
-                        newTileData.WideBackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number + "\r\n" + nextEpisode.Episode.Title + "\r\n" + ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today, " + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString()));
+                        newTileData.SmallBackgroundImage = new Uri("isostore:/Shared/ShellContent/wptraktbg" + nextEpisode.Show.tvdb_id + ".jpg", UriKind.Absolute);
+                        newTileData.WideBackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number + "\r\n" + nextEpisode.Episode.Title + "\r\n" + ((nextEpisode.Date.DayOfYear == DateTime.UtcNow.DayOfYear) ? ("Today, " + nextEpisode.Show.AirTime) : (nextEpisode.Date.ToLocalTime().ToShortDateString())) + " ( " + nextEpisode.Show.Network + " )";
                         appTile.Update(newTileData);
-
-                       
 
                         NotifyComplete();
                     });

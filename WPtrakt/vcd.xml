@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VoiceCommands xmlns="http://schemas.microsoft.com/voicecommands/1.0">
+  <CommandSet xml:lang="en-us" Name="USEnglish">
+    <CommandPrefix>trakt</CommandPrefix>
+    <Example> Find me / Search for a movie! </Example>
+    <Command Name="lookup">
+      <Example> Find Heroes </Example>
+      <ListenFor>Find [me] [a] [movie] [show]</ListenFor>
+      <ListenFor>Lookup [a] [movie] [show]</ListenFor>
+      <ListenFor>Search [for] [the] [movie] [show]</ListenFor>
+      <Feedback> Let's go find it!</Feedback>
+      <Navigate Target="/Search.xaml"/>
+    </Command>
+  </CommandSet>
+</VoiceCommands>

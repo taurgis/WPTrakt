@@ -1,7 +1,9 @@
 ﻿using System.Windows;
+using System;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using Windows.Phone.Speech.VoiceCommands;
 
 namespace WPtrakt
 {
@@ -172,7 +174,6 @@ namespace WPtrakt
                 App.ViewModel.LoadData();
             }
         }
-
 
         private void RootFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
         {

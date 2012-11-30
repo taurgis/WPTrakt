@@ -1,8 +1,13 @@
 ﻿using Microsoft.Phone.Controls;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Navigation;
+using Windows.Phone.Speech.Recognition;
+using Windows.Phone.Speech.Synthesis;
 using WPtrakt;
 using WPtrakt.Controllers;
 
@@ -61,5 +66,66 @@ namespace WPtrakt
         {
             Animation.FadeOut(LayoutRoot);
         }
+
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            if (e.NavigationMode == NavigationMode.New && NavigationContext.QueryString.ContainsKey("voiceCommandName"))
+            {
+                String searchString;
+                if (null != (searchString = await GetSiteName(NavigationContext.QueryString)))
+                {
+                    if (searchString.Length > 1)
+                    {
+                        this.SearchText.Text = searchString;
+                        App.SearchViewModel.LoadData(searchString);
+                        this.Focus();
+                    }
+                }
+               
+            }
+            else if (e.NavigationMode == NavigationMode.Back && !System.Diagnostics.Debugger.IsAttached)
+            {
+                NavigationService.GoBack();
+            }
+        }
+
+        private async Task<string> GetSiteName(IDictionary<string, string> queryString)
+        {
+             await Speak(string.Format("What are you looking for?"));
+         return 
+                     await GetResult("Ex. \"The matrix\"");
+        }
+
+        private async Task<string> GetResult(string exampleText)
+        {
+            String text ="";
+            SpeechRecognizerUI sr = new SpeechRecognizerUI();
+            sr.Recognizer.Grammars.AddGrammarFromPredefinedType("web", SpeechPredefinedGrammar.WebSearch);
+            sr.Settings.ListenText = "Listening...";
+            sr.Settings.ExampleText = exampleText;
+            sr.Settings.ReadoutEnabled = false;
+            sr.Settings.ShowConfirmation = false;
+
+            SpeechRecognitionUIResult result = await sr.RecognizeWithUIAsync();
+            if (result != null &&
+                result.ResultStatus == SpeechRecognitionUIStatus.Succeeded &&
+                result.RecognitionResult != null &&
+                result.RecognitionResult.TextConfidence != SpeechRecognitionConfidence.Rejected)
+            {
+                text = result.RecognitionResult.Text;
+            }
+            return text;
+        }
+
+        private async Task Speak(string text)
+        {
+            SpeechSynthesizer tts = new SpeechSynthesizer();
+            await tts.SpeakTextAsync(text);
+        }
+
+
+
     }
 }
