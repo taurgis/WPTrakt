@@ -24,8 +24,12 @@
         </StackPanel>
         <controls:Panorama SelectionChanged="Panorama_SelectionChanged" Name="MyMoviesPanorama" Grid.Row="1">
             <controls:PanoramaItem Orientation="Horizontal">
-                <StackPanel>
-                    <toolkit:ListPicker  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <toolkit:ListPicker Grid.Row="0"  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
                         <sys:String>All</sys:String>
                         <sys:String>Watchlist</sys:String>
                         <toolkit:ListPicker.FullModeItemTemplate>
@@ -39,9 +43,9 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <cc:QuickJumpGrid DataSource="{Binding MovieItems}"
+                    <cc:QuickJumpGrid Grid.Row="1" DataSource="{Binding MovieItems}"
                                     IsAlphaNumeric="True"
-                                    Margin="12,10,0,0" Height="630" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
+                                    Margin="12,0,0,0" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -57,7 +61,7 @@
                             </DataTemplate>
                         </cc:QuickJumpGrid.ItemTemplate>
                     </cc:QuickJumpGrid>
-                </StackPanel>
+                </Grid>
             </controls:PanoramaItem>
             <controls:PanoramaItem Header="Suggestions" Orientation="Horizontal" Name="SuggestionsPanoramaItem">
                 <StackPanel>

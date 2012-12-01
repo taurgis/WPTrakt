@@ -26,8 +26,12 @@
         </StackPanel>
         <controls:Panorama Name="MyShowsPanorama" SelectionChanged="Panorama_SelectionChanged" Grid.Row="1">
               <controls:PanoramaItem Orientation="Horizontal">
-                <StackPanel>
-                    <toolkit:ListPicker  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="80" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <toolkit:ListPicker Grid.Row="0"   ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
                         <sys:String>All</sys:String>
                         <sys:String>Watchlist</sys:String>
                         <toolkit:ListPicker.FullModeItemTemplate>
@@ -43,7 +47,7 @@
                     </toolkit:ListPicker>
                     <cc:QuickJumpGrid DataSource="{Binding ShowItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,10,0,0" Height="630" Name="ListMyShows">
+                                  Margin="12,0,0,0" Grid.Row="1"  Name="ListMyShows">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:ShowNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -60,11 +64,14 @@
                             </DataTemplate>
                         </cc:QuickJumpGrid.ItemTemplate>
                     </cc:QuickJumpGrid>
-                </StackPanel>
+                </Grid>
             </controls:PanoramaItem>
             <controls:PanoramaItem Orientation="Horizontal" Header="Upcoming">
-                <StackPanel>
-                    <ListBox ItemsSource="{Binding CalendarItems}" Height="565" MaxWidth="1000" x:Name="ListUpcomming">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <ListBox Grid.Row="0" ItemsSource="{Binding CalendarItems}" MaxWidth="1000" x:Name="ListUpcomming">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Margin="0,0,0,17" MaxWidth="1000" MaxHeight="2000">
@@ -87,7 +94,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                </StackPanel>
+                </Grid>
             </controls:PanoramaItem>
             <controls:PanoramaItem Header="Suggestions" Orientation="Horizontal">
                 <StackPanel>

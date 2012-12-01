@@ -216,12 +216,11 @@ namespace WPtrakt
             if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
             {
                 ListSuggestions.Width = 700;
-                ListMyMovies.Height = 630;
+
             }
             else
             {
                 ListSuggestions.Width = 1370;
-                ListMyMovies.Height = 340;
             }
         }
         private Int32 lastSelection;
