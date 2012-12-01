@@ -110,7 +110,7 @@
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                     <Grid Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
-                                    <TextBlock Margin="20 5" FontSize="30"  Text="{Binding DateString}"/>
+                                        <TextBlock Foreground="White" Margin="20 5" FontSize="30"  Text="{Binding DateString}"/>
                                     </Grid>
                                     <ListBox Grid.Column="0"  Grid.Row="1" Height="Auto" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding Items}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                                         <ListBox.ItemTemplate>
