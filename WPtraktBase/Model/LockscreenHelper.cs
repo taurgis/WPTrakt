@@ -9,6 +9,11 @@ namespace WPtraktBase.Model
 {
     public class LockscreenHelper
     {
+        public static Boolean IsProvider()
+        {
+            return Windows.Phone.System.UserProfile.LockScreenManager.IsProvidedByCurrentApplication;
+        }
+
         public static async void UpdateLockScreen(string filePathOfTheImage)
         {
             try

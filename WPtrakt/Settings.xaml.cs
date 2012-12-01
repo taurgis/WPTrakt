@@ -14,6 +14,7 @@ using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
+using WPtraktBase.Model;
 
 namespace WPtrakt
 {
@@ -30,8 +31,6 @@ namespace WPtrakt
             {
                 LoginButton.Visibility = System.Windows.Visibility.Visible;
             }
-
-         
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
@@ -75,7 +74,7 @@ namespace WPtrakt
 
             bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue("lockscreen", out lockscreenValue);
             if (lockscreenValueExists)
-                this.SettingsPanorama.DefaultItem = this.SettingsPanorama.Items[2];
+                this.SettingsPanorama.DefaultItem = this.SettingsPanorama.Items[3];
         }
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -113,6 +112,8 @@ namespace WPtrakt
         protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
         {
             GoBack();
+            base.OnBackKeyPress(e);
+
         }
 
         private void GoBack()
@@ -324,6 +325,11 @@ namespace WPtrakt
         private void WallpaperSetting_SelectionChanged_1(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
 
+        }
+
+        private async void LockScreenSettings_Click_1(object sender, RoutedEventArgs e)
+        {
+            var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
         }
     }
 }

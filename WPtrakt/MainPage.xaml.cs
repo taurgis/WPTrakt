@@ -392,6 +392,7 @@ namespace WPtrakt
             LayoutRoot.Opacity = 1;
         }
 
+        private Boolean wallpaperNavigationFinished = false;
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -401,9 +402,14 @@ namespace WPtrakt
 
             bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue(lockscreenKey, out lockscreenValue);
 
-            if (lockscreenValueExists)
+            if (!wallpaperNavigationFinished)
             {
-                NavigationService.Navigate(new Uri("/Settings.xaml?lockscreen=true", UriKind.Relative));
+                if (lockscreenValueExists)
+                {
+                    NavigationService.Navigate(new Uri("/Settings.xaml?lockscreen=true", UriKind.Relative));
+                    wallpaperNavigationFinished = true;
+                }
+          
             }
         }
         private async void RegisterVoice()

@@ -78,7 +78,21 @@
                         <ListBoxItem>
                             <toolkit:ToggleSwitch x:Name="toggleRandom" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Disabled" IsChecked="false"  Header="Randomise" Checked="toggleRandom_Checked_1" Unchecked="toggleRandom_Unchecked_1" Height="120" Width="420" />
                         </ListBoxItem>
-                        <toolkit:ListPicker Header="Live Wallpaper Update Schedule" Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="100" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="WallpaperSetting" SelectionChanged="WallpaperSetting_SelectionChanged_1">
+                        <ListBoxItem Height="80"></ListBoxItem>
+                        <ListBoxItem >
+                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="A random episode in the next week appears every 30 mins, otherwise the next episode in line is shown." TextWrapping="Wrap" Width="420" />
+                        </ListBoxItem>
+                        <ListBoxItem Height="50"></ListBoxItem>
+                        <ListBoxItem>
+                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="When a show/episode has been viewed inside the application, the background image shown will be used in the live tile. If it has not been viewed inside the app, the default WPtrakt image will be shown." TextWrapping="Wrap" Width="420" />
+                        </ListBoxItem>
+                    </ListBox>
+                </StackPanel>
+            </controls:PanoramaItem>
+            <controls:PanoramaItem Header="Live Wallpaper" Width="480">
+                <StackPanel>
+                    <ListBox Height="720" HorizontalAlignment="Left" Name="listBoxWallpaper" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <toolkit:ListPicker Header="Live Wallpaper Update Schedule" Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 0 0 0" Height="100" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="WallpaperSetting" SelectionChanged="WallpaperSetting_SelectionChanged_1">
                             <sys:String>Together with live tile</sys:String>
                             <sys:String>Every 6 hours</sys:String>
                             <sys:String>Every 24 hours</sys:String>
@@ -93,13 +107,16 @@
                                 </DataTemplate>
                             </toolkit:ListPicker.FullModeItemTemplate>
                         </toolkit:ListPicker>
+                        <ListBoxItem>
+                            <Button Content="Go to lock screen settings" Name="LockScreenSettings" HorizontalAlignment="Center" Click="LockScreenSettings_Click_1"/>
+                        </ListBoxItem>
                         <ListBoxItem Height="80"></ListBoxItem>
                         <ListBoxItem >
-                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="A random episode in the next week appears every 30 mins, otherwise the next episode in line is shown." TextWrapping="Wrap" Width="420" />
+                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="The wallpaper will be updated only when the live tile has been enabled. (It does not have to be pinned to start to work)" TextWrapping="Wrap" Width="420" />
                         </ListBoxItem>
                         <ListBoxItem Height="50"></ListBoxItem>
-                        <ListBoxItem>
-                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="When a show/episode has been viewed inside the application, the background image shown will be used in the live tile. If it has not been viewed inside the app, the default WPtrakt image will be shown." TextWrapping="Wrap" Width="420" />
+                        <ListBoxItem >
+                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="Images are fetched the same way as the live tile. Please visit the shows inside the application to download the wallpaper image." TextWrapping="Wrap" Width="420" />
                         </ListBoxItem>
                     </ListBox>
                 </StackPanel>
