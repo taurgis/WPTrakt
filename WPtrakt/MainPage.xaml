@@ -17,8 +17,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock CacheMode="BitmapCache"  Text="WPtrakt" FontSize="25" FontFamily="Segoe WP SemiLight"/>
-            <Border  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+            <TextBlock CacheMode="BitmapCache"  Text="WPtrakt" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <Border Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
             <ProgressBar VerticalAlignment="Top" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" Margin="0 5" />
         </StackPanel>
         <controls:Panorama IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Grid.Row="1">
