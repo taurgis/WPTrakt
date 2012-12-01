@@ -206,6 +206,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
         }
 
         private void ApplicationBarSettingsButton_Click(object sender, EventArgs e)
@@ -257,6 +259,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             lastModel = null;
         }
 
@@ -287,6 +291,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             lastModel = null;
         }
 
@@ -324,6 +330,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             lastModel = null;
         }
 

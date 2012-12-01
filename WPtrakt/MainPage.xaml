@@ -31,7 +31,6 @@
                             <TextBlock Text="{Binding UserAbout}" TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Height="77" />
                         </StackPanel>
                     </StackPanel>
-                    <TextBlock x:Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
                     <StackPanel Visibility="{Binding MainVisibility}" Tap="MyShows_Tap" Margin="0,0,0,17" Width="426" Height="Auto">
                         <TextBlock Text="My Shows" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Height="57" />
                         <TextBlock Text="A list of shows you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Name="SubTextMyShows"/>

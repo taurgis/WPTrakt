@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Windows;
@@ -248,6 +249,8 @@ namespace WPtrakt
                     NotifyPropertyChanged("LoadingStatus");
                 });
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
         }
 
         void OnTimerTick(object sender, EventArgs e)
@@ -370,6 +373,13 @@ namespace WPtrakt
                     ErrorManager.ShowConnectionErrorPopup();
                 });
             }
+            catch (TargetInvocationException)
+            {
+                NotifyPropertyChanged("MainVisibility");
+                NotifyPropertyChanged("LoadingStatus");
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+
         }
 
         private void RefreshProfile()

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading;
@@ -184,6 +185,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         public void FilterShows(int type)
@@ -323,6 +326,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         #endregion
@@ -411,6 +416,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         private void RefreshMyShowsView()
@@ -485,6 +492,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
 
             LoadingSuggestItems = false;
 

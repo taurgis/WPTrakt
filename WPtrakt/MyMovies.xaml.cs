@@ -117,6 +117,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             lastModel = null;
         }
 
@@ -147,6 +149,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             lastModel = null;
         }
 
@@ -184,6 +188,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             lastModel = null;
         }
 
