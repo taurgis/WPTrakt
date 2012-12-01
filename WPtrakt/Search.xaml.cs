@@ -6,10 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using Windows.Phone.Speech.Recognition;
-using Windows.Phone.Speech.Synthesis;
-using WPtrakt;
 using WPtrakt.Controllers;
+using WPtrakt.Model;
 
 namespace WPtrakt
 {
@@ -67,14 +65,22 @@ namespace WPtrakt
             Animation.FadeOut(LayoutRoot);
         }
 
+        #region "Speech Recognition"
+
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
             if (e.NavigationMode == NavigationMode.New && NavigationContext.QueryString.ContainsKey("voiceCommandName"))
             {
+                if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
+                {
+                    await Speech.Speak(string.Format("You have not configured a user yet!"));
+                    NavigationService.GoBack();
+                }
+
                 String searchString;
-                if (null != (searchString = await GetSiteName(NavigationContext.QueryString)))
+                if (null != (searchString = await LookForSomething(NavigationContext.QueryString)))
                 {
                     if (searchString.Length > 1)
                     {
@@ -91,41 +97,12 @@ namespace WPtrakt
             }
         }
 
-        private async Task<string> GetSiteName(IDictionary<string, string> queryString)
+        private async Task<string> LookForSomething(IDictionary<string, string> queryString)
         {
-             await Speak(string.Format("What are you looking for?"));
-         return 
-                     await GetResult("Ex. \"The matrix\"");
+            await Speech.Speak(string.Format("What are you looking for?"));
+            return await Speech.GetResult("Ex. \"The matrix\"");
         }
 
-        private async Task<string> GetResult(string exampleText)
-        {
-            String text ="";
-            SpeechRecognizerUI sr = new SpeechRecognizerUI();
-            sr.Recognizer.Grammars.AddGrammarFromPredefinedType("web", SpeechPredefinedGrammar.WebSearch);
-            sr.Settings.ListenText = "Listening...";
-            sr.Settings.ExampleText = exampleText;
-            sr.Settings.ReadoutEnabled = false;
-            sr.Settings.ShowConfirmation = false;
-
-            SpeechRecognitionUIResult result = await sr.RecognizeWithUIAsync();
-            if (result != null &&
-                result.ResultStatus == SpeechRecognitionUIStatus.Succeeded &&
-                result.RecognitionResult != null &&
-                result.RecognitionResult.TextConfidence != SpeechRecognitionConfidence.Rejected)
-            {
-                text = result.RecognitionResult.Text;
-            }
-            return text;
-        }
-
-        private async Task Speak(string text)
-        {
-            SpeechSynthesizer tts = new SpeechSynthesizer();
-            await tts.SpeakTextAsync(text);
-        }
-
-
-
+        #endregion
     }
 }

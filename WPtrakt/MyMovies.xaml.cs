@@ -6,6 +6,7 @@ using System.Net;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
@@ -246,6 +247,28 @@ namespace WPtrakt
                 }
             }
         }
+
+        #region "Speech Recognition"
+
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            if (e.NavigationMode == NavigationMode.New && NavigationContext.QueryString.ContainsKey("voiceCommandName"))
+            {
+                if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
+                {
+                    await Speech.Speak(string.Format("You have not configured a user yet!"));
+                    NavigationService.GoBack();
+                }
+            }
+            else if (e.NavigationMode == NavigationMode.Back && !System.Diagnostics.Debugger.IsAttached)
+            {
+                NavigationService.GoBack();
+            }
+        }
+
+        #endregion
     }
 
     public class MovieNameSelector : IQuickJumpGridSelector

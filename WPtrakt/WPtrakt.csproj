@@ -119,6 +119,7 @@
     <Compile Include="Controllers\ErrorManager.cs" />
     <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
     <Compile Include="Controllers\ImageController.cs" />
+    <Compile Include="Controllers\Speech.cs" />
     <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Controllers\ToastNotification.cs" />
     <Compile Include="FriendActivity.xaml.cs">
@@ -222,6 +223,7 @@
   <ItemGroup>
     <Content Include="vcd.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Images\WideBackground.png" />
     <Content Include="WideBackground.png" />
