@@ -21,13 +21,12 @@
     </Command>
     <Command Name="myShows">
       <Example> My Shows </Example>
-      <ListenFor>[open] [my] shows</ListenFor>
-      <ListenFor>[open] [my] shows collection</ListenFor>
+      <ListenFor>[open] [my] shows [collection]</ListenFor>
       <Feedback> Going to your shows </Feedback>
       <Navigate Target="/MyShows.xaml"/>
     </Command>
     <Command Name="upComming">
-      <Example> Upcomming, What's next </Example>
+      <Example> Upcomming / What's next </Example>
       <ListenFor> what's next? </ListenFor>
       <ListenFor> upcomming [episodes] </ListenFor>
       <ListenFor> what is on tv </ListenFor>
