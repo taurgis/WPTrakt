@@ -132,7 +132,8 @@
             <shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem x:Name="CancelCheckin" Text="Cancel check in" Click="CancelCheckin_Click"></shell:ApplicationBarMenuItem>
                 <shell:ApplicationBarMenuItem x:Name="FriendActivity" Text="Friend Activity" Click="FriendActivity_Click"></shell:ApplicationBarMenuItem>
-             </shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem x:Name="RateApp" Text="Rate and Review" Click="RateApp_Click_1"></shell:ApplicationBarMenuItem>
+            </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
 </phone:PhoneApplicationPage>

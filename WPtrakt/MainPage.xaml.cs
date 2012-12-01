@@ -2,6 +2,7 @@
 using Microsoft.Phone.Net.NetworkInformation;
 using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
 using System;
 using System.Net;
 using System.Reflection;
@@ -425,6 +426,13 @@ namespace WPtrakt
                 Console.Write(ex);
             }
 
+        }
+
+        private void RateApp_Click_1(object sender, EventArgs e)
+        {
+            MarketplaceReviewTask marketplaceReviewTask = new MarketplaceReviewTask();
+
+            marketplaceReviewTask.Show();
         }
       
     }
