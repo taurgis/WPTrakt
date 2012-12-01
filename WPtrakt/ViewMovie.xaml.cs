@@ -218,6 +218,7 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -261,6 +262,7 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
@@ -308,6 +310,7 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -360,6 +363,7 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -407,6 +411,7 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -479,6 +484,7 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         #endregion

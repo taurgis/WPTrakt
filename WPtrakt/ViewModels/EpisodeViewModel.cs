@@ -535,6 +535,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
         }
 
         private void UpdateEpisodeView(TraktWatched episode)
@@ -608,6 +610,8 @@ namespace WPtrakt
                 }
             }
             catch (WebException) { }
+            catch (TargetInvocationException) {}
+
         }
 
         private void LoadScreenImage()
@@ -678,6 +682,8 @@ namespace WPtrakt
                 NotifyPropertyChanged("ShoutItems");
             }
             catch (WebException) { ErrorManager.ShowConnectionErrorPopup(); }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

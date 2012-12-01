@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using WPtrakt.Controllers;
@@ -104,6 +105,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         void client_UploadShowsStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -134,6 +137,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

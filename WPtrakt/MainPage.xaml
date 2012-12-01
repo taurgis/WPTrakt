@@ -31,7 +31,6 @@
                             <TextBlock Text="{Binding UserAbout}" TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Height="77" />
                         </StackPanel>
                     </StackPanel>
-                    <TextBlock x:Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
                     <StackPanel Visibility="{Binding MainVisibility}" Tap="MyShows_Tap" Margin="0,0,0,17" Width="426" Height="Auto">
                         <TextBlock Text="My Shows" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Height="57" />
                         <TextBlock Text="A list of shows you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Name="SubTextMyShows"/>
@@ -99,31 +98,54 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <ListBox Grid.Row="1" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
+                    <ListBox  Grid.Row="1" Height="Auto" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
+                                <Grid   Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  >
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <Image Grid.Column="1" Source="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 10" Width="100"/>
-                                    <Grid Grid.Column="2" Height="Auto">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"></RowDefinition>
-                                            <RowDefinition Height="30"></RowDefinition>
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
-                                        <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTime}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="55"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
+                                    <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding DateString}"/>
                                     </Grid>
-                                    <toolkit:ContextMenuService.ContextMenu>
-                                        <toolkit:ContextMenu>
-                                            <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
-                                        </toolkit:ContextMenu>
-                                    </toolkit:ContextMenuService.ContextMenu>
+                                    <ListBox Grid.Column="0"  Grid.Row="1" Height="Auto" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding Items}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="100"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Image Grid.Column="1" Source="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 10" Width="100"/>
+                                                    <Grid Grid.Column="2" Height="Auto">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"></RowDefinition>
+                                                            <RowDefinition Height="30"></RowDefinition>
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                                        <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTime}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                                    </Grid>
+                                                    <toolkit:ContextMenuService.ContextMenu>
+                                                        <toolkit:ContextMenu>
+                                                            <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
+                                                        </toolkit:ContextMenu>
+                                                    </toolkit:ContextMenuService.ContextMenu>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                    </ListBox>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -133,6 +155,7 @@
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                     </ListBox>
+                    
                 </Grid>
             </controls:PanoramaItem>
         </controls:Panorama>

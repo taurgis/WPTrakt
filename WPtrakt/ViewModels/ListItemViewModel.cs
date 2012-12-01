@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
@@ -433,6 +434,8 @@ namespace WPtrakt
                 }
             }
             catch (WebException) { }
+            catch (TargetInvocationException) { }
+
         }
         void request_OpenReadScreenCompleted(IAsyncResult r)
         {
@@ -456,6 +459,8 @@ namespace WPtrakt
                 }
             }
             catch (WebException) { }
+            catch (TargetInvocationException) {}
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

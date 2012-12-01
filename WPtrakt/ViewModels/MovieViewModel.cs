@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Windows;
@@ -477,7 +478,7 @@ namespace WPtrakt
                     TraktMovie movie = (TraktMovie)ser.ReadObject(ms);
                     StorageController.saveObject(movie, typeof(TraktMovie));
                     UpdateMovieView(movie);
-                 
+
                     IsDataLoaded = true;
                 }
             }
@@ -485,6 +486,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { }
         }
 
         private void UpdateMovieView(TraktMovie movie)
@@ -550,6 +553,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         private void LoadBackgroundImage()
@@ -592,6 +597,8 @@ namespace WPtrakt
                 }
             }
             catch (WebException) { }
+            catch (TargetInvocationException)
+            { }
         }
        
         public event PropertyChangedEventHandler PropertyChanged;

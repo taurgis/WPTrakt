@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using WPtrakt.Controllers;
@@ -290,6 +291,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
         }
 
         private void toggleRandom_Checked_1(object sender, RoutedEventArgs e)

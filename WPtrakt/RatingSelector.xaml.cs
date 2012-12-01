@@ -7,6 +7,7 @@ using Microsoft.Phone.Controls.Primitives;
 using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
+using System.Reflection;
 
 namespace WPtrakt
 {
@@ -121,6 +122,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             NavigationService.GoBack();
         }
     }

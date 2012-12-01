@@ -134,6 +134,7 @@
     <Compile Include="ViewEpisode.xaml.cs">
       <DependentUpon>ViewEpisode.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ActivityDateListItemViewModel.cs" />
     <Compile Include="ViewModels\ActivityListItemViewModel.cs" />
     <Compile Include="ViewModels\ActivityViewModel.cs" />
     <Compile Include="ViewModels\SearchViewModel.cs" />

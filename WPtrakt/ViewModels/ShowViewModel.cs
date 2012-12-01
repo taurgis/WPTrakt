@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Windows;
@@ -552,6 +553,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         private void UpdateShowView(TraktShow show)
@@ -625,6 +628,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         private void LoadBackgroundImage()
@@ -667,6 +672,8 @@ namespace WPtrakt
                 }
             }
             catch (WebException) { }
+            catch (TargetInvocationException)
+            { }
         }
 
         public void LoadEpisodeData(String tvdb)
@@ -775,6 +782,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         public void LoadShoutData(String tvdb)
@@ -814,6 +823,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
