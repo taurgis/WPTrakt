@@ -13,8 +13,17 @@
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
     <Grid x:Name="LayoutRoot">
-        <controls:Panorama Title="My Movies" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}" Name="MyMoviesPanorama">
-            <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
+            <TextBlock CacheMode="BitmapCache"  Text="WPtrakt" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <Border Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+            <ProgressBar VerticalAlignment="Top" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" Margin="0 5" />
+        </StackPanel>
+        <controls:Panorama SelectionChanged="Panorama_SelectionChanged" Name="MyMoviesPanorama" Grid.Row="1">
+            <controls:PanoramaItem Orientation="Horizontal">
                 <StackPanel>
                     <toolkit:ListPicker  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Background="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
                         <sys:String>All</sys:String>
@@ -30,11 +39,9 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusMovies}" Name="progressBar" IsIndeterminate="True" />
-                    <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovies}"/>
                     <cc:QuickJumpGrid DataSource="{Binding MovieItems}"
                                     IsAlphaNumeric="True"
-                                    Margin="12,10,0,0" Height="570" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
+                                    Margin="12,10,0,0" Height="630" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -52,9 +59,9 @@
                     </cc:QuickJumpGrid>
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -30" Header="Suggestions" Orientation="Horizontal" Name="SuggestionsPanoramaItem">
+            <controls:PanoramaItem Header="Suggestions" Orientation="Horizontal" Name="SuggestionsPanoramaItem">
                 <StackPanel>
-                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions">
+                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>
@@ -77,8 +84,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <ProgressBar VerticalAlignment="Bottom" Visibility="{Binding LoadingStatusSuggestions}" Name="progressBarSuggest" IsIndeterminate="True" />
-                </StackPanel>
+               </StackPanel>
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
