@@ -255,7 +255,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 lastModel.Watched = true;
-                MessageBox.Show("Movie marked as watched.");
+                ToastNotification.ShowToast("Movie", "Movie marked as watched.");
             }
             catch (WebException)
             {
@@ -284,7 +284,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 lastModel.InWatchList = true;
-                MessageBox.Show("Movie added to watchlist.");
+                ToastNotification.ShowToast("Movie", "Movie added to watchlist.");
 
             }
             catch (WebException)
@@ -320,9 +320,9 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 if (jsonString.Contains("failure"))
-                    MessageBox.Show("There is already a checkin in progress.");
+                    ToastNotification.ShowToast("Movie", "There is already a checkin in progress.");
                 else
-                    MessageBox.Show("Checked in!");
+                    ToastNotification.ShowToast("Movie", "Checked in!");
             }
             catch (WebException)
             {
