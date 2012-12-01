@@ -361,23 +361,19 @@ namespace WPtrakt
         {
             if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
             {
-                this.MainPanorama.Margin = new Thickness(0, 0, 0, 0);
+                HistoryList.Width = 420;
                 ListTrending.Width = 700;
-                HistoryList.Height = 520;
+                SubTextMyMovies.Visibility = System.Windows.Visibility.Visible;
+                SubTextMyShows.Visibility = System.Windows.Visibility.Visible;
+                SubTextSearch.Visibility = System.Windows.Visibility.Visible;
             }
             else
             {
-                if (e.Orientation == PageOrientation.LandscapeRight)
-                {
-                    this.MainPanorama.Margin = new Thickness(40, -180, 0, 0);
-                }
-                else
-                {
-                    this.MainPanorama.Margin = new Thickness(0, -180, 0, 0);
-                }
-
+                HistoryList.Width = 700;
                 ListTrending.Width = 1370;
-                HistoryList.Height = 360;
+                SubTextMyMovies.Visibility = System.Windows.Visibility.Collapsed;
+                SubTextMyShows.Visibility = System.Windows.Visibility.Collapsed;
+                SubTextSearch.Visibility = System.Windows.Visibility.Collapsed;
             }
         }
 

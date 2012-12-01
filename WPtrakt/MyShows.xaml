@@ -15,8 +15,17 @@
     shell:SystemTray.IsVisible="False"  BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
     <Grid x:Name="LayoutRoot">
-        <controls:Panorama Name="MyShowsPanorama" Title="My Shows" SelectionChanged="Panorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
-              <controls:PanoramaItem Margin="0 -20" Orientation="Horizontal">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
+            <TextBlock CacheMode="BitmapCache"  Text="WPtrakt" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <Border Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+            <ProgressBar VerticalAlignment="Top" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" Margin="0 5" />
+        </StackPanel>
+        <controls:Panorama Name="MyShowsPanorama" SelectionChanged="Panorama_SelectionChanged" Grid.Row="1">
+              <controls:PanoramaItem Orientation="Horizontal">
                 <StackPanel>
                     <toolkit:ListPicker  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
                         <sys:String>All</sys:String>
@@ -32,12 +41,9 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-
-                    <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusShows}" Name="progressBar" IsIndeterminate="True" />
-                    <TextBlock Margin="0 -30" Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShows}"/>
                     <cc:QuickJumpGrid DataSource="{Binding ShowItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,10,0,0" Height="590" Name="ListMyShows">
+                                  Margin="12,10,0,0" Height="630" Name="ListMyShows">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:ShowNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -56,16 +62,14 @@
                     </cc:QuickJumpGrid>
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -30" Orientation="Horizontal" Header="Upcoming">
+            <controls:PanoramaItem Orientation="Horizontal" Header="Upcoming">
                 <StackPanel>
-                    <ProgressBar Margin="0 40" Visibility="{Binding LoadingStatusCalendar}" Name="progressBarCalendar" IsIndeterminate="True" />
-                    <TextBlock Margin="0 -30" Name="loadingTextCalendar" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusCalendar}"/>
-                    <ListBox  Margin="0,-20,-10,0" ItemsSource="{Binding CalendarItems}" Height="519" MaxWidth="1000" Name="ListUpcomming">
+                    <ListBox ItemsSource="{Binding CalendarItems}" Height="565" MaxWidth="1000" x:Name="ListUpcomming">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Margin="0,0,0,17" MaxWidth="1000" MaxHeight="2000">
                                     <TextBlock Text="{Binding Date}" HorizontalAlignment="Left" Width="400" Height="50"  Style="{StaticResource PhoneTextLargeStyle}" />
-                                    <ListBox ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,0,-12,0" ItemsSource="{Binding Items}" Name="HistoryList" >
+                                    <ListBox ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,0,-12,0" ItemsSource="{Binding Items}" x:Name="HistoryList" >
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel Tap="StackPanel_Tap" Orientation="Horizontal" Margin="40,0,0,17" MaxWidth="800">
@@ -85,9 +89,9 @@
                     </ListBox>
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -30" Header="Suggestions" Orientation="Horizontal">
+            <controls:PanoramaItem Header="Suggestions" Orientation="Horizontal">
                 <StackPanel>
-                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions">
+                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions"  ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>
@@ -102,7 +106,6 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <ProgressBar VerticalAlignment="Bottom"  Visibility="{Binding LoadingStatusSuggestions}" Name="progressBarSuggest" IsIndeterminate="True" />
                 </StackPanel>
             </controls:PanoramaItem>
         </controls:Panorama>

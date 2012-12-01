@@ -215,23 +215,13 @@ namespace WPtrakt
         {
             if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
             {
-                this.MyMoviesPanorama.Margin = new Thickness(0, 0, 0, 0);
                 ListSuggestions.Width = 700;
-                ListMyMovies.Height = 590;
+                ListMyMovies.Height = 630;
             }
             else
             {
-                if (e.Orientation == PageOrientation.LandscapeRight)
-                {
-                    this.MyMoviesPanorama.Margin = new Thickness(50, -180, 0, 0);
-                }
-                else
-                {
-                    this.MyMoviesPanorama.Margin = new Thickness(0, -180, 0, 0);
-                }
-
                 ListSuggestions.Width = 1370;
-                ListMyMovies.Height = 420;
+                ListMyMovies.Height = 340;
             }
         }
         private Int32 lastSelection;

@@ -12,8 +12,16 @@
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
     <Grid x:Name="LayoutRoot" >
-        <ProgressBar VerticalAlignment="Top" Margin="0 150" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
-        <controls:Panorama  Title="WPtrakt" IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Style="{StaticResource PanoramaBGStyle}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
+            <TextBlock CacheMode="BitmapCache"  Text="WPtrakt" Style="{StaticResource PhoneTextNormalStyle}"/>
+            <Border Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+            <ProgressBar VerticalAlignment="Top" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" Margin="0 5" />
+        </StackPanel>
+        <controls:Panorama IsEnabled="{Binding PanoramaEnabled}" x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Grid.Row="1">
             <controls:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
                 <StackPanel HorizontalAlignment="Left">
                      <StackPanel Margin="0,0,0,17"  Width="432" Height="150" Orientation="Horizontal" HorizontalAlignment="Center">
@@ -24,23 +32,23 @@
                         </StackPanel>
                     </StackPanel>
                     <TextBlock x:Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatus}"/>
-                    <StackPanel Visibility="{Binding MainVisibility}" Tap="MyShows_Tap" Margin="0,0,0,17" Width="426" Height="80">
+                    <StackPanel Visibility="{Binding MainVisibility}" Tap="MyShows_Tap" Margin="0,0,0,17" Width="426" Height="Auto">
                         <TextBlock Text="My Shows" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Height="57" />
-                        <TextBlock Text="A list of shows you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
+                        <TextBlock Text="A list of shows you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Name="SubTextMyShows"/>
                     </StackPanel>
-                    <StackPanel Visibility="{Binding MainVisibility}" Tap="MyMovies" Margin="0,0,0,17" Width="426" Height="80">
+                    <StackPanel Visibility="{Binding MainVisibility}" Tap="MyMovies" Margin="0,0,0,17" Width="426" Height="Auto">
                         <TextBlock Text="My Movies" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
-                        <TextBlock Text="A list of movies you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
+                        <TextBlock Text="A list of movies you are currently watching." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Name="SubTextMyMovies"/>
                     </StackPanel>
-                    <StackPanel Visibility="{Binding MainVisibility}" Tap="Search_Tap" Margin="0,0,0,17" Width="426" Height="80">
+                    <StackPanel Visibility="{Binding MainVisibility}" Tap="Search_Tap" Margin="0,0,0,17" Width="426" Height="Auto">
                         <TextBlock Text="Search" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}"/>
-                        <TextBlock Text="Search for movies, shows or episodes." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}"/>
+                        <TextBlock Text="Search for movies, shows or episodes." TextWrapping="Wrap" Margin="12,-6,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Name="SubTextSearch"/>
                     </StackPanel>
                 </StackPanel>
             </controls:PanoramaItem>
             <controls:PanoramaItem  Margin="0 -25" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
                  <StackPanel Margin="0 -20">
-                    <ListBox Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700">
+                    <ListBox Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>
@@ -66,9 +74,13 @@
                     </ListBox>
                   </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -45" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
-                <StackPanel>
-                    <toolkit:ListPicker Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="60" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+            <controls:PanoramaItem Margin="0 -20" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <toolkit:ListPicker Grid.Row="0" VerticalAlignment="Top" Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="60" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
                         <sys:String>All</sys:String>
                         <sys:String>Watchlist</sys:String>
                         <sys:String>Rating</sys:String>
@@ -87,7 +99,7 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <ListBox  Height="520" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList"  >
+                    <ListBox Grid.Row="1" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
@@ -104,7 +116,7 @@
                                             <RowDefinition Height="Auto"></RowDefinition>
                                             <RowDefinition Height="30"></RowDefinition>
                                         </Grid.RowDefinitions>
-                                        <TextBlock Width="300" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                        <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
                                         <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTime}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                     </Grid>
                                     <toolkit:ContextMenuService.ContextMenu>
@@ -121,7 +133,7 @@
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                     </ListBox>
-                </StackPanel>
+                </Grid>
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>

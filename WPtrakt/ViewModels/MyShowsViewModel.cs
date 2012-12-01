@@ -38,41 +38,11 @@ namespace WPtrakt
             private set;
         }
 
-        public String LoadingStatusShows
+        public String LoadingStatus
         {
             get
             {
-                if (ShowItems.Count == 0)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        public String LoadingStatusCalendar
-        {
-            get
-            {
-                if (LoadingCalendar)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        public String LoadingStatusSuggestions
-        {
-            get
-            {
-                if (LoadingSuggestItems)
+                if (this.LoadingMyShows || this.LoadingCalendar || this.LoadingSuggestItems)
                 {
                     return "Visible";
                 }
@@ -205,7 +175,7 @@ namespace WPtrakt
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
                             NotifyPropertyChanged("ShowItems");
-                            NotifyPropertyChanged("LoadingStatusShows");
+                            NotifyPropertyChanged("LoadingStatus");
                         });
                     }
                 }
@@ -343,7 +313,7 @@ namespace WPtrakt
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
                             NotifyPropertyChanged("ShowItems");
-                            NotifyPropertyChanged("LoadingStatusShows");
+                            NotifyPropertyChanged("LoadingStatus");
                         });
                     }
                 }
@@ -366,7 +336,7 @@ namespace WPtrakt
                 this.LoadingCalendar = true;
                 this.CalendarItems = new ObservableCollection<CalendarListItemViewModel>();
                 NotifyPropertyChanged("CalendarItems");
-                NotifyPropertyChanged("LoadingStatusCalendar");
+                NotifyPropertyChanged("LoadingStatus");
                 HttpWebRequest request;
 
                 request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/calendar/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName + "/" + DateTime.Now.ToString("yyyyMMdd") + "/14"));
@@ -429,7 +399,7 @@ namespace WPtrakt
 
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
-                            NotifyPropertyChanged("LoadingStatusCalendar");
+                            NotifyPropertyChanged("LoadingStatus");
                             NotifyPropertyChanged("CalendarItems");
                         });
                     }
@@ -446,7 +416,7 @@ namespace WPtrakt
         private void RefreshMyShowsView()
         {
             NotifyPropertyChanged("ShowItems");
-            NotifyPropertyChanged("LoadingStatusShows");
+            NotifyPropertyChanged("LoadingStatus");
         }
 
         #endregion
@@ -460,7 +430,7 @@ namespace WPtrakt
                 this.LoadingSuggestItems = true;
                 this.SuggestItems = new ObservableCollection<ListItemViewModel>();
                 NotifyPropertyChanged("SuggestItems");
-                NotifyPropertyChanged("LoadingStatusSuggestions");
+                NotifyPropertyChanged("LoadingStatus");
 
                 HttpWebRequest request;
 
@@ -521,7 +491,7 @@ namespace WPtrakt
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
                 NotifyPropertyChanged("SuggestItems");
-                NotifyPropertyChanged("LoadingStatusSuggestions");
+                NotifyPropertyChanged("LoadingStatus");
             });
         }
 

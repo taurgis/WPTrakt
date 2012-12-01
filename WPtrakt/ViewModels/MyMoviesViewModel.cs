@@ -36,26 +36,11 @@ namespace WPtrakt
             private set;
         }
 
-        public String LoadingStatusMovies
+        public String LoadingStatus
         {
             get
             {
-                if (LoadingMovies)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        public String LoadingStatusSuggestions
-        {
-            get
-            {
-                if (LoadingSuggestItems)
+                if (this.LoadingMovies || this.LoadingSuggestItems)
                 {
                     return "Visible";
                 }
@@ -203,7 +188,7 @@ namespace WPtrakt
         private void RefreshMyMoviesView()
         {
             NotifyPropertyChanged("MovieItems");
-            NotifyPropertyChanged("LoadingStatusMovies");
+            NotifyPropertyChanged("LoadingStatus");
         }
 
         public void FilterMovies(int type)
@@ -354,7 +339,7 @@ namespace WPtrakt
                 this.LoadingSuggestItems = true;
                 this.SuggestItems = new ObservableCollection<ListItemViewModel>();
                 NotifyPropertyChanged("SuggestItems");
-                NotifyPropertyChanged("LoadingStatusSuggestions");
+                NotifyPropertyChanged("LoadingStatus");
                 HttpWebRequest request;
 
                 request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/recommendations/movies/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
@@ -415,7 +400,7 @@ namespace WPtrakt
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
                 NotifyPropertyChanged("SuggestItems");
-                NotifyPropertyChanged("LoadingStatusSuggestions");
+                NotifyPropertyChanged("LoadingStatus");
             });
         }
 

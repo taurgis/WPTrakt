@@ -120,23 +120,14 @@ namespace WPtrakt
             {
                 this.MyShowsPanorama.Margin = new Thickness(0, 0, 0, 0);
                 ListSuggestions.Width = 700;
-                ListMyShows.Height = 590;
+                ListMyShows.Height = 630;
                 ListUpcomming.Height = 519;
             }
             else
             {
-                if (e.Orientation == PageOrientation.LandscapeRight)
-                {
-                    this.MyShowsPanorama.Margin = new Thickness(50, -180, 0, 0);
-                }
-                else
-                {
-                    this.MyShowsPanorama.Margin = new Thickness(0, -180, 0, 0);
-                }
-
                 ListSuggestions.Width = 1370;
-                ListMyShows.Height = 420;
-                ListUpcomming.Height = 425;
+                ListMyShows.Height = 340;
+                ListUpcomming.Height = 280;
             }
         }
 
