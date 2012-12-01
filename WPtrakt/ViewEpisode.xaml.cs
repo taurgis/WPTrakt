@@ -143,7 +143,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
 
-                MessageBox.Show("Episode marked as watched.");
+                ToastNotification.ShowToast("Episode", "Episode marked as watched.");
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
 
                 App.EpisodeViewModel.Watched = true;
@@ -189,7 +189,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 App.EpisodeViewModel.Watched = false;
-                MessageBox.Show("Episode unmarked as watched.");
+                ToastNotification.ShowToast("Episode", "Episode unmarked as watched.");
 
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
 
@@ -258,7 +258,7 @@ namespace WPtrakt
 
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
 
-                MessageBox.Show("Episode added to watchlist.");
+                ToastNotification.ShowToast("Episode", "Episode added to watchlist.");
 
                 InitAppBar();
             }
@@ -302,7 +302,7 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Episode removed from watchlist.");
+                ToastNotification.ShowToast("Episode", "Episode removed from watchlist.");
                 App.EpisodeViewModel.InWatchlist = false;
 
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
@@ -353,9 +353,9 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 if (jsonString.Contains("failure"))
-                    MessageBox.Show("There is already a checkin in progress.");
+                    ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
                 else
-                    MessageBox.Show("Checked in!");
+                    ToastNotification.ShowToast("Episode", "Checked in!");
                 InitAppBar();
             }
             catch (WebException)
@@ -442,7 +442,7 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Shout posted. It might take up to a minute for the shout to show up in the application.");
+                ToastNotification.ShowToast("Episode", "Shout posted. It might take up to a minute for the shout to show up in the application.");
 
                 ShoutText.Text = "";
 

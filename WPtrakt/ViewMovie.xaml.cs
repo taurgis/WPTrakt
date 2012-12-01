@@ -155,7 +155,7 @@ namespace WPtrakt
                         NewTileData);
                 }
             }
-            catch (InvalidOperationException) { MessageBox.Show("Error creating tile, please try again!", "Error!", MessageBoxButton.OK); }
+            catch (InvalidOperationException) { ToastNotification.ShowToast("Tile", "Error creating tile, please try again!"); }
         }
 
         private void CreateRatingButton(ApplicationBar appBar)
@@ -206,7 +206,7 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Movie removed from watchlist.");
+                ToastNotification.ShowToast("Movie", "Movie removed from watchlist.");
                 App.MovieViewModel.InWatchlist = false;
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
                 InitAppBar();
@@ -249,7 +249,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 App.MovieViewModel.InWatchlist = true;
-                MessageBox.Show("Movie added to watchlist.");
+                ToastNotification.ShowToast("Movie", "Movie added to watchlist.");
 
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
                 InitAppBar();
@@ -297,9 +297,9 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 if (jsonString.Contains("failure"))
-                    MessageBox.Show("There is already a checkin in progress.");
+                    ToastNotification.ShowToast("Movie", "There is already a checkin in progress.");
                 else
-                    MessageBox.Show("Checked in!");
+                    ToastNotification.ShowToast("Movie", "Checked in!");
             }
             catch (WebException)
             {
@@ -348,7 +348,7 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Movie marked as watched.");
+                ToastNotification.ShowToast("Movie", "Movie marked as watched.");
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
                 App.MovieViewModel.Watched = true;
                 InitAppBar();
@@ -395,7 +395,7 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Movie unmarked as watched.");
+                ToastNotification.ShowToast("Movie", "Movie unmarked as watched.");
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
                 App.MovieViewModel.Watched = false;
                 InitAppBar();
@@ -466,7 +466,7 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                MessageBox.Show("Shout posted. It might take up to a minute for the shout to show up in the application.");
+                ToastNotification.ShowToast("Movie", "Shout posted. It might take up to a minute for the shout to show up in the application.");
 
                 ShoutText.Text = "";
 
