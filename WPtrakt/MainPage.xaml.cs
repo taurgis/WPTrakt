@@ -60,13 +60,6 @@ namespace WPtrakt
                         App.ViewModel.LoadData();
                     }
                 }
-                else
-                {
-                    if (this.MainPanorama.SelectedIndex == 2)
-                    {
-                        App.ViewModel.LoadHistoryData();
-                    }
-                }
             }
             catch (InvalidOperationException) { }
         }
