@@ -530,7 +530,7 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                ToastNotification.ShowToast("Show", "Shout posted. It might take up to a minute for the shout to show up in the application.");
+                ToastNotification.ShowToast("Show", "Shout posted.");
 
                 ShoutText.Text = "";
 
