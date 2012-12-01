@@ -75,8 +75,12 @@
                   </StackPanel>
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
-                <StackPanel>
-                    <toolkit:ListPicker Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="60" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <toolkit:ListPicker Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="60" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged" Grid.Row="0">
                         <sys:String>All</sys:String>
                         <sys:String>Watchlist</sys:String>
                         <sys:String>Rating</sys:String>
@@ -95,7 +99,7 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <ListBox  Height="550" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList"  >
+                    <ListBox  Grid.Row="1" Height="550" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
@@ -129,7 +133,7 @@
                             </ItemsPanelTemplate>
                         </ListBox.ItemsPanel>
                     </ListBox>
-                </StackPanel>
+                </Grid>
             </controls:PanoramaItem>
         </controls:Panorama>
     </Grid>
