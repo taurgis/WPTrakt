@@ -222,6 +222,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Images\fulllogo.png" />
     <Content Include="vcd.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
