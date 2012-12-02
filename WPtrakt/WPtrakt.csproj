@@ -205,6 +205,7 @@
     <Content Include="Images\badge-9.png" />
     <Content Include="Images\collection.png" />
     <Content Include="Images\episode-watched.png" />
+    <Content Include="Images\fulllogo.png" />
     <Content Include="Images\heart-love.png" />
     <Content Include="Images\poster-small.jpg" />
     <Content Include="Images\screen-small.jpg" />
