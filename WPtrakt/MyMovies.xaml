@@ -25,14 +25,14 @@
             <Border Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
             <ProgressBar VerticalAlignment="Top" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" Margin="0 5" />
         </StackPanel>
-        <controls:Panorama SelectionChanged="Panorama_SelectionChanged" Name="MyMoviesPanorama" Grid.Row="1">
-            <controls:PanoramaItem Orientation="Horizontal">
+        <controls:Panorama SelectionChanged="Panorama_SelectionChanged" Name="MyMoviesPanorama" Grid.Row="1" >
+            <controls:PanoramaItem Orientation="Horizontal" Margin="0 -40">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="80" />
+                        <RowDefinition Height="55" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <toolkit:ListPicker Grid.Row="0"  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}"  Background="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                    <toolkit:ListPicker Grid.Row="0"  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="50" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}"  Background="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
                         <sys:String>All</sys:String>
                         <sys:String>Watchlist</sys:String>
                         <toolkit:ListPicker.FullModeItemTemplate>
@@ -48,7 +48,7 @@
                     </toolkit:ListPicker>
                     <cc:QuickJumpGrid Grid.Row="1" DataSource="{Binding MovieItems}"
                                     IsAlphaNumeric="True"
-                                    Margin="12,0,0,0" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
+                                   Margin="12 0 0 45" Width="Auto"  MaxWidth="880" Name="ListMyMovies">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -66,9 +66,10 @@
                     </cc:QuickJumpGrid>
                 </Grid>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Header="Suggestions" Orientation="Horizontal" Name="SuggestionsPanoramaItem">
+            <controls:PanoramaItem Orientation="Horizontal" Name="SuggestionsPanoramaItem" Margin="0 -25">
                 <StackPanel>
-                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <TextBlock Grid.Row="0" Text="Suggestions" FontSize="40" />
+                    <ListBox Margin="0 5" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>

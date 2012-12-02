@@ -28,10 +28,10 @@
             <ProgressBar VerticalAlignment="Top" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" Margin="0 5" />
         </StackPanel>
         <controls:Panorama Name="MyShowsPanorama" SelectionChanged="Panorama_SelectionChanged" Grid.Row="1">
-              <controls:PanoramaItem Orientation="Horizontal">
+            <controls:PanoramaItem Orientation="Horizontal"  Margin="0 -30">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="80" />
+                        <RowDefinition Height="55" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <toolkit:ListPicker Grid.Row="0"   ExpansionMode="FullscreenOnly" Margin="0 -30" Height="80" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter"  Background="{StaticResource PhoneBackgroundBrush}" SelectionChanged="Filter_SelectionChanged">
@@ -50,7 +50,7 @@
                     </toolkit:ListPicker>
                     <cc:QuickJumpGrid DataSource="{Binding ShowItems}"
                                   IsAlphaNumeric="True"
-                                  Margin="12,0,0,0" Grid.Row="1"  Name="ListMyShows">
+                                  Margin="12,0,0,35" Grid.Row="1"  Name="ListMyShows">
                         <cc:QuickJumpGrid.QuickJumpGridSelector>
                             <local:MovieNameSelector />
                         </cc:QuickJumpGrid.QuickJumpGridSelector>
@@ -69,12 +69,14 @@
                     </cc:QuickJumpGrid>
                 </Grid>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Orientation="Horizontal" Header="Upcoming">
+            <controls:PanoramaItem Orientation="Horizontal" Margin="0 -25">
                 <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="52" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <ListBox Grid.Row="0" ItemsSource="{Binding CalendarItems}" MaxWidth="1000" x:Name="ListUpcomming">
+                    <TextBlock Grid.Row="0" Text="Upcoming" FontSize="40" />
+                    <ListBox Grid.Row="1" ItemsSource="{Binding CalendarItems}" MaxWidth="1000" x:Name="ListUpcomming">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Margin="0,0,0,17" MaxWidth="1000" MaxHeight="2000">
@@ -99,9 +101,10 @@
                     </ListBox>
                 </Grid>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Header="Suggestions" Orientation="Horizontal">
+            <controls:PanoramaItem Orientation="Horizontal" Margin="0 -25">
                 <StackPanel>
-                    <ListBox Margin="0,-20,-10,0" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions"  ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                    <TextBlock Grid.Row="0" Text="Suggestions" FontSize="40" />
+                    <ListBox Margin="0 5" ItemsSource="{Binding SuggestItems}" Width="700" Name="ListSuggestions" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>
