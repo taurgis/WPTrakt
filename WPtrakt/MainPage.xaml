@@ -48,9 +48,10 @@
                     </StackPanel>
                 </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem  Margin="0 -25" Header="Trending" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
-                 <StackPanel Margin="0 -20">
-                    <ListBox Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+            <controls:PanoramaItem  Margin="0 -25" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
+                 <StackPanel>
+                    <TextBlock Text="Trending" FontSize="40" />
+                    <ListBox Margin="0 5" Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                         <ListBox.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <toolkit:WrapPanel ItemWidth="170" ItemHeight="250" Name="WrapPanelTrending"/>
@@ -76,13 +77,15 @@
                     </ListBox>
                   </StackPanel>
             </controls:PanoramaItem>
-            <controls:PanoramaItem Margin="0 -20" Header="History" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
+            <controls:PanoramaItem Margin="0 -25" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="60" />
+                        <RowDefinition Height="52" />
+                        <RowDefinition Height="55" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <toolkit:ListPicker Grid.Row="0" VerticalAlignment="Top" Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="60" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged">
+                    <TextBlock Grid.Row="0" Text="History" FontSize="40" />
+                    <toolkit:ListPicker Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="50" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged" Grid.Row="1">
                         <sys:String>All</sys:String>
                         <sys:String>Watchlist</sys:String>
                         <sys:String>Rating</sys:String>
@@ -101,7 +104,7 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <ListBox  Grid.Row="1" Height="Auto" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
+                    <ListBox  Grid.Row="2" Height="Auto" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid   Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  >
