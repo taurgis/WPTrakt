@@ -120,7 +120,7 @@ namespace WPtrakt.ViewModels
                     Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         String fileName;
-                        if (!String.IsNullOrEmpty(Imdb) && String.IsNullOrEmpty(this.Tvdb))
+                        if (!String.IsNullOrEmpty(Imdb) && this.Season == 0)
                         {
                             fileName = this.Imdb + "screen" + ".jpg";
                         }
