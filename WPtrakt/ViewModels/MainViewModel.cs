@@ -476,22 +476,26 @@ namespace WPtrakt
         private Boolean fetchingMyActivity = false;
         public void LoadHistoryData()
         {
-            this.LoadingHistory = true;
-            NotifyPropertyChanged("LoadingStatus");
-            fetchingMyActivity = true;
-            fetchingFriendsActivity = true;
-            var historyClient = new WebClient();
-            historyClient.Encoding = Encoding.GetEncoding("UTF-8");
-            historyClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
-            historyClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
-         
+            if (!this.LoadingHistory)
+            {
+                this.LoadingHistory = true;
+                NotifyPropertyChanged("LoadingStatus");
+                fetchingMyActivity = true;
+                fetchingFriendsActivity = true;
+                this.history = new List<TraktActivity>();
+                this.HistoryItems = new ObservableCollection<ActivityDateListItemViewModel>();
+                var historyClient = new WebClient();
 
-            var movieClient = new WebClient();
-            movieClient.Encoding = Encoding.GetEncoding("UTF-8");
-            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadFriendMovieStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
-    
+                historyClient.Encoding = Encoding.GetEncoding("UTF-8");
+                historyClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
+                historyClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
 
+
+                var movieClient = new WebClient();
+                movieClient.Encoding = Encoding.GetEncoding("UTF-8");
+                movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadFriendMovieStringCompleted);
+                movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+            }
         }
 
 
@@ -573,7 +577,7 @@ namespace WPtrakt
                     ActivityListItemViewModel tempModel = null;
                     try
                     {
-                        if (counter++ <= 30)
+                        if (counter++ <= 40)
                         {
                             switch (activity.Action)
                             {
@@ -614,7 +618,7 @@ namespace WPtrakt
 
         private void OrderHistory(TraktActivity activity, ActivityListItemViewModel tempModel)
         {
-            if (HistoryItems.Count == 00)
+            if (HistoryItems.Count == 0)
             {
                 DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                 time = time.AddSeconds(activity.TimeStamp);
@@ -667,7 +671,7 @@ namespace WPtrakt
 
                 try
                 {
-                    if (counter++ <= 30)
+                    if (counter++ <= 40)
                     {
                         switch (activity.Action)
                         {
