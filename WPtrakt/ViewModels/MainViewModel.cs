@@ -483,6 +483,7 @@ namespace WPtrakt
                 fetchingMyActivity = true;
                 fetchingFriendsActivity = true;
                 this.history = new List<TraktActivity>();
+                this.HistoryItems = new ObservableCollection<ActivityDateListItemViewModel>();
                 var historyClient = new WebClient();
 
                 historyClient.Encoding = Encoding.GetEncoding("UTF-8");
@@ -617,7 +618,7 @@ namespace WPtrakt
 
         private void OrderHistory(TraktActivity activity, ActivityListItemViewModel tempModel)
         {
-            if (HistoryItems.Count == 00)
+            if (HistoryItems.Count == 0)
             {
                 DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                 time = time.AddSeconds(activity.TimeStamp);
