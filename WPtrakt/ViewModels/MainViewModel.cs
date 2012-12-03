@@ -472,15 +472,26 @@ namespace WPtrakt
 
         #region History
 
+        private Boolean fetchingFriendsActivity = false;
+        private Boolean fetchingMyActivity = false;
         public void LoadHistoryData()
         {
             this.LoadingHistory = true;
             NotifyPropertyChanged("LoadingStatus");
-           
+            fetchingMyActivity = true;
+            fetchingFriendsActivity = true;
             var historyClient = new WebClient();
             historyClient.Encoding = Encoding.GetEncoding("UTF-8");
             historyClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
             historyClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+         
+
+            var movieClient = new WebClient();
+            movieClient.Encoding = Encoding.GetEncoding("UTF-8");
+            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadFriendMovieStringCompleted);
+            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+    
+
         }
 
 
@@ -489,58 +500,20 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                this.HistoryItems = new ObservableCollection<ActivityDateListItemViewModel>();
-                this.history = new List<TraktActivity>();
+                if(this.history == null)
+                 this.history = new List<TraktActivity>();
 
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
           
-                    TraktFriendsActivity friendsActivity = (TraktFriendsActivity)ser.ReadObject(ms);
-                    int counter = 0;
-                    DateTime lastDateTime = DateTime.Now;
-                    foreach (TraktActivity activity in friendsActivity.Activity)
-                    {
-                        history.Add(activity);
-                        ActivityListItemViewModel tempModel = null;
-                        try
-                        {
-                            if (counter++ <= 20)
-                            {
-                                switch (activity.Action)
-                                {
-                                    case "watchlist":
-                                        tempModel = AddToWatchList(activity);
-                                        break;
-                                    case "rating":
-                                        tempModel = Rated(activity);
-                                        break;
-                                    case "checkin":
-                                        tempModel = Checkin(activity);
-                                        break;
-                                    case "scrobble":
-                                        tempModel = Scrobble(activity);
-                                        break;
-                                    case "collection":
-                                        tempModel = Collection(activity);
-                                        break;
-                                    case "shout":
-                                        tempModel = Shout(activity);
-                                        break;
-                                }
-
-
-                                OrderHistory(activity, tempModel);
-                            }
-                        }
-                        catch (NullReferenceException) { }
-                    }
-
+                    TraktFriendsActivity myActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                   
+                    this.fetchingMyActivity = false;
                    
                     ms.Close();
-                    this.LoadingHistory = false;
-                    NotifyPropertyChanged("HistoryItems");
-                    NotifyPropertyChanged("LoadingStatus");
+                    
+                    CreateHistoryList(myActivity);
                 }
 
             }
@@ -549,6 +522,95 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
         }
+
+
+
+        void client_UploadFriendMovieStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+                if (this.history == null)
+                    this.history = new List<TraktActivity>();
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
+                    Console.Write(jsonString);
+                    TraktFriendsActivity friendsActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                    this.fetchingFriendsActivity = false;
+
+                   CreateHistoryList(friendsActivity);
+
+                    
+
+                    ms.Close();
+                }
+
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+        }
+
+        private void CreateHistoryList(TraktFriendsActivity friendsActivity)
+        {
+            int counter = 0;
+            foreach (TraktActivity activity in friendsActivity.Activity)
+            {
+                history.Add(activity);
+
+            }
+
+            if (!fetchingFriendsActivity && !fetchingMyActivity)
+            {
+                this.history.Sort(TraktActivity.ActivityComparison);
+                foreach (TraktActivity activity in this.history)
+                {
+                    ActivityListItemViewModel tempModel = null;
+                    try
+                    {
+                        if (counter++ <= 20)
+                        {
+                            switch (activity.Action)
+                            {
+                                case "watchlist":
+                                    tempModel = AddToWatchList(activity);
+                                    break;
+                                case "rating":
+                                    tempModel = Rated(activity);
+                                    break;
+                                case "checkin":
+                                    tempModel = Checkin(activity);
+                                    break;
+                                case "scrobble":
+                                    tempModel = Scrobble(activity);
+                                    break;
+                                case "collection":
+                                    tempModel = Collection(activity);
+                                    break;
+                                case "shout":
+                                    tempModel = Shout(activity);
+                                    break;
+                            }
+
+                            OrderHistory(activity, tempModel);
+                        }
+
+                     
+                    }
+                    catch (NullReferenceException) { }
+                }
+
+                this.LoadingHistory = false;
+                NotifyPropertyChanged("HistoryItems");
+                NotifyPropertyChanged("LoadingStatus");
+            }
+        }
+
 
         private void OrderHistory(TraktActivity activity, ActivityListItemViewModel tempModel)
         {
@@ -658,11 +720,11 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = "added shout to movie " + activity.Movie.Title + ".\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName))? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + ".\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
-                    return new ActivityListItemViewModel() { Activity = "added shout to show " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to show " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                     return new ActivityListItemViewModel() { Activity = "added shout to episode " + activity.Show.Title + " - " + activity.Show.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to episode " + activity.Show.Title + " - " + activity.Show.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
 
             return null;
@@ -673,11 +735,11 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                     return new ActivityListItemViewModel() { Activity = "added " + activity.Movie.Title + " to the collection.\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the collection.\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
-                     return new ActivityListItemViewModel() { Activity = "added " + activity.Show.Title + " to the collection.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the collection.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                     return new ActivityListItemViewModel() { Activity = "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the collection", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the collection", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
 
             return null;
@@ -688,11 +750,11 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                     return new ActivityListItemViewModel() { Activity = "scrobbled " + activity.Movie.Title + ".\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Movie.Title + ".\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
-                     return new ActivityListItemViewModel() { Activity = "scrobbled " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                     return new ActivityListItemViewModel() { Activity = "scrobbled " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
 
             return null;
@@ -703,11 +765,11 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = "checked in " + activity.Movie.Title + ". \r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Movie.Title + ". \r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
-                    return new ActivityListItemViewModel() { Activity = "checked in " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                    return new ActivityListItemViewModel() { Activity = "checked in " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
 
             return null;
@@ -718,11 +780,11 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = "rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 .\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 .\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
-                     return new ActivityListItemViewModel() { Activity = "rated " + activity.Show.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Show.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                    return new ActivityListItemViewModel() { Activity = "rated " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
             return null;
         }
@@ -732,11 +794,11 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                     return new ActivityListItemViewModel() { Activity = "added " + activity.Movie.Title + " to the watchlist.\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the watchlist.\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
-                    return new ActivityListItemViewModel() { Activity = "added " + activity.Show.Title + " to the watchlist.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id,  Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the watchlist.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                     return new ActivityListItemViewModel() { Activity = "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the watchlist", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the watchlist", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
 
             return null;

@@ -84,7 +84,7 @@
                         <RowDefinition Height="55" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" Text="History" FontSize="40" />
+                    <TextBlock Grid.Row="0" Text="News Feed" FontSize="40" />
                     <toolkit:ListPicker Background="{StaticResource PhoneBackgroundBrush}" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="50" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}" Name="Filter" SelectionChanged="Filter_SelectionChanged" Grid.Row="1">
                         <sys:String>All</sys:String>
                         <sys:String>Watchlist</sys:String>
@@ -172,7 +172,6 @@
             <shell:ApplicationBarIconButton IconUri="Images/appbar.refresh.rest.png" Text="Refresh" Click="ApplicationBarRefreshButton_Click" />
             <shell:ApplicationBar.MenuItems>
                 <shell:ApplicationBarMenuItem x:Name="CancelCheckin" Text="Cancel check in" Click="CancelCheckin_Click"></shell:ApplicationBarMenuItem>
-                <shell:ApplicationBarMenuItem x:Name="FriendActivity" Text="Friend Activity" Click="FriendActivity_Click"></shell:ApplicationBarMenuItem>
                 <shell:ApplicationBarMenuItem x:Name="RateApp" Text="Rate and Review" Click="RateApp_Click_1"></shell:ApplicationBarMenuItem>
             </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>

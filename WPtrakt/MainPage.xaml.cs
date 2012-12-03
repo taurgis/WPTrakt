@@ -215,12 +215,6 @@ namespace WPtrakt
             NavigationService.Navigate(new Uri("/Settings.xaml", UriKind.Relative));
         }
 
-        private void FriendActivity_Click(object sender, EventArgs e)
-        {
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/FriendActivity.xaml", UriKind.Relative));
-        }
-
-
         #endregion
 
         #region MovieContextMenu

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace WPtrakt.Model.Trakt
 {
     [DataContract]
-    public class TraktActivity : TraktObject
+    public class TraktActivity : TraktObject, IComparable<TraktActivity>
     {
         [DataMember(Name = "timestamp")]
         public Int32 TimeStamp { get; set; }
@@ -35,5 +35,20 @@ namespace WPtrakt.Model.Trakt
 
         [DataMember(Name = "rating_advanced")]
         public Int16 RatingAdvanced { get; set; }
+
+        public Int32 CompareTo(TraktActivity other)
+        {
+            return this.TimeStamp.CompareTo(other.TimeStamp);
+        }
+
+
+
+        public static Comparison<TraktActivity> ActivityComparison =
+               delegate(TraktActivity p1, TraktActivity p2)
+               {
+                   return p2.TimeStamp.CompareTo(p1.TimeStamp);
+               };
+        
+
     }
 }

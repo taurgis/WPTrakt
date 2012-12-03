@@ -32,6 +32,7 @@ namespace WPtrakt.Controllers
                     {
                         IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open);
                         saveImageForTile("/Shared/ShellContent/wptraktbg" + uniquekey + ".jpg", stream, 1920, 100);
+                        stream.Dispose();
                         stream.Close();
                     }
                 }
@@ -51,7 +52,7 @@ namespace WPtrakt.Controllers
                     using (IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open))
                     {
                         bi.SetSource(stream);
-
+                        stream.Dispose();
                         stream.Close();
                     }
                     return bi;
@@ -77,6 +78,7 @@ namespace WPtrakt.Controllers
                 if (!StorageController.UserIsHighEndDevice())
                 {
                     BitmapImage lowEndDeviceImage = resizeImage(bi, pic, width, height);
+                    pic.Dispose();
                     pic.Close();
                     return lowEndDeviceImage;
                 }
@@ -89,6 +91,7 @@ namespace WPtrakt.Controllers
                     {
                         wb.SaveJpeg(isoFileStream, width, height, 0, quality);
                         bi.SetSource(isoFileStream);
+                        isoFileStream.Dispose();
                         isoFileStream.Close();
                         wb = null;
                     }
@@ -142,6 +145,7 @@ namespace WPtrakt.Controllers
                 if (!StorageController.UserIsHighEndDevice())
                 {
                     BitmapImage lowEndDeviceImage = resizeImage(bi, pic, width);
+                    pic.Dispose();
                     pic.Close();
                     return lowEndDeviceImage;
                 }
@@ -156,6 +160,7 @@ namespace WPtrakt.Controllers
                     {
                         wb.SaveJpeg(isoFileStream, width, (int)newHeight, 0, quality);
                         bi.SetSource(isoFileStream);
+                        isoFileStream.Dispose();
                         isoFileStream.Close();
                         wb = null;
                     }
@@ -183,6 +188,7 @@ namespace WPtrakt.Controllers
                     using (var isoFileStream = isoStore.CreateFile(fileName))
                     {
                         wb.SaveJpeg(isoFileStream, width, (int)newHeight, 0, quality);
+                        isoFileStream.Dispose();
                         isoFileStream.Close();
                         wb = null;
                         bi = null;
