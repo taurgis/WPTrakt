@@ -122,9 +122,6 @@
     <Compile Include="Controllers\Speech.cs" />
     <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Controllers\ToastNotification.cs" />
-    <Compile Include="FriendActivity.xaml.cs">
-      <DependentUpon>FriendActivity.xaml</DependentUpon>
-    </Compile>
     <Compile Include="RatingSelector.xaml.cs">
       <DependentUpon>RatingSelector.xaml</DependentUpon>
     </Compile>
@@ -172,10 +169,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
-    <Page Include="FriendActivity.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="RatingSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

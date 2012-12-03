@@ -36,85 +36,6 @@ namespace WPtrakt.ViewModels
             }
         }
 
-        private String _avatar;
-        public String Avatar
-        {
-            get
-            {
-                return _avatar;
-            }
-
-            set
-            {
-                if (_avatar != value)
-                {
-                    _avatar = value;
-                    NotifyPropertyChanged("Avatar");
-                }
-            }
-        }
-
-        private BitmapImage _avatarImage;
-        public BitmapImage AvatarImage
-        {
-            get
-            {
-                if (_avatarImage == null)
-                {
-                    String fileName = this.Name + "thumb" + ".jpg";
-
-                    if (StorageController.doesFileExist(fileName))
-                    {
-                        _avatarImage = ImageController.getImageFromStorage(fileName);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            HttpWebRequest request;
-
-                            request = (HttpWebRequest)WebRequest.Create(new Uri(this.Avatar));
-                            request.BeginGetResponse(new AsyncCallback(request_OpenReadThumbCompleted), new object[] { request });
-                        }
-                        catch (NullReferenceException) { }
-                        BitmapImage tempImage = new BitmapImage(new Uri("Images/thumb-small.jpg", UriKind.Relative));
-                        return tempImage;
-                    }
-
-                    return _avatarImage;
-                }
-                else
-                {
-                    return _avatarImage;
-                }
-            }
-        }
-
-        private void request_OpenReadThumbCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        _avatarImage = ImageController.saveImage(this.Name + "thumb.jpg", str, 50, 50, 70);
-                        NotifyPropertyChanged("AvatarImage");
-                    }));
-                }
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException) {}
-
-        }
-
         private string _screen;
         public string Screen
         {
@@ -214,7 +135,7 @@ namespace WPtrakt.ViewModels
                                 fileName = this.Tvdb + "screen" + ".jpg";
                             }
                         }
-                        _screenImage = ImageController.saveImage(fileName, str, 150, 90);
+                        _screenImage = ImageController.saveImage(fileName, str, 100, 100);
 
                         NotifyPropertyChanged("ScreenImage");
                     }));

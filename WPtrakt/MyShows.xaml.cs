@@ -163,10 +163,6 @@ namespace WPtrakt
                         App.MyShowsViewModel.LoadCalendarData();
                 }
             }
-            else if (e.NavigationMode == NavigationMode.Back && !System.Diagnostics.Debugger.IsAttached)
-            {
-                NavigationService.GoBack();
-            }
         }
 
         #endregion
