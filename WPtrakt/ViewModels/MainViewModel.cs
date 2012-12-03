@@ -622,6 +622,7 @@ namespace WPtrakt
             {
                 DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                 time = time.AddSeconds(activity.TimeStamp);
+                time = time.ToLocalTime();
                 DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
 
                 ActivityDateListItemViewModel firstActivity = new ActivityDateListItemViewModel();
@@ -635,6 +636,7 @@ namespace WPtrakt
                 Boolean added = false;
                 DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                 time = time.AddSeconds(activity.TimeStamp);
+                time = time.ToLocalTime();
                 foreach (ActivityDateListItemViewModel model in HistoryItems)
                 {
 
