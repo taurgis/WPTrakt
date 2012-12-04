@@ -210,6 +210,7 @@ namespace WPtraktLiveTile
                
                     newTileData.BackgroundImage = new Uri("appdata:background.png");
                     newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
+                    newTileData.SmallBackgroundImage = new Uri("appdata:background.png");
                     newTileData.WideBackContent = nextEpisode.Show.Title + ", " + nextEpisode.Episode.Season + "x" + nextEpisode.Episode.Number + "\r\n\r\n" + nextEpisode.Episode.Title;
                     appTile.Update(newTileData);
 
@@ -231,6 +232,7 @@ namespace WPtraktLiveTile
                 FlipTileData newTileData = new FlipTileData();
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
                 newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
+                newTileData.SmallBackgroundImage = new Uri("appdata:background.png");
                 newTileData.BackContent = "No upcomming episodes";
                 newTileData.WideBackContent = "No upcomming episodes";
                 newTileData.BackTitle = DateTime.Now.ToShortTimeString();

@@ -37,39 +37,37 @@ namespace WPtrakt
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
 
-            if (!App.SettingsViewModel.IsDataLoaded)
+            if (AppUser.Instance.LiveTileEnabled)
             {
-                if (AppUser.Instance.LiveTileEnabled)
+                this.toggle.IsChecked = true;
+                this.toggleRandom.IsEnabled = true;
+                if (AppUser.Instance.LiveTileType == LiveTileType.Random)
                 {
-                    this.toggle.IsChecked = true;
-                    this.toggleRandom.IsEnabled = true;
-                    if (AppUser.Instance.LiveTileType == LiveTileType.Random)
-                    {
-                        toggleRandom.IsChecked = true;
-                        this.toggleRandom.Content = "Enabled";
-                    }
-                    else
-                    {
-                        toggleRandom.IsChecked = false;
-                        this.toggleRandom.Content = "Disabled";
-                    }
+                    toggleRandom.IsChecked = true;
+                    this.toggleRandom.Content = "Enabled";
                 }
                 else
                 {
-                    this.toggle.IsChecked = false;
-                    this.toggleRandom.IsEnabled = false;
+                    toggleRandom.IsChecked = false;
+                    this.toggleRandom.Content = "Disabled";
                 }
-
-                this.WallpaperSetting.SelectedIndex = AppUser.Instance.LiveWallpaperSchedule;
-
-                App.SettingsViewModel.LoadData();
-
-
-                App.SettingsViewModel.Usage = "Calculating...";
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-                worker.RunWorkerAsync();
             }
+            else
+            {
+                this.toggle.IsChecked = false;
+                this.toggleRandom.IsEnabled = false;
+            }
+
+            this.WallpaperSetting.SelectedIndex = AppUser.Instance.LiveWallpaperSchedule;
+
+            App.SettingsViewModel.LoadData();
+
+
+            App.SettingsViewModel.Usage = "Calculating...";
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+            worker.RunWorkerAsync();
+            
 
             string lockscreenValue = "";
 
@@ -207,6 +205,7 @@ namespace WPtrakt
                 FlipTileData newTileData = new FlipTileData();
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
                 newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
+                newTileData.SmallBackgroundImage = new Uri("appdata:background.png");
                 newTileData.BackContent = "";
                 newTileData.WideBackContent = "";
                 newTileData.BackTitle = "";
