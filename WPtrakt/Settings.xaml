@@ -14,7 +14,7 @@
            <controls:PanoramaItem Header="Login" Width="480">
                 <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
                     <ListBoxItem>
-                        <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" />
+                        <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" Width="400" />
                     </ListBoxItem>
                     <ListBoxItem>
                         <StackPanel Width="465" Height="60" Orientation="Horizontal" Visibility="{Binding ShowCreateAccount}">

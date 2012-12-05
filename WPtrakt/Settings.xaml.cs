@@ -258,15 +258,17 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                if (jsonString.Contains(" is already a registered e-mail."))
+                if (jsonString.Contains(" is already a registered e-mail"))
                 {
                     MessageBox.Show("Email already in use.");
+                    progressBar.Visibility = System.Windows.Visibility.Collapsed;
                     return;
                 }
 
                 if (jsonString.Contains("is already a registered username"))
                 {
                     MessageBox.Show("Username already in use.");
+                    progressBar.Visibility = System.Windows.Visibility.Collapsed;
                     return;
                 }
 
@@ -288,7 +290,7 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
+          
         }
 
         private void toggleRandom_Checked_1(object sender, RoutedEventArgs e)
