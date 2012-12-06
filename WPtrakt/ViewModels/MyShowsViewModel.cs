@@ -391,12 +391,12 @@ namespace WPtrakt
                                 tempEpisodes.Add(new ListItemViewModel() { Name = episode.Show.Title, ImageSource = episode.Episode.Images.Screen, Imdb = episode.Show.imdb_id + episode.Episode.Season + episode.Episode.Number, SubItemText = episode.Episode.Title, TruncateTitle = false, Tvdb = episode.Show.tvdb_id, Episode = episode.Episode.Number, Season = episode.Episode.Season });
 
                             }
-                            tempItems.Add(new CalendarListItemViewModel() { Date = calendarDate.Date, Items = tempEpisodes });
+                            tempItems.Add(new CalendarListItemViewModel() { DateString = calendarDate.Date, Items = tempEpisodes });
                         }
 
                         if (obj.Length == 00)
                         {
-                            tempItems.Add(new CalendarListItemViewModel() { Date = "No upcomming episodes", Items = new ObservableCollection<ListItemViewModel>() });
+                            tempItems.Add(new CalendarListItemViewModel() { DateString = "No upcomming episodes", Items = new ObservableCollection<ListItemViewModel>() });
                         }
 
                         this.CalendarItems = tempItems;

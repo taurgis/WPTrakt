@@ -76,18 +76,27 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Text="Upcoming" FontSize="40" />
-                    <ListBox Grid.Row="1" ItemsSource="{Binding CalendarItems}" MaxWidth="1000" x:Name="ListUpcomming">
+                    <ListBox Grid.Row="1" ItemsSource="{Binding CalendarItems}" x:Name="ListUpcomming">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical" Margin="0,0,0,17" MaxWidth="1000" MaxHeight="2000">
-                                    <TextBlock Text="{Binding Date}" HorizontalAlignment="Left" Width="400" Height="50"  Style="{StaticResource PhoneTextLargeStyle}" />
-                                    <ListBox ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,0,-12,0" ItemsSource="{Binding Items}" x:Name="HistoryList" >
+                                <Grid   Margin="0,15,0,17" Height="Auto" VerticalAlignment="Stretch"  >
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="55"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
+                                        <TextBlock Foreground="White" Margin="20 5" FontSize="30"  Text="{Binding DateString}"/>
+                                    </Grid>
+                                    <ListBox Grid.Row="1" Grid.Column="0" ScrollViewer.VerticalScrollBarVisibility="Disabled" Margin="0,10,-12,0" ItemsSource="{Binding Items}" x:Name="HistoryList" Width="420" >
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
-                                                <StackPanel Tap="StackPanel_Tap" Orientation="Horizontal" Margin="40,0,0,17" MaxWidth="800">
+                                                <StackPanel Tap="StackPanel_Tap" Orientation="Horizontal" Margin="0,0,0,17" MaxWidth="800">
                                                     <Image Margin="0 0" Source="{Binding ScreenImage}" Width="150"/>
-                                                    <StackPanel Margin="0 -12" Orientation="Vertical" MaxWidth="850">
-                                                        <TextBlock MaxWidth="850"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                                    <StackPanel Margin="0 -5" Orientation="Vertical" MaxWidth="850">
+                                                        <TextBlock MaxWidth="850"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" FontSize="25" />
                                                         <TextBlock MaxWidth="850" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                                         <TextBlock MaxWidth="850"  Text="{Binding SeasonText}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                                     </StackPanel>
@@ -95,7 +104,7 @@
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
-                                </StackPanel>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
