@@ -164,34 +164,28 @@ namespace WPtrakt
 
         void tileMenuItem_Click(object sender, EventArgs e)
         {
-            try
+            if (StorageController.doesFileExist(App.ShowViewModel.Tvdb + "background.jpg"))
             {
-                if (StorageController.doesFileExist(App.ShowViewModel.Tvdb + "background.jpg"))
+                ImageController.copyImageToShellContent(App.ShowViewModel.Tvdb + "background.jpg", App.ShowViewModel.Tvdb);
+                StandardTileData NewTileData = new StandardTileData
                 {
-                    ImageController.copyImageToShellContent(App.ShowViewModel.Tvdb + "background.jpg", App.ShowViewModel.Tvdb);
-                    FlipTileData NewTileData = new FlipTileData
-                    {
-                        BackgroundImage =
-                             new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg", UriKind.Absolute),
-                        WideBackgroundImage =
-                       new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg", UriKind.Absolute),
-                        Title = App.ShowViewModel.Name,
-                    };
-                    if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg"))
-                    {
-                        NewTileData.BackgroundImage = new Uri("appdata:background.png"); ;
-                    }
+                    BackgroundImage =
+                         new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg", UriKind.Absolute),
+                    BackContent = App.ShowViewModel.Name,
+                };
 
-                    ShellTile.Create(
-                    new Uri(
-                        "/ViewShow.xaml?id=" + App.ShowViewModel.Tvdb,
-                        UriKind.Relative),
-                        NewTileData, true);
+                if (!StorageController.doesFileExist("/Shared/ShellContent/wptraktbg" + App.ShowViewModel.Tvdb + ".jpg"))
+                {
+                    NewTileData.BackgroundImage = new Uri("appdata:background.png"); ;
                 }
+
+                ShellTile.Create(
+                new Uri(
+                    "/ViewShow.xaml?id=" + App.ShowViewModel.Tvdb,
+                    UriKind.Relative),
+                    NewTileData);
             }
-            catch (InvalidOperationException) { 
-       
-            }
+
         }
 
         private void CreateAddToWatchlist(ApplicationBar appBar)

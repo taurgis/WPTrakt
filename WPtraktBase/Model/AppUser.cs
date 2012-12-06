@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization.Json;
@@ -14,8 +14,7 @@ namespace WPtrakt.Model
         private IsolatedStorageSettings settings;
         public static AppUser Instance
         {
-            get
-            {
+            get{
                 if (appUser == null)
                     appUser = new AppUser();
                 return appUser;
@@ -40,22 +39,6 @@ namespace WPtrakt.Model
             set
             {
                 settings["AppVersion"] = value;
-                settings.Save();
-            }
-        }
-
-        public DateTime LastUpdateLockScreen
-        {
-            get
-            {
-                if (settings.Contains("LastUpdateLockScreen"))
-                    return DateTime.Parse(settings["LastUpdateLockScreen"].ToString());
-                else
-                    return DateTime.Now.Subtract(new TimeSpan(3,0,0,0,0));
-            }
-            set
-            {
-                settings["LastUpdateLockScreen"] = value.ToString();
                 settings.Save();
             }
         }
@@ -111,12 +94,11 @@ namespace WPtrakt.Model
             }
         }
 
-
         public String UserName
         {
             get
             {
-
+               
                 if (settings.Contains("UserName"))
                     return settings["UserName"].ToString();
                 else
@@ -145,18 +127,18 @@ namespace WPtrakt.Model
             }
         }
 
-        public int LiveWallpaperSchedule
+        public Boolean LiveTileUsePoster
         {
             get
             {
-                if (settings.Contains("LiveWallpaperSchedule"))
-                    return (int)settings["LiveWallpaperSchedule"];
+                if (settings.Contains("LiveTileUsePoster"))
+                    return (Boolean)settings["LiveTileUsePoster"];
                 else
-                    return 1;
+                    return false;
             }
             set
             {
-                settings["LiveWallpaperSchedule"] = value;
+                settings["LiveTileUsePoster"] = value;
                 settings.Save();
             }
         }
@@ -174,7 +156,7 @@ namespace WPtrakt.Model
                 }
                 else
                     return "";
-
+               
             }
             set
             {
@@ -196,8 +178,8 @@ namespace WPtrakt.Model
             //Create User object.
             TraktRequestAuth user = new BasicAuth();
 
-            user.Username = AppUser.Instance.UserName;
-
+            user.Username =AppUser.Instance.UserName;
+        
             user.Password = AppUser.Instance.Password;
             //Create a stream to serialize the object to.
             MemoryStream ms = new MemoryStream();
@@ -231,7 +213,7 @@ namespace WPtrakt.Model
 
         public static String getReleaseDate()
         {
-            return "15/11/2012";
+            return "22/11/2012";
         }
 
 
@@ -244,13 +226,13 @@ namespace WPtrakt.Model
 
             foreach (String file in myIsolatedStorage.GetFileNames())
             {
-
-                try
-                {
-                    myIsolatedStorage.DeleteFile(file);
-                }
-                catch (IsolatedStorageException) { };
-
+                
+                     try
+                     {
+                         myIsolatedStorage.DeleteFile(file);
+                     }
+                     catch (IsolatedStorageException) { };
+           
             }
 
             IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;
@@ -263,13 +245,13 @@ namespace WPtrakt.Model
                 {
                     foreach (String file in myIsolatedStorage.GetFileNames(dir + "/*"))
                     {
-
-                        try
-                        {
-                            myIsolatedStorage.DeleteFile(dir + "/" + file);
-                        }
-                        catch (IsolatedStorageException) { };
-
+                       
+                             try
+                             {
+                                 myIsolatedStorage.DeleteFile(dir + "/" + file);
+                             }
+                             catch (IsolatedStorageException) { };
+                    
                     }
                 }
             }

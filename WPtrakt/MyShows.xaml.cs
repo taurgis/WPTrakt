@@ -8,7 +8,6 @@ using Clarity.Phone.Controls;
 using Microsoft.Phone.Controls;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
-using System.Windows.Navigation;
 
 namespace WPtrakt
 {
@@ -139,33 +138,6 @@ namespace WPtrakt
                 }
             }
         }
-
-        #region "Speech Recognition"
-
-        protected async override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            if (e.NavigationMode == NavigationMode.New && NavigationContext.QueryString.ContainsKey("voiceCommandName"))
-            {
-                if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
-                {
-                    await Speech.Speak(string.Format("You have not configured a user yet!"));
-                    NavigationService.GoBack();
-                }
-
-                if (NavigationContext.QueryString.ContainsKey("page"))
-                {
-                    int page = Int32.Parse(NavigationContext.QueryString["page"]);
-                    this.MyShowsPanorama.DefaultItem = MyShowsPanorama.Items[page];
-
-                    if (page == 1)
-                        App.MyShowsViewModel.LoadCalendarData();
-                }
-            }
-        }
-
-        #endregion
     }
 
     public class ShowNameSelector : IQuickJumpGridSelector

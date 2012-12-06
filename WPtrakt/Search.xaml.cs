@@ -1,13 +1,10 @@
 ﻿using Microsoft.Phone.Controls;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Navigation;
+using WPtrakt;
 using WPtrakt.Controllers;
-using WPtrakt.Model;
 
 namespace WPtrakt
 {
@@ -64,45 +61,5 @@ namespace WPtrakt
         {
             Animation.FadeOut(LayoutRoot);
         }
-
-        #region "Speech Recognition"
-
-        protected async override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            if (e.NavigationMode == NavigationMode.New && NavigationContext.QueryString.ContainsKey("voiceCommandName"))
-            {
-                if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
-                {
-                    await Speech.Speak(string.Format("You have not configured a user yet!"));
-                    NavigationService.GoBack();
-                }
-
-                String searchString;
-                if (null != (searchString = await LookForSomething(NavigationContext.QueryString)))
-                {
-                    if (searchString.Length > 1)
-                    {
-                        this.SearchText.Text = searchString;
-                        App.SearchViewModel.LoadData(searchString);
-                        this.Focus();
-                    }
-                }
-               
-            }
-            else if (e.NavigationMode == NavigationMode.Back && !System.Diagnostics.Debugger.IsAttached)
-            {
-                NavigationService.GoBack();
-            }
-        }
-
-        private async Task<string> LookForSomething(IDictionary<string, string> queryString)
-        {
-            await Speech.Speak(string.Format("What are you looking for?"));
-            return await Speech.GetResult("Ex. \"The matrix\"");
-        }
-
-        #endregion
     }
 }

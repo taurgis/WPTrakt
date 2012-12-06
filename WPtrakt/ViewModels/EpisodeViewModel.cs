@@ -604,7 +604,7 @@ namespace WPtrakt
 
                     Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 1280, 100);
+                        _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
                         NotifyPropertyChanged("BackgroundImage");
                     }));
                 }
@@ -640,7 +640,7 @@ namespace WPtrakt
                 NotifyPropertyChanged("ScreenImage");
             }
             catch (WebException) { }
-            catch(TargetInvocationException){}
+            catch (TargetInvocationException) { }
         }
 
         public void LoadShoutData(String tvdb, String season, String episode)

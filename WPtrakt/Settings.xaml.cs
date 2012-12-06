@@ -15,7 +15,6 @@ using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
-using WPtraktBase.Model;
 
 namespace WPtrakt
 {
@@ -32,15 +31,16 @@ namespace WPtrakt
             {
                 LoginButton.Visibility = System.Windows.Visibility.Visible;
             }
+            
         }
 
         private void SettingsPage_Loaded(object sender, RoutedEventArgs e)
         {
-
             if (AppUser.Instance.LiveTileEnabled)
             {
                 this.toggle.IsChecked = true;
                 this.toggleRandom.IsEnabled = true;
+                this.togglePoster.IsEnabled = true;
                 if (AppUser.Instance.LiveTileType == LiveTileType.Random)
                 {
                     toggleRandom.IsChecked = true;
@@ -51,29 +51,31 @@ namespace WPtrakt
                     toggleRandom.IsChecked = false;
                     this.toggleRandom.Content = "Disabled";
                 }
+
+                if (AppUser.Instance.LiveTileUsePoster)
+                {
+                    togglePoster.IsChecked = true;
+                    this.togglePoster.Content = "Enabled";
+                }
+                else
+                    this.togglePoster.Content = "Disabled";
             }
             else
             {
                 this.toggle.IsChecked = false;
                 this.toggleRandom.IsEnabled = false;
+                this.togglePoster.IsEnabled = false;
             }
 
-            this.WallpaperSetting.SelectedIndex = AppUser.Instance.LiveWallpaperSchedule;
+            if (!App.SettingsViewModel.IsDataLoaded)
+            {
+                App.SettingsViewModel.LoadData();
 
-            App.SettingsViewModel.LoadData();
-
-
+            }
             App.SettingsViewModel.Usage = "Calculating...";
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler(worker_DoWork);
             worker.RunWorkerAsync();
-            
-
-            string lockscreenValue = "";
-
-            bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue("lockscreen", out lockscreenValue);
-            if (lockscreenValueExists)
-                this.SettingsPanorama.DefaultItem = this.SettingsPanorama.Items[3];
         }
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -83,13 +85,9 @@ namespace WPtrakt
 
             foreach (String file in myIsolatedStorage.GetFileNames())
             {
-                try
-                {
-                    IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
-                    usage += stream.Length;
-                    stream.Close();
-                }
-                catch (IsolatedStorageException) { }
+                IsolatedStorageFileStream stream = myIsolatedStorage.OpenFile(file, FileMode.Open);
+                usage += stream.Length;
+                stream.Close();
             }
 
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -111,8 +109,6 @@ namespace WPtrakt
         protected override void OnBackKeyPress(System.ComponentModel.CancelEventArgs e)
         {
             GoBack();
-            base.OnBackKeyPress(e);
-
         }
 
         private void GoBack()
@@ -143,7 +139,7 @@ namespace WPtrakt
                 catch (InvalidOperationException) { }
 
                 AppUser.Instance.LiveTileEnabled = true;
-                AppUser.Instance.LiveWallpaperSchedule = this.WallpaperSetting.SelectedIndex;
+                AppUser.Instance.LiveTileUsePoster = false;
 
                 if ((Boolean)toggleRandom.IsChecked)
                 {
@@ -186,6 +182,7 @@ namespace WPtrakt
         {
             this.toggle.Content = "Enabled";
             this.toggleRandom.IsEnabled = true;
+            this.togglePoster.IsEnabled = true;
         }
 
         private void toggle_Unchecked(object sender, RoutedEventArgs e)
@@ -194,6 +191,9 @@ namespace WPtrakt
             this.toggleRandom.IsEnabled = false;
             this.toggleRandom.IsChecked = false;
             this.toggleRandom.Content = "Disabled";
+            this.togglePoster.IsEnabled = false;
+            this.togglePoster.IsChecked = false;
+            this.togglePoster.Content = "Disabled";
         }
 
         private void updateTileToStandard()
@@ -202,12 +202,9 @@ namespace WPtrakt
 
             if (appTile != null)
             {
-                FlipTileData newTileData = new FlipTileData();
+                StandardTileData newTileData = new StandardTileData();
                 newTileData.BackgroundImage = new Uri("appdata:background.png");
-                newTileData.WideBackgroundImage = new Uri("appdata:WideBackground.png");
-                newTileData.SmallBackgroundImage = new Uri("appdata:background.png");
                 newTileData.BackContent = "";
-                newTileData.WideBackContent = "";
                 newTileData.BackTitle = "";
                 
                 appTile.Update(newTileData);
@@ -261,15 +258,17 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                if (jsonString.Contains(" is already a registered e-mail."))
+                if (jsonString.Contains(" is already a registered e-mail"))
                 {
                     MessageBox.Show("Email already in use.");
+                    progressBar.Visibility = System.Windows.Visibility.Collapsed;
                     return;
                 }
 
                 if (jsonString.Contains("is already a registered username"))
                 {
                     MessageBox.Show("Username already in use.");
+                    progressBar.Visibility = System.Windows.Visibility.Collapsed;
                     return;
                 }
 
@@ -291,7 +290,7 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
+          
         }
 
         private void toggleRandom_Checked_1(object sender, RoutedEventArgs e)
@@ -302,6 +301,16 @@ namespace WPtrakt
         private void toggleRandom_Unchecked_1(object sender, RoutedEventArgs e)
         {
             toggleRandom.Content = "Disabled";
+        }
+
+        private void togglePoster_Checked_1(object sender, RoutedEventArgs e)
+        {
+            togglePoster.Content = "Enabled";
+        }
+
+        private void togglePoster_Unchecked_1(object sender, RoutedEventArgs e)
+        {
+            togglePoster.Content = "Disabled";
         }
 
         private void btnLogin_Click_1(object sender, RoutedEventArgs e)
@@ -322,16 +331,6 @@ namespace WPtrakt
             task.Uri = new Uri("https://twitter.com/theunenth");
 
             task.Show();
-        }
-
-        private void WallpaperSetting_SelectionChanged_1(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-
-        }
-
-        private async void LockScreenSettings_Click_1(object sender, RoutedEventArgs e)
-        {
-            var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings-lock:"));
         }
     }
 }

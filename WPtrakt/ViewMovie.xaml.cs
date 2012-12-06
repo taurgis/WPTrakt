@@ -141,25 +141,22 @@ namespace WPtrakt
                 if (StorageController.doesFileExist(App.MovieViewModel.Imdb + "background.jpg"))
                 {
                     ImageController.copyImageToShellContent(App.MovieViewModel.Imdb + "background.jpg", App.MovieViewModel.Imdb);
-                    FlipTileData NewTileData = new FlipTileData
+                    StandardTileData NewTileData = new StandardTileData
                     {
                         BackgroundImage =
                              new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.MovieViewModel.Imdb + ".jpg", UriKind.Absolute),
-                        WideBackgroundImage =
-                      new Uri("isostore:/Shared/ShellContent/wptraktbg" + App.MovieViewModel.Imdb + ".jpg", UriKind.Absolute),
-                        Title = App.MovieViewModel.Name,
+                        BackContent = App.MovieViewModel.Name,
                     };
 
                     ShellTile.Create(
                     new Uri(
                         "/ViewMovie.xaml?id=" + App.MovieViewModel.Imdb,
                         UriKind.Relative),
-                        NewTileData, true);
+                        NewTileData);
                 }
             }
             catch (InvalidOperationException) { ToastNotification.ShowToast("Tile", "Error creating tile, please try again!"); }
         }
-
 
         private void CreateRatingButton(ApplicationBar appBar)
         {

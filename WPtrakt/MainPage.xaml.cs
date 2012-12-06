@@ -1,14 +1,12 @@
 ﻿using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using Microsoft.Phone.Scheduler;
-using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
 using System.Net;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using Windows.Phone.Speech.VoiceCommands;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
@@ -23,7 +21,6 @@ namespace WPtrakt
         {
             InitializeComponent();
             DataContext = App.ViewModel;
-            RegisterVoice();
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
         }
 
@@ -42,7 +39,6 @@ namespace WPtrakt
                 if (!App.ViewModel.IsDataLoaded)
                 {
                     ReloadLiveTile();
-               
                     if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
                     {
                         AppUser.Instance.AppVersion = fullVersionNumber;
@@ -68,8 +64,7 @@ namespace WPtrakt
         {
             try
             {
-
-
+               
                 if (AppUser.Instance.LiveTileEnabled)
                 {
                     var taskName = "WPtraktLiveTile";
@@ -89,7 +84,8 @@ namespace WPtrakt
 
                     // Add it to the service to execute
                     ScheduledActionService.Add(task);
-                    // ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+                    //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+
                 }
             }
             catch (InvalidOperationException) { }
@@ -148,7 +144,7 @@ namespace WPtrakt
 
         private void MyMovies(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/MyMovies.xaml", UriKind.Relative));
+            Animation.NavigateToFadeOut(this, LayoutRoot,  new Uri("/MyMovies.xaml", UriKind.Relative));
         }
 
         private void MyShows_Tap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -270,7 +266,7 @@ namespace WPtrakt
             WatchlistAuth auth = new WatchlistAuth();
             auth.Movies = new TraktMovie[1];
             auth.Movies[0] = new TraktMovie();
-            auth.Movies[0].imdb_id = lastModel.Imdb;
+            auth.Movies[0].imdb_id =lastModel.Imdb;
             auth.Movies[0].Title = lastModel.Name;
             auth.Movies[0].year = Int16.Parse(lastModel.SubItemText);
             watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
@@ -299,7 +295,7 @@ namespace WPtrakt
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             var checkinClient = new WebClient();
-            checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
+             checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
             CheckinAuth auth = new CheckinAuth();
 
             auth.imdb_id = lastModel.Imdb;
@@ -343,8 +339,8 @@ namespace WPtrakt
             switch (model.Type)
             {
                 case "movie":
-                    StorageController.DeleteFile(TraktMovie.getFolderStatic() + "/" + model.Imdb + ".json");
-                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                      StorageController.DeleteFile(TraktMovie.getFolderStatic() + "/" + model.Imdb + ".json");
+                      NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
                     break;
                 case "show":
                     StorageController.DeleteFile(TraktShow.getFolderStatic() + "/" + model.Tvdb + ".json");
@@ -363,6 +359,7 @@ namespace WPtrakt
         {
             if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
             {
+                HistoryList.Height = 550;
                 HistoryList.Width = 420;
                 ListTrending.Width = 700;
                 SubTextMyMovies.Visibility = System.Windows.Visibility.Visible;
@@ -371,6 +368,7 @@ namespace WPtrakt
             }
             else
             {
+                HistoryList.Height = 260;
                 HistoryList.Width = 700;
                 ListTrending.Width = 1370;
                 SubTextMyMovies.Visibility = System.Windows.Visibility.Collapsed;
@@ -384,47 +382,11 @@ namespace WPtrakt
             LayoutRoot.Opacity = 1;
         }
 
-        private Boolean wallpaperNavigationFinished = false;
-        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            string lockscreenKey = "WallpaperSettings";
-            string lockscreenValue = "0";
-
-            bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue(lockscreenKey, out lockscreenValue);
-
-            if (!wallpaperNavigationFinished)
-            {
-                if (lockscreenValueExists)
-                {
-                    NavigationService.Navigate(new Uri("/Settings.xaml?lockscreen=true", UriKind.Relative));
-                    wallpaperNavigationFinished = true;
-                }
-          
-            }
-        }
-        private async void RegisterVoice()
-        {
-
-            try // try block recommended to detect compilation errors in VCD file
-            {
-                await VoiceCommandService.InstallCommandSetsFromFileAsync(
-                  new System.Uri("ms-appx:///vcd.xml"));
-            }
-            catch (System.Exception ex)
-            {
-                Console.Write(ex);
-            }
-
-        }
-
         private void RateApp_Click_1(object sender, EventArgs e)
         {
             MarketplaceReviewTask marketplaceReviewTask = new MarketplaceReviewTask();
 
             marketplaceReviewTask.Show();
         }
-      
     }
 }
