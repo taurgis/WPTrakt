@@ -13,12 +13,14 @@ namespace WPtrakt
         {
             get
             {
-                String[] parts = _dateString.Split('-');
-                if (DateTime.Now.Year.Equals(Int32.Parse(parts[0])) && DateTime.Now.Month.Equals(Int32.Parse(parts[1])) && DateTime.Now.Day.Equals(Int32.Parse(parts[2])))
-                    return "Today";
-                if (DateTime.Now.AddDays(1).Year.Equals(Int32.Parse(parts[0])) && DateTime.Now.AddDays(1).Month.Equals(Int32.Parse(parts[1])) && DateTime.Now.AddDays(1).Day.Equals(Int32.Parse(parts[2])))
-                    return "Tomorrow";
-
+                if (_dateString.Contains("-"))
+                {
+                    String[] parts = _dateString.Split('-');
+                    if (DateTime.Now.Year.Equals(Int32.Parse(parts[0])) && DateTime.Now.Month.Equals(Int32.Parse(parts[1])) && DateTime.Now.Day.Equals(Int32.Parse(parts[2])))
+                        return "Today";
+                    if (DateTime.Now.AddDays(1).Year.Equals(Int32.Parse(parts[0])) && DateTime.Now.AddDays(1).Month.Equals(Int32.Parse(parts[1])) && DateTime.Now.AddDays(1).Day.Equals(Int32.Parse(parts[2])))
+                        return "Tomorrow";
+                }
                 return _dateString;
             }
             set
