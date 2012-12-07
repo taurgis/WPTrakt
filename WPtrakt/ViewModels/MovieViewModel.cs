@@ -11,6 +11,8 @@ using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtraktBase.DAO;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
@@ -18,11 +20,13 @@ namespace WPtrakt
     {
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public Boolean ShoutsLoaded { get; set; }
+        private MovieDao dao;
 
         public MovieViewModel()
         {
             ShoutsLoaded = false;
             ShoutItems = new ObservableCollection<ListItemViewModel>();
+            this.dao = new MovieDao();
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." }); 
         }
 
@@ -212,11 +216,14 @@ namespace WPtrakt
         {
             get
             {
+                int count = 1;
+
                 if (_genres == null)
                     return "";
                 String genreString = "";
                 foreach (String genre in _genres)
                 {
+                    if(count++ <= 3)
                     genreString += genre + ", ";
                 }
                 if(!String.IsNullOrEmpty(genreString))
@@ -420,10 +427,7 @@ namespace WPtrakt
         public void LoadData(String imdbId)
         {
             this._imdb = imdbId;
-            String fileName = TraktMovie.getFolderStatic() + "/" + _imdb + ".json";
-            
-         
-            if (StorageController.doesFileExist(fileName))
+            if (dao.movieAvailableInDatabaseByIMDB(imdbId))
             {
                 BackgroundWorker worker = new BackgroundWorker();
                 worker.WorkerReportsProgress = false;
@@ -440,8 +444,10 @@ namespace WPtrakt
 
         void movieworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            String fileName = TraktMovie.getFolderStatic() + "/" + _imdb + ".json";
-            TraktMovie movie = (TraktMovie)StorageController.LoadObject(fileName, typeof(TraktMovie));
+           
+            TraktMovie movie = dao.getMovieByIMDB(this._imdb);
+            movie.Genres = movie.GenresAsString.Split('|');
+
             if ((DateTime.Now - movie.DownloadTime).Days < 7)
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
@@ -476,7 +482,15 @@ namespace WPtrakt
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie));
                     TraktMovie movie = (TraktMovie)ser.ReadObject(ms);
-                    StorageController.saveObject(movie, typeof(TraktMovie));
+                    movie.DownloadTime = DateTime.Now;
+
+                    foreach (String genre in movie.Genres)
+                        movie.GenresAsString += genre + "|";
+
+                    movie.GenresAsString = movie.GenresAsString.Remove(movie.GenresAsString.Length - 1);
+
+                    dao.saveMovie(movie);
+
                     UpdateMovieView(movie);
 
                     IsDataLoaded = true;

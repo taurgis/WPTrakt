@@ -11,6 +11,7 @@ using System.Text;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtraktBase.Model.Trakt;
 
 
 namespace WPtrakt

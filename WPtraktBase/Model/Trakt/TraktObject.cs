@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Linq.Mapping;
 using System.Runtime.Serialization;
 
 namespace WPtrakt.Model.Trakt
@@ -6,6 +7,7 @@ namespace WPtrakt.Model.Trakt
     [DataContract]
     public abstract class TraktObject
     {
+        [Column]
         [DataMember(Name = "DownloadTime")]
         public DateTime DownloadTime { get; set; }
 

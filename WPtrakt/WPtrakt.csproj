@@ -59,6 +59,7 @@
       <HintPath>.\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Phone.Interop" />
+    <Reference Include="system.data.linq" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Servicemodel.Web" />
     <Reference Include="System.Windows" />

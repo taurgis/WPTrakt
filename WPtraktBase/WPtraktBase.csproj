@@ -44,6 +44,7 @@
     <Reference Include="Coding4Fun.Phone.Controls">
       <HintPath>.\Coding4Fun.Phone.Controls.dll</HintPath>
     </Reference>
+    <Reference Include="system.data.linq" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Servicemodel.Web" />
     <Reference Include="System.Windows" />
@@ -54,6 +55,8 @@
     <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DAO\Dao.cs" />
+    <Compile Include="DAO\MovieDao.cs" />
     <Compile Include="Model\AppUser.cs" />
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
