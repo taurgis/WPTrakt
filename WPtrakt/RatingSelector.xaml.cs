@@ -8,11 +8,16 @@ using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using System.Reflection;
+using WPtraktBase.DAO;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
     public partial class RatingSelector : PhoneApplicationPage
     {
+       
+        private String type;
+
         public RatingSelector()
         {
             InitializeComponent();
@@ -26,7 +31,6 @@ namespace WPtrakt
 
         private void ApplicationBarIconButton_Click_1(object sender, EventArgs e)
         {
-            String type;
             NavigationContext.QueryString.TryGetValue("type", out type);
             if (type.Equals("movie"))
                 RateMovie();
@@ -38,7 +42,7 @@ namespace WPtrakt
 
         private void RateEpisode()
         {
-            String imdb;
+             String imdb;
             String year;
             String title;
             String season;
@@ -61,6 +65,7 @@ namespace WPtrakt
             auth.Season = Int16.Parse(season);
             auth.Episode = Int16.Parse(episode);
             auth.Rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
+           
             ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/episode/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
       
         }
@@ -116,6 +121,21 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
+                if (type.Equals("movie"))
+                {
+                    String imdb;
+                    Int16 rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
+                    NavigationContext.QueryString.TryGetValue("imdb", out imdb);
+                    MovieDao dao = MovieDao.Instance;
+                    TraktMovie movie = dao.getMovieByIMDB(imdb);
+                    movie.MyRatingAdvanced = rating;
+                    if (rating > 5)
+                        movie.MyRating = "Loved";
+                    else
+                        movie.MyRating = "Hated";
+
+                    dao.saveMovie(movie);
+                }
                 MessageBox.Show("Rated successfull.");
             }
             catch (WebException)

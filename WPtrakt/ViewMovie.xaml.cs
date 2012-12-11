@@ -14,24 +14,36 @@ using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Model.Trakt;
+using WPtraktBase.DAO;
 
 namespace WPtrakt
 {
     public partial class ViewMovie : PhoneApplicationPage
     {
+        private MovieDao dao;
+
         public ViewMovie()
         {
             InitializeComponent();
-
             DataContext = App.MovieViewModel;
             this.Loaded += new RoutedEventHandler(ViewMovie_Loaded);
         }
 
         private void ViewMovie_Loaded(object sender, RoutedEventArgs e)
         {
+           
             String id;
             NavigationContext.QueryString.TryGetValue("id", out id);
-            App.MovieViewModel.LoadData(id);
+
+                dao =  MovieDao.Instance;
+                App.MovieViewModel.LoadData(id);
+            
+        }
+
+        private void saveMovieToDB()
+        {
+            if (App.MovieViewModel != null)
+                dao.saveMovie(App.MovieViewModel.Movie);
         }
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -172,9 +184,7 @@ namespace WPtrakt
 
         private void RateClick(object sender, EventArgs e)
         {
-            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
-    
-            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + App.MovieViewModel.Imdb + "&year=" + App.MovieViewModel.Year + "&title=" + App.MovieViewModel.Name, UriKind.Relative));
+             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + App.MovieViewModel.Imdb + "&year=" + App.MovieViewModel.Year + "&title=" + App.MovieViewModel.Name, UriKind.Relative));
         }
 
         private void CreateRemoveFromWatchlist(ApplicationBar appBar)
@@ -208,8 +218,11 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 ToastNotification.ShowToast("Movie", "Movie removed from watchlist.");
+
+                App.MovieViewModel.Movie.InWatchlist = false;
                 App.MovieViewModel.InWatchlist = false;
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
+                saveMovieToDB();
+        
                 InitAppBar();
             }
             catch (WebException)
@@ -250,10 +263,13 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
+
+                App.MovieViewModel.Movie.InWatchlist = true;
                 App.MovieViewModel.InWatchlist = true;
+                saveMovieToDB();
+
                 ToastNotification.ShowToast("Movie", "Movie added to watchlist.");
 
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
                 InitAppBar();
             }
             catch (WebException)
@@ -352,9 +368,13 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                ToastNotification.ShowToast("Movie", "Movie marked as watched.");
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
+
                 App.MovieViewModel.Watched = true;
+                App.MovieViewModel.Movie.Watched = true;
+                saveMovieToDB();
+
+                ToastNotification.ShowToast("Movie", "Movie marked as watched.");
+
                 InitAppBar();
             }
             catch (WebException)
@@ -401,8 +421,11 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
                 ToastNotification.ShowToast("Movie", "Movie unmarked as watched.");
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktMovie.getFolderStatic() + "/" + App.MovieViewModel.Imdb + ".json");
+
+                App.MovieViewModel.Movie.Watched = false;
                 App.MovieViewModel.Watched = false;
+                saveMovieToDB();
+
                 InitAppBar();
             }
             catch (WebException)

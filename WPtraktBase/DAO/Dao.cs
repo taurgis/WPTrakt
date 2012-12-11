@@ -10,6 +10,8 @@ namespace WPtraktBase.DAO
 {
     public class Dao : DataContext
     {
+        
+
         public const string ConnectionString = "Data Source=isostore:/wptrakt.sdf";
 
         public Dao()

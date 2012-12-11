@@ -21,12 +21,13 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public Boolean ShoutsLoaded { get; set; }
         private MovieDao dao;
+        public TraktMovie Movie { get; set; }
 
         public MovieViewModel()
         {
             ShoutsLoaded = false;
             ShoutItems = new ObservableCollection<ListItemViewModel>();
-            this.dao = new MovieDao();
+            this.dao =  MovieDao.Instance;
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." }); 
         }
 
@@ -444,15 +445,14 @@ namespace WPtrakt
 
         void movieworker_DoWork(object sender, DoWorkEventArgs e)
         {
-           
-            TraktMovie movie = dao.getMovieByIMDB(this._imdb);
-            movie.Genres = movie.GenresAsString.Split('|');
+            this.Movie = dao.getMovieByIMDB(this._imdb);
+            this.Movie.Genres = Movie.GenresAsString.Split('|');
 
-            if ((DateTime.Now - movie.DownloadTime).Days < 7)
+            if ((DateTime.Now - this.Movie.DownloadTime).Days < 7)
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                {
-                   UpdateMovieView(movie);
+                   UpdateMovieView(this.Movie);
                });
             }
             else
@@ -481,17 +481,17 @@ namespace WPtrakt
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie));
-                    TraktMovie movie = (TraktMovie)ser.ReadObject(ms);
-                    movie.DownloadTime = DateTime.Now;
+                    this.Movie = (TraktMovie)ser.ReadObject(ms);
+                    this.Movie.DownloadTime = DateTime.Now;
 
-                    foreach (String genre in movie.Genres)
-                        movie.GenresAsString += genre + "|";
+                    foreach (String genre in this.Movie.Genres)
+                        this.Movie.GenresAsString += genre + "|";
 
-                    movie.GenresAsString = movie.GenresAsString.Remove(movie.GenresAsString.Length - 1);
+                    this.Movie.GenresAsString = Movie.GenresAsString.Remove(Movie.GenresAsString.Length - 1);
 
-                    dao.saveMovie(movie);
+                    dao.saveMovie(Movie);
 
-                    UpdateMovieView(movie);
+                    UpdateMovieView(Movie);
 
                     IsDataLoaded = true;
                 }
