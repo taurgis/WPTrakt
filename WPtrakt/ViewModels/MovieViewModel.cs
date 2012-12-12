@@ -20,14 +20,11 @@ namespace WPtrakt
     {
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public Boolean ShoutsLoaded { get; set; }
-        private MovieDao dao;
-        public TraktMovie Movie { get; set; }
 
         public MovieViewModel()
         {
             ShoutsLoaded = false;
             ShoutItems = new ObservableCollection<ListItemViewModel>();
-            this.dao =  MovieDao.Instance;
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." }); 
         }
 
@@ -425,86 +422,7 @@ namespace WPtrakt
 
         #endregion
 
-        public void LoadData(String imdbId)
-        {
-            this._imdb = imdbId;
-            if (dao.movieAvailableInDatabaseByIMDB(imdbId))
-            {
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(movieworker_DoWork);
-
-                worker.RunWorkerAsync();
-            }
-            else
-            {
-               CallMovieService(imdbId);
-            }
-        }
-
-        void movieworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            this.Movie = dao.getMovieByIMDB(this._imdb);
-            this.Movie.Genres = Movie.GenresAsString.Split('|');
-
-            if ((DateTime.Now - this.Movie.DownloadTime).Days < 7)
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-               {
-                   UpdateMovieView(this.Movie);
-               });
-            }
-            else
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-               {
-                   CallMovieService(_imdb);
-               });
-            }
-        }
-
-        private void CallMovieService(String imdbId)
-        {
-            var movieClient = new WebClient();
-            this._imdb = imdbId;
-            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
-        }
-
-        void client_UploadMovieStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktMovie));
-                    this.Movie = (TraktMovie)ser.ReadObject(ms);
-                    this.Movie.DownloadTime = DateTime.Now;
-
-                    foreach (String genre in this.Movie.Genres)
-                        this.Movie.GenresAsString += genre + "|";
-
-                    this.Movie.GenresAsString = Movie.GenresAsString.Remove(Movie.GenresAsString.Length - 1);
-
-                    dao.saveMovie(Movie);
-
-                    UpdateMovieView(Movie);
-
-                    IsDataLoaded = true;
-                }
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { }
-        }
-
-        private void UpdateMovieView(TraktMovie movie)
+        public void UpdateMovieView(TraktMovie movie)
         {
             this.Name = movie.Title;
             this.Fanart = movie.Images.Fanart;

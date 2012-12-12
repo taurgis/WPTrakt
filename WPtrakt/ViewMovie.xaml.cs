@@ -1,26 +1,29 @@
-﻿using System;
-using System.IO.IsolatedStorage;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Tasks;
+using System;
+using System.ComponentModel;
+using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using Microsoft.Phone.Tasks;
 using WPtrakt.Controllers;
-using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
-using WPtrakt.Model.Trakt;
-using WPtraktBase.Model.Trakt;
+using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.DAO;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
     public partial class ViewMovie : PhoneApplicationPage
     {
-        private MovieDao dao;
+        public TraktMovie Movie { get; set; }
+
+        #region Load Movie
 
         public ViewMovie()
         {
@@ -31,20 +34,95 @@ namespace WPtrakt
 
         private void ViewMovie_Loaded(object sender, RoutedEventArgs e)
         {
-           
-            String id;
-            NavigationContext.QueryString.TryGetValue("id", out id);
+            String imdbId;
+            NavigationContext.QueryString.TryGetValue("id", out imdbId);
 
-                dao =  MovieDao.Instance;
-                App.MovieViewModel.LoadData(id);
-            
+            if (MovieDao.Instance.movieAvailableInDatabaseByIMDB(imdbId))
+            {
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = false;
+                worker.WorkerSupportsCancellation = false;
+                worker.DoWork += new DoWorkEventHandler(movieworker_DoWork);
+
+                worker.RunWorkerAsync();
+            }
+            else
+            {
+                CallMovieService(imdbId);
+            }
         }
+
+        void movieworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String imdbId;
+            NavigationContext.QueryString.TryGetValue("id", out imdbId);
+
+            this.Movie = MovieDao.Instance.getMovieByIMDB(imdbId);
+            this.Movie.Genres = Movie.GenresAsString.Split('|');
+
+            if ((DateTime.Now - this.Movie.DownloadTime).Days < 7)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    App.MovieViewModel.UpdateMovieView(this.Movie);
+                });
+            }
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    CallMovieService(imdbId);
+                });
+            }
+        }
+
+        private void CallMovieService(String imdbId)
+        {
+            var movieClient = new WebClient();
+           
+            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
+            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
+        }
+
+        void client_UploadMovieStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
+            {
+                String jsonString = e.Result;
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktMovie));
+                    this.Movie = (TraktMovie)ser.ReadObject(ms);
+                    this.Movie.DownloadTime = DateTime.Now;
+
+                    foreach (String genre in this.Movie.Genres)
+                        this.Movie.GenresAsString += genre + "|";
+
+                    this.Movie.GenresAsString = Movie.GenresAsString.Remove(Movie.GenresAsString.Length - 1);
+
+                    MovieDao.Instance.saveMovie(Movie);
+
+                    App.MovieViewModel.UpdateMovieView(Movie);
+
+                }
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException)
+            { }
+        }
+
 
         private void saveMovieToDB()
         {
             if (App.MovieViewModel != null)
-                dao.saveMovie(App.MovieViewModel.Movie);
+                MovieDao.Instance.saveMovie(this.Movie);
         }
+
+        #endregion
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -219,7 +297,7 @@ namespace WPtrakt
                 String jsonString = e.Result;
                 ToastNotification.ShowToast("Movie", "Movie removed from watchlist.");
 
-                App.MovieViewModel.Movie.InWatchlist = false;
+                this.Movie.InWatchlist = false;
                 App.MovieViewModel.InWatchlist = false;
                 saveMovieToDB();
         
@@ -264,7 +342,7 @@ namespace WPtrakt
             {
                 String jsonString = e.Result;
 
-                App.MovieViewModel.Movie.InWatchlist = true;
+                this.Movie.InWatchlist = true;
                 App.MovieViewModel.InWatchlist = true;
                 saveMovieToDB();
 
@@ -370,7 +448,7 @@ namespace WPtrakt
                 String jsonString = e.Result;
 
                 App.MovieViewModel.Watched = true;
-                App.MovieViewModel.Movie.Watched = true;
+                this.Movie.Watched = true;
                 saveMovieToDB();
 
                 ToastNotification.ShowToast("Movie", "Movie marked as watched.");
@@ -422,7 +500,7 @@ namespace WPtrakt
                 String jsonString = e.Result;
                 ToastNotification.ShowToast("Movie", "Movie unmarked as watched.");
 
-                App.MovieViewModel.Movie.Watched = false;
+                this.Movie.Watched = false;
                 App.MovieViewModel.Watched = false;
                 saveMovieToDB();
 
