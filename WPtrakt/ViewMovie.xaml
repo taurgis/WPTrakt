@@ -44,7 +44,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Genre:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />
-                                    <TextBlock Text="{Binding GenreString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" Width="370" />
+                                    <TextBlock Text="{Binding GenreString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" Width="290" />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Rating:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />

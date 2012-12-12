@@ -1,17 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
-using System.Net;
-using System.Reflection;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Windows;
 using System.Windows.Media.Imaging;
-using WPtrakt.Controllers;
-using WPtrakt.Model;
-using WPtrakt.Model.Trakt;
-using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
@@ -19,22 +9,31 @@ namespace WPtrakt
     public class MovieViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
-        public Boolean ShoutsLoaded { get; set; }
+        public Boolean ShoutsLoading { get; set; }
 
         public MovieViewModel()
         {
-            ShoutsLoaded = false;
-            ShoutItems = new ObservableCollection<ListItemViewModel>();
+            ShoutsLoading = false;
+            this.ShoutItems = new ObservableCollection<ListItemViewModel>();
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." }); 
         }
 
-        #region Getters/Setters
-
-        public bool IsDataLoaded
+        public void clearShouts()
         {
-            get;
-            private set;
+            this.ShoutItems = new ObservableCollection<ListItemViewModel>();
+            NotifyPropertyChanged("ShoutItems");
         }
+
+        public void addShout(ListItemViewModel model)
+        {
+            if (this.ShoutItems == null)
+                this.ShoutItems = new ObservableCollection<ListItemViewModel>();
+
+            this.ShoutItems.Add(model);
+            NotifyPropertyChanged("ShoutItems");
+        }
+
+        #region Getters/Setters
 
         private string _name;
         public string Name
@@ -320,23 +319,6 @@ namespace WPtrakt
             }
         }
 
-        private string _fanart;
-        public string Fanart
-        {
-            get
-            {
-                return _fanart;
-            }
-            set
-            {
-                if (value != _fanart)
-                {
-                    _fanart = value;
-                    NotifyPropertyChanged("Fanart");
-                }
-            }
-        }
-
         private string _trailer;
         public string Trailer
         {
@@ -359,19 +341,13 @@ namespace WPtrakt
         {
             get
             {
-                if (Fanart == null)
-                    return null;
+                return _backgroundImage;
+            }
+            set
+            {
+                _backgroundImage = value;
 
-                if (_backgroundImage == null)
-                {
-                    LoadBackgroundImage();
-
-                    return _backgroundImage;
-                }
-                else
-                {
-                    return _backgroundImage;
-                }
+                NotifyPropertyChanged("BackgroundImage");
             }
         }
 
@@ -425,7 +401,6 @@ namespace WPtrakt
         public void UpdateMovieView(TraktMovie movie)
         {
             this.Name = movie.Title;
-            this.Fanart = movie.Images.Fanart;
             this.Genres = movie.Genres;
             this.Overview = movie.Overview;
             this.Runtime = movie.Runtime.ToString();
@@ -443,96 +418,8 @@ namespace WPtrakt
 
             NotifyPropertyChanged("LoadingStatusMovie");
             NotifyPropertyChanged("DetailVisibility");
-
-            LoadBackgroundImage();
         }
 
-        public void LoadShoutData(String imdbId)
-        {
-            ShoutItems = new ObservableCollection<ListItemViewModel>();
-            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
-
-            NotifyPropertyChanged("ShoutItems");
-
-            var movieClient = new WebClient();
-            this._imdb = imdbId;
-            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
-        }
-
-        void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                ShoutsLoaded = true;
-                String jsonString = e.Result;
-                this.ShoutItems = new ObservableCollection<ListItemViewModel>();
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
-                    foreach (TraktShout shout in shouts)
-                        this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
-                }
-
-                if (this.ShoutItems.Count == 0)
-                    this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
-
-                NotifyPropertyChanged("ShoutItems");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { ErrorManager.ShowConnectionErrorPopup(); }
-        }
-
-        private void LoadBackgroundImage()
-        {
-            String fileName = this._imdb + "background" + ".jpg";
-
-            if (StorageController.doesFileExist(fileName))
-            {
-                _backgroundImage = ImageController.getImageFromStorage(fileName);
-                NotifyPropertyChanged("BackgroundImage");
-            }
-            else
-            {
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri(Fanart));
-                request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-            }
-        }
-
-        void request_OpenReadFanartCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                   {
-                       _backgroundImage = ImageController.saveImage(_imdb + "background.jpg", str, 800, 450, 100);
-
-                       NotifyPropertyChanged("BackgroundImage");
-                   }));
-                }
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException)
-            { }
-        }
-       
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
         {

@@ -2,6 +2,7 @@
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
@@ -13,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
+using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
@@ -23,6 +25,24 @@ namespace WPtrakt
     {
         public TraktMovie Movie { get; set; }
 
+        private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.MoviePanorama.SelectedIndex == 1)
+            {
+                if (!App.MovieViewModel.ShoutsLoading)
+                {
+                    App.MovieViewModel.ShoutsLoading = true;
+                    String id;
+                    NavigationContext.QueryString.TryGetValue("id", out id);
+                    LoadShoutData(id);
+                }
+                InitAppBarShouts();
+            }
+            else
+            {
+                InitAppBar();
+            }
+        }
         #region Load Movie
 
         public ViewMovie()
@@ -44,7 +64,7 @@ namespace WPtrakt
                 worker.WorkerSupportsCancellation = false;
                 worker.DoWork += new DoWorkEventHandler(movieworker_DoWork);
 
-                worker.RunWorkerAsync();
+                worker.RunWorkerAsync(imdbId);
             }
             else
             {
@@ -54,10 +74,7 @@ namespace WPtrakt
 
         void movieworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            String imdbId;
-            NavigationContext.QueryString.TryGetValue("id", out imdbId);
-
-            this.Movie = MovieDao.Instance.getMovieByIMDB(imdbId);
+            this.Movie = MovieDao.Instance.getMovieByIMDB(e.Argument.ToString());
             this.Movie.Genres = Movie.GenresAsString.Split('|');
 
             if ((DateTime.Now - this.Movie.DownloadTime).Days < 7)
@@ -66,12 +83,14 @@ namespace WPtrakt
                 {
                     App.MovieViewModel.UpdateMovieView(this.Movie);
                 });
+
+                LoadBackgroundImage();
             }
             else
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    CallMovieService(imdbId);
+                    CallMovieService(e.Argument.ToString());
                 });
             }
         }
@@ -104,7 +123,7 @@ namespace WPtrakt
                     MovieDao.Instance.saveMovie(Movie);
 
                     App.MovieViewModel.UpdateMovieView(Movie);
-
+                    LoadBackgroundImage();
                 }
             }
             catch (WebException)
@@ -124,24 +143,95 @@ namespace WPtrakt
 
         #endregion
 
-        private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        #region Load Shouts
+
+        public void LoadShoutData(String imdbId)
         {
-            if (this.MoviePanorama.SelectedIndex == 1)
+            App.MovieViewModel.clearShouts();
+            App.MovieViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
+
+            var movieClient = new WebClient();
+            
+            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
+            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
+        }
+
+        void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        {
+            try
             {
-                if (!App.MovieViewModel.ShoutsLoaded)
+                String jsonString = e.Result;
+                App.MovieViewModel.clearShouts();
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
-                    String id;
-                    NavigationContext.QueryString.TryGetValue("id", out id);
-                    App.MovieViewModel.LoadShoutData(id);
+                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
+                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
+                    foreach (TraktShout shout in shouts)
+                        App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Movie.imdb_id, SubItemText = shout.Shout });
                 }
-                InitAppBarShouts();
+
+                if (App.MovieViewModel.ShoutItems.Count == 0)
+                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+
+                App.MovieViewModel.ShoutsLoading = false;
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
+        }
+
+        #endregion
+
+        #region Load Fanart
+
+        private void LoadBackgroundImage()
+        {
+            String fileName = this.Movie.imdb_id + "background" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName))
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                   {
+                       App.MovieViewModel.BackgroundImage = ImageController.getImageFromStorage(fileName);
+                   }));
             }
             else
             {
-                InitAppBar();
-            }
+                HttpWebRequest request;
 
+                request = (HttpWebRequest)WebRequest.Create(new Uri(this.Movie.Images.Fanart));
+                request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
+            }
         }
+
+        void request_OpenReadFanartCompleted(IAsyncResult r)
+        {
+            try
+            {
+                object[] param = (object[])r.AsyncState;
+                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
+
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = httpResoponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        App.MovieViewModel.BackgroundImage = ImageController.saveImage(this.Movie.imdb_id + "background.jpg", str, 800, 450, 100);
+                    }));
+                }
+            }
+            catch (WebException) { }
+            catch (TargetInvocationException)
+            { }
+        }
+        #endregion
 
         private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -408,7 +498,7 @@ namespace WPtrakt
 
         private void ShoutsIconButton_Click(object sender, EventArgs e)
         {
-            App.MovieViewModel.LoadShoutData(App.MovieViewModel.Imdb);
+            LoadShoutData(App.MovieViewModel.Imdb);
         }
 
     
@@ -554,7 +644,7 @@ namespace WPtrakt
             if (!String.IsNullOrEmpty((ShoutText.Text)))
             {
                 var watchlistClient = new WebClient();
-                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
+                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSendShoutStringCompleted);
                 ShoutAuth auth = new ShoutAuth();
 
                 auth.Imdb = App.MovieViewModel.Imdb;
@@ -568,7 +658,7 @@ namespace WPtrakt
         }
 
       
-        void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        void client_UploadSendShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
             try
             {
