@@ -67,15 +67,22 @@ namespace WPtrakt
         private async void movieworker_DoWork(object sender, DoWorkEventArgs e)
         {
             this.Movie = await MovieDao.Instance.getMovieByIMDB(e.Argument.ToString());
-            this.Movie.Genres = Movie.GenresAsString.Split('|');
 
-            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+            if (this.Movie != null)
             {
-                App.MovieViewModel.UpdateMovieView(this.Movie);
-            });
+                this.Movie.Genres = Movie.GenresAsString.Split('|');
 
-            LoadBackgroundImage();
-            
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    App.MovieViewModel.UpdateMovieView(this.Movie);
+                });
+
+                LoadBackgroundImage();
+            }
+            else
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
         }
 
         private void saveMovieToDB()
