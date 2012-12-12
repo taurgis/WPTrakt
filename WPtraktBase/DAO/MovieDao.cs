@@ -1,8 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Linq;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Threading.Tasks;
+using WPtrakt.Model;
 using WPtraktBase.Model.Trakt;
 
 namespace WPtraktBase.DAO
@@ -23,7 +29,7 @@ namespace WPtraktBase.DAO
 
 
         private List<String> cachedMovieUUIDS;
-        public Boolean movieAvailableInDatabaseByIMDB(String IMDB)
+        private Boolean movieAvailableInDatabaseByIMDB(String IMDB)
         {
             if (cachedMovieUUIDS == null)
                 cachedMovieUUIDS = new List<string>();
@@ -54,9 +60,44 @@ namespace WPtraktBase.DAO
             }
         }
 
-        public TraktMovie getMovieByIMDB(String IMDB)
+        public async Task<TraktMovie> getMovieByIMDB(String IMDB)
         {
-            return this.Movies.Where(t => t.imdb_id == IMDB).FirstOrDefault();
+            if (movieAvailableInDatabaseByIMDB(IMDB))
+                return this.Movies.Where(t => t.imdb_id == IMDB).FirstOrDefault();
+            else
+                return await getMovieByIMDBThroughTrakt(IMDB);
+        }
+
+        private async Task<TraktMovie> getMovieByIMDBThroughTrakt(String IMDB)
+        {
+            try
+            {
+                var movieClient = new WebClient();
+
+                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + IMDB), AppUser.createJsonStringForAuthentication());
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktMovie));
+                    TraktMovie Movie = (TraktMovie)ser.ReadObject(ms);
+                    Movie.DownloadTime = DateTime.Now;
+
+                    foreach (String genre in Movie.Genres)
+                        Movie.GenresAsString += genre + "|";
+
+                    Movie.GenresAsString = Movie.GenresAsString.Remove(Movie.GenresAsString.Length - 1);
+
+                    MovieDao.Instance.saveMovie(Movie);
+
+
+                    return Movie;
+                }
+            }
+            catch (WebException)
+            { }
+            catch (TargetInvocationException)
+            { }
+
+            return null;
         }
 
         public Boolean saveMovie(TraktMovie traktMovie)
@@ -78,9 +119,9 @@ namespace WPtraktBase.DAO
             return true;
         }
 
-        private void updateMovie(TraktMovie traktMovie)
+        private async void updateMovie(TraktMovie traktMovie)
         {
-            TraktMovie dbMovie = getMovieByIMDB(traktMovie.imdb_id);
+            TraktMovie dbMovie = await getMovieByIMDB(traktMovie.imdb_id);
             dbMovie.Certification = traktMovie.Certification;
             dbMovie.DownloadTime = traktMovie.DownloadTime;
             dbMovie.Genres = traktMovie.Genres;

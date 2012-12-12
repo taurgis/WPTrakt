@@ -2,7 +2,6 @@
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
@@ -57,83 +56,27 @@ namespace WPtrakt
             String imdbId;
             NavigationContext.QueryString.TryGetValue("id", out imdbId);
 
-            if (MovieDao.Instance.movieAvailableInDatabaseByIMDB(imdbId))
-            {
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(movieworker_DoWork);
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = false;
+            worker.WorkerSupportsCancellation = false;
+            worker.DoWork += new DoWorkEventHandler(movieworker_DoWork);
 
-                worker.RunWorkerAsync(imdbId);
-            }
-            else
-            {
-                CallMovieService(imdbId);
-            }
+            worker.RunWorkerAsync(imdbId);     
         }
 
-        void movieworker_DoWork(object sender, DoWorkEventArgs e)
+        private async void movieworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            this.Movie = MovieDao.Instance.getMovieByIMDB(e.Argument.ToString());
+            this.Movie = await MovieDao.Instance.getMovieByIMDB(e.Argument.ToString());
             this.Movie.Genres = Movie.GenresAsString.Split('|');
 
-            if ((DateTime.Now - this.Movie.DownloadTime).Days < 7)
+            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    App.MovieViewModel.UpdateMovieView(this.Movie);
-                });
+                App.MovieViewModel.UpdateMovieView(this.Movie);
+            });
 
-                LoadBackgroundImage();
-            }
-            else
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    CallMovieService(e.Argument.ToString());
-                });
-            }
+            LoadBackgroundImage();
+            
         }
-
-        private void CallMovieService(String imdbId)
-        {
-            var movieClient = new WebClient();
-           
-            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
-        }
-
-        void client_UploadMovieStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktMovie));
-                    this.Movie = (TraktMovie)ser.ReadObject(ms);
-                    this.Movie.DownloadTime = DateTime.Now;
-
-                    foreach (String genre in this.Movie.Genres)
-                        this.Movie.GenresAsString += genre + "|";
-
-                    this.Movie.GenresAsString = Movie.GenresAsString.Remove(Movie.GenresAsString.Length - 1);
-
-                    MovieDao.Instance.saveMovie(Movie);
-
-                    App.MovieViewModel.UpdateMovieView(Movie);
-                    LoadBackgroundImage();
-                }
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { }
-        }
-
 
         private void saveMovieToDB()
         {
@@ -145,22 +88,16 @@ namespace WPtrakt
 
         #region Load Shouts
 
-        public void LoadShoutData(String imdbId)
+        public async void LoadShoutData(String imdbId)
         {
             App.MovieViewModel.clearShouts();
             App.MovieViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
-
-            var movieClient = new WebClient();
-            
-            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
-        }
-
-        void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
+                var movieClient = new WebClient();
+
+                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
+
                 App.MovieViewModel.clearShouts();
 
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
@@ -188,7 +125,7 @@ namespace WPtrakt
 
         #region Load Fanart
 
-        private void LoadBackgroundImage()
+        private async void LoadBackgroundImage()
         {
             String fileName = this.Movie.imdb_id + "background" + ".jpg";
 
@@ -201,43 +138,30 @@ namespace WPtrakt
             }
             else
             {
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri(this.Movie.Images.Fanart));
-                request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-            }
-        }
-
-        void request_OpenReadFanartCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
+                try
                 {
-                    Stream str = httpResoponse.GetResponseStream();
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(new Uri(this.Movie.Images.Fanart));
+                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
 
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    System.Net.HttpStatusCode status = webResponse.StatusCode;
+
+                    if (status == System.Net.HttpStatusCode.OK)
                     {
-                        App.MovieViewModel.BackgroundImage = ImageController.saveImage(this.Movie.imdb_id + "background.jpg", str, 800, 450, 100);
-                    }));
+                        Stream str = webResponse.GetResponseStream();
+
+                        Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            App.MovieViewModel.BackgroundImage = ImageController.saveImage(this.Movie.imdb_id + "background.jpg", str, 800, 450, 100);
+                        }));
+                    }
                 }
+                catch (WebException) { }
+                catch (TargetInvocationException){ }
             }
-            catch (WebException) { }
-            catch (TargetInvocationException)
-            { }
         }
+
         #endregion
 
-        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            App.MovieViewModel = null;
-            Animation.FadeOut(LayoutRoot);
-        }
 
         #region Taps
 
@@ -696,5 +620,11 @@ namespace WPtrakt
             MoviePanorama.DefaultItem = MoviePanorama.Items[0];
         }
 
+
+        private void PhoneApplicationPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            App.MovieViewModel = null;
+            Animation.FadeOut(LayoutRoot);
+        }
     }
 }

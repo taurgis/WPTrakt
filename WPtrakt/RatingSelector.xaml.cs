@@ -116,7 +116,7 @@ namespace WPtrakt
             ratingClient.UploadStringAsync(new Uri("http://api.trakt.tv/rate/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
         }
 
-        void client_UploadRatingStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        async void client_UploadRatingStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
             try
             {
@@ -127,7 +127,7 @@ namespace WPtrakt
                     Int16 rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
                     NavigationContext.QueryString.TryGetValue("imdb", out imdb);
                     MovieDao dao = MovieDao.Instance;
-                    TraktMovie movie = dao.getMovieByIMDB(imdb);
+                    TraktMovie movie = await dao.getMovieByIMDB(imdb);
                     movie.MyRatingAdvanced = rating;
                     if (rating > 5)
                         movie.MyRating = "Loved";
