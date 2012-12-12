@@ -106,23 +106,6 @@ namespace WPtrakt
             }
         }
 
-        private String _myRating;
-        public String MyRating
-        {
-            get
-            {
-                return _myRating;
-            }
-            set
-            {
-                if (value != _myRating)
-                {
-                    _myRating = value;
-                }
-            }
-        }
-
-
         private string _year;
         public string Year
         {
@@ -287,16 +270,9 @@ namespace WPtrakt
                 String baseString;
                 baseString = this.Rating / 10 + "/10 (" + this.Votes + ")";
 
-                if (!(this.MyRatingAdvanced == 0 && this.MyRating.Equals("false")))
+                if (!(this.MyRatingAdvanced == 0 ))
                 {
-                    if (this.MyRatingAdvanced == 0 && !(this.MyRating.Equals("false")))
-                    {
-                        baseString += " - Mine: " + this.MyRating;
-                    }
-                    else
-                    {
-                        baseString += " - Mine: " + this.MyRatingAdvanced+"/10";
-                    }
+                    baseString += " - Mine: " + this.MyRatingAdvanced+"/10";
                 }
                 return baseString;
             } 
@@ -409,7 +385,6 @@ namespace WPtrakt
             this.InWatchlist = movie.InWatchlist;
             this.Rating = movie.Ratings.Percentage;
             this.Votes = movie.Ratings.Votes;
-            this.MyRating = movie.MyRating;
             this.MyRatingAdvanced = movie.MyRatingAdvanced;
             this.Watched = movie.Watched;
             this.Imdb = movie.imdb_id;
