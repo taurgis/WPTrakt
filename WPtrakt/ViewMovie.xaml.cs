@@ -6,23 +6,20 @@ using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using WPtrakt.Controllers;
-using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using WPtrakt.Model.Trakt.Request;
-using WPtraktBase.DAO;
+using WPtraktBase.Controller;
 using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
     public partial class ViewMovie : PhoneApplicationPage
     {
-        public TraktMovie Movie { get; set; }
+        private TraktMovie Movie { get; set; }
+        private MovieController movieController;
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -42,11 +39,13 @@ namespace WPtrakt
                 InitAppBar();
             }
         }
+
         #region Load Movie
 
         public ViewMovie()
         {
             InitializeComponent();
+            movieController = new MovieController();
             DataContext = App.MovieViewModel;
             this.Loaded += new RoutedEventHandler(ViewMovie_Loaded);
         }
@@ -66,7 +65,7 @@ namespace WPtrakt
 
         private async void movieworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            this.Movie = await MovieDao.Instance.getMovieByIMDB(e.Argument.ToString());
+            this.Movie = await movieController.getMovieByImdbId(e.Argument.ToString());
 
             if (this.Movie != null)
             {
@@ -85,12 +84,6 @@ namespace WPtrakt
             }
         }
 
-        private void saveMovieToDB()
-        {
-            if (App.MovieViewModel != null)
-                MovieDao.Instance.saveMovie(this.Movie);
-        }
-
         #endregion
 
         #region Load Shouts
@@ -101,20 +94,12 @@ namespace WPtrakt
             App.MovieViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
             try
             {
-                var movieClient = new WebClient();
-
-                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbId), AppUser.createJsonStringForAuthentication());
-
                 App.MovieViewModel.clearShouts();
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
-                    foreach (TraktShout shout in shouts)
-                        App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Movie.imdb_id, SubItemText = shout.Shout });
-                }
-
+                TraktShout[] shouts = await this.movieController.getShoutsForMovie(this.Movie.imdb_id);
+               
+                foreach (TraktShout shout in shouts)
+                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Movie.imdb_id, SubItemText = shout.Shout });
+           
                 if (App.MovieViewModel.ShoutItems.Count == 0)
                     App.MovieViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
 
@@ -168,7 +153,6 @@ namespace WPtrakt
         }
 
         #endregion
-
 
         #region Taps
 
@@ -238,6 +222,8 @@ namespace WPtrakt
             this.ApplicationBar = appBar;
         }
 
+        #region Tile
+
         private void CreateTileMenuItem(ApplicationBar appBar)
         {
             ApplicationBarMenuItem tileMenuItem = new ApplicationBarMenuItem();
@@ -270,6 +256,10 @@ namespace WPtrakt
             catch (InvalidOperationException) { ToastNotification.ShowToast("Tile", "Error creating tile, please try again!"); }
         }
 
+        #endregion
+
+        #region Rating
+
         private void CreateRatingButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton ratingButton = new ApplicationBarIconButton();
@@ -286,6 +276,10 @@ namespace WPtrakt
              NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + App.MovieViewModel.Imdb + "&year=" + App.MovieViewModel.Year + "&title=" + App.MovieViewModel.Name, UriKind.Relative));
         }
 
+        #endregion
+
+        #region Watchlist
+
         private void CreateRemoveFromWatchlist(ApplicationBar appBar)
         {
             ApplicationBarIconButton removeFromWatchlist = new ApplicationBarIconButton();
@@ -295,33 +289,13 @@ namespace WPtrakt
             appBar.Buttons.Add(removeFromWatchlist);
         }
 
-        void removeFromWatchlist_Click(object sender, EventArgs e)
-        {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadRemoveFromWatchlistStringCompleted);
-
-            WatchlistAuth auth = new WatchlistAuth();
-            auth.Movies = new TraktMovie[1];
-            auth.Movies[0] = new TraktMovie();
-            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
-            auth.Movies[0].Title = App.MovieViewModel.Name;
-            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
-        }
-
-        void client_UploadRemoveFromWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        private void removeFromWatchlist_Click(object sender, EventArgs e)
         {
             try
             {
-                String jsonString = e.Result;
-                ToastNotification.ShowToast("Movie", "Movie removed from watchlist.");
-
-                this.Movie.InWatchlist = false;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                this.movieController.removeMovieFromWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 App.MovieViewModel.InWatchlist = false;
-                saveMovieToDB();
-        
                 InitAppBar();
             }
             catch (WebException)
@@ -345,27 +319,11 @@ namespace WPtrakt
 
         private void AddToWatchList_Click(object sender, EventArgs e)
         {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadWatchlistStringCompleted);
-            WatchlistAuth auth = new WatchlistAuth();
-            auth.Movies = new TraktMovie[1];
-            auth.Movies[0] = new TraktMovie();
-            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
-            auth.Movies[0].Title = App.MovieViewModel.Name;
-            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
-        }
-
-        void client_UploadWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
-
-                this.Movie.InWatchlist = true;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                this.movieController.addMovieToWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 App.MovieViewModel.InWatchlist = true;
-                saveMovieToDB();
 
                 ToastNotification.ShowToast("Movie", "Movie added to watchlist.");
 
@@ -380,6 +338,10 @@ namespace WPtrakt
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
+        #endregion
+
+        #region Checkin
+
         private void CreateCheckingButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton checkinButton = new ApplicationBarIconButton();
@@ -390,34 +352,16 @@ namespace WPtrakt
             appBar.Buttons.Add(checkinButton);
         }
 
-        void checkinButton_Click(object sender, EventArgs e)
-        {
-            var checkinClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
-            CheckinAuth auth = new CheckinAuth();
-
-            auth.imdb_id = App.MovieViewModel.Imdb;
-            auth.Title = App.MovieViewModel.Name;
-            auth.year = Int16.Parse(App.MovieViewModel.Year);
-            auth.AppDate = AppUser.getReleaseDate();
-
-            var assembly = Assembly.GetExecutingAssembly().FullName;
-            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-            auth.AppVersion = fullVersionNumber;
-
-            checkinClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
-        }
-
-        void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        private async void checkinButton_Click(object sender, EventArgs e)
         {
             try
             {
-                String jsonString = e.Result;
-                if (jsonString.Contains("failure"))
-                    ToastNotification.ShowToast("Movie", "There is already a checkin in progress.");
-                else
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+
+                if (await this.movieController.checkinMovie(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
                     ToastNotification.ShowToast("Movie", "Checked in!");
+                else
+                    ToastNotification.ShowToast("Movie", "There is already a checkin in progress.");
             }
             catch (WebException)
             {
@@ -427,12 +371,11 @@ namespace WPtrakt
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
-        private void ShoutsIconButton_Click(object sender, EventArgs e)
-        {
-            LoadShoutData(App.MovieViewModel.Imdb);
-        }
 
-    
+        #endregion Checkin
+
+        #region Seen
+
         private void CreateSeenButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
@@ -445,35 +388,12 @@ namespace WPtrakt
 
         private void SeenClick(object sender, EventArgs e)
         {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeenStringCompleted);
-            WatchedAuth auth = new WatchedAuth();
-            auth.Movies = new TraktMovieRequest[1];
-            auth.Movies[0] = new TraktMovieRequest();
-            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
-            auth.Movies[0].Title = App.MovieViewModel.Name;
-            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
-            auth.Movies[0].Plays = 1;
-
-            DateTime UnixEpoch =  new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-        }
-
-        void client_UploadSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
-
-                App.MovieViewModel.Watched = true;
-                this.Movie.Watched = true;
-                saveMovieToDB();
-
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                movieController.markMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 ToastNotification.ShowToast("Movie", "Movie marked as watched.");
-
+                App.MovieViewModel.Watched = true;
                 InitAppBar();
             }
             catch (WebException)
@@ -481,9 +401,8 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-        }
-
+             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+       }
 
         private void CreateUnSeenButton(ApplicationBar appBar)
         {
@@ -497,34 +416,12 @@ namespace WPtrakt
 
         void unseeButton_Click(object sender, EventArgs e)
         {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadUnSeenStringCompleted);
-            WatchedAuth auth = new WatchedAuth();
-            auth.Movies = new TraktMovieRequest[1];
-            auth.Movies[0] = new TraktMovieRequest();
-            auth.Movies[0].imdb_id = App.MovieViewModel.Imdb;
-            auth.Movies[0].Title = App.MovieViewModel.Name;
-            auth.Movies[0].year = Int16.Parse(App.MovieViewModel.Year);
-            auth.Movies[0].Plays = 1;
-
-            DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-        }
-
-        void client_UploadUnSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                this.movieController.unMarkMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 ToastNotification.ShowToast("Movie", "Movie unmarked as watched.");
-
-                this.Movie.Watched = false;
                 App.MovieViewModel.Watched = false;
-                saveMovieToDB();
-
                 InitAppBar();
             }
             catch (WebException)
@@ -533,7 +430,9 @@ namespace WPtrakt
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-        }
+         }
+
+        #endregion 
 
         #endregion
 
@@ -558,6 +457,10 @@ namespace WPtrakt
             appBar.Buttons.Add(watchedButton);
         }
 
+        private void ShoutsIconButton_Click(object sender, EventArgs e)
+        {
+            LoadShoutData(App.MovieViewModel.Imdb);
+        }
 
         private void CreateSendButton(ApplicationBar appBar)
         {
@@ -574,37 +477,20 @@ namespace WPtrakt
         {
             if (!String.IsNullOrEmpty((ShoutText.Text)))
             {
-                var watchlistClient = new WebClient();
-                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSendShoutStringCompleted);
-                ShoutAuth auth = new ShoutAuth();
+                try
+                {
+                    this.movieController.addShoutToMovie(ShoutText.Text, this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
+                    ToastNotification.ShowToast("Movie", "Shout posted.");
+                    ShoutText.Text = "";
 
-                auth.Imdb = App.MovieViewModel.Imdb;
-                auth.Title = App.MovieViewModel.Name;
-                auth.Year = Int16.Parse(App.MovieViewModel.Year);
-
-                auth.Shout = (ShoutText.Text);
-
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+                    this.Focus();
+                }
+                catch (WebException)
+                {
+                    ErrorManager.ShowConnectionErrorPopup();
+                }
+                catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             }
-        }
-
-      
-        void client_UploadSendShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                ToastNotification.ShowToast("Movie", "Shout posted.");
-
-                ShoutText.Text = "";
-
-                this.Focus();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
         }
 
         #endregion
