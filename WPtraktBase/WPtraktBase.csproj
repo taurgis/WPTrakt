@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\MovieController.cs" />
+    <Compile Include="DAO\ShowDao.cs" />
     <Compile Include="DAO\Dao.cs" />
     <Compile Include="DAO\MovieDao.cs" />
     <Compile Include="Model\AppUser.cs" />

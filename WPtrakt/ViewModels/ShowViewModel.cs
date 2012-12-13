@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtraktBase.DAO;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
@@ -442,23 +444,15 @@ namespace WPtrakt
                 currentSeason = 1;
             this._tvdb = tvdb;
 
-            String fileName = TraktShow.getFolderStatic() + "/" + tvdb + ".json";
-            if (StorageController.doesFileExist(fileName))
-            {
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(showworker_DoWork);
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = false;
+            worker.WorkerSupportsCancellation = false;
+            worker.DoWork += new DoWorkEventHandler(showworker_DoWork);
 
-                worker.RunWorkerAsync();
-            }
-            else
-            {
-                CallShowService(tvdb);
-            }
-
+            worker.RunWorkerAsync(tvdb);
+           
             String fileNameSeasons = TraktSeason.getFolderStatic() + "/" + tvdb + ".json";
-            if (StorageController.doesFileExist(fileName))
+            if (StorageController.doesFileExist(fileNameSeasons))
             {
                 BackgroundWorker seasonsWorker = new BackgroundWorker();
                 seasonsWorker.WorkerReportsProgress = false;
@@ -506,10 +500,9 @@ namespace WPtrakt
         }
 
 
-        void showworker_DoWork(object sender, DoWorkEventArgs e)
+        private async void showworker_DoWork(object sender, DoWorkEventArgs e)
         {
-            String fileName = TraktShow.getFolderStatic() + "/" + _tvdb + ".json";
-            TraktShow show = (TraktShow)StorageController.LoadObject(fileName, typeof(TraktShow));
+            TraktShow show = await ShowDao.Instance.getShowByTVDB(e.Argument.ToString());
 
             if ((DateTime.Now - show.DownloadTime).Days < 7)
             {
@@ -525,6 +518,7 @@ namespace WPtrakt
                     CallShowService(_tvdb);
                 });
             }
+          
         }
 
         private void CallShowService(String tvdb)
@@ -544,7 +538,7 @@ namespace WPtrakt
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktShow));
                     TraktShow show = (TraktShow)ser.ReadObject(ms);
-                    StorageController.saveObject(show, typeof(TraktShow));
+                    //StorageController.saveObject(show, typeof(TraktShow));
                     UpdateShowView(show);
                     IsDataLoaded = true;
                 }

@@ -12,6 +12,7 @@ using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model.Trakt;
 using System.Reflection;
 using WPtrakt.Model;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {

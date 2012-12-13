@@ -23,6 +23,12 @@ namespace WPtraktBase.DAO
             get { return GetTable<TraktMovie>(); }
         }
 
+        public Table<TraktShow> Shows
+        {
+            get { return GetTable<TraktShow>(); }
+        }
+
+
         public Table<TraktImage> Images
         {
             get { return GetTable<TraktImage>(); }
