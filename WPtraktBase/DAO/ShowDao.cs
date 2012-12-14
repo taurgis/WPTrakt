@@ -67,6 +67,11 @@ namespace WPtraktBase.DAO
                 return await getShowByTVDBThroughTrakt(TVDB);
         }
 
+        public TraktShow getShowByIMDB(String IMDB)
+        {
+            return this.Shows.Where(t => t.imdb_id == IMDB).FirstOrDefault();
+        }
+
         private async Task<TraktShow> getShowByTVDBThroughTrakt(String TVDB)
         {
             try

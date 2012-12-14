@@ -289,13 +289,14 @@ namespace WPtrakt
             appBar.Buttons.Add(removeFromWatchlist);
         }
 
-        private void removeFromWatchlist_Click(object sender, EventArgs e)
+        private async void removeFromWatchlist_Click(object sender, EventArgs e)
         {
             try
             {
                 progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                this.movieController.removeMovieFromWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
+                await this.movieController.removeMovieFromWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 App.MovieViewModel.InWatchlist = false;
+                ToastNotification.ShowToast("Movie", "Movie removed from watchlist.");
                 InitAppBar();
             }
             catch (WebException)
@@ -317,12 +318,12 @@ namespace WPtrakt
             appBar.Buttons.Add(enabledAddtoWatchlist);
         }
 
-        private void AddToWatchList_Click(object sender, EventArgs e)
+        private async void AddToWatchList_Click(object sender, EventArgs e)
         {
             try
             {
                 progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                this.movieController.addMovieToWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
+                await this.movieController.addMovieToWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 App.MovieViewModel.InWatchlist = true;
 
                 ToastNotification.ShowToast("Movie", "Movie added to watchlist.");
@@ -386,12 +387,12 @@ namespace WPtrakt
             appBar.Buttons.Add(watchedButton);
         }
 
-        private void SeenClick(object sender, EventArgs e)
+        private async void SeenClick(object sender, EventArgs e)
         {
             try
             {
                 progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                movieController.markMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
+                await movieController.markMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 ToastNotification.ShowToast("Movie", "Movie marked as watched.");
                 App.MovieViewModel.Watched = true;
                 InitAppBar();
@@ -404,7 +405,7 @@ namespace WPtrakt
              progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
        }
 
-        private void CreateUnSeenButton(ApplicationBar appBar)
+        private  void CreateUnSeenButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton unseeButton = new ApplicationBarIconButton();
             unseeButton = new ApplicationBarIconButton(new Uri("Images/appbar.unseen.rest.png", UriKind.Relative));
@@ -414,12 +415,12 @@ namespace WPtrakt
             appBar.Buttons.Add(unseeButton);
         }
 
-        void unseeButton_Click(object sender, EventArgs e)
+        private async void unseeButton_Click(object sender, EventArgs e)
         {
             try
             {
                 progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                this.movieController.unMarkMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
+                await this.movieController.unMarkMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 ToastNotification.ShowToast("Movie", "Movie unmarked as watched.");
                 App.MovieViewModel.Watched = false;
                 InitAppBar();

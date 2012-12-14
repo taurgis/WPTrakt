@@ -295,6 +295,8 @@ namespace WPtrakt
 
         }
 
+        #region Watchlist
+
         private void CreateAddToWatchlist(ApplicationBar appBar)
         {
             ApplicationBarIconButton AddtoWatchlist = new ApplicationBarIconButton();
@@ -307,26 +309,14 @@ namespace WPtrakt
 
         void disabledAddtoWatchlist_Click(object sender, EventArgs e)
         {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadWatchlistStringCompleted);
-            WatchlistAuth auth = new WatchlistAuth();
-            auth.Shows = new TraktShow[1];
-            auth.Shows[0] = new TraktShow();
-            auth.Shows[0].imdb_id = App.ShowViewModel.Imdb;
-            auth.Shows[0].Title = App.ShowViewModel.Name;
-            auth.Shows[0].year = Int16.Parse(App.ShowViewModel.Year);
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
-        }
-
-        void client_UploadWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
-                ToastNotification.ShowToast("Show", "Show added to watchlist.");
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + ".json");
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                this.showController.addShowToWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
                 App.ShowViewModel.InWatchlist = true;
+
+                ToastNotification.ShowToast("Show", "Show added to watchlist.");
+
                 InitAppBarMain();
             }
             catch (WebException)
@@ -347,30 +337,14 @@ namespace WPtrakt
             appBar.Buttons.Add(removeFromWatchlist);
         }
 
-        void removeFromWatchlist_Click(object sender, EventArgs e)
-        {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadRemoveFromWatchlistStringCompleted);
-
-            WatchlistAuth auth = new WatchlistAuth();
-            auth.Shows = new TraktShow[1];
-            auth.Shows[0] = new TraktShow();
-            auth.Shows[0].imdb_id = App.ShowViewModel.Imdb;
-            auth.Shows[0].Title = App.ShowViewModel.Name;
-            auth.Shows[0].year = Int16.Parse(App.ShowViewModel.Year);
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
-        }
-
-        void client_UploadRemoveFromWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        private void removeFromWatchlist_Click(object sender, EventArgs e)
         {
             try
             {
-                String jsonString = e.Result;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                this.showController.removeShowFromWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
                 ToastNotification.ShowToast("Show", "Show removed from watchlist.");
                 App.ShowViewModel.InWatchlist = false;
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + ".json");
                 InitAppBarMain();
             }
             catch (WebException)
@@ -378,10 +352,12 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
+        #endregion
+
+        #region Rating
 
         private void CreateRating(ApplicationBar appBar)
         {
@@ -394,6 +370,15 @@ namespace WPtrakt
             appBar.Buttons.Add(ratingButton);
         }
 
+        void ratingButton_Click(object sender, EventArgs e)
+        {
+            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + App.ShowViewModel.Imdb + "&year=" + App.ShowViewModel.Year + "&title=" + App.ShowViewModel.Name, UriKind.Relative));
+        }
+
+        #endregion
+
+        #region Watched
+
         private void CreateWatchedButton(ApplicationBar appBar, Boolean enabled)
         {
             ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
@@ -405,28 +390,13 @@ namespace WPtrakt
             appBar.Buttons.Add(watchedButton);
         }
 
-        private void WatchedIconButton_Click(object sender, EventArgs e)
-        {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeenStringCompleted);
-            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
-           
-           
-            auth.Imdb = App.ShowViewModel.Imdb;
-            auth.Title = App.ShowViewModel.Name;
-            auth.Year = Int16.Parse(App.ShowViewModel.Year);
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-        }
-
-        void client_UploadSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        private async void WatchedIconButton_Click(object sender, EventArgs e)
         {
             try
             {
-                String jsonString = e.Result;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                await showController.markShowAsSeen(this.Show.imdb_id, this.Show.Title, this.Show.year);
                 ToastNotification.ShowToast("Show", "Show marked as watched.");
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + ".json");
                 App.ShowViewModel.Watched = true;
                 InitAppBarMain();
             }
@@ -435,16 +405,10 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
-        void ratingButton_Click(object sender, EventArgs e)
-        {
-            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktShow.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + ".json");
-
-            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + App.ShowViewModel.Imdb + "&year=" + App.ShowViewModel.Year + "&title=" + App.ShowViewModel.Name, UriKind.Relative));
-        }
+        #endregion
 
         #endregion
 

@@ -136,6 +136,21 @@ namespace WPtrakt
 
                     dao.saveMovie(movie);
                 }
+                else if (type.Equals("show"))
+                {
+                    String imdb;
+                    Int16 rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
+                    NavigationContext.QueryString.TryGetValue("imdb", out imdb);
+                    ShowDao dao = ShowDao.Instance;
+                    TraktShow show = dao.getShowByIMDB(imdb);
+                    show.MyRatingAdvanced = rating;
+                    if (rating > 5)
+                        show.MyRating = "Loved";
+                    else
+                        show.MyRating = "Hated";
+
+                    dao.saveShow(show);
+                }
                 MessageBox.Show("Rated successfull.");
             }
             catch (WebException)

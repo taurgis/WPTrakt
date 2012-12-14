@@ -29,7 +29,7 @@ namespace WPtraktBase.Controller
             return await movieDao.getMovieByIMDB(imdbId);
         }
 
-        public async void removeMovieFromWatchlist(String imdbID, String title, Int16 year)
+        public async Task<Boolean> removeMovieFromWatchlist(String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
 
@@ -40,9 +40,11 @@ namespace WPtraktBase.Controller
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.InWatchlist = false;
             movieDao.saveMovie(movie);
+
+            return true;
         }
 
-        public async void addMovieToWatchlist(String imdbID, String title, Int16 year)
+        public async Task<Boolean> addMovieToWatchlist(String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
 
@@ -53,6 +55,8 @@ namespace WPtraktBase.Controller
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.InWatchlist = true;
             movieDao.saveMovie(movie);
+
+            return true;
         }
 
         private static WatchlistAuth CreateWatchListAuth(String imdbID, String title, Int16 year)
@@ -88,7 +92,7 @@ namespace WPtraktBase.Controller
                 return true;
         }
 
-        public async void markMovieAsSeen(String imdbID, String title, Int16 year)
+        public async Task<Boolean> markMovieAsSeen(String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
             WatchedAuth auth = createWatchedAuth(imdbID, title, year);
@@ -98,9 +102,11 @@ namespace WPtraktBase.Controller
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.Watched = true;
             movieDao.saveMovie(movie);
+
+            return true;
         }
 
-        public async void unMarkMovieAsSeen(String imdbID, String title, Int16 year)
+        public async Task<Boolean> unMarkMovieAsSeen(String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
             WatchedAuth auth = createWatchedAuth(imdbID, title, year);
@@ -110,6 +116,8 @@ namespace WPtraktBase.Controller
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.Watched = false;
             movieDao.saveMovie(movie);
+
+            return true;
         }
 
         private static WatchedAuth createWatchedAuth(String imdbID, String title, Int16 year)
@@ -140,7 +148,7 @@ namespace WPtraktBase.Controller
             }
         }
 
-        public async void addShoutToMovie(String shout, String imdbID, String title, Int16 year)
+        public async Task<Boolean> addShoutToMovie(String shout, String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
              ShoutAuth auth = new ShoutAuth();
@@ -151,6 +159,7 @@ namespace WPtraktBase.Controller
             auth.Shout = shout;
 
            String jsonString  = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+           return true;
         }
     }
 }
