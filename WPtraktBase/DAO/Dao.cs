@@ -28,7 +28,6 @@ namespace WPtraktBase.DAO
             get { return GetTable<TraktShow>(); }
         }
 
-
         public Table<TraktImage> Images
         {
             get { return GetTable<TraktImage>(); }
@@ -38,5 +37,11 @@ namespace WPtraktBase.DAO
         {
             get { return GetTable<TraktRating>(); }
         }
+
+        public Table<TraktSeason> Seasons
+        {
+            get { return GetTable<TraktSeason>(); }
+        }
+
     }
 }

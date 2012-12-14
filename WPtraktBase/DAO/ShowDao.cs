@@ -84,7 +84,7 @@ namespace WPtraktBase.DAO
                         show.GenresAsString += genre + "|";
 
                     show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
-
+                    show.Seasons = new EntitySet<TraktSeason>();
                     saveShow(show);
 
                     return show;
@@ -138,6 +138,18 @@ namespace WPtraktBase.DAO
             dbShow.Watched = traktShow.Watched;
             dbShow.Watchers = traktShow.Watchers;
             dbShow.year = traktShow.year;
+            dbShow.Seasons = traktShow.Seasons;
+        }
+
+        public async Task<TraktSeason[]> getSeasonsForTvShowByTVDBID(String TVDBID)
+        {
+            WebClient seasonClient = new WebClient();
+            String jsonString = await seasonClient.DownloadStringTaskAsync(new Uri("http://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDBID));
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            {
+                var ser = new DataContractJsonSerializer(typeof(TraktSeason[]));
+                return (TraktSeason[])ser.ReadObject(ms);
+            }
         }
     }
 }

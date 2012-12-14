@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtraktBase.Controller;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
 
@@ -19,6 +20,7 @@ namespace WPtrakt
 {
     public class ShowViewModel : INotifyPropertyChanged
     {
+
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public ObservableCollection<ListItemViewModel> EpisodeItems { get; set; }
         public Int16 numberOfSeasons { get; set; }
@@ -27,8 +29,8 @@ namespace WPtrakt
 
         public ShowViewModel()
         {
-            ShoutsLoaded = false;
-            ShoutItems = new ObservableCollection<ListItemViewModel>();
+            this.ShoutsLoaded = false;
+            this.ShoutItems = new ObservableCollection<ListItemViewModel>();
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
             this.EpisodeItems = new ObservableCollection<ListItemViewModel>();
         }
@@ -251,21 +253,16 @@ namespace WPtrakt
         {
             get
             {
-                if (Fanart == null)
-                    return null;
+                return _backgroundImage;
+            }
+            set
+            {
+                _backgroundImage = value;
 
-                if (_backgroundImage == null)
-                {
-                    LoadBackgroundImage();
-
-                    return _backgroundImage;
-                }
-                else
-                {
-                    return _backgroundImage;
-                }
+                NotifyPropertyChanged("BackgroundImage");
             }
         }
+
 
         public String DetailVisibility
         {
@@ -439,119 +436,13 @@ namespace WPtrakt
 
         public void LoadData(String tvdb)
         {
-
             if (currentSeason == 0)
                 currentSeason = 1;
+
             this._tvdb = tvdb;
-
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.WorkerReportsProgress = false;
-            worker.WorkerSupportsCancellation = false;
-            worker.DoWork += new DoWorkEventHandler(showworker_DoWork);
-
-            worker.RunWorkerAsync(tvdb);
-           
-            String fileNameSeasons = TraktSeason.getFolderStatic() + "/" + tvdb + ".json";
-            if (StorageController.doesFileExist(fileNameSeasons))
-            {
-                BackgroundWorker seasonsWorker = new BackgroundWorker();
-                seasonsWorker.WorkerReportsProgress = false;
-                seasonsWorker.WorkerSupportsCancellation = false;
-                seasonsWorker.DoWork += new DoWorkEventHandler(seasonsWorker_DoWork);
-
-                seasonsWorker.RunWorkerAsync();
-            }
-            else
-            {
-                CallSeasonService(tvdb);
-            }
         }
 
-        void seasonsWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            String fileName = TraktSeason.getFolderStatic() + "/" + _tvdb + ".json";
-            TraktSeason[] seasons = (TraktSeason[])StorageController.LoadObjects(fileName, typeof(TraktSeason[]));
-
-            if ((DateTime.Now - seasons[0].DownloadTime).Days < 7)
-            {
-                numberOfSeasons = 0;
-                foreach (TraktSeason season in seasons)
-                {
-                    if (!String.IsNullOrEmpty(this.Tvdb))
-                        season.Tvdb = this.Tvdb;
-
-                    if (season.Season != "0")
-                    {
-                        numberOfSeasons += 1;
-                    }
-                }
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-               {
-                   NotifyPropertyChanged("SeasonItems");
-               });
-            }
-            else
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    CallSeasonService(_tvdb);
-                });
-            }
-        }
-
-
-        private async void showworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            TraktShow show = await ShowDao.Instance.getShowByTVDB(e.Argument.ToString());
-
-            if ((DateTime.Now - show.DownloadTime).Days < 7)
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    UpdateShowView(show);
-                });
-            }
-            else
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    CallShowService(_tvdb);
-                });
-            }
-          
-        }
-
-        private void CallShowService(String tvdb)
-        {
-            var showClient = new WebClient();
-            showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShowStringCompleted);
-            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb), AppUser.createJsonStringForAuthentication());
-        }
-
-        void client_UploadShowStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktShow));
-                    TraktShow show = (TraktShow)ser.ReadObject(ms);
-                    //StorageController.saveObject(show, typeof(TraktShow));
-                    UpdateShowView(show);
-                    IsDataLoaded = true;
-                }
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { ErrorManager.ShowConnectionErrorPopup(); }
-        }
-
-        private void UpdateShowView(TraktShow show)
+        public void UpdateShowView(TraktShow show)
         {
             _name = show.Title;
             _fanart = show.Images.Fanart;
@@ -578,97 +469,10 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatusShow");
             NotifyPropertyChanged("DetailVisibility");
             NotifyPropertyChanged("RatingString");
-
-            LoadBackgroundImage();
         }
 
-        private void CallSeasonService(String tvdb)
-        {
-            var seasonClient = new WebClient();
-            seasonClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadSeasonsStringCompleted);
-            seasonClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb));
-        }
 
-        void client_DownloadSeasonsStringCompleted(object sender, DownloadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktSeason[]));
-                    TraktSeason[] seasons = (TraktSeason[])ser.ReadObject(ms);
-                    numberOfSeasons = 0;
-                    foreach (TraktSeason season in seasons)
-                    {
-                        if (!String.IsNullOrEmpty(this.Tvdb))
-                            season.Tvdb = this.Tvdb;
-
-                        if (season.Season != "0")
-                        {
-                            numberOfSeasons += 1;
-                        }
-                    }
-
-                    seasons[0].DownloadTime = DateTime.Now;
-
-                    if (!String.IsNullOrEmpty(this.Tvdb))
-                        StorageController.saveObject(seasons, typeof(TraktSeason[]));
-                }
-
-                NotifyPropertyChanged("SeasonItems");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { ErrorManager.ShowConnectionErrorPopup(); }
-        }
-
-        private void LoadBackgroundImage()
-        {
-            String fileName = this._tvdb + "background" + ".jpg";
-
-            if (StorageController.doesFileExist(fileName))
-            {
-                _backgroundImage = ImageController.getImageFromStorage(fileName);
-                NotifyPropertyChanged("BackgroundImage");
-            }
-            else
-            {
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri(Fanart));
-                request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-
-            }
-        }
-
-        void request_OpenReadFanartCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
-                        NotifyPropertyChanged("BackgroundImage");
-                    }));
-                }
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException)
-            { }
-        }
+       
 
         public void LoadEpisodeData(String tvdb)
         {
@@ -719,13 +523,6 @@ namespace WPtrakt
                     this.EpisodeItems.Add(new ListItemViewModel());
                     NotifyPropertyChanged("EpisodeItems");
                     NotifyPropertyChanged("LoadingStatusSeason");
-                });
-            }
-            else
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    CallSeasonService(_tvdb);
                 });
             }
         }

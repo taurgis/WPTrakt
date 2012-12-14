@@ -123,6 +123,9 @@ namespace WPtraktBase.Model.Trakt
             }
         }
 
+        [Association(ThisKey = "tvdb_id", OtherKey = "Tvdb")]
+        public EntitySet<TraktSeason> Seasons { get; set; }
+
         [Column]
         [DataMember(Name = "rating_advanced")]
         public Int16 MyRatingAdvanced { get; set; }

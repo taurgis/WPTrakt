@@ -13,30 +13,136 @@ using WPtrakt.Model.Trakt;
 using System.Reflection;
 using WPtrakt.Model;
 using WPtraktBase.Model.Trakt;
+using System.ComponentModel;
+using WPtraktBase.Controller;
+using System.IO;
+using System.Runtime.Serialization.Json;
+using System.Text;
 
 namespace WPtrakt
 {
     public partial class ViewShow : PhoneApplicationPage
     {
+        private ShowController showController;
+        private TraktShow Show;
+
         public ViewShow()
         {
             InitializeComponent();
 
             DataContext = App.ShowViewModel;
+            this.showController = new ShowController();
             this.Loaded += new RoutedEventHandler(ViewShow_Loaded);
         }
 
+
         private void ViewShow_Loaded(object sender, RoutedEventArgs e)
         {
-            String id;
-            NavigationContext.QueryString.TryGetValue("id", out id);
+            String tvdb;
+            NavigationContext.QueryString.TryGetValue("id", out tvdb);
+
             if (!String.IsNullOrEmpty(App.ShowViewModel.Tvdb))
             {
                 RefreshBottomBar();
             }
-
-            App.ShowViewModel.LoadData(id);  
+            LoadShow(tvdb);
         }
+
+        #region Load Show 
+
+        private void LoadShow(String tvdb)
+        {
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = false;
+            worker.WorkerSupportsCancellation = false;
+            worker.DoWork += new DoWorkEventHandler(showworker_DoWork);
+
+            worker.RunWorkerAsync(tvdb);
+
+            App.ShowViewModel.LoadData(tvdb);  
+        }
+
+        private async void showworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            this.Show = await showController.getShowByTVDBID(e.Argument.ToString());
+
+            if (this.Show != null)
+            {
+                this.Show.Genres = this.Show.GenresAsString.Split('|');
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    App.ShowViewModel.UpdateShowView(this.Show);
+                }));
+            }
+            else
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+
+            if (this.Show.Seasons.Count == 0)
+            {
+                LoadSeasons(e.Argument.ToString());
+            }
+
+            LoadBackgroundImage();
+        }
+
+        #endregion
+
+        #region Load Seasons
+
+        private async void LoadSeasons(String TvdbId)
+        {
+            TraktSeason[] seasons = await this.showController.getSeasonsByTVDBID(TvdbId);
+            this.showController.AddSeasonsToShow(this.Show, seasons);
+            Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                App.ShowViewModel.numberOfSeasons = (Int16)this.Show.Seasons.Count;
+            }));
+        }
+
+        #endregion
+
+        #region Load Fanart
+
+        private async void LoadBackgroundImage()
+        {
+            String fileName = this.Show.tvdb_id + "background" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName))
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    App.ShowViewModel.BackgroundImage = ImageController.getImageFromStorage(fileName);
+                }));
+            }
+            else
+            {
+                try
+                {
+                    HttpWebRequest request;
+
+                    request = (HttpWebRequest)WebRequest.Create(new Uri(this.Show.Images.Fanart));
+                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+
+                    System.Net.HttpStatusCode status = webResponse.StatusCode;
+                    if (status == System.Net.HttpStatusCode.OK)
+                    {
+                        Stream str = webResponse.GetResponseStream();
+
+                        Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            App.ShowViewModel.BackgroundImage = ImageController.saveImage(this.Show.tvdb_id + "background.jpg", str, 800, 100);
+                        }));
+                    }
+                }
+                catch (WebException) { }
+                catch (TargetInvocationException)
+                { }
+            }
+        }
+
+        #endregion 
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
