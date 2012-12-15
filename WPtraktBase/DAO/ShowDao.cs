@@ -62,13 +62,17 @@ namespace WPtraktBase.DAO
         public async Task<TraktShow> getShowByTVDB(String TVDB)
         {
             if (showAvailableInDatabaseByTVDB(TVDB))
+            {
+                TraktSeason season = this.Seasons.Where(t => t.Tvdb == TVDB).FirstOrDefault();
                 return this.Shows.Where(t => t.tvdb_id == TVDB).FirstOrDefault();
+            }
             else
                 return await getShowByTVDBThroughTrakt(TVDB);
         }
 
         public TraktShow getShowByIMDB(String IMDB)
         {
+       
             return this.Shows.Where(t => t.imdb_id == IMDB).FirstOrDefault();
         }
 
@@ -90,6 +94,7 @@ namespace WPtraktBase.DAO
 
                     show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
                     show.Seasons = new EntitySet<TraktSeason>();
+                    
                     saveShow(show);
 
                     return show;
@@ -101,6 +106,17 @@ namespace WPtraktBase.DAO
             { }
 
             return null;
+        }
+
+        public Boolean saveSeasons(TraktSeason[] seasons, String tvdbid)
+        {
+            foreach (TraktSeason season in seasons)
+            {
+                season.Tvdb = tvdbid;
+                this.Seasons.InsertOnSubmit(season);
+            }
+            this.SubmitChanges();
+            return true;
         }
 
         public Boolean saveShow(TraktShow traktShow)

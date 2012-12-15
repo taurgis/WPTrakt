@@ -487,60 +487,15 @@ namespace WPtrakt
         }
 
 
-       
-
-        public void LoadEpisodeData(String tvdb)
+        public void RefreshEpisodes()
         {
-            this.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             NotifyPropertyChanged("EpisodeItems");
             NotifyPropertyChanged("LoadingStatusSeason");
-            if (numberOfSeasons > 0)
-            {
-                if (currentSeason <= numberOfSeasons)
-                {
-                    String fileNameEpisodes = TraktEpisode.getFolderStatic() + "/" + tvdb + currentSeason + ".json";
-                    if (StorageController.doesFileExist(fileNameEpisodes))
-                    {
-                        BackgroundWorker episodesWorker = new BackgroundWorker();
-                        episodesWorker.WorkerReportsProgress = false;
-                        episodesWorker.WorkerSupportsCancellation = false;
-                        episodesWorker.DoWork += new DoWorkEventHandler(episodesWorker_DoWork);
-
-                        episodesWorker.RunWorkerAsync();
-                    }
-                    else
-                    {
-                        CallEpisodesService(tvdb);
-                    }
-                }
-            }
         }
 
-        void episodesWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            String fileName = TraktEpisode.getFolderStatic() + "/" + this.Tvdb + this.currentSeason + ".json";
-            TraktEpisode[] episodes = (TraktEpisode[])StorageController.LoadObjects(fileName, typeof(TraktEpisode[]));
+        
 
-            if ((DateTime.Now - episodes[0].DownloadTime).Days < 7)
-            {
-                foreach (TraktEpisode episodeIt in episodes)
-                {
-                    episodeIt.Tvdb = this.Tvdb;
-                    TraktEpisode episode = episodeIt;
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                     {
-                         this.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = _imdb + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = _tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
-                        });
-                }
-                
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    this.EpisodeItems.Add(new ListItemViewModel());
-                    NotifyPropertyChanged("EpisodeItems");
-                    NotifyPropertyChanged("LoadingStatusSeason");
-                });
-            }
-        }
+     
 
         private void CallEpisodesService(String tvdb)
         {
@@ -576,10 +531,10 @@ namespace WPtrakt
                     this.EpisodeItems.Add(new ListItemViewModel());
 
 
-
+                    /*
                     if (!String.IsNullOrEmpty(this.Tvdb) && !(daysSinceRelease < 30))
                         StorageController.saveObject(episodes, typeof(TraktEpisode[]));
-
+                    */
                 }
                 NotifyPropertyChanged("EpisodeItems");
                 NotifyPropertyChanged("LoadingStatusSeason");

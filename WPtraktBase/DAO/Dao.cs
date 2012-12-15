@@ -43,5 +43,10 @@ namespace WPtraktBase.DAO
             get { return GetTable<TraktSeason>(); }
         }
 
+        public Table<TraktEpisode> Episodes
+        {
+            get { return GetTable<TraktEpisode>(); }
+        }
+
     }
 }

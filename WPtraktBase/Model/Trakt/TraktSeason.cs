@@ -30,6 +30,9 @@ namespace WPtraktBase.Model.Trakt
         [DataMember(Name = "episodes")]
         public String Episodes { get; set; }
 
+        [Association(ThisKey = "SeasonID", OtherKey = "SeasonID")]
+        public EntitySet<TraktEpisode> SeasonEpisodes { get; set; }
+
         [Column]
         [DataMember(Name = "url")]
         public String Url { get; set; }

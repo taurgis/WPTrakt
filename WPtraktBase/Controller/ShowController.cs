@@ -37,10 +37,41 @@ namespace WPtraktBase.Controller
         public void AddSeasonsToShow(TraktShow show, TraktSeason[] seasons)
         {
             show.Seasons = new System.Data.Linq.EntitySet<TraktSeason>();
+            showDao.saveSeasons(seasons, show.tvdb_id);
 
             foreach (TraktSeason season in seasons)
             {
                 show.Seasons.Add(season);
+               
+            }
+
+            showDao.saveShow(show);
+        }
+
+        public TraktSeason getSeasonFromShow(TraktShow show, int SeasonNumber)
+        {
+            foreach (TraktSeason season in show.Seasons)
+            {
+                if (int.Parse(season.Season) == SeasonNumber)
+                    return season;
+            }
+
+            return null;
+        }
+
+        public void AddEpisodesToShowSeason(TraktShow show, TraktEpisode[] episodes, int SeasonNumber)
+        {
+            foreach (TraktSeason season in show.Seasons)
+            {
+                if (int.Parse(season.Season) == SeasonNumber)
+                {
+                    foreach (TraktEpisode episode in episodes)
+                    {
+                        episode.DownloadTime = DateTime.Now;
+                        episode.SeasonID = season.SeasonID;
+                        season.SeasonEpisodes.Add(episode);
+                    }
+                }
             }
 
             showDao.saveShow(show);

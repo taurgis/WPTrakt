@@ -18,6 +18,7 @@ using WPtraktBase.Controller;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Data.Linq;
 
 namespace WPtrakt
 {
@@ -94,11 +95,83 @@ namespace WPtrakt
         private async void LoadSeasons(String TvdbId)
         {
             TraktSeason[] seasons = await this.showController.getSeasonsByTVDBID(TvdbId);
+            foreach (TraktSeason season in seasons)
+                season.SeasonEpisodes = new EntitySet<TraktEpisode>();
+
             this.showController.AddSeasonsToShow(this.Show, seasons);
             Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 App.ShowViewModel.numberOfSeasons = (Int16)this.Show.Seasons.Count;
             }));
+        }
+
+        #endregion
+
+        #region Load Episodes
+
+        public void LoadEpisodeData()
+        {
+            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+            App.ShowViewModel.RefreshEpisodes();
+            if (this.Show.Seasons.Count > 0)
+            {
+                if (App.ShowViewModel.currentSeason <= this.Show.Seasons.Count)
+                {
+                        BackgroundWorker episodesWorker = new BackgroundWorker();
+                        episodesWorker.WorkerReportsProgress = false;
+                        episodesWorker.WorkerSupportsCancellation = false;
+                        episodesWorker.DoWork += new DoWorkEventHandler(episodesWorker_DoWork);
+
+                        episodesWorker.RunWorkerAsync();
+                }
+
+
+
+            }
+        }
+
+        private async void episodesWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            TraktEpisode[] episodes = null;
+            TraktSeason currentSeason =  this.showController.getSeasonFromShow(this.Show, App.ShowViewModel.currentSeason);
+            if (currentSeason.SeasonEpisodes.Count > 0)
+            {
+                episodes = new TraktEpisode[currentSeason.SeasonEpisodes.Count];
+                int i = 0;
+                foreach (TraktEpisode episode in currentSeason.SeasonEpisodes)
+                    episodes[i++] = episode;
+            }
+            else
+            {
+                var showClient = new WebClient();
+                String jsonString = await showClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + this.Show.tvdb_id + "/" + App.ShowViewModel.currentSeason), AppUser.createJsonStringForAuthentication());
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
+                    episodes = (TraktEpisode[])ser.ReadObject(ms);
+                    showController.AddEpisodesToShowSeason(this.Show, episodes, App.ShowViewModel.currentSeason);
+                }
+            }
+
+            if ((DateTime.Now - episodes[0].DownloadTime).Days < 7)
+            {
+                foreach (TraktEpisode episodeIt in episodes)
+                {
+                    episodeIt.Tvdb = this.Show.tvdb_id;
+                    TraktEpisode episode = episodeIt;
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                    });
+                }
+
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
+                    App.ShowViewModel.RefreshEpisodes();
+                });
+            }
         }
 
         #endregion
@@ -192,7 +265,7 @@ namespace WPtrakt
 
                     String id;
                     NavigationContext.QueryString.TryGetValue("id", out id);
-                    App.ShowViewModel.LoadEpisodeData(id);
+                    LoadEpisodeData();
                 }
                 InitAppBarSeasons();
 
@@ -241,7 +314,7 @@ namespace WPtrakt
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             String id;
             NavigationContext.QueryString.TryGetValue("id", out id);
-            App.ShowViewModel.LoadEpisodeData(id);
+            LoadEpisodeData();
 
 
 
@@ -504,7 +577,7 @@ namespace WPtrakt
                 IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktEpisode.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + App.ShowViewModel.currentSeason + ".json");
                 String id;
                 NavigationContext.QueryString.TryGetValue("id", out id);
-                App.ShowViewModel.LoadEpisodeData(id);
+                LoadEpisodeData();
             }
             catch (WebException)
             {
@@ -541,7 +614,7 @@ namespace WPtrakt
         {
             String id;
             NavigationContext.QueryString.TryGetValue("id", out id);
-            App.ShowViewModel.LoadEpisodeData(id);
+            LoadEpisodeData();
         }
 
 
@@ -555,7 +628,7 @@ namespace WPtrakt
             String id;
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             NavigationContext.QueryString.TryGetValue("id", out id);
-            App.ShowViewModel.LoadEpisodeData(id);
+            LoadEpisodeData();
             InitAppBarSeasons();
         }
 
@@ -569,7 +642,7 @@ namespace WPtrakt
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             String id;
             NavigationContext.QueryString.TryGetValue("id", out id);
-            App.ShowViewModel.LoadEpisodeData(id);
+            LoadEpisodeData();
 
             InitAppBarSeasons();
         }
@@ -728,10 +801,9 @@ namespace WPtrakt
             lastModel = null; 
         }
 
-        private static void ReloadSeason()
+        private void ReloadSeason()
         {
-            StorageController.DeleteFile(TraktEpisode.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + App.ShowViewModel.currentSeason + ".json");
-            App.ShowViewModel.LoadEpisodeData(App.ShowViewModel.Tvdb);
+            LoadEpisodeData();
         }
 
         private void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
