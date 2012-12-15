@@ -103,6 +103,35 @@ namespace WPtrakt
 
         #endregion
 
+        #region Load Shouts
+
+        public async void LoadShoutData(String imdbId)
+        {
+            App.ShowViewModel.clearShouts();
+            App.ShowViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
+            try
+            {
+               TraktShout[] shouts = await this.showController.getShoutsForShow(this.Show.imdb_id);
+               App.ShowViewModel.clearShouts();
+              
+                foreach (TraktShout shout in shouts)
+                    App.ShowViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Show.imdb_id, SubItemText = shout.Shout });
+
+                if (App.ShowViewModel.ShoutItems.Count == 0)
+                    App.ShowViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+
+                App.ShowViewModel.ShoutsLoaded = true; ;
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }
+        }
+
+        #endregion
+
         #region Load Fanart
 
         private async void LoadBackgroundImage()
@@ -174,7 +203,7 @@ namespace WPtrakt
                 {
                     String id;
                     NavigationContext.QueryString.TryGetValue("id", out id);
-                    App.ShowViewModel.LoadShoutData(id);
+                    this.LoadShoutData(id);
                 }
                 InitAppBarShouts();
 
@@ -307,12 +336,12 @@ namespace WPtrakt
             appBar.Buttons.Add(AddtoWatchlist);
         }
 
-        void disabledAddtoWatchlist_Click(object sender, EventArgs e)
+        private async void disabledAddtoWatchlist_Click(object sender, EventArgs e)
         {
             try
             {
                 progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                this.showController.addShowToWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
+                await this.showController.addShowToWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
                 App.ShowViewModel.InWatchlist = true;
 
                 ToastNotification.ShowToast("Show", "Show added to watchlist.");
@@ -337,12 +366,12 @@ namespace WPtrakt
             appBar.Buttons.Add(removeFromWatchlist);
         }
 
-        private void removeFromWatchlist_Click(object sender, EventArgs e)
+        private async void removeFromWatchlist_Click(object sender, EventArgs e)
         {
             try
             {
                 progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                this.showController.removeShowFromWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
+                await this.showController.removeShowFromWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
                 ToastNotification.ShowToast("Show", "Show removed from watchlist.");
                 App.ShowViewModel.InWatchlist = false;
                 InitAppBarMain();
@@ -580,27 +609,29 @@ namespace WPtrakt
             appBar.Buttons.Add(sendButton);
         }
 
-        void sendButton_Click(object sender, EventArgs e)
+        private async void sendButton_Click(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty((ShoutText.Text)))
             {
-                var watchlistClient = new WebClient();
-                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-                ShoutAuth auth = new ShoutAuth();
+               try
+                {
+                    await this.showController.addShoutToShow(ShoutText.Text, this.Show.imdb_id, this.Show.Title, this.Show.year);
+                    ToastNotification.ShowToast("Show", "Shout posted.");
+                    ShoutText.Text = "";
 
-                auth.Tvdb = App.ShowViewModel.Tvdb;
-                auth.Title = App.ShowViewModel.Name;
-                auth.Year = Int16.Parse(App.ShowViewModel.Year);
-
-                auth.Shout = ShoutText.Text;
-                LastShout = auth.Shout;
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/show/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+                    this.Focus();
+                }
+                catch (WebException)
+                {
+                    ErrorManager.ShowConnectionErrorPopup();
+                }
+                catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             }
         }
 
         private void ShoutsIconButton_Click(object sender, EventArgs e)
         {
-            App.ShowViewModel.LoadShoutData(App.ShowViewModel.Tvdb);
+            this.LoadShoutData(App.ShowViewModel.Tvdb);
         }
 
         private String LastShout { get; set; }
@@ -781,8 +812,5 @@ namespace WPtrakt
         }
 
         #endregion
-
-
-
     }
 }

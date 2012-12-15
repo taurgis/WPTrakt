@@ -87,62 +87,58 @@ namespace WPtraktBase.Controller
             auth.Shows[0].year = year;
             return auth;
         }
-   
-      public async Task<Boolean> markShowAsSeen(String imdbID, String title, Int16 year)
-      {
-          WebClient watchlistClient = new WebClient();
-          WatchedEpisodeAuth auth = createWatchedAuth(imdbID, title, year);
 
-          String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-           
-          TraktShow show = showDao.getShowByIMDB(imdbID);
-          show.Watched = true;
-          showDao.saveShow(show);
+        public async Task<Boolean> markShowAsSeen(String imdbID, String title, Int16 year)
+        {
+            WebClient watchlistClient = new WebClient();
+            WatchedEpisodeAuth auth = createWatchedAuth(imdbID, title, year);
 
-          return true;
-      }
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
-      private static WatchedEpisodeAuth createWatchedAuth(String imdbID, String title, Int16 year)
-      {
-          WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
+            TraktShow show = showDao.getShowByIMDB(imdbID);
+            show.Watched = true;
+            showDao.saveShow(show);
 
+            return true;
+        }
 
-          auth.Imdb = imdbID;
-          auth.Title = title;
-          auth.Year = year;
-
-          return auth;
-      }
-
-        /*
-    
+        private static WatchedEpisodeAuth createWatchedAuth(String imdbID, String title, Int16 year)
+        {
+            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
 
 
- public async Task<TraktShout[]> getShoutsForMovie(String imdbID)
- {
-     var movieClient = new WebClient();
+            auth.Imdb = imdbID;
+            auth.Title = title;
+            auth.Year = year;
 
-     String jsonString = await movieClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbID), AppUser.createJsonStringForAuthentication());
+            return auth;
+        }
 
-     using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-     {
-         var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-         return (TraktShout[])ser.ReadObject(ms);
-     }
- }
+        public async Task<TraktShout[]> getShoutsForShow(String imdbID)
+        {
+            var showClient = new WebClient();
 
- public async void addShoutToMovie(String shout, String imdbID, String title, Int16 year)
- {
-     WebClient watchlistClient = new WebClient();
-      ShoutAuth auth = new ShoutAuth();
+            String jsonString = await showClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbID), AppUser.createJsonStringForAuthentication());
 
-     auth.Imdb = imdbID;
-     auth.Title = title;
-     auth.Year = year;
-     auth.Shout = shout;
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            {
+                var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
+                return (TraktShout[])ser.ReadObject(ms);
+            }
+        }
 
-    String jsonString  = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
- }
-  */
+        public async Task<Boolean> addShoutToShow(String shout, String imdbID, String title, Int16 year)
+        {
+            WebClient shoutClient = new WebClient();
+            ShoutAuth auth = new ShoutAuth();
+
+            auth.Imdb = imdbID;
+            auth.Title = title;
+            auth.Year = year;
+            auth.Shout = shout;
+
+            String jsonString = await shoutClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/shout/show/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+            return true;
+        }
     }
 }

@@ -94,9 +94,9 @@ namespace WPtrakt
             App.MovieViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
             try
             {
-                App.MovieViewModel.clearShouts();
-                TraktShout[] shouts = await this.movieController.getShoutsForMovie(this.Movie.imdb_id);
-               
+                 TraktShout[] shouts = await this.movieController.getShoutsForMovie(this.Movie.imdb_id);
+                 App.MovieViewModel.clearShouts();
+             
                 foreach (TraktShout shout in shouts)
                     App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Movie.imdb_id, SubItemText = shout.Shout });
            
@@ -474,13 +474,13 @@ namespace WPtrakt
             appBar.Buttons.Add(sendButton);
         }
 
-        void sendButton_Click(object sender, EventArgs e)
+        private async void sendButton_Click(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty((ShoutText.Text)))
             {
                 try
                 {
-                    this.movieController.addShoutToMovie(ShoutText.Text, this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
+                    await this.movieController.addShoutToMovie(ShoutText.Text, this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                     ToastNotification.ShowToast("Movie", "Shout posted.");
                     ShoutText.Text = "";
 

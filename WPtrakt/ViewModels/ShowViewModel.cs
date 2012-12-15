@@ -35,6 +35,21 @@ namespace WPtrakt
             this.EpisodeItems = new ObservableCollection<ListItemViewModel>();
         }
 
+        public void clearShouts()
+        {
+            this.ShoutItems = new ObservableCollection<ListItemViewModel>();
+            NotifyPropertyChanged("ShoutItems");
+        }
+
+        public void addShout(ListItemViewModel model)
+        {
+            if (this.ShoutItems == null)
+                this.ShoutItems = new ObservableCollection<ListItemViewModel>();
+
+            this.ShoutItems.Add(model);
+            NotifyPropertyChanged("ShoutItems");
+        }
+
         #region Getters/Setters
 
         public List<String> SeasonItems
@@ -568,47 +583,6 @@ namespace WPtrakt
                 }
                 NotifyPropertyChanged("EpisodeItems");
                 NotifyPropertyChanged("LoadingStatusSeason");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { ErrorManager.ShowConnectionErrorPopup(); }
-        }
-
-        public void LoadShoutData(String tvdb)
-        {
-            ShoutItems = new ObservableCollection<ListItemViewModel>();
-            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
-
-            NotifyPropertyChanged("ShoutItems");
-
-            var showClient = new WebClient();
-            this._tvdb = tvdb;
-            showClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadShoutStringCompleted);
-            showClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb));
-        }
-
-        void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                this.ShoutItems = new ObservableCollection<ListItemViewModel>();
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
-                    foreach (TraktShout shout in shouts)
-                        this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
-                }
-
-                if (this.ShoutItems.Count == 0)
-                    this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
-                ShoutsLoaded = true;
-                NotifyPropertyChanged("ShoutItems");
             }
             catch (WebException)
             {
