@@ -37,12 +37,11 @@ namespace WPtraktBase.Controller
         public void AddSeasonsToShow(TraktShow show, TraktSeason[] seasons)
         {
             show.Seasons = new System.Data.Linq.EntitySet<TraktSeason>();
-            showDao.saveSeasons(seasons, show.tvdb_id);
-
+           
             foreach (TraktSeason season in seasons)
             {
+                season.Tvdb = show.tvdb_id;
                 show.Seasons.Add(season);
-               
             }
 
             showDao.saveShow(show);
@@ -119,6 +118,33 @@ namespace WPtraktBase.Controller
             return auth;
         }
 
+        public async Task<TraktEpisode[]> getEpisodesOfSeason(TraktShow show, Int16 season)
+        {
+            TraktEpisode[] episodes = null;
+            TraktSeason currentSeason = getSeasonFromShow(show, season);
+            if (currentSeason.SeasonEpisodes.Count > 0)
+            {
+                episodes = new TraktEpisode[currentSeason.SeasonEpisodes.Count];
+                int i = 0;
+                foreach (TraktEpisode episode in currentSeason.SeasonEpisodes)
+                    episodes[i++] = episode;
+            }
+            else
+            {
+                var showClient = new WebClient();
+                String jsonString = await showClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + show.tvdb_id + "/" + season), AppUser.createJsonStringForAuthentication());
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
+                    episodes = (TraktEpisode[])ser.ReadObject(ms);
+                    AddEpisodesToShowSeason(show, episodes, season);
+                }
+            }
+
+            return episodes;
+        }
+
         public async Task<Boolean> markShowAsSeen(String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
@@ -132,6 +158,29 @@ namespace WPtraktBase.Controller
 
             return true;
         }
+
+        public async Task<Boolean> markShowSeasonAsSeen(TraktShow show, Int16 season)
+        {
+            var watchlistClient = new WebClient();
+            WatchedSeasonAuth auth = new WatchedSeasonAuth();
+
+            auth.Imdb = show.imdb_id;
+            auth.Title = show.Title;
+            auth.Year = show.year;
+            auth.Season = season;
+
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/season/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedSeasonAuth), auth));
+
+            foreach (TraktEpisode episode in this.getSeasonFromShow(show, season).SeasonEpisodes)
+            {
+                episode.Watched = true;
+            }
+
+            showDao.saveShow(show);
+
+            return true;
+        }
+
 
         private static WatchedEpisodeAuth createWatchedAuth(String imdbID, String title, Int16 year)
         {

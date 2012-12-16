@@ -124,54 +124,28 @@ namespace WPtrakt
 
                         episodesWorker.RunWorkerAsync();
                 }
-
-
-
             }
         }
 
         private async void episodesWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            TraktEpisode[] episodes = null;
-            TraktSeason currentSeason =  this.showController.getSeasonFromShow(this.Show, App.ShowViewModel.currentSeason);
-            if (currentSeason.SeasonEpisodes.Count > 0)
-            {
-                episodes = new TraktEpisode[currentSeason.SeasonEpisodes.Count];
-                int i = 0;
-                foreach (TraktEpisode episode in currentSeason.SeasonEpisodes)
-                    episodes[i++] = episode;
-            }
-            else
-            {
-                var showClient = new WebClient();
-                String jsonString = await showClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + this.Show.tvdb_id + "/" + App.ShowViewModel.currentSeason), AppUser.createJsonStringForAuthentication());
+            TraktEpisode[] episodes = await this.showController.getEpisodesOfSeason(this.Show, App.ShowViewModel.currentSeason);
 
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
-                    episodes = (TraktEpisode[])ser.ReadObject(ms);
-                    showController.AddEpisodesToShowSeason(this.Show, episodes, App.ShowViewModel.currentSeason);
-                }
-            }
-
-            if ((DateTime.Now - episodes[0].DownloadTime).Days < 7)
+            foreach (TraktEpisode episodeIt in episodes)
             {
-                foreach (TraktEpisode episodeIt in episodes)
-                {
-                    episodeIt.Tvdb = this.Show.tvdb_id;
-                    TraktEpisode episode = episodeIt;
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
-                    });
-                }
-
+                episodeIt.Tvdb = this.Show.tvdb_id;
+                TraktEpisode episode = episodeIt;
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
-                    App.ShowViewModel.RefreshEpisodes();
+                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
                 });
             }
+
+            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
+                App.ShowViewModel.RefreshEpisodes();
+            });
         }
 
         #endregion
@@ -285,7 +259,6 @@ namespace WPtrakt
 
         #region Taps
 
-
         private void ImdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             WebBrowserTask task = new WebBrowserTask();
@@ -315,8 +288,6 @@ namespace WPtrakt
             String id;
             NavigationContext.QueryString.TryGetValue("id", out id);
             LoadEpisodeData();
-
-
 
             EpisodeGrid.Visibility = System.Windows.Visibility.Visible;
             SeasonGrid.Visibility = System.Windows.Visibility.Collapsed;
@@ -548,35 +519,19 @@ namespace WPtrakt
         {
             ApplicationBarMenuItem watchedMenuItem = new ApplicationBarMenuItem();
             watchedMenuItem.Text = "Mark season as seen.";
-            watchedMenuItem.Click += new EventHandler(SeasonWatchedIconButton_Click);
 
+            watchedMenuItem.Click += new EventHandler(SeasonWatchedIconButton_Click);
+             
             appBar.MenuItems.Add(watchedMenuItem);
         }
 
-        private void SeasonWatchedIconButton_Click(object sender, EventArgs e)
-        {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeasonSeenStringCompleted);
-            WatchedSeasonAuth auth = new WatchedSeasonAuth();
-
-            auth.Imdb = App.ShowViewModel.Imdb;
-            auth.Title = App.ShowViewModel.Name;
-            auth.Year = Int16.Parse(App.ShowViewModel.Year);
-            auth.Season = App.ShowViewModel.currentSeason;
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/season/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedSeasonAuth), auth));
-        }
-
-        void client_UploadSeasonSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        private async void SeasonWatchedIconButton_Click(object sender, EventArgs e)
         {
             try
             {
-                String jsonString = e.Result;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                await this.showController.markShowSeasonAsSeen(this.Show, App.ShowViewModel.currentSeason);
                 ToastNotification.ShowToast("Show", "Season marked as watched.");
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktEpisode.getFolderStatic() + "/" + App.ShowViewModel.Tvdb + App.ShowViewModel.currentSeason + ".json");
-                String id;
-                NavigationContext.QueryString.TryGetValue("id", out id);
                 LoadEpisodeData();
             }
             catch (WebException)
@@ -600,7 +555,7 @@ namespace WPtrakt
 
         void refreshButton_Click(object sender, EventArgs e)
         {
-            ReloadSeason();
+            LoadEpisodeData();
         }
 
         void showSeasons_Click(object sender, EventArgs e)
@@ -799,11 +754,6 @@ namespace WPtrakt
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             lastModel = null; 
-        }
-
-        private void ReloadSeason()
-        {
-            LoadEpisodeData();
         }
 
         private void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
