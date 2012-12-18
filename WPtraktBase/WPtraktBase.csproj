@@ -70,6 +70,7 @@
     <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controller\EpisodeController.cs" />
     <Compile Include="Controller\ShowController.cs" />
     <Compile Include="Controller\MovieController.cs" />
     <Compile Include="DAO\EpisodeDao.cs" />

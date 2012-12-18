@@ -48,7 +48,7 @@ namespace WPtraktBase.DAO
             }
         }
 
-        public async Task<TraktEpisode> getShowByTVDB(String TVDB, String season, String episode)
+        public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String TVDB, String season, String episode)
         {
             if (episodeAvailableInDatabaseByTVDBAndSeasonInfo(TVDB, season, episode))
             {

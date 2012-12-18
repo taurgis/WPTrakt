@@ -15,20 +15,22 @@ using WPtraktBase.Model.Trakt;
 
 namespace WPtraktBase.Controller
 {
-    public class MovieController
+    public class EpisodeController
     {
-        private MovieDao movieDao;
+        private EpisodeDao episodeDao;
 
-        public MovieController()
+        public EpisodeController()
         {
-            this.episodeDao = MovieDao.Instance;
+            this.episodeDao = EpisodeDao.Instance;
         }
 
-        public async Task<TraktMovie> getMovieByImdbId(String imdbId)
+        public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String imdbId, String season, String episode)
         {
-            return await episodeDao.getMovieByIMDB(imdbId);
+            return await episodeDao.getEpisodeByTvdbAndSeasonInfo(imdbId, season, episode);
         }
 
+
+        /*
         public async Task<Boolean> removeMovieFromWatchlist(String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
@@ -161,5 +163,6 @@ namespace WPtraktBase.Controller
            String jsonString  = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
            return true;
         }
+         */
     }
 }
