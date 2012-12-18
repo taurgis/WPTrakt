@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using WPtrakt.Model.Trakt;
 using WPtraktBase.Model.Trakt;
 
-namespace WPtrakt.Model.Trakt
+namespace WPtraktBase.Model.Trakt
 {
     [DataContract]
     public class TraktWatched : TraktObject
