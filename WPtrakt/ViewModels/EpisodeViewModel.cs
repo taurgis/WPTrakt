@@ -362,19 +362,16 @@ namespace WPtrakt
         {
             get
             {
-                if (Fanart == null)
-                    return null;
 
-                if (_backgroundImage == null)
-                {
-                    LoadBackgroundImage();
+                return _backgroundImage;
 
-                    return _backgroundImage;
-                }
-                else
-                {
-                    return _backgroundImage;
-                }
+            }
+            set
+            {
+
+                _backgroundImage = value;
+                NotifyPropertyChanged("BackgroundImage");
+
             }
         }
 
@@ -383,19 +380,16 @@ namespace WPtrakt
         {
             get
             {
-                if (Screen == null)
-                    return null;
 
-                if (_screenImage == null)
-                {
-                    LoadScreenImage();
+                return _screenImage;
 
-                    return _screenImage;
-                }
-                else
-                {
-                    return _screenImage;
-                }
+            }
+            set
+            {
+
+                _screenImage = value;
+                NotifyPropertyChanged("ScreenImage");
+
             }
         }
 
@@ -451,61 +445,7 @@ namespace WPtrakt
         }
 
         #endregion
-        /*
-        public void LoadData(String tvdb, String season, String episode)
-        {
-            this._tvdb = tvdb;
-            this._season = season;
-            this._number = episode;
-            String fileName = TraktWatched.getFolderStatic() + "/" + tvdb + season + episode + ".json";
-
-            if (StorageController.doesFileExist(fileName))
-            {
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(episodeworker_DoWork);
-
-                worker.RunWorkerAsync();
-            }
-            else
-            {
-                CallEpisodeService(tvdb, season, episode);
-            }
-        }
-
        
-        private void CallEpisodeService(String tvdb, String season, String episode)
-        {
-            var movieClient = new WebClient();
-            movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
-        }
-
-        void client_UploadEpisodeStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktWatched));
-                    TraktWatched episode = (TraktWatched)ser.ReadObject(ms);
-                    StorageController.saveObject(episode, typeof(TraktWatched));
-                    UpdateEpisodeView(episode);
-                    IsDataLoaded = true;
-                    ms.Close();
-                }
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-        }
-        */
         public void UpdateEpisodeView(TraktEpisode episode, TraktShow show)
         {
             this.ShowName = episode.Title;
@@ -536,77 +476,9 @@ namespace WPtrakt
         }
 
         /*
-        private void LoadBackgroundImage()
-        {
-            String fileName = this._tvdb + "background" + ".jpg";
+       
 
-            if (StorageController.doesFileExist(fileName))
-            {
-                _backgroundImage = ImageController.getImageFromStorage(fileName);
-                NotifyPropertyChanged("BackgroundImage");
-            }
-            else
-            {
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri(Fanart));
-                request.BeginGetResponse(new AsyncCallback(request_OpenReadFanartCompleted), new object[] { request });
-            }
-        }
-
-        void request_OpenReadFanartCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        _backgroundImage = ImageController.saveImage(_tvdb + "background.jpg", str, 800, 450, 100);
-                        NotifyPropertyChanged("BackgroundImage");
-                    }));
-                }
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException) {}
-
-        }
-
-        private void LoadScreenImage()
-        {
-            String fileName = _imdb + _season + _number + "screenlarge" + ".jpg";
-
-            if (StorageController.doesFileExist(fileName))
-            {
-                _screenImage = ImageController.getImageFromStorage(fileName);
-                NotifyPropertyChanged("ScreenImage");
-            }
-            else
-            {
-                WebClient client = new WebClient();
-                client.OpenReadCompleted += new OpenReadCompletedEventHandler(client_OpenReadScreenCompleted);
-                client.OpenReadAsync(new Uri(Screen));
-
-            }
-        }
-
-        void client_OpenReadScreenCompleted(object sender, OpenReadCompletedEventArgs e)
-        {
-            try
-            {
-                _screenImage = ImageController.saveImage(_imdb + _season + _number + "screenlarge.jpg", e.Result, 218, 90);
-                NotifyPropertyChanged("ScreenImage");
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException) { }
-        }
+        
 
         public void LoadShoutData(String tvdb, String season, String episode)
         {

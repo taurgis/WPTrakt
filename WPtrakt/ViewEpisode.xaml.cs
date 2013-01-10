@@ -15,6 +15,7 @@ using WPtrakt.Model.Trakt;
 using System.ComponentModel;
 using WPtraktBase.Model.Trakt;
 using WPtraktBase.Controller;
+using System.IO;
 
 namespace WPtrakt
 {
@@ -50,16 +51,14 @@ namespace WPtrakt
         private async void episodeworker_DoWork(object sender, DoWorkEventArgs e)
         {
             String id;
-            String tvdbId;
             String season;
             String episodeNr;
             NavigationContext.QueryString.TryGetValue("id", out id);
-            NavigationContext.QueryString.TryGetValue("tvdbId", out tvdbId);
             NavigationContext.QueryString.TryGetValue("season", out season);
             NavigationContext.QueryString.TryGetValue("episode", out episodeNr);
 
             TraktEpisode episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
-            TraktShow show = await showController.getShowByTVDBID(tvdbId);
+            TraktShow show = await showController.getShowByTVDBID(id);
 
             DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
             airTime = airTime.AddSeconds(episode.FirstAired);
@@ -69,10 +68,65 @@ namespace WPtrakt
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
             {
                 App.EpisodeViewModel.UpdateEpisodeView(episode, show);
+                LoadBackgroundImage(show);
             });
         }
 
+        private async void LoadBackgroundImage(TraktShow show)
+        {
+            String fileName = show.tvdb_id + "background" + ".jpg";
 
+            if (StorageController.doesFileExist(fileName))
+            {
+                App.EpisodeViewModel.BackgroundImage = ImageController.getImageFromStorage(fileName);
+            }
+            else
+            {
+                HttpWebRequest request;
+
+                request = (HttpWebRequest)WebRequest.Create(new Uri(show.Images.Fanart));
+                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                System.Net.HttpStatusCode status = webResponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = webResponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        App.EpisodeViewModel.BackgroundImage = ImageController.saveImage(show.tvdb_id + "background.jpg", str, 800, 450, 100);
+                    }));
+                }
+            }
+        }
+
+        private async void LoadScreenImage(TraktEpisode episode)
+        {
+            String fileName = episode.Tvdb + episode.Season + episode.Number + "screenlarge" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName))
+            {
+                App.EpisodeViewModel.ScreenImage = ImageController.getImageFromStorage(fileName);
+            }
+            else
+            {
+                HttpWebRequest request;
+
+                request = (HttpWebRequest)WebRequest.Create(new Uri(episode.Images.Screen));
+                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                System.Net.HttpStatusCode status = webResponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = webResponse.GetResponseStream();
+
+                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        App.EpisodeViewModel.ScreenImage = ImageController.saveImage(episode.Tvdb + episode.Season + episode.Number + "screenlarge" + ".jpg", str, 318, 90);
+                    }));
+                }
+
+            }
+        }
+      
         #endregion
 
         private void EpisodePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -87,7 +141,7 @@ namespace WPtrakt
                     NavigationContext.QueryString.TryGetValue("id", out id);
                     NavigationContext.QueryString.TryGetValue("season", out season);
                     NavigationContext.QueryString.TryGetValue("episode", out episode);
-                    App.EpisodeViewModel.LoadShoutData(id, season, episode);
+                    //App.EpisodeViewModel.LoadShoutData(id, season, episode);
                 }
 
                 InitAppBarShouts();
