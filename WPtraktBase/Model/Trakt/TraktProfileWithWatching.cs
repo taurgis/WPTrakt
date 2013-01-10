@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using WPtraktBase.Model.Trakt;
 
 
 namespace WPtrakt.Model.Trakt

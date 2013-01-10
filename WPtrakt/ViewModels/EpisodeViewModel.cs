@@ -475,54 +475,20 @@ namespace WPtrakt
             NotifyPropertyChanged("DetailVisibility");
         }
 
-        /*
-       
-
-        
-
-        public void LoadShoutData(String tvdb, String season, String episode)
+        public void clearShouts()
         {
-
-            ShoutItems = new ObservableCollection<ListItemViewModel>();
-            this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
-
+            this.ShoutItems = new ObservableCollection<ListItemViewModel>();
             NotifyPropertyChanged("ShoutItems");
-
-            var movieClient = new WebClient();
-
-            this._tvdb = tvdb;
-            movieClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(client_DownloadShoutStringCompleted);
-            movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + season + "/" + episode));
         }
 
-        void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        public void addShout(ListItemViewModel model)
         {
-            try
-            {
-                String jsonString = e.Result;
+            if (this.ShoutItems == null)
                 this.ShoutItems = new ObservableCollection<ListItemViewModel>();
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
-                    foreach (TraktShout shout in shouts)
-                    {
-                        this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
-                    }
 
-                    ms.Close();
-                }
-
-                if (this.ShoutItems.Count == 0)
-                    this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
-                ShoutsLoading = true;
-                NotifyPropertyChanged("ShoutItems");
-            }
-            catch (WebException) { ErrorManager.ShowConnectionErrorPopup(); }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
+            this.ShoutItems.Add(model);
+            NotifyPropertyChanged("ShoutItems");
         }
-        */
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
         {

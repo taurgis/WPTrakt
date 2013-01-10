@@ -16,6 +16,7 @@ using System.ComponentModel;
 using WPtraktBase.Model.Trakt;
 using WPtraktBase.Controller;
 using System.IO;
+using System.Collections.ObjectModel;
 
 namespace WPtrakt
 {
@@ -42,20 +43,29 @@ namespace WPtrakt
             worker.WorkerReportsProgress = false;
             worker.WorkerSupportsCancellation = false;
             worker.DoWork += new DoWorkEventHandler(episodeworker_DoWork);
-
-            worker.RunWorkerAsync();
-
-            LayoutRoot.Opacity = 1;
-        }
-
-        private async void episodeworker_DoWork(object sender, DoWorkEventArgs e)
-        {
+           
             String id;
             String season;
             String episodeNr;
             NavigationContext.QueryString.TryGetValue("id", out id);
             NavigationContext.QueryString.TryGetValue("season", out season);
             NavigationContext.QueryString.TryGetValue("episode", out episodeNr);
+            String[] paramsString = new String[3];
+
+            paramsString[0] = id;
+            paramsString[1] = season;
+            paramsString[2] = episodeNr;
+
+            worker.RunWorkerAsync(paramsString);
+
+            LayoutRoot.Opacity = 1;
+        }
+
+        private async void episodeworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String id = ((String[])e.Argument)[0];
+            String season = ((String[])e.Argument)[1];
+            String episodeNr = ((String[])e.Argument)[2];
 
             TraktEpisode episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
             TraktShow show = await showController.getShowByTVDBID(id);
@@ -69,6 +79,7 @@ namespace WPtrakt
             {
                 App.EpisodeViewModel.UpdateEpisodeView(episode, show);
                 LoadBackgroundImage(show);
+                LoadScreenImage(episode);
             });
         }
 
@@ -129,6 +140,67 @@ namespace WPtrakt
       
         #endregion
 
+        #region Load shouts
+
+
+        
+        public async void LoadShoutData(String tvdb, String season, String episode)
+        {
+             App.EpisodeViewModel.clearShouts();
+            App.EpisodeViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
+            try
+            {
+                 TraktShout[] shouts = await this.episodeController.getShoutsForEpisode(tvdb,season,episode);
+                 App.MovieViewModel.clearShouts();
+             
+                foreach (TraktShout shout in shouts)
+                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, SubItemText = shout.Shout });
+           
+                if (App.MovieViewModel.ShoutItems.Count == 0)
+                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+
+                App.MovieViewModel.ShoutsLoading = false;
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException)
+            { ErrorManager.ShowConnectionErrorPopup(); }      
+        }
+        /*
+        void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+         * 
+            movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + season + "/" + episode));
+            try
+            {
+                String jsonString = e.Result;
+                this.ShoutItems = new ObservableCollection<ListItemViewModel>();
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
+                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
+                    foreach (TraktShout shout in shouts)
+                    {
+                        this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
+                    }
+
+                    ms.Close();
+                }
+
+                if (this.ShoutItems.Count == 0)
+                    this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
+                ShoutsLoading = true;
+                NotifyPropertyChanged("ShoutItems");
+            }
+            catch (WebException) { ErrorManager.ShowConnectionErrorPopup(); }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+        }*/
+
+        #endregion
+
         private void EpisodePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (this.EpisodePanorama.SelectedIndex == 1)
@@ -141,7 +213,7 @@ namespace WPtrakt
                     NavigationContext.QueryString.TryGetValue("id", out id);
                     NavigationContext.QueryString.TryGetValue("season", out season);
                     NavigationContext.QueryString.TryGetValue("episode", out episode);
-                    //App.EpisodeViewModel.LoadShoutData(id, season, episode);
+                    LoadShoutData(id, season, episode);
                 }
 
                 InitAppBarShouts();
@@ -507,7 +579,7 @@ namespace WPtrakt
 
         private void ShoutsIconButton_Click(object sender, EventArgs e)
         {
-            App.EpisodeViewModel.LoadShoutData(App.EpisodeViewModel.Tvdb, App.EpisodeViewModel.Season, App.EpisodeViewModel.Number);
+          LoadShoutData(App.EpisodeViewModel.Tvdb, App.EpisodeViewModel.Season, App.EpisodeViewModel.Number);
         }
 
         private void CreateSendButton(ApplicationBar appBar)

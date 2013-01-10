@@ -21,12 +21,12 @@ namespace WPtraktBase.Controller
 
         public MovieController()
         {
-            this.episodeDao = MovieDao.Instance;
+            this.movieDao = MovieDao.Instance;
         }
 
         public async Task<TraktMovie> getMovieByImdbId(String imdbId)
         {
-            return await episodeDao.getMovieByIMDB(imdbId);
+            return await movieDao.getMovieByIMDB(imdbId);
         }
 
         public async Task<Boolean> removeMovieFromWatchlist(String imdbID, String title, Int16 year)
@@ -37,9 +37,9 @@ namespace WPtraktBase.Controller
 
             String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
 
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
+            TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.InWatchlist = false;
-            episodeDao.saveMovie(movie);
+            movieDao.saveMovie(movie);
 
             return true;
         }
@@ -51,10 +51,10 @@ namespace WPtraktBase.Controller
             WatchlistAuth auth = CreateWatchListAuth(imdbID, title, year);
 
             String jsonString  = await  watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
-           
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
+
+            TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.InWatchlist = true;
-            episodeDao.saveMovie(movie);
+            movieDao.saveMovie(movie);
 
             return true;
         }
@@ -98,10 +98,10 @@ namespace WPtraktBase.Controller
             WatchedAuth auth = createWatchedAuth(imdbID, title, year);
 
             String jsonString =  await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-           
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
+
+            TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.Watched = true;
-            episodeDao.saveMovie(movie);
+            movieDao.saveMovie(movie);
 
             return true;
         }
@@ -112,10 +112,10 @@ namespace WPtraktBase.Controller
             WatchedAuth auth = createWatchedAuth(imdbID, title, year);
 
             String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-            
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
+
+            TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.Watched = false;
-            episodeDao.saveMovie(movie);
+            movieDao.saveMovie(movie);
 
             return true;
         }

@@ -137,19 +137,7 @@ namespace WPtraktBase.Controller
             return auth;
         }
 
-        public async Task<TraktShout[]> getShoutsForMovie(String imdbID)
-        {
-            var movieClient = new WebClient();
-
-            String jsonString = await movieClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbID), AppUser.createJsonStringForAuthentication());
-
-            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-            {
-                var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                return (TraktShout[])ser.ReadObject(ms);
-            }
-        }
-
+        
         public async Task<Boolean> addShoutToMovie(String shout, String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();
@@ -164,5 +152,18 @@ namespace WPtraktBase.Controller
            return true;
         }
          */
+        public async Task<TraktShout[]> getShoutsForEpisode(String tvdb, String season, String episode)
+        {
+            var episodeClient = new WebClient();
+
+            String jsonString = await episodeClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
+
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            {
+                var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
+                return (TraktShout[])ser.ReadObject(ms);
+            }
+        }
+
     }
 }
