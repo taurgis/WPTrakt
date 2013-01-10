@@ -12,36 +12,74 @@ using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt.Request;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using System.ComponentModel;
+using WPtraktBase.Model.Trakt;
+using WPtraktBase.Controller;
 
 namespace WPtrakt
 {
     public partial class ViewEpisode : PhoneApplicationPage
     {
+        private EpisodeController episodeController;
+        private ShowController showController;
+
         public ViewEpisode()
         {
             InitializeComponent();
     
             DataContext = App.EpisodeViewModel;
+            this.episodeController = new EpisodeController();
+            this.showController = new ShowController();
             this.Loaded += new RoutedEventHandler(ViewEpisode_Loaded);
         }
 
+        #region Load Episode
+
         private void ViewEpisode_Loaded(object sender, RoutedEventArgs e)
         {
-            String id;
-            String season;
-            String episode;
-            NavigationContext.QueryString.TryGetValue("id", out id);
-            NavigationContext.QueryString.TryGetValue("season", out season);
-            NavigationContext.QueryString.TryGetValue("episode", out episode);
-            App.EpisodeViewModel.LoadData(id, season, episode);
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.WorkerReportsProgress = false;
+            worker.WorkerSupportsCancellation = false;
+            worker.DoWork += new DoWorkEventHandler(episodeworker_DoWork);
+
+            worker.RunWorkerAsync();
+
             LayoutRoot.Opacity = 1;
         }
+
+        private async void episodeworker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            String id;
+            String tvdbId;
+            String season;
+            String episodeNr;
+            NavigationContext.QueryString.TryGetValue("id", out id);
+            NavigationContext.QueryString.TryGetValue("tvdbId", out tvdbId);
+            NavigationContext.QueryString.TryGetValue("season", out season);
+            NavigationContext.QueryString.TryGetValue("episode", out episodeNr);
+
+            TraktEpisode episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
+            TraktShow show = await showController.getShowByTVDBID(tvdbId);
+
+            DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+            airTime = airTime.AddSeconds(episode.FirstAired);
+
+            int daysSinceRelease = (DateTime.Now - airTime).Days;
+
+            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+            {
+                App.EpisodeViewModel.UpdateEpisodeView(episode, show);
+            });
+        }
+
+
+        #endregion
 
         private void EpisodePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (this.EpisodePanorama.SelectedIndex == 1)
             {
-                if (!App.EpisodeViewModel.ShoutsLoaded)
+                if (!App.EpisodeViewModel.ShoutsLoading)
                 {
                     String id;
                     String season;

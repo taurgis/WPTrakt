@@ -11,17 +11,18 @@ using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
     public class EpisodeViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
-        public Boolean ShoutsLoaded { get; set; }
+        public Boolean ShoutsLoading { get; set; }
 
         public EpisodeViewModel()
         {
-            ShoutsLoaded = false;
+            ShoutsLoading = false;
             ShoutItems = new ObservableCollection<ListItemViewModel>();
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
         }
@@ -450,7 +451,7 @@ namespace WPtrakt
         }
 
         #endregion
-
+        /*
         public void LoadData(String tvdb, String season, String episode)
         {
             this._tvdb = tvdb;
@@ -473,41 +474,7 @@ namespace WPtrakt
             }
         }
 
-        void episodeworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            String fileName = TraktWatched.getFolderStatic() + "/" + _tvdb + _season + _number + ".json";
-            TraktWatched episodeCache = (TraktWatched)StorageController.LoadObject(fileName, typeof(TraktWatched));
-
-            int cacheLength = 1;
-
-            DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
-            airTime = airTime.AddSeconds(episodeCache.Episode.FirstAired);
-
-            int daysSinceRelease = (DateTime.Now - airTime).Days;
-
-            if (daysSinceRelease > 100)
-                cacheLength = 30;
-            else if (daysSinceRelease > 7)
-                cacheLength = 7;
-            else if (daysSinceRelease < 1)
-                cacheLength = 0;
-
-            if ((DateTime.Now - episodeCache.DownloadTime).Days < cacheLength)
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    UpdateEpisodeView(episodeCache);
-                });
-            }
-            else
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    CallEpisodeService(_tvdb, _season, _number);
-                });
-            }
-        }
-
+       
         private void CallEpisodeService(String tvdb, String season, String episode)
         {
             var movieClient = new WebClient();
@@ -538,39 +505,37 @@ namespace WPtrakt
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
         }
-
-        private void UpdateEpisodeView(TraktWatched episode)
+        */
+        public void UpdateEpisodeView(TraktEpisode episode, TraktShow show)
         {
-            this.ShowName = episode.Show.Title;
-            this.ShowYear = episode.Show.year;
-            this.Name = episode.Episode.Title;
-            this.Fanart = episode.Show.Images.Fanart;
-            this.Overview = episode.Episode.Overview;
-            this.Season = episode.Episode.Season;
-            this.Number = episode.Episode.Number;
-            this.Screen = episode.Episode.Images.Screen;
-            this.Imdb = episode.Show.imdb_id;
-            this._airDate = episode.Episode.FirstAired;
-            this.Watched = episode.Episode.Watched;
-            this.InWatchlist = episode.Episode.InWatchlist;
-            this.Year = episode.Show.year;
+            this.ShowName = episode.Title;
+            this.ShowYear = show.year;
+            this.Name = episode.Title;
+            this.Fanart = show.Images.Fanart;
+            this.Overview = episode.Overview;
+            this.Season = episode.Season;
+            this.Number = episode.Number;
+            this.Screen = episode.Images.Screen;
+            this.Imdb = show.imdb_id;
+            this._airDate = episode.FirstAired;
+            this.Watched = episode.Watched;
+            this.InWatchlist = episode.InWatchlist;
+            this.Year = show.year;
 
-            if (episode.Episode.Ratings != null)
+            if (episode.Ratings != null)
             {
-                this.Rating = episode.Episode.Ratings.Percentage;
-                this.Votes = episode.Episode.Ratings.Votes;
-                this.MyRating = episode.Episode.MyRating;
-                this.MyRatingAdvanced = episode.Episode.MyRatingAdvanced;
+                this.Rating = episode.Ratings.Percentage;
+                this.Votes = episode.Ratings.Votes;
+                this.MyRating = episode.MyRating;
+                this.MyRatingAdvanced = episode.MyRatingAdvanced;
                 NotifyPropertyChanged("RatingString");
             }
 
             NotifyPropertyChanged("LoadingStatusEpisode");
             NotifyPropertyChanged("DetailVisibility");
-
-            LoadBackgroundImage();
-            LoadScreenImage();
         }
 
+        /*
         private void LoadBackgroundImage()
         {
             String fileName = this._tvdb + "background" + ".jpg";
@@ -678,14 +643,14 @@ namespace WPtrakt
 
                 if (this.ShoutItems.Count == 0)
                     this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
-                ShoutsLoaded = true;
+                ShoutsLoading = true;
                 NotifyPropertyChanged("ShoutItems");
             }
             catch (WebException) { ErrorManager.ShowConnectionErrorPopup(); }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
         }
-
+        */
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
         {
