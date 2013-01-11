@@ -22,7 +22,7 @@ namespace WPtraktBase.Model.Trakt
         public int SeasonID { get; set; }
 
         [Column]
-        [DataMember(Name = "tvdb")]
+        [DataMember(Name = "tvdb_id")]
         public String Tvdb;
 
         [Column]

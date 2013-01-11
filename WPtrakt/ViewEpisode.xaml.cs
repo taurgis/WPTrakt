@@ -273,7 +273,7 @@ namespace WPtrakt
             progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             try
             {
-                await episodeController.addMovieToWatchlist(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
+                await episodeController.addEpisodeToWatchlist(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
                 App.EpisodeViewModel.InWatchlist = true;
                 InitAppBar();
             }
