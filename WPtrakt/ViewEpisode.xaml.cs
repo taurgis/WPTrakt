@@ -24,6 +24,8 @@ namespace WPtrakt
     {
         private EpisodeController episodeController;
         private ShowController showController;
+        private TraktEpisode episode;
+        private TraktShow show;
 
         public ViewEpisode()
         {
@@ -34,6 +36,31 @@ namespace WPtrakt
             this.showController = new ShowController();
             this.Loaded += new RoutedEventHandler(ViewEpisode_Loaded);
         }
+
+        private void EpisodePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (this.EpisodePanorama.SelectedIndex == 1)
+            {
+                if (!App.EpisodeViewModel.ShoutsLoading)
+                {
+                    String id;
+                    String season;
+                    String episode;
+                    NavigationContext.QueryString.TryGetValue("id", out id);
+                    NavigationContext.QueryString.TryGetValue("season", out season);
+                    NavigationContext.QueryString.TryGetValue("episode", out episode);
+                    LoadShoutData(id, season, episode);
+                }
+
+                InitAppBarShouts();
+
+            }
+            else
+            {
+                InitAppBar();
+            }
+        }
+
 
         #region Load Episode
 
@@ -67,8 +94,8 @@ namespace WPtrakt
             String season = ((String[])e.Argument)[1];
             String episodeNr = ((String[])e.Argument)[2];
 
-            TraktEpisode episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
-            TraktShow show = await showController.getShowByTVDBID(id);
+            episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
+            show = await showController.getShowByTVDBID(id);
 
             DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
             airTime = airTime.AddSeconds(episode.FirstAired);
@@ -82,6 +109,10 @@ namespace WPtrakt
                 LoadScreenImage(episode);
             });
         }
+
+        #endregion
+
+        #region Load Background
 
         private async void LoadBackgroundImage(TraktShow show)
         {
@@ -109,6 +140,10 @@ namespace WPtrakt
                 }
             }
         }
+
+        #endregion
+
+        #region Load Screen Image
 
         private async void LoadScreenImage(TraktEpisode episode)
         {
@@ -142,8 +177,6 @@ namespace WPtrakt
 
         #region Load shouts
 
-
-        
         public async void LoadShoutData(String tvdb, String season, String episode)
         {
              App.EpisodeViewModel.clearShouts();
@@ -168,62 +201,9 @@ namespace WPtrakt
             catch (TargetInvocationException)
             { ErrorManager.ShowConnectionErrorPopup(); }      
         }
-        /*
-        void client_DownloadShoutStringCompleted(object sender, DownloadStringCompletedEventArgs e)
-        {
-         * 
-            movieClient.DownloadStringAsync(new Uri("http://api.trakt.tv/show/episode/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + season + "/" + episode));
-            try
-            {
-                String jsonString = e.Result;
-                this.ShoutItems = new ObservableCollection<ListItemViewModel>();
-                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                {
-                    var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                    TraktShout[] shouts = (TraktShout[])ser.ReadObject(ms);
-                    foreach (TraktShout shout in shouts)
-                    {
-                        this.ShoutItems.Add(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = _imdb, SubItemText = shout.Shout });
-                    }
-
-                    ms.Close();
-                }
-
-                if (this.ShoutItems.Count == 0)
-                    this.ShoutItems.Add(new ListItemViewModel() { Name = "No shouts" });
-                ShoutsLoading = true;
-                NotifyPropertyChanged("ShoutItems");
-            }
-            catch (WebException) { ErrorManager.ShowConnectionErrorPopup(); }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-        }*/
-
+     
         #endregion
 
-        private void EpisodePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (this.EpisodePanorama.SelectedIndex == 1)
-            {
-                if (!App.EpisodeViewModel.ShoutsLoading)
-                {
-                    String id;
-                    String season;
-                    String episode;
-                    NavigationContext.QueryString.TryGetValue("id", out id);
-                    NavigationContext.QueryString.TryGetValue("season", out season);
-                    NavigationContext.QueryString.TryGetValue("episode", out episode);
-                    LoadShoutData(id, season, episode);
-                }
-
-                InitAppBarShouts();
-
-            }
-            else
-            {
-                InitAppBar();
-            }
-        }
 
         #region Taps
 
@@ -274,6 +254,106 @@ namespace WPtrakt
             this.ApplicationBar = appBar;
         }
 
+        #region Watchlist
+
+        private void CreateAddToWatchlist(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton enabledAddtoWatchlist = new ApplicationBarIconButton();
+
+            enabledAddtoWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.video.rest.png", UriKind.Relative));
+            enabledAddtoWatchlist.IsEnabled = true;
+            enabledAddtoWatchlist.Click += new EventHandler(AddToWatchList_Click);
+            enabledAddtoWatchlist.Text = "Watchlist +";
+            appBar.Buttons.Add(enabledAddtoWatchlist);
+        }
+
+        private async void AddToWatchList_Click(object sender, EventArgs e)
+        {
+
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            try
+            {
+                await episodeController.addMovieToWatchlist(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
+                App.EpisodeViewModel.InWatchlist = true;
+                InitAppBar();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        private void CreateRemoveFromWatchlist(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton removeFromWatchlist = new ApplicationBarIconButton();
+            removeFromWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.removevideo.rest.png", UriKind.Relative));
+            removeFromWatchlist.Text = "Watchlist -";
+            removeFromWatchlist.Click += new EventHandler(removeFromWatchlist_Click);
+            appBar.Buttons.Add(removeFromWatchlist);
+        }
+
+        private async void removeFromWatchlist_Click(object sender, EventArgs e)
+        {
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+
+            try
+            {
+                await episodeController.removeEpisodeFromWatchlist(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
+                ToastNotification.ShowToast("Episode", "Episode removed from watchlist.");
+                App.EpisodeViewModel.InWatchlist = false;
+                InitAppBar();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        #endregion
+
+        #region Checkin
+
+        private void CreateCheckingButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton checkinButton = new ApplicationBarIconButton();
+            checkinButton = new ApplicationBarIconButton(new Uri("Images/appbar.check.rest.png", UriKind.Relative));
+            checkinButton.Text = "Check In";
+            checkinButton.Click += new EventHandler(checkinButton_Click);
+
+            appBar.Buttons.Add(checkinButton);
+        }
+
+        private async void checkinButton_Click(object sender, EventArgs e)
+        {
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+
+            try
+            {
+                if (await episodeController.checkinEpisode(this.show.tvdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
+                    ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
+                else
+                    ToastNotification.ShowToast("Episode", "Checked in!");
+                InitAppBar();
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        #endregion
+
+        #region Seen
+
         private void CreateSeenButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton watchedButton = new ApplicationBarIconButton();
@@ -284,32 +364,13 @@ namespace WPtrakt
             appBar.Buttons.Add(watchedButton);
         }
 
-        private void Seen_Click(object sender, EventArgs e)
+        private async void Seen_Click(object sender, EventArgs e)
         {
-            var seenClient = new WebClient();
             progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            seenClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadSeenStringCompleted);
-            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
-            auth.Episodes = new TraktRequestEpisode[1];
-            auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = App.EpisodeViewModel.Season;
-            auth.Episodes[0].Episode = App.EpisodeViewModel.Number;
-            auth.Imdb = App.EpisodeViewModel.Imdb;
-            auth.Title = App.EpisodeViewModel.ShowName;
-            auth.Year = App.EpisodeViewModel.ShowYear;
 
-            seenClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-        }
-
-        void client_UploadSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
-
-                ToastNotification.ShowToast("Episode", "Episode marked as watched.");
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
-
+                await episodeController.markEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
                 App.EpisodeViewModel.Watched = true;
                 InitAppBar();
             }
@@ -318,6 +379,7 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
 
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
@@ -332,32 +394,14 @@ namespace WPtrakt
             appBar.Buttons.Add(unseeButton);
         }
 
-        void unseeButton_Click(object sender, EventArgs e)
+        private async void unseeButton_Click(object sender, EventArgs e)
         {
-            var unseeClient = new WebClient();
             progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            unseeClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadUnSeenStringCompleted);
-            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
-            auth.Episodes = new TraktRequestEpisode[1];
-            auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = App.EpisodeViewModel.Season;
-            auth.Episodes[0].Episode = App.EpisodeViewModel.Number;
-            auth.Imdb = App.EpisodeViewModel.Imdb;
-            auth.Title = App.EpisodeViewModel.ShowName;
-            auth.Year = App.EpisodeViewModel.ShowYear;
-
-            unseeClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-        }
-
-        void client_UploadUnSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
+                await episodeController.unMarkEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
                 App.EpisodeViewModel.Watched = false;
                 ToastNotification.ShowToast("Episode", "Episode unmarked as watched.");
-
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
 
                 InitAppBar();
             }
@@ -366,10 +410,12 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
+        #endregion
+
+        #region Rating
 
         private void CreateRatingButton(ApplicationBar appBar)
         {
@@ -389,155 +435,7 @@ namespace WPtrakt
             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + App.EpisodeViewModel.Imdb + "&year=" + App.EpisodeViewModel.ShowYear + "&title=" + App.EpisodeViewModel.ShowName + "&season=" + App.EpisodeViewModel.Season + "&episode=" + App.EpisodeViewModel.Number, UriKind.Relative));
         }
 
-        private void CreateAddToWatchlist(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton enabledAddtoWatchlist = new ApplicationBarIconButton();
-
-            enabledAddtoWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.video.rest.png", UriKind.Relative));
-            enabledAddtoWatchlist.IsEnabled = true;
-            enabledAddtoWatchlist.Click += new EventHandler(AddToWatchList_Click);
-            enabledAddtoWatchlist.Text = "Watchlist +";
-            appBar.Buttons.Add(enabledAddtoWatchlist);
-        }
-
-        private void AddToWatchList_Click(object sender, EventArgs e)
-        {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadWatchlistStringCompleted);
-            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
-            auth.Episodes = new TraktRequestEpisode[1];
-            auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = App.EpisodeViewModel.Season;
-            auth.Episodes[0].Episode = App.EpisodeViewModel.Number;
-            auth.Imdb = App.EpisodeViewModel.Imdb;
-            auth.Title = App.EpisodeViewModel.ShowName;
-            auth.Year = App.EpisodeViewModel.ShowYear;
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-        }
-
-        void client_UploadWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                App.EpisodeViewModel.InWatchlist = true;
-
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
-
-                ToastNotification.ShowToast("Episode", "Episode added to watchlist.");
-
-                InitAppBar();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-        }
-
-        private void CreateRemoveFromWatchlist(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton removeFromWatchlist = new ApplicationBarIconButton();
-            removeFromWatchlist = new ApplicationBarIconButton(new Uri("Images/appbar.feature.removevideo.rest.png", UriKind.Relative));
-            removeFromWatchlist.Text = "Watchlist -";
-            removeFromWatchlist.Click += new EventHandler(removeFromWatchlist_Click);
-            appBar.Buttons.Add(removeFromWatchlist);
-        }
-
-        void removeFromWatchlist_Click(object sender, EventArgs e)
-        {
-            var watchlistClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadRemoveFromWatchlistStringCompleted);
-
-            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
-            auth.Episodes = new TraktRequestEpisode[1];
-            auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = App.EpisodeViewModel.Season;
-            auth.Episodes[0].Episode = App.EpisodeViewModel.Number;
-            auth.Imdb = App.EpisodeViewModel.Imdb;
-            auth.Title = App.EpisodeViewModel.ShowName;
-            auth.Year = App.EpisodeViewModel.ShowYear;
-
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-        }
-
-        void client_UploadRemoveFromWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                ToastNotification.ShowToast("Episode", "Episode removed from watchlist.");
-                App.EpisodeViewModel.InWatchlist = false;
-
-                IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number + ".json");
-
-                InitAppBar();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-        }
-
-        private void CreateCheckingButton(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton checkinButton = new ApplicationBarIconButton();
-            checkinButton = new ApplicationBarIconButton(new Uri("Images/appbar.check.rest.png", UriKind.Relative));
-            checkinButton.Text = "Check In";
-            checkinButton.Click += new EventHandler(checkinButton_Click);
-
-            appBar.Buttons.Add(checkinButton);
-        }
-
-        void checkinButton_Click(object sender, EventArgs e)
-        {
-            var checkinClient = new WebClient();
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
-            CheckinAuth auth = new CheckinAuth();
-
-            auth.tvdb_id = App.EpisodeViewModel.Tvdb;
-            auth.Title = App.EpisodeViewModel.ShowName;
-            auth.year = App.EpisodeViewModel.Year;
-            auth.Season = Int16.Parse(App.EpisodeViewModel.Season);
-            auth.Episode = Int16.Parse(App.EpisodeViewModel.Number);
-            auth.AppDate = AppUser.getReleaseDate();
-
-            var assembly = Assembly.GetExecutingAssembly().FullName;
-            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-            auth.AppVersion = fullVersionNumber;
-
-            checkinClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
-        }
-
-        void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                if (jsonString.Contains("failure"))
-                    ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
-                else
-                    ToastNotification.ShowToast("Episode", "Checked in!");
-                InitAppBar();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-        }
+        #endregion
 
         private void CreateBackToShowMenuItem(ApplicationBar appBar)
         {
@@ -557,6 +455,7 @@ namespace WPtrakt
 
         #region Shout Appbar
 
+
         private void InitAppBarShouts()
         {
             ApplicationBar appBar = new ApplicationBar();
@@ -566,6 +465,8 @@ namespace WPtrakt
 
             this.ApplicationBar = appBar;
         }
+
+        #region Refresh shouts
 
         private void CreateRefreshShoutsButton(ApplicationBar appBar)
         {
@@ -582,6 +483,8 @@ namespace WPtrakt
           LoadShoutData(App.EpisodeViewModel.Tvdb, App.EpisodeViewModel.Season, App.EpisodeViewModel.Number);
         }
 
+        #endregion
+
         private void CreateSendButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton sendButton = new ApplicationBarIconButton();
@@ -593,41 +496,25 @@ namespace WPtrakt
             appBar.Buttons.Add(sendButton);
         }
 
-        void sendButton_Click(object sender, EventArgs e)
+        private async void sendButton_Click(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty((ShoutText.Text)))
             {
-                var watchlistClient = new WebClient();
-                watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShoutStringCompleted);
-                ShoutAuth auth = new ShoutAuth();
+                try
+                {
+                    await episodeController.addShoutToEpisode(ShoutText.Text, this.show.tvdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
+                    ToastNotification.ShowToast("Episode", "Shout posted.");
 
-                auth.Tvdb = App.EpisodeViewModel.Tvdb;
-                auth.Title = App.EpisodeViewModel.ShowName;
-                auth.Year = App.EpisodeViewModel.ShowYear;
-                auth.Season = Int16.Parse(App.EpisodeViewModel.Season);
-                auth.episode = Int16.Parse(App.EpisodeViewModel.Number);
-                auth.Shout = (ShoutText.Text);
-                watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/shout/episode/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+                    ShoutText.Text = "";
+
+                    this.Focus();
+                }
+                catch (WebException)
+                {
+                    ErrorManager.ShowConnectionErrorPopup();
+                }
+                catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }         
             }
-        }
-
-        void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                ToastNotification.ShowToast("Episode", "Shout posted.");
-
-                ShoutText.Text = "";
-
-                this.Focus();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
         }
 
         #endregion

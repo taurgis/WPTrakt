@@ -28,130 +28,137 @@ namespace WPtraktBase.Controller
         {
             return await episodeDao.getEpisodeByTvdbAndSeasonInfo(imdbId, season, episode);
         }
-
-
-        /*
-        public async Task<Boolean> removeMovieFromWatchlist(String imdbID, String title, Int16 year)
+       
+       
+        public async Task<Boolean> addMovieToWatchlist(String tvdbid, String imdbId, String title, Int16 year, String season, String episode)
         {
             WebClient watchlistClient = new WebClient();
 
-            WatchlistAuth auth = CreateWatchListAuth(imdbID, title, year);
+            WatchedEpisodeAuth auth = CreateWatchListAuth(imdbId, title, year, season, episode);
 
-            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
-
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
-            movie.InWatchlist = false;
-            episodeDao.saveMovie(movie);
-
-            return true;
-        }
-
-        public async Task<Boolean> addMovieToWatchlist(String imdbID, String title, Int16 year)
-        {
-            WebClient watchlistClient = new WebClient();
-
-            WatchlistAuth auth = CreateWatchListAuth(imdbID, title, year);
-
-            String jsonString  = await  watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+            String jsonString  = await  watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
            
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
-            movie.InWatchlist = true;
-            episodeDao.saveMovie(movie);
+            TraktEpisode traktEpisode = await episodeDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
+            traktEpisode.InWatchlist = true;
+            episodeDao.saveEpisode(traktEpisode);
 
             return true;
         }
 
-        private static WatchlistAuth CreateWatchListAuth(String imdbID, String title, Int16 year)
-        {
-            WatchlistAuth auth = new WatchlistAuth();
-            auth.Movies = new TraktMovie[1];
-            auth.Movies[0] = new TraktMovie();
-            auth.Movies[0].imdb_id = imdbID;
-            auth.Movies[0].Title = title;
-            auth.Movies[0].year = year;
-            return auth;
-        }
-
-        public async Task<Boolean> checkinMovie(String imdbID, String title, Int16 year)
-        {
-            WebClient checkinClient = new WebClient();
-            CheckinAuth auth = new CheckinAuth();
-
-            auth.imdb_id = imdbID;
-            auth.Title = title;
-            auth.year = year;
-            auth.AppDate = AppUser.getReleaseDate();
-
-            var assembly = Assembly.GetExecutingAssembly().FullName;
-            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-            auth.AppVersion = fullVersionNumber;
-
-            String jsonString = await checkinClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
-
-            if (jsonString.Contains("failure"))
-                return false;
-            else
-                return true;
-        }
-
-        public async Task<Boolean> markMovieAsSeen(String imdbID, String title, Int16 year)
+        public async Task<Boolean> removeEpisodeFromWatchlist(String tvdbid, String imdbid, String title, Int16 year, String season, String episode)
         {
             WebClient watchlistClient = new WebClient();
-            WatchedAuth auth = createWatchedAuth(imdbID, title, year);
 
-            String jsonString =  await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-           
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
-            movie.Watched = true;
-            episodeDao.saveMovie(movie);
+            WatchedEpisodeAuth auth = CreateWatchListAuth(imdbid, title, year, season, episode);
+
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/episode/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+
+            TraktEpisode traktEpisode = await episodeDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
+            traktEpisode.InWatchlist = false;
+            episodeDao.saveEpisode(traktEpisode);
 
             return true;
         }
 
-        public async Task<Boolean> unMarkMovieAsSeen(String imdbID, String title, Int16 year)
+
+        private static WatchedEpisodeAuth CreateWatchListAuth(String imdbID, String title, Int16 year, String season, String episode)
         {
-            WebClient watchlistClient = new WebClient();
-            WatchedAuth auth = createWatchedAuth(imdbID, title, year);
-
-            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-            
-            TraktMovie movie = await episodeDao.getMovieByIMDB(imdbID);
-            movie.Watched = false;
-            episodeDao.saveMovie(movie);
-
-            return true;
-        }
-
-        private static WatchedAuth createWatchedAuth(String imdbID, String title, Int16 year)
-        {
-            WatchedAuth auth = new WatchedAuth();
-            auth.Movies = new TraktMovieRequest[1];
-            auth.Movies[0] = new TraktMovieRequest();
-            auth.Movies[0].imdb_id = imdbID;
-            auth.Movies[0].Title = title;
-            auth.Movies[0].year = year;
-            auth.Movies[0].Plays = 1;
-            DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
-
-            return auth;
-        }
-
-        
-        public async Task<Boolean> addShoutToMovie(String shout, String imdbID, String title, Int16 year)
-        {
-            WebClient watchlistClient = new WebClient();
-             ShoutAuth auth = new ShoutAuth();
-
+            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
+            auth.Episodes = new TraktRequestEpisode[1];
+            auth.Episodes[0] = new TraktRequestEpisode();
+            auth.Episodes[0].Season = season;
+            auth.Episodes[0].Episode = episode;
             auth.Imdb = imdbID;
             auth.Title = title;
             auth.Year = year;
-            auth.Shout = shout;
 
-           String jsonString  = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
-           return true;
+            return auth;
         }
-         */
+
+       public async Task<Boolean> checkinEpisode(String tvdbid, String title, Int16 year, String season, String episode)
+       {
+           WebClient checkinClient = new WebClient();
+           CheckinAuth auth = new CheckinAuth();
+
+           auth.tvdb_id = tvdbid;
+           auth.Title = title;
+           auth.year = year;
+           auth.Season = Int16.Parse(season);
+           auth.Episode = Int16.Parse(episode);
+           auth.AppDate = AppUser.getReleaseDate();
+
+           var assembly = Assembly.GetExecutingAssembly().FullName;
+           var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+           auth.AppVersion = fullVersionNumber;
+
+           String jsonString = await checkinClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
+
+           if (jsonString.Contains("failure"))
+               return false;
+           else
+               return true;
+       }
+
+
+      public async Task<Boolean> markEpisodeAsSeen(String tvdbid, String imdbID, String title, Int16 year, String season, String episode)
+      {
+          WebClient watchlistClient = new WebClient();
+          WatchedEpisodeAuth auth = createWatchedAuth(imdbID, title, year, season, episode);
+
+          String jsonString =  await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+           
+          TraktEpisode traktEpisode = await episodeDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
+          traktEpisode.Watched = true;
+          episodeDao.saveEpisode(traktEpisode);
+
+          return true;
+      }
+
+      public async Task<Boolean> unMarkEpisodeAsSeen(String tvdbid, String imdbID, String title, Int16 year, String season, String episode)
+      {
+          WebClient watchlistClient = new WebClient();
+          WatchedEpisodeAuth auth = createWatchedAuth(imdbID, title, year, season, episode);
+
+          String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/episode/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+
+          TraktEpisode traktEpisode = await episodeDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
+          traktEpisode.Watched = false;
+          episodeDao.saveEpisode(traktEpisode);
+
+          return true;
+      }
+
+      private static WatchedEpisodeAuth createWatchedAuth(String imdbID, String title, Int16 year, String season, String episode)
+      {
+          WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
+          auth.Episodes = new TraktRequestEpisode[1];
+          auth.Episodes[0] = new TraktRequestEpisode();
+          auth.Episodes[0].Season = season;
+          auth.Episodes[0].Episode = episode;
+          auth.Imdb = imdbID;
+          auth.Title = title;
+          auth.Year = year;
+
+          return auth;
+      }
+
+
+      public async Task<Boolean> addShoutToEpisode(String shout, String tvdb, String title, Int16 year, String season, String episode)
+      {
+          WebClient watchlistClient = new WebClient();
+          ShoutAuth auth = new ShoutAuth();
+
+          auth.Tvdb = tvdb;
+          auth.Title = title;
+          auth.Year = year;
+          auth.Season = Int16.Parse(season);
+          auth.episode = Int16.Parse(episode);
+          auth.Shout = shout;
+
+          String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/shout/episode/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+          return true;
+      }
+    
         public async Task<TraktShout[]> getShoutsForEpisode(String tvdb, String season, String episode)
         {
             var episodeClient = new WebClient();
