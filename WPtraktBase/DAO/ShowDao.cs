@@ -254,21 +254,24 @@ namespace WPtraktBase.DAO
         {
             TraktEpisode dbEpisode = await getEpisodeByTVDBThroughTrakt(traktEpisode.Tvdb, traktEpisode.Season, traktEpisode.Number);
 
-            dbEpisode.DownloadTime = traktEpisode.DownloadTime;
-            dbEpisode.EpisodeID = traktEpisode.EpisodeID;
-            dbEpisode.FirstAired = traktEpisode.FirstAired;
-            dbEpisode.Images = traktEpisode.Images;
-            dbEpisode.InWatchlist = traktEpisode.InWatchlist;
-            dbEpisode.MyRating = traktEpisode.MyRating;
-            dbEpisode.MyRatingAdvanced = traktEpisode.MyRatingAdvanced;
-            dbEpisode.Number = traktEpisode.Number;
-            dbEpisode.Overview = traktEpisode.Overview;
-            dbEpisode.Ratings = traktEpisode.Ratings;
-            dbEpisode.Season = traktEpisode.Season;
-            dbEpisode.SeasonID = traktEpisode.SeasonID;
-            dbEpisode.Title = traktEpisode.Title;
-            dbEpisode.Tvdb = traktEpisode.Tvdb;
-            dbEpisode.Watched = traktEpisode.Watched;
+            if (dbEpisode != null)
+            {
+                dbEpisode.DownloadTime = traktEpisode.DownloadTime;
+                dbEpisode.EpisodeID = traktEpisode.EpisodeID;
+                dbEpisode.FirstAired = traktEpisode.FirstAired;
+                dbEpisode.Images = traktEpisode.Images;
+                dbEpisode.InWatchlist = traktEpisode.InWatchlist;
+                dbEpisode.MyRating = traktEpisode.MyRating;
+                dbEpisode.MyRatingAdvanced = traktEpisode.MyRatingAdvanced;
+                dbEpisode.Number = traktEpisode.Number;
+                dbEpisode.Overview = traktEpisode.Overview;
+                dbEpisode.Ratings = traktEpisode.Ratings;
+                dbEpisode.Season = traktEpisode.Season;
+                dbEpisode.SeasonID = traktEpisode.SeasonID;
+                dbEpisode.Title = traktEpisode.Title;
+                dbEpisode.Tvdb = traktEpisode.Tvdb;
+                dbEpisode.Watched = traktEpisode.Watched;
+            }
         }
     }
 }
