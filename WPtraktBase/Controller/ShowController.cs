@@ -40,8 +40,11 @@ namespace WPtraktBase.Controller
            
             foreach (TraktSeason season in seasons)
             {
-                season.Tvdb = show.tvdb_id;
-                show.Seasons.Add(season);
+                if (int.Parse(season.Season) > 0)
+                {
+                    season.Tvdb = show.tvdb_id;
+                    show.Seasons.Add(season);
+                }
             }
 
             showDao.saveShow(show);

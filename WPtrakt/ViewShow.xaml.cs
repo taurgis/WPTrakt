@@ -84,6 +84,14 @@ namespace WPtrakt
             {
                 LoadSeasons(e.Argument.ToString());
             }
+            else
+            {
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    App.ShowViewModel.NumberOfSeasons = (Int16)this.Show.Seasons.Count;
+
+                }));
+            }
 
             LoadBackgroundImage();
         }
@@ -101,7 +109,7 @@ namespace WPtrakt
             this.showController.AddSeasonsToShow(this.Show, seasons);
             Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
-                App.ShowViewModel.numberOfSeasons = (Int16)this.Show.Seasons.Count;
+                App.ShowViewModel.NumberOfSeasons = (Int16)this.Show.Seasons.Count;
             }));
         }
 
@@ -576,7 +584,7 @@ namespace WPtrakt
         private void ApplicationBarIconButton_Click_EpisodeBack(object sender, EventArgs e)
         {
             if (App.ShowViewModel.currentSeason == 1)
-                App.ShowViewModel.currentSeason = App.ShowViewModel.numberOfSeasons;
+                App.ShowViewModel.currentSeason = App.ShowViewModel.NumberOfSeasons;
             else
                 App.ShowViewModel.currentSeason -= 1;
 
@@ -589,7 +597,7 @@ namespace WPtrakt
 
         private void ApplicationBarIconButton_Click_EpisodeForward(object sender, EventArgs e)
         {
-            if (App.ShowViewModel.currentSeason == App.ShowViewModel.numberOfSeasons)
+            if (App.ShowViewModel.currentSeason == App.ShowViewModel.NumberOfSeasons)
                 App.ShowViewModel.currentSeason = 1;
             else
                 App.ShowViewModel.currentSeason += 1;

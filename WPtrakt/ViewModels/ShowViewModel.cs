@@ -23,7 +23,7 @@ namespace WPtrakt
 
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public ObservableCollection<ListItemViewModel> EpisodeItems { get; set; }
-        public Int16 numberOfSeasons { get; set; }
+        private Int16 numberOfSeasons { get; set; }
         public Int16 currentSeason { get; set; }
         public Boolean ShoutsLoaded { get; set; }
 
@@ -51,6 +51,19 @@ namespace WPtrakt
         }
 
         #region Getters/Setters
+
+        public Int16 NumberOfSeasons
+        {
+            get
+            {
+                return this.numberOfSeasons;
+            }
+            set
+            {
+                this.numberOfSeasons = value;
+                NotifyPropertyChanged("SeasonItems");
+            }
+        }
 
         public List<String> SeasonItems
         {

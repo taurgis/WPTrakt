@@ -17,6 +17,7 @@ using WPtraktBase.Model.Trakt;
 using WPtraktBase.Controller;
 using System.IO;
 using System.Collections.ObjectModel;
+using System.Data.Linq;
 
 namespace WPtrakt
 {
@@ -94,8 +95,9 @@ namespace WPtrakt
             String season = ((String[])e.Argument)[1];
             String episodeNr = ((String[])e.Argument)[2];
 
-            episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
+            
             show = await showController.getShowByTVDBID(id);
+            episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
 
             DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
             airTime = airTime.AddSeconds(episode.FirstAired);
@@ -108,6 +110,20 @@ namespace WPtrakt
                 LoadBackgroundImage(show);
                 LoadScreenImage(episode);
             });
+        }
+
+        private async void LoadSeasons(String TvdbId)
+        {
+            TraktSeason[] seasons = await this.showController.getSeasonsByTVDBID(TvdbId);
+            foreach (TraktSeason season in seasons)
+                season.SeasonEpisodes = new EntitySet<TraktEpisode>();
+
+            this.showController.AddSeasonsToShow(show, seasons);
+        }
+
+        private async void FetchEpisodesForSeason(string id, String season)
+        {
+             await this.showController.getEpisodesOfSeason(show, Int16.Parse(season));
         }
 
         #endregion
@@ -203,7 +219,6 @@ namespace WPtrakt
         }
      
         #endregion
-
 
         #region Taps
 
