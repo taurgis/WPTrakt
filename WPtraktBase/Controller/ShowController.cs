@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -71,6 +68,7 @@ namespace WPtraktBase.Controller
                     {
                         episode.DownloadTime = DateTime.Now;
                         episode.SeasonID = season.SeasonID;
+                        episode.Tvdb = show.tvdb_id;
                         season.SeasonEpisodes.Add(episode);
                     }
                 }

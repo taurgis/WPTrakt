@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Linq;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -26,6 +27,21 @@ namespace WPtraktBase.Controller
 
         public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String imdbId, String season, String episode)
         {
+            TraktShow show = await showDao.getShowByTVDB(imdbId);
+
+            if (show.Seasons.Count == 0)
+            {
+                ShowController showController = new ShowController();
+                TraktSeason[] seasons = await showController.getSeasonsByTVDBID(imdbId);
+                foreach (TraktSeason traktSeason in seasons)
+                    traktSeason.SeasonEpisodes = new EntitySet<TraktEpisode>();
+
+
+                showController.AddSeasonsToShow(show, seasons);
+
+                TraktEpisode[] episodes = await showController.getEpisodesOfSeason(show, Int16.Parse(season));
+
+            }
             return await showDao.getEpisodeByTvdbAndSeasonInfo(imdbId, season, episode);
         }
        

@@ -3,22 +3,19 @@ using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
 using System.Collections.ObjectModel;
-using System.IO.IsolatedStorage;
+using System.ComponentModel;
+using System.Data.Linq;
+using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using WPtrakt.Controllers;
-using WPtrakt.Model.Trakt.Request;
-using WPtrakt.Model.Trakt;
-using System.Reflection;
 using WPtrakt.Model;
-using WPtraktBase.Model.Trakt;
-using System.ComponentModel;
+using WPtrakt.Model.Trakt;
+using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.Controller;
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using System.Data.Linq;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {

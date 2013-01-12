@@ -217,6 +217,7 @@ namespace WPtraktBase.DAO
                     TraktEpisode tEpisode = ((TraktWatched)ser.ReadObject(ms)).Episode;
                     tEpisode.DownloadTime = DateTime.Now;
                     tEpisode.SeasonID = 0;
+                    tEpisode.Tvdb = TVDB;
                     this.saveEpisode(tEpisode);
                     return tEpisode;
                 }
