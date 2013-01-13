@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Linq;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -48,8 +49,11 @@ namespace WPtraktBase.DAO
 
                 if (exists)
                 {
+                   Console.WriteLine("Show " + TVDB + " is available in the DB cache.");
                     cachedShowUUIDS.Add(TVDB);
                 }
+
+               Console.WriteLine("Show " + TVDB + " exists: " + exists.ToString());
 
                 return exists;
             }
@@ -63,8 +67,10 @@ namespace WPtraktBase.DAO
         {
             if (showAvailableInDatabaseByTVDB(TVDB))
             {
-                TraktSeason season = this.Seasons.Where(t => t.Tvdb == TVDB).FirstOrDefault();
-                return this.Shows.Where(t => t.tvdb_id == TVDB).FirstOrDefault();
+                TraktShow show = this.Shows.Where(t => t.tvdb_id == TVDB).FirstOrDefault();
+
+               Console.WriteLine("Show " + show.Title + " fetched from DB.");
+                return show;
             }
             else
                 return await getShowByTVDBThroughTrakt(TVDB);
@@ -72,8 +78,10 @@ namespace WPtraktBase.DAO
 
         public TraktShow getShowByIMDB(String IMDB)
         {
-       
-            return this.Shows.Where(t => t.imdb_id == IMDB).FirstOrDefault();
+            TraktShow show = this.Shows.Where(t => t.imdb_id == IMDB).FirstOrDefault();
+
+           Console.WriteLine("Show " + show.Title + " fetched from DB.");
+            return show;
         }
 
         private async Task<TraktShow> getShowByTVDBThroughTrakt(String TVDB)
@@ -96,7 +104,7 @@ namespace WPtraktBase.DAO
                     show.Seasons = new EntitySet<TraktSeason>();
                     
                     saveShow(show);
-
+                   Console.WriteLine("Show " + show.Title + " fetched from Trakt Server.");
                     return show;
                 }
             }
@@ -127,14 +135,16 @@ namespace WPtraktBase.DAO
             if (showAvailableInDatabaseByTVDB(traktShow.tvdb_id))
             {
                 updateShow(traktShow);
+               Console.WriteLine("Show " + traktShow.Title + " updated to DB.");
             }
             else
             {
                 this.Shows.InsertOnSubmit(traktShow);
+               Console.WriteLine("Show " + traktShow.Title + " saved to DB.");
             }
 
             this.SubmitChanges(ConflictMode.FailOnFirstConflict);
-
+    
             return true;
         }
 
@@ -185,6 +195,7 @@ namespace WPtraktBase.DAO
                     return false;
 
                 Boolean exists = this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).Count() > 0;
+               Console.WriteLine("Episode " + TVDB + "-" + season + "-" + episode + " is available in the DB.");
 
                 return exists;
             }
@@ -198,7 +209,9 @@ namespace WPtraktBase.DAO
         {
             if (episodeAvailableInDatabaseByTVDBAndSeasonInfo(TVDB, season, episode))
             {
-                return this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).FirstOrDefault();
+                TraktEpisode traktEpisode = this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).FirstOrDefault();
+               Console.WriteLine("Episode " + traktEpisode.Title + " fetched from DB.");
+                return traktEpisode;
             }
             else
                 return await getEpisodeByTVDBThroughTrakt(TVDB, season, episode);
@@ -219,6 +232,8 @@ namespace WPtraktBase.DAO
                     tEpisode.SeasonID = 0;
                     tEpisode.Tvdb = TVDB;
                     this.saveEpisode(tEpisode);
+
+                   Console.WriteLine("Episode " + tEpisode.Title + " fetched from Trakt server.");
                     return tEpisode;
                 }
             }
@@ -240,10 +255,12 @@ namespace WPtraktBase.DAO
             if (episodeAvailableInDatabaseByTVDBAndSeasonInfo(traktEpisode.Tvdb, traktEpisode.Season, traktEpisode.Number))
             {
                 updateEpisode(traktEpisode);
+               Console.WriteLine("Episode " + traktEpisode.Title + " updated to DB.");
             }
             else
             {
                 this.Episodes.InsertOnSubmit(traktEpisode);
+               Console.WriteLine("Episode " + traktEpisode.Title + " saved to DB.");
             }
 
             this.SubmitChanges(ConflictMode.FailOnFirstConflict);
