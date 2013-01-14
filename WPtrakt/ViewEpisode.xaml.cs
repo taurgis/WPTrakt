@@ -97,7 +97,7 @@ namespace WPtrakt
 
             
             show = await showController.getShowByTVDBID(id);
-            episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr);
+            episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr, show);
 
             DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
             airTime = airTime.AddSeconds(episode.FirstAired);

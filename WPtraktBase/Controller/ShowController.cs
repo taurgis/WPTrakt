@@ -146,6 +146,29 @@ namespace WPtraktBase.Controller
             return episodes;
         }
 
+        public async Task<TraktEpisode[]> getAllUnwatchedEpisodesOfShow(TraktShow show)
+        {
+            for (int season = 1; season <= show.Seasons.Count; season++)
+            {
+                TraktEpisode[] episodes = null;
+                TraktSeason currentSeason = getSeasonFromShow(show, season);
+                if (currentSeason.SeasonEpisodes.Count == 0)
+                {
+                    var showClient = new WebClient();
+                    String jsonString = await showClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + show.tvdb_id + "/" + season), AppUser.createJsonStringForAuthentication());
+
+                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                    {
+                        var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
+                        episodes = (TraktEpisode[])ser.ReadObject(ms);
+                        AddEpisodesToShowSeason(show, episodes, season);
+                    }
+                }
+            }
+
+            return showDao.getUnwatchedEpisodesForShow(show.tvdb_id);
+        }
+
         public async Task<Boolean> markShowAsSeen(String imdbID, String title, Int16 year)
         {
             WebClient watchlistClient = new WebClient();

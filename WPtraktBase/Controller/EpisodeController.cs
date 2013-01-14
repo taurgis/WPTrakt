@@ -25,10 +25,8 @@ namespace WPtraktBase.Controller
             this.showDao = ShowDao.Instance;
         }
 
-        public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String imdbId, String season, String episode)
+        public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String imdbId, String season, String episode, TraktShow show)
         {
-            TraktShow show = await showDao.getShowByTVDB(imdbId);
-
             if (show.Seasons.Count == 0)
             {
                 ShowController showController = new ShowController();

@@ -28,48 +28,17 @@ namespace WPtraktBase.DAO
             }
         }
 
-        private List<String> cachedShowUUIDS;
-        private Boolean showAvailableInDatabaseByTVDB(String TVDB)
-        {
-            if (cachedShowUUIDS == null)
-                cachedShowUUIDS = new List<string>();
-
-            if (cachedShowUUIDS.Contains(TVDB))
-                return true;
-
-            try
-            {
-                if (!this.DatabaseExists())
-                    return false;
-
-                if (this.Shows.Count() == 0)
-                    return false;
-
-                Boolean exists = this.Shows.Where(t => t.tvdb_id == TVDB).Count() > 0;
-
-                if (exists)
-                {
-                   Console.WriteLine("Show " + TVDB + " is available in the DB cache.");
-                    cachedShowUUIDS.Add(TVDB);
-                }
-
-               Console.WriteLine("Show " + TVDB + " exists: " + exists.ToString());
-
-                return exists;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
 
         public async Task<TraktShow> getShowByTVDB(String TVDB)
         {
-            if (showAvailableInDatabaseByTVDB(TVDB))
+            if (!this.DatabaseExists())
+                this.CreateDatabase();
+
+            if (this.Shows.Where(t => t.tvdb_id == TVDB).Count() > 0)
             {
                 TraktShow show = this.Shows.Where(t => t.tvdb_id == TVDB).FirstOrDefault();
 
-               Console.WriteLine("Show " + show.Title + " fetched from DB.");
+                Console.WriteLine("Show " + show.Title + " fetched from DB.");
                 return show;
             }
             else
@@ -132,9 +101,9 @@ namespace WPtraktBase.DAO
             if (!this.DatabaseExists())
                 this.CreateDatabase();
 
-            if (showAvailableInDatabaseByTVDB(traktShow.tvdb_id))
+            if (this.Shows.Where(t => t.tvdb_id == traktShow.tvdb_id).Count() > 0)
             {
-                updateShow(traktShow);
+               updateShow(traktShow);
                Console.WriteLine("Show " + traktShow.Title + " updated to DB.");
             }
             else
@@ -183,34 +152,20 @@ namespace WPtraktBase.DAO
             }
         }
 
-
-        private Boolean episodeAvailableInDatabaseByTVDBAndSeasonInfo(String TVDB, String season, String episode)
+        public TraktEpisode[] getUnwatchedEpisodesForShow(String TVDB)
         {
-            try
-            {
-                if (!this.DatabaseExists())
-                    return false;
-
-                if (this.Episodes.Count() == 0)
-                    return false;
-
-                Boolean exists = this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).Count() > 0;
-               Console.WriteLine("Episode " + TVDB + "-" + season + "-" + episode + " is available in the DB.");
-
-                return exists;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Watched == false)).ToArray();
         }
 
         public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String TVDB, String season, String episode)
         {
-            if (episodeAvailableInDatabaseByTVDBAndSeasonInfo(TVDB, season, episode))
+            if (!this.DatabaseExists())
+                this.CreateDatabase();
+
+            if (this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).Count() > 0)
             {
                 TraktEpisode traktEpisode = this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).FirstOrDefault();
-               Console.WriteLine("Episode " + traktEpisode.Title + " fetched from DB.");
+                Console.WriteLine("Episode " + traktEpisode.Title + " fetched from DB.");
                 return traktEpisode;
             }
             else
@@ -252,7 +207,7 @@ namespace WPtraktBase.DAO
             if (!this.DatabaseExists())
                 this.CreateDatabase();
 
-            if (episodeAvailableInDatabaseByTVDBAndSeasonInfo(traktEpisode.Tvdb, traktEpisode.Season, traktEpisode.Number))
+            if (this.Episodes.Where(t => (t.Tvdb == traktEpisode.Tvdb) && (t.Season == traktEpisode.Season) && (t.Number == traktEpisode.Number)).Count() > 0)
             {
                 updateEpisode(traktEpisode);
                Console.WriteLine("Episode " + traktEpisode.Title + " updated to DB.");

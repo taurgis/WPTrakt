@@ -23,6 +23,7 @@ namespace WPtrakt
 
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public ObservableCollection<ListItemViewModel> EpisodeItems { get; set; }
+        public ObservableCollection<ListItemViewModel> UnWatchedEpisodeItems { get; set; }
         private Int16 numberOfSeasons { get; set; }
         public Int16 currentSeason { get; set; }
         public Boolean ShoutsLoaded { get; set; }
@@ -322,6 +323,38 @@ namespace WPtrakt
             }
         }
 
+        private Boolean _loadingUnwatched;
+        public Boolean LoadingUnwatched 
+        {
+            get
+            {
+                return _loadingUnwatched;
+            }
+
+            set
+            {
+                _loadingUnwatched = value;
+                NotifyPropertyChanged("LoadingStatusUnwatched");
+            }
+        
+        }
+        public String LoadingStatusUnwatched
+        {
+            get
+            {
+                if (_loadingUnwatched)
+                {
+                    return "Visible";
+                }
+                else
+                {
+                    return "Collapsed";
+                }
+            }
+        }
+
+        
+
         private Int16 _rating;
         public Int16 Rating
         {
@@ -506,8 +539,12 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatusSeason");
         }
 
-        
 
+        public void RefreshUnwatchedEpisodes()
+        {
+            NotifyPropertyChanged("UnWatchedEpisodeItems");
+            NotifyPropertyChanged("LoadingStatusUnwatched");
+        }
      
 
         private void CallEpisodesService(String tvdb)

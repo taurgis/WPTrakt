@@ -155,6 +155,52 @@ namespace WPtrakt
 
         #endregion
 
+        #region Load Unwatched Episodes
+
+        public void LoadUnwatchedEpisodeData()
+        {
+            App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<ListItemViewModel>();
+            App.ShowViewModel.LoadingUnwatched = true;
+            App.ShowViewModel.RefreshUnwatchedEpisodes();
+            
+            BackgroundWorker episodesWorker = new BackgroundWorker();
+            episodesWorker.WorkerReportsProgress = false;
+            episodesWorker.WorkerSupportsCancellation = false;
+            episodesWorker.DoWork += new DoWorkEventHandler(unwatchedEpisodesWorker_DoWork);
+
+            episodesWorker.RunWorkerAsync();
+        }
+
+        private async void unwatchedEpisodesWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
+
+            if (episodes.Length > 0)
+            {
+                foreach (TraktEpisode episodeIt in episodes)
+                {
+                    episodeIt.Tvdb = this.Show.tvdb_id;
+                    TraktEpisode episode = episodeIt;
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        App.ShowViewModel.UnWatchedEpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                    });
+                }
+
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    App.ShowViewModel.UnWatchedEpisodeItems.Add(new ListItemViewModel());
+                });
+            }
+            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+               {
+                   App.ShowViewModel.LoadingUnwatched = false;
+                   App.ShowViewModel.RefreshUnwatchedEpisodes();
+               });
+        }
+
+        #endregion
+
         #region Load Shouts
 
         public async void LoadShoutData(String imdbId)
@@ -250,6 +296,10 @@ namespace WPtrakt
 
             }
             else if (this.ShowPanorama.SelectedIndex == 2)
+            {
+                LoadUnwatchedEpisodeData();
+            }
+            else if (this.ShowPanorama.SelectedIndex == 3)
             {
                 if (!App.ShowViewModel.ShoutsLoaded)
                 {

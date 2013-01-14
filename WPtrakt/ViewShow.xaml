@@ -108,6 +108,42 @@
                     </Grid>
                 </Grid>
             </controls:PanoramaItem>
+            <controls:PanoramaItem Margin="0 -25" Header="Unwatched" Orientation="Horizontal">
+                <Grid>
+                    <Grid Name="UnwatchedEpisodeGrid">
+                        <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusUnwatched}" Name="progressBarUnwatched" IsIndeterminate="True" />
+                        <TextBlock  Name="loadingTextUnwatched" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusUnwatched}"/>
+                        <ListBox ItemsSource="{Binding UnWatchedEpisodeItems}" Name="UnwatchedEpisodes">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel  Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
+                                        <Grid Width="150">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" Source="{Binding ScreenImage}" HorizontalAlignment="Right"  Height="84"/>
+                                            <Image Margin="0 3" Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
+                                            <Image Margin="0 3" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
+                                            <Image Margin="0 3" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
+                                        </Grid>
+                                        <StackPanel Orientation="Vertical"  Height="113">
+                                            <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                            <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </StackPanel>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinEpisode_Click" />
+                                                <toolkit:MenuItem Header="Mark as seen" Name="SeenEpisode" Click="SeenEpisode_Click" />
+                                                <toolkit:MenuItem Header="Add to watchlist" Name="WatchlistEpisode" Click="WatchlistEpisode_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </controls:PanoramaItem>
             <controls:PanoramaItem Header="Shouts" Margin="0, -25">
                 <Grid>
                     <ListBox VerticalAlignment="Top" Margin="0,-30,15,0" ItemsSource="{Binding ShoutItems}" Name="ShoutList" Height="420" Width="405">
