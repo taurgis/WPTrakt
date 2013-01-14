@@ -23,7 +23,7 @@ namespace WPtrakt
 
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public ObservableCollection<ListItemViewModel> EpisodeItems { get; set; }
-        public ObservableCollection<ListItemViewModel> UnWatchedEpisodeItems { get; set; }
+        public ObservableCollection<CalendarListItemViewModel> UnWatchedEpisodeItems { get; set; }
         private Int16 numberOfSeasons { get; set; }
         public Int16 currentSeason { get; set; }
         public Boolean ShoutsLoaded { get; set; }

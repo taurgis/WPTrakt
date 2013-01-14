@@ -2,6 +2,7 @@
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Linq;
@@ -159,7 +160,7 @@ namespace WPtrakt
 
         public void LoadUnwatchedEpisodeData()
         {
-            App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<ListItemViewModel>();
+            App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<CalendarListItemViewModel>();
             App.ShowViewModel.LoadingUnwatched = true;
             App.ShowViewModel.RefreshUnwatchedEpisodes();
             
@@ -175,22 +176,50 @@ namespace WPtrakt
         {
             TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
 
+        
+
             if (episodes.Length > 0)
             {
+                Dictionary<String, List<TraktEpisode>> seasonEpisodes = new Dictionary<string, List<TraktEpisode>>();
+
+                int counter = 0;
                 foreach (TraktEpisode episodeIt in episodes)
                 {
-                    episodeIt.Tvdb = this.Show.tvdb_id;
-                    TraktEpisode episode = episodeIt;
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    if (counter++ < 30)
                     {
-                        App.ShowViewModel.UnWatchedEpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
-                    });
+                        if (seasonEpisodes.ContainsKey(episodeIt.Season))
+                            seasonEpisodes[episodeIt.Season].Add(episodeIt);
+                        else
+                        {
+                            seasonEpisodes.Add(episodeIt.Season, new List<TraktEpisode>());
+                            seasonEpisodes[episodeIt.Season].Add(episodeIt);
+                        }
+                    }
+                    else
+                        break;
                 }
 
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                foreach (String season in seasonEpisodes.Keys)
                 {
-                    App.ShowViewModel.UnWatchedEpisodeItems.Add(new ListItemViewModel());
-                });
+                    CalendarListItemViewModel model = new CalendarListItemViewModel();
+                    model.DateString = "Season " + season;
+                    model.Items = new ObservableCollection<ListItemViewModel>();
+
+                    foreach (TraktEpisode episode in seasonEpisodes[season])
+                    {
+                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                        {
+                            model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                        });
+                    }
+
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                       {
+                           App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
+                       });
+                }
+
+
             }
             System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                {
@@ -297,7 +326,10 @@ namespace WPtrakt
             }
             else if (this.ShowPanorama.SelectedIndex == 2)
             {
-                LoadUnwatchedEpisodeData();
+                if (App.ShowViewModel.UnWatchedEpisodeItems == null)
+                {
+                    LoadUnwatchedEpisodeData();
+                }
             }
             else if (this.ShowPanorama.SelectedIndex == 3)
             {
