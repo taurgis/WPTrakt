@@ -10,6 +10,7 @@ using WPtrakt.Model;
 using System.Reflection;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
+using WPtraktBase.Controller;
 
 namespace WPtrakt
 {
@@ -141,15 +142,15 @@ namespace WPtrakt
                     String imdb;
                     Int16 rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
                     NavigationContext.QueryString.TryGetValue("imdb", out imdb);
-                    ShowDao dao = ShowDao.Instance;
-                    TraktShow show = dao.getShowByIMDB(imdb);
+                    ShowController controller = new ShowController();
+                    TraktShow show = controller.getShowByIMDBID(imdb);
                     show.MyRatingAdvanced = rating;
                     if (rating > 5)
                         show.MyRating = "Loved";
                     else
                         show.MyRating = "Hated";
 
-                    dao.saveShow(show);
+                    controller.updateShow(show);
                 }
                 MessageBox.Show("Rated successfull.");
             }

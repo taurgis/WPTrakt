@@ -26,6 +26,11 @@ namespace WPtraktBase.Controller
             return await showDao.getShowByTVDB(TVDBID);
         }
 
+        public TraktShow getShowByIMDBID(String IMDBID)
+        {
+            return showDao.getShowByIMDB(IMDBID);
+        }
+
         public async Task<TraktSeason[]> getSeasonsByTVDBID(String TVDBID)
         {
             return await showDao.getSeasonsForTvShowByTVDBID(TVDBID);
@@ -50,6 +55,11 @@ namespace WPtraktBase.Controller
         public void deleteShow(TraktShow show)
         {
             showDao.deleteShowByTvdbId(show.tvdb_id);
+        }
+
+        public void updateShow(TraktShow show)
+        {
+            showDao.saveShow(show);
         }
 
         public TraktSeason getSeasonFromShow(TraktShow show, int SeasonNumber)
@@ -250,6 +260,11 @@ namespace WPtraktBase.Controller
 
             String jsonString = await shoutClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/shout/show/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
             return true;
+        }
+
+        public void deleteEpisode(TraktEpisode traktEpisode)
+        {
+            showDao.deleteEpisodeBySeasonInfo(traktEpisode.Tvdb, traktEpisode.Season, traktEpisode.Number);
         }
     }
 }

@@ -27,6 +27,14 @@ namespace WPtrakt
             this.ShoutItems.Add(new ListItemViewModel() { Name = "Loading..." });
         }
 
+        public void RefreshAll()
+        {
+            NotifyPropertyChanged("DetailVisibility");
+            NotifyPropertyChanged("LoadingStatusEpisode");
+            clearShouts();
+
+        }
+
         #region Getters/Setters
 
         private string _name;

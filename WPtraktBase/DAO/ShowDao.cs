@@ -17,7 +17,7 @@ namespace WPtraktBase.DAO
     public class ShowDao : Dao
     {
         private static ShowDao _Instance { get; set; }
-        public static ShowDao Instance
+        internal static ShowDao Instance
         {
             get
             {
@@ -29,7 +29,7 @@ namespace WPtraktBase.DAO
         }
 
 
-        public async Task<TraktShow> getShowByTVDB(String TVDB)
+        internal async Task<TraktShow> getShowByTVDB(String TVDB)
         {
             if (!this.DatabaseExists())
                 this.CreateDatabase();
@@ -45,7 +45,7 @@ namespace WPtraktBase.DAO
                 return await getShowByTVDBThroughTrakt(TVDB);
         }
 
-        public TraktShow getShowByIMDB(String IMDB)
+        internal TraktShow getShowByIMDB(String IMDB)
         {
             TraktShow show = this.Shows.Where(t => t.imdb_id == IMDB).FirstOrDefault();
 
@@ -53,7 +53,7 @@ namespace WPtraktBase.DAO
             return show;
         }
 
-        public async void deleteShowByTvdbId(String TVDBid)
+        internal async void deleteShowByTvdbId(String TVDBid)
         {
             TraktShow show = await getShowByTVDB(TVDBid);
             foreach (TraktSeason season in show.Seasons)
@@ -94,7 +94,7 @@ namespace WPtraktBase.DAO
             return null;
         }
 
-        public Boolean saveSeasons(TraktSeason[] seasons, String tvdbid)
+        internal Boolean saveSeasons(TraktSeason[] seasons, String tvdbid)
         {
             foreach (TraktSeason season in seasons)
             {
@@ -105,7 +105,7 @@ namespace WPtraktBase.DAO
             return true;
         }
 
-        public Boolean saveShow(TraktShow traktShow)
+        internal Boolean saveShow(TraktShow traktShow)
         {
             if (!this.DatabaseExists())
                 this.CreateDatabase();
@@ -150,7 +150,7 @@ namespace WPtraktBase.DAO
             dbShow.Seasons = traktShow.Seasons;
         }
 
-        public async Task<TraktSeason[]> getSeasonsForTvShowByTVDBID(String TVDBID)
+        internal async Task<TraktSeason[]> getSeasonsForTvShowByTVDBID(String TVDBID)
         {
             WebClient seasonClient = new WebClient();
             String jsonString = await seasonClient.DownloadStringTaskAsync(new Uri("https://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDBID));
@@ -161,12 +161,12 @@ namespace WPtraktBase.DAO
             }
         }
 
-        public TraktEpisode[] getUnwatchedEpisodesForShow(String TVDB)
+        internal TraktEpisode[] getUnwatchedEpisodesForShow(String TVDB)
         {
             return this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Watched == false)).ToArray();
         }
 
-        public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String TVDB, String season, String episode)
+        internal async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String TVDB, String season, String episode)
         {
             if (!this.DatabaseExists())
                 this.CreateDatabase();
@@ -211,7 +211,7 @@ namespace WPtraktBase.DAO
 
 
 
-        public Boolean saveEpisode(TraktEpisode traktEpisode)
+        internal Boolean saveEpisode(TraktEpisode traktEpisode)
         {
             if (!this.DatabaseExists())
                 this.CreateDatabase();
@@ -254,6 +254,14 @@ namespace WPtraktBase.DAO
                 dbEpisode.Tvdb = traktEpisode.Tvdb;
                 dbEpisode.Watched = traktEpisode.Watched;
             }
+        }
+
+        internal async void deleteEpisodeBySeasonInfo(string TVDB, string season, string episode)
+        {
+            TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDB, season, episode);
+
+            this.Episodes.DeleteOnSubmit(traktEpisode);
+            this.SubmitChanges(ConflictMode.FailOnFirstConflict);
         }
     }
 }

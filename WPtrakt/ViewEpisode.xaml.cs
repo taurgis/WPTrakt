@@ -2,6 +2,9 @@
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
+using System.ComponentModel;
+using System.Data.Linq;
+using System.IO;
 using System.IO.IsolatedStorage;
 using System.Net;
 using System.Reflection;
@@ -9,15 +12,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 using WPtrakt.Controllers;
-using WPtrakt.Model.Trakt.Request;
-using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using System.ComponentModel;
-using WPtraktBase.Model.Trakt;
 using WPtraktBase.Controller;
-using System.IO;
-using System.Collections.ObjectModel;
-using System.Data.Linq;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
@@ -67,11 +64,16 @@ namespace WPtrakt
 
         private void ViewEpisode_Loaded(object sender, RoutedEventArgs e)
         {
+            LoadEpisode();
+        }
+
+        private void LoadEpisode()
+        {
             BackgroundWorker worker = new BackgroundWorker();
             worker.WorkerReportsProgress = false;
             worker.WorkerSupportsCancellation = false;
             worker.DoWork += new DoWorkEventHandler(episodeworker_DoWork);
-           
+
             String id;
             String season;
             String episodeNr;
@@ -265,9 +267,31 @@ namespace WPtrakt
             CreateCheckingButton(appBar);
 
             CreateBackToShowMenuItem(appBar);
-
+            CreateRefreshEpisodesButton(appBar);
             this.ApplicationBar = appBar;
         }
+
+        #region Refresh
+
+        private void CreateRefreshEpisodesButton(ApplicationBar appBar)
+        {
+            ApplicationBarMenuItem refreshButton = new ApplicationBarMenuItem();
+            refreshButton = new ApplicationBarMenuItem();
+            refreshButton.Text = "Refresh";
+            refreshButton.Click += new EventHandler(refreshButton_Click);
+
+            appBar.MenuItems.Add(refreshButton);
+        }
+
+        void refreshButton_Click(object sender, EventArgs e)
+        {
+            showController.deleteEpisode(this.episode);
+            App.EpisodeViewModel.Name = null;
+            App.EpisodeViewModel.RefreshAll();
+            LoadEpisode();
+        }
+
+        #endregion
 
         #region Watchlist
 
