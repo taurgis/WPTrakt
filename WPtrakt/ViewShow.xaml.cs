@@ -23,6 +23,8 @@ namespace WPtrakt
     public partial class ViewShow : PhoneApplicationPage
     {
         private ShowController showController;
+        private EpisodeController episodeController;
+
         private TraktShow Show;
 
         public ViewShow()
@@ -31,6 +33,7 @@ namespace WPtrakt
 
             DataContext = App.ShowViewModel;
             this.showController = new ShowController();
+            this.episodeController = new EpisodeController();
             this.Loaded += new RoutedEventHandler(ViewShow_Loaded);
         }
 
@@ -819,69 +822,33 @@ namespace WPtrakt
 
         private ListItemViewModel lastModel;
 
-        private void SeenEpisode_Click(object sender, RoutedEventArgs e)
+        private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            var seenClient = new WebClient();
-
-            seenClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeSeenStringCompleted);
-            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
-            auth.Episodes = new TraktRequestEpisode[1];
-            auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = lastModel.Season;
-            auth.Episodes[0].Episode = lastModel.Episode;
-            auth.Imdb = App.ShowViewModel.Imdb;
-            auth.Title = App.ShowViewModel.Name;
-            auth.Year = Int16.Parse(App.ShowViewModel.Year);
-
-            seenClient.UploadStringAsync(new Uri("https://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-        }
-
-        private void client_UploadEpisodeSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
+                await episodeController.markEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
                 lastModel.Watched = true;
                 ToastNotification.ShowToast("Show", "Episode marked as watched.");
-                
             }
             catch (WebException)
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-            lastModel = null; 
+            lastModel = null;
         }
 
-        private void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
+        private async void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
-            var watchlistClient = new WebClient();
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeWatchlistStringCompleted);
-           
-            WatchedEpisodeAuth auth = new WatchedEpisodeAuth();
-            auth.Episodes = new TraktRequestEpisode[1];
-            auth.Episodes[0] = new TraktRequestEpisode();
-            auth.Episodes[0].Season = lastModel.Season;
-            auth.Episodes[0].Episode = lastModel.Episode;
-            auth.Imdb = App.ShowViewModel.Imdb;
-            auth.Title = App.ShowViewModel.Name;
-            auth.Year = Int16.Parse(App.ShowViewModel.Year);
-
-            watchlistClient.UploadStringAsync(new Uri("https://api.trakt.tv/show/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
-
-        }
-
-        void client_UploadEpisodeWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
+                await episodeController.addEpisodeToWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
+          
                 lastModel.InWatchList = true;
                 ToastNotification.ShowToast("Show", "Episode added to watchlist.");
-                
             }
             catch (WebException)
             {
@@ -892,34 +859,12 @@ namespace WPtrakt
             lastModel = null;
         }
 
-        private void CheckinEpisode_Click(object sender, RoutedEventArgs e)
+        private async void CheckinEpisode_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-
-            var checkinClient = new WebClient();
-            checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
-            CheckinAuth auth = new CheckinAuth();
-
-            auth.tvdb_id = App.ShowViewModel.Tvdb;
-            auth.Title = App.ShowViewModel.Name;
-            auth.year = Int16.Parse(App.ShowViewModel.Year);
-            auth.Season = Int16.Parse(lastModel.Season);
-            auth.Episode = Int16.Parse(lastModel.Episode);
-            auth.AppDate = AppUser.getReleaseDate();
-
-            var assembly = Assembly.GetExecutingAssembly().FullName;
-            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-            auth.AppVersion = fullVersionNumber;
-
-            checkinClient.UploadStringAsync(new Uri("https://api.trakt.tv/show/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
-
-        }
-
-        void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
             try
             {
-                String jsonString = e.Result;
+                await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
                 ToastNotification.ShowToast("Show", "Checked in!");
             }
             catch (WebException)
@@ -929,6 +874,7 @@ namespace WPtrakt
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             lastModel = null;
+
         }
 
         #endregion

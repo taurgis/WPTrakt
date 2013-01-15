@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Clarity.Phone.Controls;
+using Microsoft.Phone.Controls;
+using System;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Animation;
-using Clarity.Phone.Controls;
-using Microsoft.Phone.Controls;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 
