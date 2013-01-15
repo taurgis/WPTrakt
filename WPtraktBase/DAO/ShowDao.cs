@@ -193,7 +193,15 @@ namespace WPtraktBase.DAO
                     var ser = new DataContractJsonSerializer(typeof(TraktWatched));
                     TraktEpisode tEpisode = ((TraktWatched)ser.ReadObject(ms)).Episode;
                     tEpisode.DownloadTime = DateTime.Now;
-                    tEpisode.SeasonID = 0;
+
+                    TraktShow show = await getShowByTVDB(TVDB);
+
+                    foreach (TraktSeason traktSeason in show.Seasons)
+                    {
+                        if (traktSeason.Season.Equals(season))
+                            tEpisode.SeasonID = traktSeason.SeasonID;
+                    }
+
                     tEpisode.Tvdb = TVDB;
                     this.saveEpisode(tEpisode);
 
