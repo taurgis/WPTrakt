@@ -55,7 +55,10 @@ namespace WPtraktBase.DAO
 
         public async void deleteShowByTvdbId(String TVDBid)
         {
-             this.Shows.DeleteOnSubmit(await getShowByTVDB(TVDBid));
+            TraktShow show = await getShowByTVDB(TVDBid);
+            foreach (TraktSeason season in show.Seasons)
+                this.Seasons.DeleteOnSubmit(season);
+             this.Shows.DeleteOnSubmit(show);
              this.SubmitChanges(ConflictMode.FailOnFirstConflict);
         }
 

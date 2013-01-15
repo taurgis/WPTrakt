@@ -18,7 +18,7 @@ namespace WPtraktBase.Model.Trakt
           AutoSync = AutoSync.OnInsert)]
         public int EpisodeID { get; set; }
 
-        [Column]
+        [Column(CanBeNull=false)]
         public int SeasonID { get; set; }
 
         [Column]
