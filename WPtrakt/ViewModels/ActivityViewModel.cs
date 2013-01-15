@@ -43,7 +43,7 @@ namespace WPtrakt
             var movieClient = new WebClient();
             movieClient.Encoding = Encoding.GetEncoding("UTF-8");
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+            movieClient.UploadStringAsync(new Uri("https://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
         }
 
 

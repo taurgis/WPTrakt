@@ -71,6 +71,7 @@ namespace WPtraktBase.Model.Trakt
             Storage = "_images",
             ThisKey = "_imageID",
             OtherKey = "ImageId",
+            DeleteRule= "ON DELETE CASCADE",
             IsForeignKey = true)]
         [DataMember(Name = "images")]
         public TraktImage Images
@@ -108,6 +109,7 @@ namespace WPtraktBase.Model.Trakt
             Storage = "_ratings",
             ThisKey = "_ratingId",
             OtherKey = "RatingId",
+            DeleteRule= "ON DELETE CASCADE",
             IsForeignKey = true)]
         [DataMember(Name = "ratings")]
         public TraktRating Ratings
@@ -123,7 +125,7 @@ namespace WPtraktBase.Model.Trakt
             }
         }
 
-        [Association(ThisKey = "tvdb_id", OtherKey = "Tvdb")]
+        [Association(ThisKey = "tvdb_id", OtherKey = "Tvdb", DeleteRule= "ON DELETE CASCADE")]
         public EntitySet<TraktSeason> Seasons { get; set; }
 
         [Column]

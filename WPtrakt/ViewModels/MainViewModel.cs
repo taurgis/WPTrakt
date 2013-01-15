@@ -202,7 +202,7 @@ namespace WPtrakt
 
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetValidationRequestStreamCallback), request);
         }
@@ -307,7 +307,7 @@ namespace WPtrakt
         {
             HttpWebRequest request;
 
-            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/user/profile.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
+            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/user/profile.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
             request.Method = "POST";
             request.BeginGetRequestStream(new AsyncCallback(GetProfileRequestStreamCallback), request);
         }
@@ -409,7 +409,7 @@ namespace WPtrakt
 
                 HttpWebRequest request;
 
-                request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.trakt.tv/movies/trending.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
+                request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/movies/trending.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
                 request.Method = "POST";
                 request.BeginGetRequestStream(new AsyncCallback(GetRequestStreamCallback), request);
             }
@@ -489,13 +489,13 @@ namespace WPtrakt
 
                 historyClient.Encoding = Encoding.GetEncoding("UTF-8");
                 historyClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
-                historyClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+                historyClient.UploadStringAsync(new Uri("https://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
 
 
                 var movieClient = new WebClient();
                 movieClient.Encoding = Encoding.GetEncoding("UTF-8");
                 movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadFriendMovieStringCompleted);
-                movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+                movieClient.UploadStringAsync(new Uri("https://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
             }
         }
 

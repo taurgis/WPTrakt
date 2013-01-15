@@ -503,6 +503,18 @@ namespace WPtrakt
             this._tvdb = tvdb;
         }
 
+        public void RefreshAll()
+        {
+            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+            App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<CalendarListItemViewModel>();
+
+            NotifyPropertyChanged("LoadingStatusShow");
+            NotifyPropertyChanged("DetailVisibility");
+           
+            clearShouts();
+            RefreshEpisodes();
+        }
+
         public void UpdateShowView(TraktShow show)
         {
             _name = show.Title;
@@ -552,7 +564,7 @@ namespace WPtrakt
             var showClient = new WebClient();
             this._tvdb = tvdb;
             showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadEpisodeStringCompleted);
-            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + currentSeason), AppUser.createJsonStringForAuthentication());
+            showClient.UploadStringAsync(new Uri("https://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + tvdb + "/" + currentSeason), AppUser.createJsonStringForAuthentication());
         }
 
         void client_UploadEpisodeStringCompleted(object sender, UploadStringCompletedEventArgs e)

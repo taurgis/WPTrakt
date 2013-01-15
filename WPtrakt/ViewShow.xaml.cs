@@ -418,6 +418,8 @@ namespace WPtrakt
 
             CreateTileMenuItem(appBar);
 
+            CreateRefreshEpisodesButton(appBar);
+
             this.ApplicationBar = appBar;
         }
 
@@ -454,6 +456,31 @@ namespace WPtrakt
             }
 
         }
+
+        #region Refresh
+
+        private void CreateRefreshEpisodesButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton refreshButton = new ApplicationBarIconButton();
+            refreshButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
+            refreshButton.Text = "Refresh";
+            refreshButton.Click += new EventHandler(refreshButton_Click);
+
+            appBar.Buttons.Add(refreshButton);
+        }
+
+        void refreshButton_Click(object sender, EventArgs e)
+        {
+   
+
+            String tvdbId  = this.Show.tvdb_id;
+            showController.deleteShow(this.Show);
+            App.ShowViewModel.Name = null;
+            App.ShowViewModel.RefreshAll();
+            LoadShow(tvdbId);
+        }
+
+        #endregion
 
         #region Watchlist
 
@@ -592,7 +619,6 @@ namespace WPtrakt
 
 
             appBar.Buttons.Add(showSeasons);
-            CreateRefreshEpisodesButton(appBar);
 
             ApplicationBarIconButton nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
             nextSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeForward);
@@ -628,21 +654,6 @@ namespace WPtrakt
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-        }
-
-        private void CreateRefreshEpisodesButton(ApplicationBar appBar)
-        {
-            ApplicationBarIconButton refreshButton = new ApplicationBarIconButton();
-            refreshButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
-            refreshButton.Text = "Refresh";
-            refreshButton.Click += new EventHandler(refreshButton_Click);
-
-            appBar.Buttons.Add(refreshButton);
-        }
-
-        void refreshButton_Click(object sender, EventArgs e)
-        {
-            LoadEpisodeData();
         }
 
         void showSeasons_Click(object sender, EventArgs e)
@@ -823,7 +834,7 @@ namespace WPtrakt
             auth.Title = App.ShowViewModel.Name;
             auth.Year = Int16.Parse(App.ShowViewModel.Year);
 
-            seenClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+            seenClient.UploadStringAsync(new Uri("https://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
         }
 
         private void client_UploadEpisodeSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -859,7 +870,7 @@ namespace WPtrakt
             auth.Title = App.ShowViewModel.Name;
             auth.Year = Int16.Parse(App.ShowViewModel.Year);
 
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+            watchlistClient.UploadStringAsync(new Uri("https://api.trakt.tv/show/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
         }
 
@@ -900,7 +911,7 @@ namespace WPtrakt
             var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
             auth.AppVersion = fullVersionNumber;
 
-            checkinClient.UploadStringAsync(new Uri("http://api.trakt.tv/show/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
+            checkinClient.UploadStringAsync(new Uri("https://api.trakt.tv/show/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
 
         }
 

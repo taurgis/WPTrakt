@@ -53,13 +53,19 @@ namespace WPtraktBase.DAO
             return show;
         }
 
+        public async void deleteShowByTvdbId(String TVDBid)
+        {
+             this.Shows.DeleteOnSubmit(await getShowByTVDB(TVDBid));
+             this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+        }
+
         private async Task<TraktShow> getShowByTVDBThroughTrakt(String TVDB)
         {
             try
             {
                 var showClient = new WebClient();
 
-                String jsonString = await showClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDB), AppUser.createJsonStringForAuthentication());
+                String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDB), AppUser.createJsonStringForAuthentication());
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktShow));
@@ -144,7 +150,7 @@ namespace WPtraktBase.DAO
         public async Task<TraktSeason[]> getSeasonsForTvShowByTVDBID(String TVDBID)
         {
             WebClient seasonClient = new WebClient();
-            String jsonString = await seasonClient.DownloadStringTaskAsync(new Uri("http://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDBID));
+            String jsonString = await seasonClient.DownloadStringTaskAsync(new Uri("https://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDBID));
             using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
             {
                 var ser = new DataContractJsonSerializer(typeof(TraktSeason[]));
@@ -178,7 +184,7 @@ namespace WPtraktBase.DAO
             {
                 var showClient = new WebClient();
 
-                String jsonString = await showClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/episode/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDB + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
+                String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDB + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktWatched));

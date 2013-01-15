@@ -103,7 +103,7 @@ namespace WPtrakt
             DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
 
-            seenClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+            seenClient.UploadStringAsync(new Uri("https://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
         }
 
         private void client_UploadMovieSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -134,7 +134,7 @@ namespace WPtrakt
             auth.Movies[0].imdb_id = lastModel.Imdb;
             auth.Movies[0].Title = lastModel.Name;
             auth.Movies[0].year = Int16.Parse(lastModel.SubItemText);
-            watchlistClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+            watchlistClient.UploadStringAsync(new Uri("https://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
         }
 
         void client_UploadMovieWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
@@ -172,7 +172,7 @@ namespace WPtrakt
             var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
             auth.AppVersion = fullVersionNumber;
 
-            checkinClient.UploadStringAsync(new Uri("http://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
+            checkinClient.UploadStringAsync(new Uri("https://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
         }
 
         void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)

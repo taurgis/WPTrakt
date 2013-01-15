@@ -49,12 +49,12 @@ namespace WPtrakt
             var movieClient = new WebClient();
             movieClient.Encoding = Encoding.GetEncoding("UTF-8");
             movieClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieStringCompleted);
-            movieClient.UploadStringAsync(new Uri("http://api.trakt.tv/search/movies.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + key), AppUser.createJsonStringForAuthentication());
+            movieClient.UploadStringAsync(new Uri("https://api.trakt.tv/search/movies.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + key), AppUser.createJsonStringForAuthentication());
 
             var showClient = new WebClient();
             showClient.Encoding = Encoding.GetEncoding("UTF-8");
             showClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadShowsStringCompleted);
-            showClient.UploadStringAsync(new Uri("http://api.trakt.tv/search/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + key), AppUser.createJsonStringForAuthentication());
+            showClient.UploadStringAsync(new Uri("https://api.trakt.tv/search/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + key), AppUser.createJsonStringForAuthentication());
         }
 
         static char[] frenchReplace = { 'a', 'a', 'a', 'a', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'o', 'o', 'u', 'u', 'u', '+' };

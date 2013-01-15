@@ -49,6 +49,7 @@ namespace WPtraktBase.Model.Trakt
         [Association(
             Storage = "_images",
             ThisKey = "_imageID",
+            DeleteRule = "ON DELETE CASCADE",
             OtherKey = "ImageId",
             IsForeignKey = true)]
         [DataMember(Name = "images")]
@@ -85,6 +86,7 @@ namespace WPtraktBase.Model.Trakt
             Storage = "_ratings",
             ThisKey = "_ratingId",
             OtherKey = "RatingId",
+            DeleteRule = "ON DELETE CASCADE",
             IsForeignKey = true)]
         [DataMember(Name = "ratings")]
         public TraktRating Ratings

@@ -74,7 +74,7 @@ namespace WPtraktBase.DAO
             {
                 var movieClient = new WebClient();
 
-                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + IMDB), AppUser.createJsonStringForAuthentication());
+                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + IMDB), AppUser.createJsonStringForAuthentication());
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie));

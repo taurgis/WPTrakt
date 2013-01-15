@@ -30,7 +30,7 @@ namespace WPtraktBase.Model.Trakt
         [DataMember(Name = "episodes")]
         public String Episodes { get; set; }
 
-        [Association(ThisKey = "SeasonID", OtherKey = "SeasonID")]
+        [Association(ThisKey = "SeasonID", OtherKey = "SeasonID", DeleteRule= "ON DELETE CASCADE")]
         public EntitySet<TraktEpisode> SeasonEpisodes { get; set; }
 
         [Column]
@@ -45,6 +45,7 @@ namespace WPtraktBase.Model.Trakt
         [Association(
             Storage = "_images",
             ThisKey = "_imageID",
+            DeleteRule = "ON DELETE CASCADE",
             OtherKey = "ImageId",
             IsForeignKey = true)]
         [DataMember(Name = "images")]

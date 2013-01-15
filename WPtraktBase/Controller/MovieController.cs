@@ -35,7 +35,7 @@ namespace WPtraktBase.Controller
 
             WatchlistAuth auth = CreateWatchListAuth(imdbID, title, year);
 
-            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
 
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.InWatchlist = false;
@@ -50,7 +50,7 @@ namespace WPtraktBase.Controller
 
             WatchlistAuth auth = CreateWatchListAuth(imdbID, title, year);
 
-            String jsonString  = await  watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+            String jsonString  = await  watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
 
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.InWatchlist = true;
@@ -84,7 +84,7 @@ namespace WPtraktBase.Controller
             var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
             auth.AppVersion = fullVersionNumber;
 
-            String jsonString = await checkinClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
+            String jsonString = await checkinClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
 
             if (jsonString.Contains("failure"))
                 return false;
@@ -97,7 +97,7 @@ namespace WPtraktBase.Controller
             WebClient watchlistClient = new WebClient();
             WatchedAuth auth = createWatchedAuth(imdbID, title, year);
 
-            String jsonString =  await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+            String jsonString =  await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
 
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.Watched = true;
@@ -111,7 +111,7 @@ namespace WPtraktBase.Controller
             WebClient watchlistClient = new WebClient();
             WatchedAuth auth = createWatchedAuth(imdbID, title, year);
 
-            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
 
             TraktMovie movie = await movieDao.getMovieByIMDB(imdbID);
             movie.Watched = false;
@@ -139,7 +139,7 @@ namespace WPtraktBase.Controller
         {
             var movieClient = new WebClient();
 
-            String jsonString = await movieClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbID), AppUser.createJsonStringForAuthentication());
+            String jsonString = await movieClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbID), AppUser.createJsonStringForAuthentication());
 
             using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
             {
@@ -158,7 +158,7 @@ namespace WPtraktBase.Controller
             auth.Year = year;
             auth.Shout = shout;
 
-           String jsonString  = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
+           String jsonString  = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/shout/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
            return true;
         }
     }

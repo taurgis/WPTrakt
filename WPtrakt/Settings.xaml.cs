@@ -245,7 +245,7 @@ namespace WPtrakt
 
                 RegisterAuth auth = new RegisterAuth();
                 auth.Email = txtEmail.Text;
-                registerClient.UploadStringAsync(new Uri("http://api.trakt.tv/account/create/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RegisterAuth), auth));
+                registerClient.UploadStringAsync(new Uri("https://api.trakt.tv/account/create/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RegisterAuth), auth));
             }
             else
                 MessageBox.Show("Invalid email!");
