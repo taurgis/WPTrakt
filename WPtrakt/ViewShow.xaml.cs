@@ -50,6 +50,50 @@ namespace WPtrakt
             LoadShow(tvdb);
         }
 
+        private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            RefreshBottomBar();
+        }
+
+        private void RefreshBottomBar()
+        {
+            if (this.ShowPanorama.SelectedIndex == 0)
+            {
+                InitAppBarMain();
+            }
+            else if (this.ShowPanorama.SelectedIndex == 1)
+            {
+                if (App.ShowViewModel.EpisodeItems.Count == 0)
+                {
+                    this.ApplicationBar.IsVisible = true;
+
+                    String id;
+                    NavigationContext.QueryString.TryGetValue("id", out id);
+                    LoadEpisodeData();
+                }
+                InitAppBarSeasons();
+
+            }
+            else if (this.ShowPanorama.SelectedIndex == 2)
+            {
+                if (App.ShowViewModel.UnWatchedEpisodeItems == null)
+                {
+                    LoadUnwatchedEpisodeData();
+                }
+            }
+            else if (this.ShowPanorama.SelectedIndex == 3)
+            {
+                if (!App.ShowViewModel.ShoutsLoaded)
+                {
+                    String id;
+                    NavigationContext.QueryString.TryGetValue("id", out id);
+                    this.LoadShoutData(id);
+                }
+                InitAppBarShouts();
+
+            }
+        }
+
         #region Load Show 
 
         private void LoadShow(String tvdb)
@@ -302,50 +346,6 @@ namespace WPtrakt
         }
 
         #endregion 
-
-        private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            RefreshBottomBar();
-        }
-
-        private void RefreshBottomBar()
-        {
-            if (this.ShowPanorama.SelectedIndex == 0)
-            {
-                InitAppBarMain();
-            }
-            else if (this.ShowPanorama.SelectedIndex == 1)
-            {
-                if (App.ShowViewModel.EpisodeItems.Count == 0)
-                {
-                    this.ApplicationBar.IsVisible = true;
-
-                    String id;
-                    NavigationContext.QueryString.TryGetValue("id", out id);
-                    LoadEpisodeData();
-                }
-                InitAppBarSeasons();
-
-            }
-            else if (this.ShowPanorama.SelectedIndex == 2)
-            {
-                if (App.ShowViewModel.UnWatchedEpisodeItems == null)
-                {
-                    LoadUnwatchedEpisodeData();
-                }
-            }
-            else if (this.ShowPanorama.SelectedIndex == 3)
-            {
-                if (!App.ShowViewModel.ShoutsLoaded)
-                {
-                    String id;
-                    NavigationContext.QueryString.TryGetValue("id", out id);
-                    this.LoadShoutData(id);
-                }
-                InitAppBarShouts();
-
-            }
-        }
 
         #region Taps
 
@@ -784,6 +784,67 @@ namespace WPtrakt
 
         #endregion
 
+        #region EpisodeContextMenu
+
+        private ListItemViewModel lastModel;
+
+        private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+            try
+            {
+                await episodeController.markEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
+                lastModel.Watched = true;
+                ToastNotification.ShowToast("Show", "Episode marked as watched.");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+            lastModel = null;
+        }
+
+        private async void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            try
+            {
+                await episodeController.addEpisodeToWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
+
+                lastModel.InWatchList = true;
+                ToastNotification.ShowToast("Show", "Episode added to watchlist.");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+            lastModel = null;
+        }
+
+        private async void CheckinEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+            try
+            {
+                await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
+                ToastNotification.ShowToast("Show", "Checked in!");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+            lastModel = null;
+
+        }
+
+        #endregion
+
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
         {
             LayoutRoot.Opacity = 1;
@@ -818,65 +879,6 @@ namespace WPtrakt
             Animation.FadeOut(LayoutRoot);
         }
 
-        #region EpisodeContextMenu
-
-        private ListItemViewModel lastModel;
-
-        private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
-        {
-            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            try
-            {
-                await episodeController.markEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
-                lastModel.Watched = true;
-                ToastNotification.ShowToast("Show", "Episode marked as watched.");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-            lastModel = null;
-        }
-
-        private async void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
-        {
-            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-
-            try
-            {
-                await episodeController.addEpisodeToWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
-          
-                lastModel.InWatchList = true;
-                ToastNotification.ShowToast("Show", "Episode added to watchlist.");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-            lastModel = null;
-        }
-
-        private async void CheckinEpisode_Click(object sender, RoutedEventArgs e)
-        {
-            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            try
-            {
-                await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
-                ToastNotification.ShowToast("Show", "Checked in!");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-            lastModel = null;
-
-        }
-
-        #endregion
+        
     }
 }
