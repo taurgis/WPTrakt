@@ -23,7 +23,7 @@ namespace WPtraktBase.Model.Trakt
         public String Title { get; set; }
 
         [Column]
-        [DataMember(Name = "year")] 
+        [DataMember(Name = "year")]
         public Int16 year { get; set; }
 
         [Column]
@@ -71,12 +71,22 @@ namespace WPtraktBase.Model.Trakt
             Storage = "_images",
             ThisKey = "_imageID",
             OtherKey = "ImageId",
-            DeleteRule= "ON DELETE CASCADE",
+            DeleteRule = "ON DELETE CASCADE",
             IsForeignKey = true)]
         [DataMember(Name = "images")]
         public TraktImage Images
         {
-            get { return _images.Entity; }
+            get
+            {
+                try
+                {
+                    return _images.Entity;
+                }
+                catch (InvalidOperationException)
+                {
+                    return null;
+                }
+            }
             set
             {
                 _images.Entity = value;
@@ -109,12 +119,22 @@ namespace WPtraktBase.Model.Trakt
             Storage = "_ratings",
             ThisKey = "_ratingId",
             OtherKey = "RatingId",
-            DeleteRule= "ON DELETE CASCADE",
+            DeleteRule = "ON DELETE CASCADE",
             IsForeignKey = true)]
         [DataMember(Name = "ratings")]
         public TraktRating Ratings
         {
-            get { return _ratings.Entity; }
+            get
+            {
+                try
+                {
+                    return _ratings.Entity;
+                }
+                catch (InvalidOperationException)
+                {
+                    return null;
+                }
+            }
             set
             {
                 _ratings.Entity = value;
@@ -125,18 +145,18 @@ namespace WPtraktBase.Model.Trakt
             }
         }
 
-        [Association(ThisKey = "tvdb_id", OtherKey = "Tvdb", DeleteRule= "ON DELETE CASCADE")]
+        [Association(ThisKey = "tvdb_id", OtherKey = "Tvdb", DeleteRule = "ON DELETE CASCADE")]
         public EntitySet<TraktSeason> Seasons { get; set; }
 
         [Column]
         [DataMember(Name = "rating_advanced")]
         public Int16 MyRatingAdvanced { get; set; }
 
-         [Column]
+        [Column]
         [DataMember(Name = "rating")]
         public String MyRating { get; set; }
 
-         [Column]
+        [Column]
         [DataMember(Name = "watched")]
         public Boolean Watched { get; set; }
 
@@ -149,12 +169,12 @@ namespace WPtraktBase.Model.Trakt
             return "show";
         }
 
-        public  String getFolder()
+        public String getFolder()
         {
             return "show";
         }
 
-        public  String getIdentifier()
+        public String getIdentifier()
         {
             return this.tvdb_id;
         }
