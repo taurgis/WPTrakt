@@ -18,6 +18,7 @@ using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.Controller;
 using WPtraktBase.Model.Trakt;
 using System.Linq;
+using System.Threading;
 
 namespace WPtrakt
 {
@@ -97,22 +98,10 @@ namespace WPtrakt
 
         #region Load Show 
 
-        private void LoadShow(String tvdb)
+        private async void LoadShow(String tvdb)
         {
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.WorkerReportsProgress = false;
-            worker.WorkerSupportsCancellation = false;
-            worker.DoWork += new DoWorkEventHandler(showworker_DoWork);
-
-            worker.RunWorkerAsync(tvdb);
-
+            this.Show = await showController.getShowByTVDBID(tvdb);
             App.ShowViewModel.LoadData(tvdb);  
-        }
-
-        private async void showworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            this.Show = await showController.getShowByTVDBID(e.Argument.ToString());
-
             if (this.Show != null)
             {
                 this.Show.Genres = this.Show.GenresAsString.Split('|');
@@ -128,7 +117,7 @@ namespace WPtrakt
 
             if (this.Show.Seasons.Count == 0)
             {
-                LoadSeasons(e.Argument.ToString());
+                LoadSeasons(tvdb);
             }
             else
             {
@@ -141,6 +130,7 @@ namespace WPtrakt
 
             LoadBackgroundImage();
         }
+
 
         #endregion
 
@@ -191,7 +181,7 @@ namespace WPtrakt
                 TraktEpisode episode = episodeIt;
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
                 });
             }
 
@@ -226,28 +216,27 @@ namespace WPtrakt
 
             if (episodes.Length > 0)
             {
-                Dictionary<String, List<TraktEpisode>> seasonEpisodes = new Dictionary<string, List<TraktEpisode>>();
+                Dictionary<Int16, List<TraktEpisode>> seasonEpisodes = new Dictionary<Int16, List<TraktEpisode>>();
 
                 int counter = 0;
                 foreach (TraktEpisode episodeIt in episodes)
                 {
                     if (counter++ < 30)
                     {
-                        if (seasonEpisodes.ContainsKey(episodeIt.Season))
-                            seasonEpisodes[episodeIt.Season].Add(episodeIt);
+                        if (seasonEpisodes.ContainsKey(Int16.Parse(episodeIt.Season)))
+                            seasonEpisodes[Int16.Parse(episodeIt.Season)].Add(episodeIt);
                         else
                         {
-                            seasonEpisodes.Add(episodeIt.Season, new List<TraktEpisode>());
-                            seasonEpisodes[episodeIt.Season].Add(episodeIt);
+                            seasonEpisodes.Add(Int16.Parse(episodeIt.Season), new List<TraktEpisode>());
+                            seasonEpisodes[Int16.Parse(episodeIt.Season)].Add(episodeIt);
                         }
                     }
                     else
                         break;
                 }
 
-                seasonEpisodes.OrderBy(key => key.Value);
 
-                foreach (KeyValuePair<string, List<TraktEpisode>> keyvalue in seasonEpisodes.OrderBy(key => key.Value))
+                foreach (KeyValuePair<Int16, List<TraktEpisode>> keyvalue in seasonEpisodes.OrderBy(item => item.Key))
                 {
 
                     CalendarListItemViewModel model = new CalendarListItemViewModel();
@@ -267,14 +256,21 @@ namespace WPtrakt
                            App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
                        });
                 }
-
-
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    App.ShowViewModel.LoadingUnwatched = false;
+                    App.ShowViewModel.RefreshUnwatchedEpisodes();
+                });
             }
-            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-               {
-                   App.ShowViewModel.LoadingUnwatched = false;
-                   App.ShowViewModel.RefreshUnwatchedEpisodes();
-               });
+            else
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    App.ShowViewModel.LoadingUnwatched = false;
+                    NoUnWatchedEpisodes.Visibility = System.Windows.Visibility.Visible;
+                });
+            }
+           
         }
 
         #endregion
@@ -474,14 +470,15 @@ namespace WPtrakt
             appBar.Buttons.Add(refreshButton);
         }
 
-        void refreshButton_Click(object sender, EventArgs e)
+        private void refreshButton_Click(object sender, EventArgs e)
         {
    
-
             String tvdbId  = this.Show.tvdb_id;
-            showController.deleteShow(this.Show);
+        
             App.ShowViewModel.Name = null;
             App.ShowViewModel.RefreshAll();
+         
+            showController.deleteShow(this.Show);
             LoadShow(tvdbId);
         }
 

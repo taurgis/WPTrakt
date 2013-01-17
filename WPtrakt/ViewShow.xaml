@@ -112,6 +112,8 @@
                 <Grid>
                     <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusUnwatched}" Name="progressBarUnwatched" IsIndeterminate="True" />
                     <TextBlock  Name="loadingTextUnwatched" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusUnwatched}"/>
+                    <TextBlock  Name="NoUnWatchedEpisodes" Text="No unwatched episodes!" Visibility="Collapsed"  FontSize="30" HorizontalAlignment="Center"/>
+
                     <ListBox Grid.Row="1" ItemsSource="{Binding UnWatchedEpisodeItems}" x:Name="ListUpcomming">
                         <ListBox.ItemTemplate>
                             <DataTemplate>

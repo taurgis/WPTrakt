@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
+using WPtraktBase.Model.Trakt.Request;
 
 namespace WPtraktBase.Controller
 {
@@ -54,7 +56,7 @@ namespace WPtraktBase.Controller
 
         public void deleteShow(TraktShow show)
         {
-            showDao.deleteShowByTvdbId(show.tvdb_id);
+             showDao.deleteShowByTvdbId(show.tvdb_id);
         }
 
         public void updateShow(TraktShow show)
@@ -140,11 +142,23 @@ namespace WPtraktBase.Controller
             TraktSeason currentSeason = getSeasonFromShow(show, season);
             if (currentSeason.SeasonEpisodes.Count > 0)
             {
-                episodes = new TraktEpisode[currentSeason.SeasonEpisodes.Count];
-                Console.WriteLine("Fetched season " + season + " of show " + show.Title + " from the DB.");
-                int i = 0;
-                foreach (TraktEpisode episode in currentSeason.SeasonEpisodes)
-                    episodes[i++] = episode;
+                
+                TraktEpisode lastEpisode = currentSeason.SeasonEpisodes[currentSeason.SeasonEpisodes.Count - 1];
+                if (lastEpisode.FirstAiredAsDate >= DateTime.UtcNow && NetworkInterface.GetIsNetworkAvailable())
+                {
+                    showDao.deleteSeasonEpisodes(currentSeason);
+                    episodes = await showDao.GetSeasonFromTrakt(show, season, episodes);
+                    AddEpisodesToShowSeason(show, episodes, season);
+                }
+                else
+                {
+
+                    episodes = new TraktEpisode[currentSeason.SeasonEpisodes.Count];
+                    Console.WriteLine("Fetched season " + season + " of show " + show.Title + " from the DB.");
+                    int i = 0;
+                    foreach (TraktEpisode episode in currentSeason.SeasonEpisodes)
+                        episodes[i++] = episode;
+                }
             }
             else
             {
@@ -171,20 +185,28 @@ namespace WPtraktBase.Controller
                 TraktSeason currentSeason = getSeasonFromShow(show, season);
                 if (currentSeason.SeasonEpisodes.Count == 0)
                 {
-                    var showClient = new WebClient();
-                    String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + show.tvdb_id + "/" + season), AppUser.createJsonStringForAuthentication());
-
-                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                    episodes = await showDao.GetSeasonFromTrakt(show, season, episodes);
+                    AddEpisodesToShowSeason(show, episodes, season);
+                }
+                else
+                {
+                    if (NetworkInterface.GetIsNetworkAvailable())
                     {
-                        var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
-                        episodes = (TraktEpisode[])ser.ReadObject(ms);
-                        AddEpisodesToShowSeason(show, episodes, season);
+                        TraktEpisode lastEpisode = currentSeason.SeasonEpisodes[currentSeason.SeasonEpisodes.Count - 1];
+                        if (lastEpisode.FirstAiredAsDate >= DateTime.UtcNow)
+                        {
+                            showDao.deleteSeasonEpisodes(currentSeason);
+                            episodes = await showDao.GetSeasonFromTrakt(show, season, episodes);
+                            AddEpisodesToShowSeason(show, episodes, season);
+                        }
                     }
                 }
             }
 
             return showDao.getUnwatchedEpisodesForShow(show.tvdb_id);
         }
+
+       
 
         public async Task<Boolean> markShowAsSeen(String imdbID, String title, Int16 year)
         {

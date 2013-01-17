@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using WPtrakt.Model.Trakt.Request;
 
-namespace WPtrakt.Model.Trakt.Request
+namespace WPtraktBase.Model.Trakt.Request
 {
     [DataContract]
     public class WatchedEpisodeAuth : TraktRequestAuth

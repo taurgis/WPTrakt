@@ -13,6 +13,7 @@ using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
+using WPtraktBase.Model.Trakt.Request;
 
 namespace WPtraktBase.Controller
 {
@@ -50,7 +51,7 @@ namespace WPtraktBase.Controller
 
             WatchedEpisodeAuth auth = CreateWatchListAuth(imdbId, title, year, season, episode);
 
-            String jsonString  = await  watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
             TraktEpisode traktEpisode = await showDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
             traktEpisode.InWatchlist = true;
@@ -65,7 +66,7 @@ namespace WPtraktBase.Controller
 
             WatchedEpisodeAuth auth = CreateWatchListAuth(imdbid, title, year, season, episode);
 
-            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
             TraktEpisode traktEpisode = await showDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
             traktEpisode.InWatchlist = false;
@@ -119,7 +120,7 @@ namespace WPtraktBase.Controller
           WebClient watchlistClient = new WebClient();
           WatchedEpisodeAuth auth = createWatchedAuth(imdbID, title, year, season, episode);
 
-          String jsonString =  await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+          String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
           TraktEpisode traktEpisode = await showDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
           traktEpisode.Watched = true;
@@ -133,7 +134,7 @@ namespace WPtraktBase.Controller
           WebClient watchlistClient = new WebClient();
           WatchedEpisodeAuth auth = createWatchedAuth(imdbID, title, year, season, episode);
 
-          String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/episode/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
+          String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("http://api.trakt.tv/show/episode/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
           TraktEpisode traktEpisode = await showDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
           traktEpisode.Watched = false;

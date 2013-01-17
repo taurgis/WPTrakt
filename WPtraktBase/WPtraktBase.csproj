@@ -83,7 +83,7 @@
     <Compile Include="Model\Trakt\Request\RatingAuth.cs" />
     <Compile Include="Model\Trakt\Request\RegisterAuth.cs" />
     <Compile Include="Model\Trakt\Request\ShoutAuth.cs" />
-    <Compile Include="Model\Trakt\Request\TraktEpisode.cs" />
+    <Compile Include="Model\Trakt\Request\TraktRequestEpisode.cs" />
     <Compile Include="Model\Trakt\Request\TraktMovieRequest.cs" />
     <Compile Include="Model\Trakt\Request\TraktRequestAuth.cs" />
     <Compile Include="Model\Trakt\Request\WatchedAuth.cs" />

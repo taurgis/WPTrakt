@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace WPtrakt.Model.Trakt.Request
+namespace WPtraktBase.Model.Trakt.Request
 {
     [DataContract]
     public class TraktRequestEpisode

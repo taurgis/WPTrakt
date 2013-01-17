@@ -57,9 +57,32 @@ namespace WPtraktBase.DAO
         {
             TraktShow show = await getShowByTVDB(TVDBid);
             foreach (TraktSeason season in show.Seasons)
+            {
+                this.Episodes.DeleteAllOnSubmit(season.SeasonEpisodes);
                 this.Seasons.DeleteOnSubmit(season);
+            }
              this.Shows.DeleteOnSubmit(show);
              this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+        }
+
+        internal void deleteSeasonEpisodes(TraktSeason season)
+        {
+            this.Episodes.DeleteAllOnSubmit(season.SeasonEpisodes);
+            this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+        }
+
+        internal async Task<TraktEpisode[]> GetSeasonFromTrakt(TraktShow show, int season, TraktEpisode[] episodes)
+        {
+            var showClient = new WebClient();
+            String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + show.tvdb_id + "/" + season), AppUser.createJsonStringForAuthentication());
+
+            using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+            {
+                var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
+                episodes = (TraktEpisode[])ser.ReadObject(ms);
+             
+            }
+            return episodes;
         }
 
         private async Task<TraktShow> getShowByTVDBThroughTrakt(String TVDB)

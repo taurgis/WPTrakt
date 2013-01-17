@@ -55,7 +55,17 @@ namespace WPtraktBase.Model.Trakt
         [DataMember(Name = "images")]
         public TraktImage Images
         {
-            get { return _images.Entity; }
+            get
+            {
+                try
+                {
+                    return _images.Entity;
+                }
+                catch (InvalidOperationException)
+                {
+                    return null;
+                }
+            }
             set
             {
                 _images.Entity = value;
@@ -69,6 +79,17 @@ namespace WPtraktBase.Model.Trakt
         [Column]
         [DataMember(Name = "first_aired")]
         public long FirstAired { get; set; }
+
+        public DateTime FirstAiredAsDate
+        {
+            get
+            {
+                DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                time = time.AddSeconds(this.FirstAired);
+
+                return time;
+            }
+        }
 
         [Column]
         [DataMember(Name = "watched")]
@@ -91,7 +112,17 @@ namespace WPtraktBase.Model.Trakt
         [DataMember(Name = "ratings")]
         public TraktRating Ratings
         {
-            get { return _ratings.Entity; }
+            get
+            {
+                try
+                {
+                    return _ratings.Entity;
+                }
+                catch (InvalidOperationException)
+                {
+                    return null;
+                }
+            }
             set
             {
                 _ratings.Entity = value;

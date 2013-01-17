@@ -506,7 +506,7 @@ namespace WPtrakt
         public void RefreshAll()
         {
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
-            App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<CalendarListItemViewModel>();
+            App.ShowViewModel.UnWatchedEpisodeItems = null;
 
             NotifyPropertyChanged("LoadingStatusShow");
             NotifyPropertyChanged("DetailVisibility");

@@ -67,37 +67,18 @@ namespace WPtrakt
             LoadEpisode();
         }
 
-        private void LoadEpisode()
+        private async void LoadEpisode()
         {
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.WorkerReportsProgress = false;
-            worker.WorkerSupportsCancellation = false;
-            worker.DoWork += new DoWorkEventHandler(episodeworker_DoWork);
-
+            
             String id;
             String season;
             String episodeNr;
             NavigationContext.QueryString.TryGetValue("id", out id);
             NavigationContext.QueryString.TryGetValue("season", out season);
             NavigationContext.QueryString.TryGetValue("episode", out episodeNr);
-            String[] paramsString = new String[3];
-
-            paramsString[0] = id;
-            paramsString[1] = season;
-            paramsString[2] = episodeNr;
-
-            worker.RunWorkerAsync(paramsString);
 
             LayoutRoot.Opacity = 1;
-        }
 
-        private async void episodeworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            String id = ((String[])e.Argument)[0];
-            String season = ((String[])e.Argument)[1];
-            String episodeNr = ((String[])e.Argument)[2];
-
-            
             show = await showController.getShowByTVDBID(id);
             episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr, show);
 
@@ -112,6 +93,8 @@ namespace WPtrakt
                 LoadBackgroundImage(show);
                 LoadScreenImage(episode);
             });
+
+            InitAppBar();
         }
 
         private async void LoadSeasons(String TvdbId)
@@ -202,15 +185,15 @@ namespace WPtrakt
             try
             {
                  TraktShout[] shouts = await this.episodeController.getShoutsForEpisode(tvdb,season,episode);
-                 App.MovieViewModel.clearShouts();
+                 App.EpisodeViewModel.clearShouts();
              
                 foreach (TraktShout shout in shouts)
-                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, SubItemText = shout.Shout });
-           
-                if (App.MovieViewModel.ShoutItems.Count == 0)
-                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+                    App.EpisodeViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, SubItemText = shout.Shout });
 
-                App.MovieViewModel.ShoutsLoading = false;
+                if (App.EpisodeViewModel.ShoutItems.Count == 0)
+                    App.EpisodeViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+
+                App.EpisodeViewModel.ShoutsLoading = false;
             }
             catch (WebException)
             {
@@ -285,9 +268,10 @@ namespace WPtrakt
 
         void refreshButton_Click(object sender, EventArgs e)
         {
-            showController.deleteEpisode(this.episode);
+    
             App.EpisodeViewModel.Name = null;
             App.EpisodeViewModel.RefreshAll();
+            showController.deleteEpisode(this.episode);
             LoadEpisode();
         }
 
@@ -375,9 +359,9 @@ namespace WPtrakt
             try
             {
                 if (await episodeController.checkinEpisode(this.show.tvdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
-                    ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
+                   ToastNotification.ShowToast("Episode", "Checked in!");
                 else
-                    ToastNotification.ShowToast("Episode", "Checked in!");
+                   ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
                 InitAppBar();
             }
             catch (WebException)
@@ -410,6 +394,7 @@ namespace WPtrakt
             try
             {
                 await episodeController.markEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
+                ToastNotification.ShowToast("Episode", "Episode marked as watched.");
                 App.EpisodeViewModel.Watched = true;
                 InitAppBar();
             }
@@ -469,8 +454,7 @@ namespace WPtrakt
 
         private void ratingButton_Click(object sender, EventArgs e)
         {
-            IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktWatched.getFolderStatic() + "/" + App.EpisodeViewModel.Tvdb + App.EpisodeViewModel.Season + App.EpisodeViewModel.Number  + ".json");
-           
+         
             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + App.EpisodeViewModel.Imdb + "&year=" + App.EpisodeViewModel.ShowYear + "&title=" + App.EpisodeViewModel.ShowName + "&season=" + App.EpisodeViewModel.Season + "&episode=" + App.EpisodeViewModel.Number, UriKind.Relative));
         }
 
