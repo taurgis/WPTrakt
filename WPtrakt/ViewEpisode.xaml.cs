@@ -487,7 +487,7 @@ namespace WPtrakt
 
         void backtoShowMenuItem_Click(object sender, EventArgs e)
         {
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + App.EpisodeViewModel.Tvdb, UriKind.Relative));
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + this.show.tvdb_id, UriKind.Relative));
         }
 
         #endregion

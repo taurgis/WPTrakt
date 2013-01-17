@@ -17,6 +17,7 @@ using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.Controller;
 using WPtraktBase.Model.Trakt;
+using System.Linq;
 
 namespace WPtrakt
 {
@@ -223,8 +224,6 @@ namespace WPtrakt
         {
             TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
 
-        
-
             if (episodes.Length > 0)
             {
                 Dictionary<String, List<TraktEpisode>> seasonEpisodes = new Dictionary<string, List<TraktEpisode>>();
@@ -246,13 +245,16 @@ namespace WPtrakt
                         break;
                 }
 
-                foreach (String season in seasonEpisodes.Keys)
+                seasonEpisodes.OrderBy(key => key.Value);
+
+                foreach (KeyValuePair<string, List<TraktEpisode>> keyvalue in seasonEpisodes.OrderBy(key => key.Value))
                 {
+
                     CalendarListItemViewModel model = new CalendarListItemViewModel();
-                    model.DateString = "Season " + season;
+                    model.DateString = "Season " + keyvalue.Key;
                     model.Items = new ObservableCollection<ListItemViewModel>();
 
-                    foreach (TraktEpisode episode in seasonEpisodes[season])
+                    foreach (TraktEpisode episode in seasonEpisodes[keyvalue.Key])
                     {
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
