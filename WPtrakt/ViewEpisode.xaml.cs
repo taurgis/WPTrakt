@@ -297,7 +297,9 @@ namespace WPtrakt
             try
             {
                 await episodeController.addEpisodeToWatchlist(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
-                App.EpisodeViewModel.InWatchlist = true;
+                 App.EpisodeViewModel.InWatchlist = true;
+
+                await updateOtherViews();
                 InitAppBar();
             }
             catch (WebException)
@@ -308,6 +310,7 @@ namespace WPtrakt
 
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
+
 
         private void CreateRemoveFromWatchlist(ApplicationBar appBar)
         {
@@ -327,6 +330,7 @@ namespace WPtrakt
                 await episodeController.removeEpisodeFromWatchlist(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
                 ToastNotification.ShowToast("Episode", "Episode removed from watchlist.");
                 App.EpisodeViewModel.InWatchlist = false;
+                await updateOtherViews();
                 InitAppBar();
             }
             catch (WebException)
@@ -396,6 +400,7 @@ namespace WPtrakt
                 await episodeController.markEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
                 ToastNotification.ShowToast("Episode", "Episode marked as watched.");
                 App.EpisodeViewModel.Watched = true;
+                await updateOtherViews();
                 InitAppBar();
             }
             catch (WebException)
@@ -425,6 +430,7 @@ namespace WPtrakt
             {
                 await episodeController.unMarkEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number);
                 App.EpisodeViewModel.Watched = false;
+                await updateOtherViews();
                 ToastNotification.ShowToast("Episode", "Episode unmarked as watched.");
 
                 InitAppBar();
@@ -455,10 +461,20 @@ namespace WPtrakt
         private void ratingButton_Click(object sender, EventArgs e)
         {
          
-            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + App.EpisodeViewModel.Imdb + "&year=" + App.EpisodeViewModel.ShowYear + "&title=" + App.EpisodeViewModel.ShowName + "&season=" + App.EpisodeViewModel.Season + "&episode=" + App.EpisodeViewModel.Number, UriKind.Relative));
+            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + this.show.imdb_id + "&tvdb=" + this.show.tvdb_id + "&year=" + App.EpisodeViewModel.ShowYear + "&title=" + App.EpisodeViewModel.ShowName + "&season=" + App.EpisodeViewModel.Season + "&episode=" + App.EpisodeViewModel.Number, UriKind.Relative));
         }
 
         #endregion
+
+        private async System.Threading.Tasks.Task updateOtherViews()
+        {
+            this.episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(this.show.tvdb_id, this.episode.Season, this.episode.Number, this.show);
+
+            if (App.ShowViewModel != null && App.ShowViewModel.Tvdb.Equals(this.show.tvdb_id))
+            {
+                App.ShowViewModel.updateEpisode(this.episode);
+            }
+        }
 
         private void CreateBackToShowMenuItem(ApplicationBar appBar)
         {

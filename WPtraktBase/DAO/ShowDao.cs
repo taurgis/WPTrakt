@@ -265,26 +265,30 @@ namespace WPtraktBase.DAO
 
         private async void updateEpisode(TraktEpisode traktEpisode)
         {
-            TraktEpisode dbEpisode = await getEpisodeByTVDBThroughTrakt(traktEpisode.Tvdb, traktEpisode.Season, traktEpisode.Number);
-
-            if (dbEpisode != null)
+            try
             {
-                dbEpisode.DownloadTime = traktEpisode.DownloadTime;
-                dbEpisode.EpisodeID = traktEpisode.EpisodeID;
-                dbEpisode.FirstAired = traktEpisode.FirstAired;
-                dbEpisode.Images = traktEpisode.Images;
-                dbEpisode.InWatchlist = traktEpisode.InWatchlist;
-                dbEpisode.MyRating = traktEpisode.MyRating;
-                dbEpisode.MyRatingAdvanced = traktEpisode.MyRatingAdvanced;
-                dbEpisode.Number = traktEpisode.Number;
-                dbEpisode.Overview = traktEpisode.Overview;
-                dbEpisode.Ratings = traktEpisode.Ratings;
-                dbEpisode.Season = traktEpisode.Season;
-                dbEpisode.SeasonID = traktEpisode.SeasonID;
-                dbEpisode.Title = traktEpisode.Title;
-                dbEpisode.Tvdb = traktEpisode.Tvdb;
-                dbEpisode.Watched = traktEpisode.Watched;
+                TraktEpisode dbEpisode = await getEpisodeByTVDBThroughTrakt(traktEpisode.Tvdb, traktEpisode.Season, traktEpisode.Number);
+
+                if (dbEpisode != null)
+                {
+                    dbEpisode.DownloadTime = traktEpisode.DownloadTime;
+                    dbEpisode.EpisodeID = traktEpisode.EpisodeID;
+                    dbEpisode.FirstAired = traktEpisode.FirstAired;
+                    dbEpisode.Images = traktEpisode.Images;
+                    dbEpisode.InWatchlist = traktEpisode.InWatchlist;
+                    dbEpisode.MyRating = traktEpisode.MyRating;
+                    dbEpisode.MyRatingAdvanced = traktEpisode.MyRatingAdvanced;
+                    dbEpisode.Number = traktEpisode.Number;
+                    dbEpisode.Overview = traktEpisode.Overview;
+                    dbEpisode.Ratings = traktEpisode.Ratings;
+                    dbEpisode.Season = traktEpisode.Season;
+                    dbEpisode.SeasonID = traktEpisode.SeasonID;
+                    dbEpisode.Title = traktEpisode.Title;
+                    dbEpisode.Tvdb = traktEpisode.Tvdb;
+                    dbEpisode.Watched = traktEpisode.Watched;
+                }
             }
+            catch (InvalidOperationException) { }
         }
 
         internal async void deleteEpisodeBySeasonInfo(string TVDB, string season, string episode)

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Linq;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization.Json;
@@ -26,12 +24,12 @@ namespace WPtraktBase.Controller
             this.showDao = ShowDao.Instance;
         }
 
-        public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String imdbId, String season, String episode, TraktShow show)
+        public async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String tvdbId, String season, String episode, TraktShow show)
         {
             if (show.Seasons.Count == 0)
             {
                 ShowController showController = new ShowController();
-                TraktSeason[] seasons = await showController.getSeasonsByTVDBID(imdbId);
+                TraktSeason[] seasons = await showController.getSeasonsByTVDBID(tvdbId);
                 foreach (TraktSeason traktSeason in seasons)
                     traktSeason.SeasonEpisodes = new EntitySet<TraktEpisode>();
 
@@ -41,7 +39,7 @@ namespace WPtraktBase.Controller
                 TraktEpisode[] episodes = await showController.getEpisodesOfSeason(show, Int16.Parse(season));
 
             }
-            return await showDao.getEpisodeByTvdbAndSeasonInfo(imdbId, season, episode);
+            return await showDao.getEpisodeByTvdbAndSeasonInfo(tvdbId, season, episode);
         }
        
        
@@ -51,7 +49,7 @@ namespace WPtraktBase.Controller
 
             WatchedEpisodeAuth auth = CreateWatchListAuth(imdbId, title, year, season, episode);
 
-            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
+            String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
             TraktEpisode traktEpisode = await showDao.getEpisodeByTvdbAndSeasonInfo(tvdbid, season, episode);
             traktEpisode.InWatchlist = true;
@@ -187,5 +185,10 @@ namespace WPtraktBase.Controller
             }
         }
 
+
+        public void updateEpisode(TraktEpisode traktEpisode)
+        {
+            showDao.saveEpisode(traktEpisode);
+        }
     }
 }

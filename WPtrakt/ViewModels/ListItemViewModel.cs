@@ -44,6 +44,8 @@ namespace WPtrakt
             {
                 _rating = value;
                 NotifyPropertyChanged("Rating");
+                NotifyPropertyChanged("RatingVisibility");
+                NotifyPropertyChanged("RatingImage");
             }
         }
         private String _numberOfRatings;
@@ -71,6 +73,8 @@ namespace WPtrakt
             {
                 _watched = value;
                 this.NotifyPropertyChanged("SeenVisibility");
+                this.NotifyPropertyChanged("ContextMarkAsWatchedVisibility");
+                this.NotifyPropertyChanged("ContextUnMarkAsWatchedVisibility");
             }
         }
 
@@ -86,6 +90,8 @@ namespace WPtrakt
                 _inWatchList = value;
                 this.NotifyPropertyChanged("InWatchList");
                 this.NotifyPropertyChanged("WatchlistVisibility");
+                this.NotifyPropertyChanged("ContextWatchlist");
+                this.NotifyPropertyChanged("ContextUnWatchlist");
             }
         }
 
@@ -99,6 +105,54 @@ namespace WPtrakt
                     return "Collapsed";
             }
            
+        }
+
+        public String ContextMarkAsWatchedVisibility
+        {
+            get
+            {
+                if (!this.Watched)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+
+        }
+
+
+        public String ContextWatchlist
+        {
+            get
+            {
+                if (!this.InWatchList)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+
+        }
+
+        public String ContextUnWatchlist
+        {
+            get
+            {
+                if (this.InWatchList)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+
+        }
+
+        public String ContextUnMarkAsWatchedVisibility
+        {
+            get
+            {
+                if (this.Watched)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
         }
 
         public String RatingVisibility

@@ -18,14 +18,15 @@
         <Grid.Background>
             <ImageBrush Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill" />
         </Grid.Background>
+        <ProgressBar  VerticalAlignment="Top"  Width="400" HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}" Name="progressBarLoading" IsIndeterminate="True" />
+
         <controls:Panorama Title="{Binding Name}" Name="MoviePanorama" SelectionChanged="MoviePanorama_SelectionChanged">
             <controls:PanoramaItem Header="Overview" Margin="0, -25" Canvas.ZIndex="2">
                 <Grid Margin="0 -30">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ProgressBar Grid.Column="1" Margin="0 40" Width="400" HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}" Name="progressBarLoading" IsIndeterminate="True" />
-                    <TextBlock Grid.Column="1" Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}"/>
+                     <TextBlock Grid.Column="1" Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}"/>
 
                     <ListBox Grid.Column="1" Margin="0, 0,0,-3" Height="Auto" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
                         <ListBoxItem Height="Auto">

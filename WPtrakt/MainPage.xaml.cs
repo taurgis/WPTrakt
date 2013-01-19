@@ -86,7 +86,6 @@ namespace WPtrakt
                     // Add it to the service to execute
                     ScheduledActionService.Add(task);
                     //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
-
                 }
             }
             catch (InvalidOperationException) { }

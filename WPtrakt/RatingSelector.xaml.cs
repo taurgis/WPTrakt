@@ -43,7 +43,7 @@ namespace WPtrakt
 
         private void RateEpisode()
         {
-             String imdb;
+            String imdb;
             String year;
             String title;
             String season;
@@ -117,7 +117,7 @@ namespace WPtrakt
             ratingClient.UploadStringAsync(new Uri("https://api.trakt.tv/rate/movie/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RatingAuth), auth));
         }
 
-        async void client_UploadRatingStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        private async void client_UploadRatingStringCompleted(object sender, UploadStringCompletedEventArgs e)
         {
             try
             {
@@ -151,6 +151,42 @@ namespace WPtrakt
                         show.MyRating = "Hated";
 
                     controller.updateShow(show);
+                }
+                else if (type.Equals("episode"))
+                {
+                    String imdb;
+                    String tvdbId;
+                    String year;
+                    String title;
+                    String season;
+                    String episode;
+
+                    NavigationContext.QueryString.TryGetValue("imdb", out imdb);
+                    NavigationContext.QueryString.TryGetValue("tvdb", out tvdbId);
+                    NavigationContext.QueryString.TryGetValue("year", out year);
+                    NavigationContext.QueryString.TryGetValue("title", out title);
+                    NavigationContext.QueryString.TryGetValue("season", out season);
+                    NavigationContext.QueryString.TryGetValue("episode", out episode);
+
+                    Int16 rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
+
+                    EpisodeController controller = new EpisodeController();
+                    ShowController showController = new ShowController();
+
+                    TraktShow show = await showController.getShowByTVDBID(tvdbId);
+                    TraktEpisode traktEpisode = await controller.getEpisodeByTvdbAndSeasonInfo(tvdbId, season, episode, show);
+                    traktEpisode.MyRatingAdvanced = rating;
+                    if (rating > 5)
+                        traktEpisode.MyRating = "Loved";
+                    else
+                        traktEpisode.MyRating = "Hated";
+
+                    controller.updateEpisode(traktEpisode);
+
+                    if (App.ShowViewModel != null && App.ShowViewModel.Tvdb.Equals(show.tvdb_id))
+                    {
+                        App.ShowViewModel.updateEpisode(traktEpisode);
+                    }
                 }
                 MessageBox.Show("Rated successfull.");
             }

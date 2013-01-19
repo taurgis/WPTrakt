@@ -7,18 +7,15 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Linq;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using WPtrakt.Controllers;
-using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using WPtrakt.Model.Trakt.Request;
 using WPtraktBase.Controller;
 using WPtraktBase.Model.Trakt;
-using System.Linq;
-using System.Threading;
 
 namespace WPtrakt
 {
@@ -82,6 +79,8 @@ namespace WPtrakt
                 {
                     LoadUnwatchedEpisodeData();
                 }
+
+                InitAppBarUnwatched();
             }
             else if (this.ShowPanorama.SelectedIndex == 3)
             {
@@ -153,7 +152,7 @@ namespace WPtrakt
 
         #region Load Episodes
 
-        public void LoadEpisodeData()
+        public async void LoadEpisodeData()
         {
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             App.ShowViewModel.RefreshEpisodes();
@@ -161,58 +160,34 @@ namespace WPtrakt
             {
                 if (App.ShowViewModel.currentSeason <= this.Show.Seasons.Count)
                 {
-                        BackgroundWorker episodesWorker = new BackgroundWorker();
-                        episodesWorker.WorkerReportsProgress = false;
-                        episodesWorker.WorkerSupportsCancellation = false;
-                        episodesWorker.DoWork += new DoWorkEventHandler(episodesWorker_DoWork);
+                    TraktEpisode[] episodes = await this.showController.getEpisodesOfSeason(Show, App.ShowViewModel.currentSeason);
 
-                        episodesWorker.RunWorkerAsync();
+                    foreach (TraktEpisode episodeIt in episodes)
+                    {
+                        episodeIt.Tvdb = this.Show.tvdb_id;
+                        TraktEpisode episode = episodeIt;
+                      
+                        App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                  
+                    }
+
+                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
+                    App.ShowViewModel.RefreshEpisodes();
                 }
             }
-        }
-
-        private async void episodesWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            TraktEpisode[] episodes = await this.showController.getEpisodesOfSeason(this.Show, App.ShowViewModel.currentSeason);
-
-            foreach (TraktEpisode episodeIt in episodes)
-            {
-                episodeIt.Tvdb = this.Show.tvdb_id;
-                TraktEpisode episode = episodeIt;
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
-                });
-            }
-
-            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-            {
-                App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
-                App.ShowViewModel.RefreshEpisodes();
-            });
         }
 
         #endregion
 
         #region Load Unwatched Episodes
 
-        public void LoadUnwatchedEpisodeData()
+        private async void LoadUnwatchedEpisodeData()
         {
             App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<CalendarListItemViewModel>();
             App.ShowViewModel.LoadingUnwatched = true;
             App.ShowViewModel.RefreshUnwatchedEpisodes();
             
-            BackgroundWorker episodesWorker = new BackgroundWorker();
-            episodesWorker.WorkerReportsProgress = false;
-            episodesWorker.WorkerSupportsCancellation = false;
-            episodesWorker.DoWork += new DoWorkEventHandler(unwatchedEpisodesWorker_DoWork);
-
-            episodesWorker.RunWorkerAsync();
-        }
-
-        private async void unwatchedEpisodesWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
+         TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
 
             if (episodes.Length > 0)
             {
@@ -245,32 +220,22 @@ namespace WPtrakt
 
                     foreach (TraktEpisode episode in seasonEpisodes[keyvalue.Key])
                     {
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
-                        });
+                       model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
                     }
 
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                       {
-                           App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
-                       });
+                    App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
+
                 }
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
+
                     App.ShowViewModel.LoadingUnwatched = false;
                     App.ShowViewModel.RefreshUnwatchedEpisodes();
-                });
             }
             else
             {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
+
                     App.ShowViewModel.LoadingUnwatched = false;
                     NoUnWatchedEpisodes.Visibility = System.Windows.Visibility.Visible;
-                });
             }
-           
         }
 
         #endregion
@@ -783,6 +748,35 @@ namespace WPtrakt
 
         #endregion
 
+        #region Unwatched AppBar
+        private void InitAppBarUnwatched()
+        {
+
+            ApplicationBar appBar = new ApplicationBar();
+
+            CreateRefreshUnwatchedEpisodesButton(appBar);
+
+            this.ApplicationBar = appBar;
+        }
+
+        private void CreateRefreshUnwatchedEpisodesButton(ApplicationBar appBar)
+        {
+            ApplicationBarIconButton refreshButton = new ApplicationBarIconButton();
+            refreshButton = new ApplicationBarIconButton(new Uri("Images/appbar.refresh.rest.png", UriKind.Relative));
+            refreshButton.Text = "Refresh";
+            refreshButton.Click += new EventHandler(unwatchedRefreshButton_Click);
+
+            appBar.Buttons.Add(refreshButton);
+        }
+
+        private void unwatchedRefreshButton_Click(object sender, EventArgs e)
+        {
+
+           LoadUnwatchedEpisodeData();
+        }
+
+        #endregion
+
         #region EpisodeContextMenu
 
         private ListItemViewModel lastModel;
@@ -821,6 +815,45 @@ namespace WPtrakt
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
+            lastModel = null;
+        }
+
+
+        private async void RemoveWatchlistEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            try
+            {
+                await episodeController.removeEpisodeFromWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
+
+                lastModel.InWatchList = false;
+                
+                ToastNotification.ShowToast("Show", "Episode removed from watchlist.");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+            lastModel = null;
+        }
+
+        private async void UnSeenEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+            try
+            {
+                await episodeController.unMarkEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
+                lastModel.Watched = false;
+                ToastNotification.ShowToast("Show", "Episode unmarked as watched.");
+            }
+            catch (WebException)
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             lastModel = null;
         }
 
@@ -877,7 +910,5 @@ namespace WPtrakt
             App.ShowViewModel = null;
             Animation.FadeOut(LayoutRoot);
         }
-
-        
     }
 }

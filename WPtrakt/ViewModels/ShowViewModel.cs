@@ -7,13 +7,9 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Windows;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
-using WPtrakt.Model.Trakt;
-using WPtraktBase.Controller;
-using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
@@ -49,6 +45,43 @@ namespace WPtrakt
 
             this.ShoutItems.Add(model);
             NotifyPropertyChanged("ShoutItems");
+        }
+
+        public void updateEpisode(TraktEpisode traktEpisode)
+        {
+            foreach (ListItemViewModel model in EpisodeItems)
+            {
+                if (!String.IsNullOrEmpty(model.Season))
+                {
+                    if (model.Season.Equals(traktEpisode.Season) && model.Episode.Equals(traktEpisode.Number))
+                    {
+                        model.Watched = traktEpisode.Watched;
+                        model.InWatchList = traktEpisode.InWatchlist;
+                        model.Rating = traktEpisode.MyRatingAdvanced;
+                    }
+                }
+            }
+
+            if (UnWatchedEpisodeItems != null)
+            {
+                foreach (CalendarListItemViewModel model in UnWatchedEpisodeItems)
+                {
+                    foreach (ListItemViewModel subModel in model.Items)
+                    {
+                        if (!String.IsNullOrEmpty(subModel.Season))
+                        {
+                            if (subModel.Season.Equals(traktEpisode.Season) && subModel.Episode.Equals(traktEpisode.Number))
+                            {
+                                if (traktEpisode.Watched)
+                                {
+                                    model.Items.Remove(subModel);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         #region Getters/Setters

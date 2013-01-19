@@ -12,14 +12,15 @@
         <Grid.Background>
             <ImageBrush  Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill"  />
         </Grid.Background>
+        <ProgressBar VerticalAlignment="Top" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusEpisode}" Name="progressBarLoading" IsIndeterminate="True" />
+
         <controls:Panorama  Title="{Binding Name}" Name="EpisodePanorama" SelectionChanged="EpisodePanorama_SelectionChanged">
             <controls:PanoramaItem Header="Overview" Margin="0, -25">
                 <Grid Margin="0 -30">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusEpisode}" Name="progressBarLoading" IsIndeterminate="True" />
-                    <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusEpisode}"/>
+                     <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusEpisode}"/>
                     <ListBox Margin="0, 0,0,-3" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
                         <ListBoxItem Height="Auto" >
                             <StackPanel>
