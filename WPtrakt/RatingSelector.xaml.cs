@@ -150,7 +150,7 @@ namespace WPtrakt
                     else
                         show.MyRating = "Hated";
 
-                    controller.updateShow(show);
+                    await controller.updateShow(show);
                 }
                 else if (type.Equals("episode"))
                 {
@@ -181,16 +181,23 @@ namespace WPtrakt
                     else
                         traktEpisode.MyRating = "Hated";
 
-                    controller.updateEpisode(traktEpisode);
-
-                    if (App.ShowViewModel != null && !String.IsNullOrEmpty(App.ShowViewModel.Tvdb) && App.ShowViewModel.Tvdb.Equals(show.tvdb_id))
+                    if (await controller.updateEpisode(traktEpisode))
                     {
-                        App.ShowViewModel.updateEpisode(traktEpisode);
+
+                        if (App.ShowViewModel != null && !String.IsNullOrEmpty(App.ShowViewModel.Tvdb) && App.ShowViewModel.Tvdb.Equals(show.tvdb_id))
+                        {
+                            App.ShowViewModel.updateEpisode(traktEpisode);
+                        }
+
+                        if (App.EpisodeViewModel != null && App.EpisodeViewModel.Tvdb.Equals(show.tvdb_id))
+                        {
+                            App.EpisodeViewModel.MyRatingAdvanced = rating;
+                        }
                     }
-
-                    if (App.EpisodeViewModel != null && App.EpisodeViewModel.Tvdb.Equals(show.tvdb_id))
+                    else
                     {
-                        App.EpisodeViewModel.MyRatingAdvanced = rating;
+                        ErrorManager.ShowConnectionErrorPopup();
+                        NavigationService.GoBack();
                     }
                 }
                 MessageBox.Show("Rated successfull.");

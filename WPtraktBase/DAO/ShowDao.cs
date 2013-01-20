@@ -69,6 +69,7 @@ namespace WPtraktBase.DAO
                     TraktShow show = this.Shows.Where(t => t.tvdb_id == TVDB).FirstOrDefault();
 
                     Debug.WriteLine("Show " + show.Title + " fetched from DB.");
+
                     return show;
                 }
                 else
@@ -77,11 +78,13 @@ namespace WPtraktBase.DAO
             catch (OperationCanceledException)
             {
                 Debug.WriteLine("OperationCanceledException in getShowByTVDB(" + TVDB + ").");
+               
                 return null;
             }
             catch (InvalidOperationException)
             {
                 Debug.WriteLine("InvalidOperationException in getShowByTVDB(" + TVDB + ").");
+                
                 return null;
             }
         }
@@ -110,7 +113,7 @@ namespace WPtraktBase.DAO
             }
         }
 
-        internal async void deleteShowByTvdbId(String TVDBid)
+        internal async Task<Boolean> deleteShowByTvdbId(String TVDBid)
         {
             try
             {
@@ -121,14 +124,18 @@ namespace WPtraktBase.DAO
                 this.Shows.DeleteOnSubmit(show);
 
                 this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+
+                return true;
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in deleteShowByTvdbId(" + TVDBid + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in deleteShowByTvdbId(" + TVDBid + ")."); }
+
+            return false;
         }
 
-        internal void deleteSeasonEpisodes(TraktSeason season)
+        internal Boolean deleteSeasonEpisodes(TraktSeason season)
         {
             if (season.SeasonEpisodes != null && season.SeasonEpisodes.Count > 0)
             {
@@ -137,12 +144,16 @@ namespace WPtraktBase.DAO
                     this.Episodes.DeleteAllOnSubmit(this.Episodes.Where(t => (t.Tvdb == season.SeasonEpisodes[0].Tvdb) && (t.Season == season.Season)));
                     season.SeasonEpisodes = new EntitySet<TraktEpisode>();
                     this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+
+                    return true;
                 }
                 catch (OperationCanceledException)
                 { Debug.WriteLine("OperationCanceledException in deleteSeasonEpisodes(" + season.Season + ")."); }
                 catch (InvalidOperationException)
                 { Debug.WriteLine("InvalidOperationException in deleteSeasonEpisodes(" + season.Season + ")."); }
             }
+
+            return false;
         }
 
 
@@ -158,7 +169,7 @@ namespace WPtraktBase.DAO
                     var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
                     episodes = (TraktEpisode[])ser.ReadObject(ms);
                     Debug.WriteLine("Fetched season " + season + " of show " + show.Title + " from Trakt.");
-                    AddEpisodesToShowSeason(show, episodes, season);
+                    await AddEpisodesToShowSeason(show, episodes, season);
                 }
                 return episodes;
             }
@@ -190,7 +201,7 @@ namespace WPtraktBase.DAO
                     show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
                     show.Seasons = new EntitySet<TraktSeason>();
 
-                    saveShow(show);
+                    await saveShow(show);
                     Debug.WriteLine("Show " + show.Title + " fetched from Trakt Server.");
                     return show;
                 }
@@ -203,7 +214,7 @@ namespace WPtraktBase.DAO
             return null;
         }
 
-        internal void saveSeasons(TraktSeason[] seasons, String TVDB)
+        internal Boolean saveSeasons(TraktSeason[] seasons, String TVDB)
         {
             try
             {
@@ -213,14 +224,18 @@ namespace WPtraktBase.DAO
                     this.Seasons.InsertOnSubmit(season);
                 }
                 this.SubmitChanges();
+
+                return true;
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in saveSeasons(" + seasons.Length + ", " + TVDB + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in saveSeasons(" + seasons.Length + ", " + TVDB + ")."); }
+
+            return false;
         }
 
-        internal void saveShow(TraktShow traktShow)
+        internal async Task<Boolean> saveShow(TraktShow traktShow)
         {
             try
             {
@@ -229,7 +244,9 @@ namespace WPtraktBase.DAO
 
                 if (this.Shows.Where(t => t.tvdb_id == traktShow.tvdb_id).Count() > 0)
                 {
-                    updateShow(traktShow);
+                    if (!await updateShow(traktShow))
+                        return false;
+
                     Debug.WriteLine("Show " + traktShow.Title + " updated to DB.");
                 }
                 else
@@ -239,14 +256,18 @@ namespace WPtraktBase.DAO
                 }
 
                 this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+
+                return true;
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in saveShow(" + traktShow.Title + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in saveShow(" + traktShow.Title + ")."); }
+
+            return false;
         }
 
-        private async void updateShow(TraktShow traktShow)
+        private async Task<Boolean> updateShow(TraktShow traktShow)
         {
             try
             {
@@ -270,11 +291,15 @@ namespace WPtraktBase.DAO
                 dbShow.Watchers = traktShow.Watchers;
                 dbShow.year = traktShow.year;
                 dbShow.Seasons = traktShow.Seasons;
+
+                return true;
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in updateShow(" + traktShow.Title + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in updateShow(" + traktShow.Title + ")."); }
+
+            return false;
         }
 
         internal async Task<TraktSeason[]> getSeasonsForTvShowByTVDBID(String TVDB)
@@ -297,7 +322,7 @@ namespace WPtraktBase.DAO
             return new TraktSeason[0];
         }
 
-        internal void AddEpisodesToShowSeason(TraktShow show, TraktEpisode[] episodes, int SeasonNumber)
+        internal async Task<Boolean> AddEpisodesToShowSeason(TraktShow show, TraktEpisode[] episodes, int SeasonNumber)
         {
             foreach (TraktSeason season in show.Seasons)
             {
@@ -313,7 +338,7 @@ namespace WPtraktBase.DAO
                 }
             }
 
-            saveShow(show);
+            return await saveShow(show);
         }
 
         internal TraktEpisode[] getUnwatchedEpisodesForShow(String TVDB)
@@ -337,15 +362,14 @@ namespace WPtraktBase.DAO
             try
             {
                 WebClient watchlistClient = new WebClient();
-
                 WatchlistAuth auth = CreateWatchListAuth(IMDBID, title, year);
 
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
 
                 TraktShow show = await getShowByTVDB(TVDBID);
                 show.InWatchlist = true;
-                saveShow(show);
-                return true;
+
+                return await saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in addShowToWatchlist(" + TVDBID + ", " + IMDBID + ", " + title + ", " + year + ")."); }
@@ -367,8 +391,8 @@ namespace WPtraktBase.DAO
 
                 TraktShow show = await getShowByTVDB(TVDBID);
                 show.InWatchlist = false;
-                saveShow(show);
-
+               
+                return await saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in removeShowFromWatchlist(" + TVDBID + ", " + IMDBID + ", " + title + ", " + year + ")."); }
@@ -404,9 +428,7 @@ namespace WPtraktBase.DAO
 
                 TraktShow show = getShowByIMDB(IMDBID);
                 show.Watched = true;
-                saveShow(show);
-
-                return true;
+                return await saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in markShowAsSeen(" + IMDBID + ", " + title + ", " + year + ")."); }
@@ -435,9 +457,7 @@ namespace WPtraktBase.DAO
                     episode.Watched = true;
                 }
 
-                saveShow(show);
-
-                return true;
+                return await saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in markShowSeasonAsSeen(" + show.Title + ", " + season + ")."); }
@@ -562,7 +582,8 @@ namespace WPtraktBase.DAO
                     }
 
                     tEpisode.Tvdb = TVDB;
-                    this.saveEpisode(tEpisode);
+                    
+                    await saveEpisode(tEpisode);
 
                     Debug.WriteLine("Episode " + tEpisode.Title + " fetched from Trakt server.");
                     return tEpisode;
@@ -576,7 +597,7 @@ namespace WPtraktBase.DAO
             return null;
         }
 
-        internal void saveEpisode(TraktEpisode traktEpisode)
+        internal async Task<Boolean> saveEpisode(TraktEpisode traktEpisode)
         {
             try
             {
@@ -585,7 +606,7 @@ namespace WPtraktBase.DAO
 
                 if (this.Episodes.Where(t => (t.Tvdb == traktEpisode.Tvdb) && (t.Season == traktEpisode.Season) && (t.Number == traktEpisode.Number)).Count() > 0)
                 {
-                    updateEpisode(traktEpisode);
+                    await updateEpisode(traktEpisode);
                     Debug.WriteLine("Episode " + traktEpisode.Title + " updated to DB.");
                 }
                 else
@@ -595,14 +616,18 @@ namespace WPtraktBase.DAO
                 }
 
                 this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+
+                return true;
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in saveEpisode(" + traktEpisode.Title + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in saveEpisode(" + traktEpisode.Title + ")."); }
+
+            return false;
         }
 
-        private async void updateEpisode(TraktEpisode traktEpisode)
+        private async Task<Boolean> updateEpisode(TraktEpisode traktEpisode)
         {
             try
             {
@@ -625,25 +650,33 @@ namespace WPtraktBase.DAO
                     dbEpisode.Title = traktEpisode.Title;
                     dbEpisode.Tvdb = traktEpisode.Tvdb;
                     dbEpisode.Watched = traktEpisode.Watched;
+
+                    return true;
                 }
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in updateEpisode(" + traktEpisode.Title + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in updateEpisode(" + traktEpisode.Title + ")."); }
+
+            return false;
         }
 
-        internal void deleteEpisodeBySeasonInfo(string TVDBID, string season, string episode)
+        internal Boolean deleteEpisodeBySeasonInfo(string TVDBID, string season, string episode)
         {
             try
             {
                 this.Episodes.DeleteAllOnSubmit(this.Episodes.Where(t => (t.Tvdb == TVDBID) && (t.Season == season) && (t.Number == episode)));
                 this.SubmitChanges(ConflictMode.FailOnFirstConflict);
+
+                return true;
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in deleteEpisodeBySeasonInfo(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in deleteEpisodeBySeasonInfo(" + TVDBID + ", " + season + ", " + episode + ")."); }
+
+            return false;
         }
 
         #region Watchlist
@@ -660,9 +693,8 @@ namespace WPtraktBase.DAO
 
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(IMDBID, season, episode);
                 traktEpisode.InWatchlist = true;
-                saveEpisode(traktEpisode);
 
-                return true;
+                return await saveEpisode(traktEpisode);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in addEpisodeToWatchlist(" + TVDBID + ", " + season + ", " + episode + ")."); }
@@ -684,9 +716,7 @@ namespace WPtraktBase.DAO
 
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.InWatchlist = false;
-                saveEpisode(traktEpisode);
-
-                return true;
+                return await saveEpisode(traktEpisode);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in removeEpisodeFromWatchlist(" + TVDBID + ", " + season + ", " + episode + ")."); }
@@ -762,14 +792,14 @@ namespace WPtraktBase.DAO
 
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.Watched = true;
-                saveEpisode(traktEpisode);
 
-                return true;
+                return await saveEpisode(traktEpisode);
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in markEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in markEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }
+           
             return false;
         }
 
@@ -784,9 +814,8 @@ namespace WPtraktBase.DAO
 
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.Watched = false;
-                saveEpisode(traktEpisode);
-
-                return true;
+                
+                return await saveEpisode(traktEpisode);
             }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in unMarkEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }

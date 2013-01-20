@@ -33,11 +33,7 @@ namespace WPtraktBase.Controller
                 foreach (TraktSeason traktSeason in seasons)
                     traktSeason.SeasonEpisodes = new EntitySet<TraktEpisode>();
 
-
-                showController.AddSeasonsToShow(show, seasons);
-
-                TraktEpisode[] episodes = await showController.getEpisodesOfSeason(show, Int16.Parse(season));
-
+                await showController.AddSeasonsToShow(show, seasons);
             }
 
             return await showDao.getEpisodeByTvdbAndSeasonInfo(tvdbId, season, episode);
@@ -121,9 +117,9 @@ namespace WPtraktBase.Controller
             return await showDao.getShoutsForEpisode(TVDBID, season, episode);
         }
 
-        public void updateEpisode(TraktEpisode traktEpisode)
+        public async Task<Boolean> updateEpisode(TraktEpisode traktEpisode)
         {
-            showDao.saveEpisode(traktEpisode);
+            return await showDao.saveEpisode(traktEpisode);
         }
     }
 }

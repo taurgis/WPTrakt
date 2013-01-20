@@ -147,7 +147,7 @@ namespace WPtrakt
                 foreach (TraktSeason season in seasons)
                     season.SeasonEpisodes = new EntitySet<TraktEpisode>();
 
-                this.showController.AddSeasonsToShow(this.Show, seasons);
+                await this.showController.AddSeasonsToShow(this.Show, seasons);
 
                 App.ShowViewModel.NumberOfSeasons = (Int16)this.Show.Seasons.Count;
             }
@@ -460,7 +460,7 @@ namespace WPtrakt
             appBar.Buttons.Add(refreshButton);
         }
 
-        private void refreshButton_Click(object sender, EventArgs e)
+        private async void refreshButton_Click(object sender, EventArgs e)
         {
             if (!this.LoadingActive)
             {
@@ -471,8 +471,10 @@ namespace WPtrakt
                 App.ShowViewModel.Name = null;
                 App.ShowViewModel.RefreshAll();
 
-                showController.deleteShow(this.Show);
-                LoadShow(tvdbId);
+                if (await showController.deleteShow(this.Show))
+                {
+                    LoadShow(tvdbId);
+                }
 
                 this.LoadingActive = false;
             }

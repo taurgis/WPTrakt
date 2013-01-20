@@ -54,7 +54,7 @@ namespace WPtraktBase.Controller
             }
         }
 
-        public void AddSeasonsToShow(TraktShow show, TraktSeason[] seasons)
+        public async Task<Boolean> AddSeasonsToShow(TraktShow show, TraktSeason[] seasons)
         {
             if (show != null && seasons != null)
             {
@@ -69,24 +69,30 @@ namespace WPtraktBase.Controller
                     }
                 }
 
-                showDao.saveShow(show);
+                return await showDao.saveShow(show);
             }
+
+            return false;
         }
 
-        public void deleteShow(TraktShow show)
+        public async Task<Boolean> deleteShow(TraktShow show)
         {
             if (show != null)
             {
-                showDao.deleteShowByTvdbId(show.tvdb_id);
+                return await showDao.deleteShowByTvdbId(show.tvdb_id);
             }
+
+            return false;
         }
 
-        public void updateShow(TraktShow show)
+        public async Task<Boolean> updateShow(TraktShow show)
         {
             if (show != null)
             {
-                showDao.saveShow(show);
+                return await showDao.saveShow(show);
             }
+
+            return false;
         }
 
         public async Task<Boolean> removeShowFromWatchlist(String TVDBID, String IMDBID, String title, Int16 year)
@@ -123,7 +129,7 @@ namespace WPtraktBase.Controller
                     {
                         showDao.deleteSeasonEpisodes(currentSeason);
                         episodes = await showDao.getSeasonFromTrakt(show, season, episodes);
-                        showDao.AddEpisodesToShowSeason(show, episodes, season);
+                        await showDao.AddEpisodesToShowSeason(show, episodes, season);
                     }
                     else
                     {
@@ -160,7 +166,7 @@ namespace WPtraktBase.Controller
                         if (currentSeason.SeasonEpisodes.Count == 0)
                         {
                             episodes = await showDao.getSeasonFromTrakt(show, season, episodes);
-                            showDao.AddEpisodesToShowSeason(show, episodes, season);
+                            await showDao.AddEpisodesToShowSeason(show, episodes, season);
                         }
                         else
                         {
@@ -171,7 +177,7 @@ namespace WPtraktBase.Controller
                                 {
                                     showDao.deleteSeasonEpisodes(currentSeason);
                                     episodes = await showDao.getSeasonFromTrakt(show, season, episodes);
-                                    showDao.AddEpisodesToShowSeason(show, episodes, season);
+                                    await showDao.AddEpisodesToShowSeason(show, episodes, season);
                                 }
                             }
                         }
