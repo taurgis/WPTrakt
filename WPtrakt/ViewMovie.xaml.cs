@@ -50,31 +50,21 @@ namespace WPtrakt
             this.Loaded += new RoutedEventHandler(ViewMovie_Loaded);
         }
 
-        private void ViewMovie_Loaded(object sender, RoutedEventArgs e)
+        private async void ViewMovie_Loaded(object sender, RoutedEventArgs e)
         {
             String imdbId;
             NavigationContext.QueryString.TryGetValue("id", out imdbId);
 
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.WorkerReportsProgress = false;
-            worker.WorkerSupportsCancellation = false;
-            worker.DoWork += new DoWorkEventHandler(movieworker_DoWork);
-
-            worker.RunWorkerAsync(imdbId);     
-        }
-
-        private async void movieworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            this.Movie = await movieController.getMovieByImdbId(e.Argument.ToString());
+            this.Movie = await movieController.getMovieByImdbId(imdbId);
 
             if (this.Movie != null)
             {
-                this.Movie.Genres = Movie.GenresAsString.Split('|');
-
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                if (!String.IsNullOrEmpty(this.Movie.GenresAsString))
                 {
-                    App.MovieViewModel.UpdateMovieView(this.Movie);
-                });
+                    this.Movie.Genres = Movie.GenresAsString.Split('|');
+                }
+
+                App.MovieViewModel.UpdateMovieView(this.Movie);
 
                 LoadBackgroundImage();
             }
@@ -83,6 +73,7 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
         }
+
 
         #endregion
 
@@ -94,12 +85,12 @@ namespace WPtrakt
             App.MovieViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
             try
             {
-                 TraktShout[] shouts = await this.movieController.getShoutsForMovie(this.Movie.imdb_id);
-                 App.MovieViewModel.clearShouts();
-             
+                TraktShout[] shouts = await this.movieController.getShoutsForMovie(this.Movie.imdb_id);
+                App.MovieViewModel.clearShouts();
+
                 foreach (TraktShout shout in shouts)
                     App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Movie.imdb_id, SubItemText = shout.Shout });
-           
+
                 if (App.MovieViewModel.ShoutItems.Count == 0)
                     App.MovieViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
 
@@ -148,7 +139,7 @@ namespace WPtrakt
                     }
                 }
                 catch (WebException) { }
-                catch (TargetInvocationException){ }
+                catch (TargetInvocationException) { }
             }
         }
 
@@ -159,7 +150,7 @@ namespace WPtrakt
         private void ImdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
             WebBrowserTask task = new WebBrowserTask();
-            task.Uri = new Uri( "http://www.imdb.com/title/" + App.MovieViewModel.Imdb);
+            task.Uri = new Uri("http://www.imdb.com/title/" + App.MovieViewModel.Imdb);
 
             task.Show();
         }
@@ -174,7 +165,7 @@ namespace WPtrakt
 
         private void TrailerButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-   
+
 
             Regex Youtube = new Regex("youtu(?:\\.be|be\\.com)/(?:.*v(?:/|=)|(?:.*/)?)([a-zA-Z0-9-_]+)");
 
@@ -186,11 +177,11 @@ namespace WPtrakt
                 id = youtubeMatch.Groups[1].Value;
 
             WebBrowserTask webBrowserTask = new WebBrowserTask();
-            webBrowserTask.Uri = new Uri("http://www.youtube.com/embed/" + id +"?autoplay=1");
+            webBrowserTask.Uri = new Uri("http://www.youtube.com/embed/" + id + "?autoplay=1");
             webBrowserTask.Show();
         }
 
-        #endregion 
+        #endregion
 
         #region AppBar
 
@@ -273,7 +264,7 @@ namespace WPtrakt
 
         private void RateClick(object sender, EventArgs e)
         {
-             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + App.MovieViewModel.Imdb + "&year=" + App.MovieViewModel.Year + "&title=" + App.MovieViewModel.Name, UriKind.Relative));
+            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + App.MovieViewModel.Imdb + "&year=" + App.MovieViewModel.Year + "&title=" + App.MovieViewModel.Name, UriKind.Relative));
         }
 
         #endregion
@@ -402,10 +393,10 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-       }
+            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+        }
 
-        private  void CreateUnSeenButton(ApplicationBar appBar)
+        private void CreateUnSeenButton(ApplicationBar appBar)
         {
             ApplicationBarIconButton unseeButton = new ApplicationBarIconButton();
             unseeButton = new ApplicationBarIconButton(new Uri("Images/appbar.unseen.rest.png", UriKind.Relative));
@@ -431,9 +422,9 @@ namespace WPtrakt
             }
             catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
-         }
+        }
 
-        #endregion 
+        #endregion
 
         #endregion
 

@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
 using System.Text;
 using WPtrakt.Model.Trakt.Request;
+using WPtraktBase.DAO;
 
 namespace WPtrakt.Model
 {
@@ -226,13 +227,39 @@ namespace WPtrakt.Model
 
             foreach (String file in myIsolatedStorage.GetFileNames())
             {
+
+                try
+                {
+                    if (file.Equals("wptrakt.sdf"))
+                    {
+                        if (MovieDao.Instance.DatabaseExists())
+                        {
+                            try
+                            {
+                                MovieDao.Instance.DeleteDatabase();
+                                MovieDao.Instance.Dispose();
+                                MovieDao.DisposeDB();
+                            }
+                            catch (IOException) { }
+                        }
+
+                        if (ShowDao.Instance.DatabaseExists())
+                        {
+                            try
+                            {
+                            ShowDao.Instance.DeleteDatabase();
+                            ShowDao.Instance.Dispose();
+                            ShowDao.DisposeDB();
+                            }
+                            catch (IOException) { }
+                        }
+                    }
                 
-                     try
-                     {
-                         myIsolatedStorage.DeleteFile(file);
-                     }
-                     catch (IsolatedStorageException) { };
-           
+                    myIsolatedStorage.DeleteFile(file);
+                    
+                }
+                catch (IsolatedStorageException) { };
+
             }
 
             IsolatedStorageSettings.ApplicationSettings["UserName"] = tempUsername;

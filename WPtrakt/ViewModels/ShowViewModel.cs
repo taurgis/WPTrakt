@@ -564,6 +564,8 @@ namespace WPtrakt
             _myRating = show.MyRating;
             _myRatingAdvanced = show.MyRatingAdvanced;
             _watched = show.Watched;
+            _tvdb = show.tvdb_id;
+            _imdb = show.imdb_id;
 
             NotifyPropertyChanged("Name");
             NotifyPropertyChanged("Fanart");

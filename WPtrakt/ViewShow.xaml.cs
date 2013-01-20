@@ -4,7 +4,6 @@ using Microsoft.Phone.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data.Linq;
 using System.IO;
 using System.Linq;
@@ -23,6 +22,7 @@ namespace WPtrakt
     {
         private ShowController showController;
         private EpisodeController episodeController;
+        private Boolean LoadingActive;
 
         private TraktShow Show;
 
@@ -33,6 +33,7 @@ namespace WPtrakt
             DataContext = App.ShowViewModel;
             this.showController = new ShowController();
             this.episodeController = new EpisodeController();
+            this.LoadingActive = false;
             this.Loaded += new RoutedEventHandler(ViewShow_Loaded);
         }
 
@@ -46,7 +47,13 @@ namespace WPtrakt
             {
                 RefreshBottomBar();
             }
-            LoadShow(tvdb);
+
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+                LoadShow(tvdb);
+                this.LoadingActive = false;
+            }
         }
 
         private void MoviePanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -95,39 +102,36 @@ namespace WPtrakt
             }
         }
 
-        #region Load Show 
+        #region Load Show
 
         private async void LoadShow(String tvdb)
         {
             this.Show = await showController.getShowByTVDBID(tvdb);
-            App.ShowViewModel.LoadData(tvdb);  
+
             if (this.Show != null)
             {
+                App.ShowViewModel.LoadData(tvdb);
                 this.Show.Genres = this.Show.GenresAsString.Split('|');
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+
+                App.ShowViewModel.UpdateShowView(this.Show);
+
+
+
+                if (this.Show.Seasons.Count == 0)
                 {
-                    App.ShowViewModel.UpdateShowView(this.Show);
-                }));
+                    LoadSeasons(tvdb);
+                }
+                else
+                {
+                    App.ShowViewModel.NumberOfSeasons = (Int16)this.Show.Seasons.Count;
+                }
+
+                LoadBackgroundImage();
             }
             else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-
-            if (this.Show.Seasons.Count == 0)
-            {
-                LoadSeasons(tvdb);
-            }
-            else
-            {
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    App.ShowViewModel.NumberOfSeasons = (Int16)this.Show.Seasons.Count;
-
-                }));
-            }
-
-            LoadBackgroundImage();
         }
 
 
@@ -138,14 +142,19 @@ namespace WPtrakt
         private async void LoadSeasons(String TvdbId)
         {
             TraktSeason[] seasons = await this.showController.getSeasonsByTVDBID(TvdbId);
-            foreach (TraktSeason season in seasons)
-                season.SeasonEpisodes = new EntitySet<TraktEpisode>();
-
-            this.showController.AddSeasonsToShow(this.Show, seasons);
-            Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+            if (seasons != null)
             {
+                foreach (TraktSeason season in seasons)
+                    season.SeasonEpisodes = new EntitySet<TraktEpisode>();
+
+                this.showController.AddSeasonsToShow(this.Show, seasons);
+
                 App.ShowViewModel.NumberOfSeasons = (Int16)this.Show.Seasons.Count;
-            }));
+            }
+            else
+            {
+                App.ShowViewModel.NumberOfSeasons = 0;
+            }
         }
 
         #endregion
@@ -154,27 +163,40 @@ namespace WPtrakt
 
         public async void LoadEpisodeData()
         {
-            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
-            App.ShowViewModel.RefreshEpisodes();
-            if (this.Show.Seasons.Count > 0)
+            try
             {
-                if (App.ShowViewModel.currentSeason <= this.Show.Seasons.Count)
+                App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+                App.ShowViewModel.RefreshEpisodes();
+                if (this.Show != null && this.Show.Seasons != null && this.Show.Seasons.Count > 0)
                 {
-                    TraktEpisode[] episodes = await this.showController.getEpisodesOfSeason(Show, App.ShowViewModel.currentSeason);
-
-                    foreach (TraktEpisode episodeIt in episodes)
+                    if (App.ShowViewModel.currentSeason <= this.Show.Seasons.Count)
                     {
-                        episodeIt.Tvdb = this.Show.tvdb_id;
-                        TraktEpisode episode = episodeIt;
-                      
-                        App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
-                  
-                    }
+                        TraktEpisode[] episodes = await this.showController.getEpisodesOfSeason(Show, App.ShowViewModel.currentSeason);
+                        if (episodes != null)
+                        {
+                            foreach (TraktEpisode episodeIt in episodes)
+                            {
+                                episodeIt.Tvdb = this.Show.tvdb_id;
+                                TraktEpisode episode = episodeIt;
 
-                    App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
-                    App.ShowViewModel.RefreshEpisodes();
+                                App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+
+                            }
+
+                            App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
+                            App.ShowViewModel.RefreshEpisodes();
+                        }
+                    }
                 }
+
+
             }
+
+            catch (NullReferenceException)
+            { }
+
+
+            RefreshBottomBar();
         }
 
         #endregion
@@ -186,8 +208,8 @@ namespace WPtrakt
             App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<CalendarListItemViewModel>();
             App.ShowViewModel.LoadingUnwatched = true;
             App.ShowViewModel.RefreshUnwatchedEpisodes();
-            
-         TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
+
+            TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
 
             if (episodes.Length > 0)
             {
@@ -220,21 +242,21 @@ namespace WPtrakt
 
                     foreach (TraktEpisode episode in seasonEpisodes[keyvalue.Key])
                     {
-                       model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                        model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
                     }
 
                     App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
 
                 }
 
-                    App.ShowViewModel.LoadingUnwatched = false;
-                    App.ShowViewModel.RefreshUnwatchedEpisodes();
+                App.ShowViewModel.LoadingUnwatched = false;
+                App.ShowViewModel.RefreshUnwatchedEpisodes();
             }
             else
             {
 
-                    App.ShowViewModel.LoadingUnwatched = false;
-                    NoUnWatchedEpisodes.Visibility = System.Windows.Visibility.Visible;
+                App.ShowViewModel.LoadingUnwatched = false;
+                NoUnWatchedEpisodes.Visibility = System.Windows.Visibility.Visible;
             }
         }
 
@@ -245,26 +267,19 @@ namespace WPtrakt
         public async void LoadShoutData(String imdbId)
         {
             App.ShowViewModel.clearShouts();
+
             App.ShowViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
-            try
-            {
-               TraktShout[] shouts = await this.showController.getShoutsForShow(this.Show.imdb_id);
-               App.ShowViewModel.clearShouts();
-              
-                foreach (TraktShout shout in shouts)
-                    App.ShowViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Show.imdb_id, SubItemText = shout.Shout });
 
-                if (App.ShowViewModel.ShoutItems.Count == 0)
-                    App.ShowViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+            TraktShout[] shouts = await this.showController.getShoutsForShow(this.Show.imdb_id);
+            App.ShowViewModel.clearShouts();
 
-                App.ShowViewModel.ShoutsLoaded = true; ;
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { ErrorManager.ShowConnectionErrorPopup(); }
+            foreach (TraktShout shout in shouts)
+                App.ShowViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Show.imdb_id, SubItemText = shout.Shout });
+
+            if (App.ShowViewModel.ShoutItems.Count == 0)
+                App.ShowViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+
+            App.ShowViewModel.ShoutsLoaded = true; ;
         }
 
         #endregion
@@ -308,7 +323,7 @@ namespace WPtrakt
             }
         }
 
-        #endregion 
+        #endregion
 
         #region Taps
 
@@ -331,19 +346,25 @@ namespace WPtrakt
 
         private void SeasonPanel_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            StackPanel seasonPanel = (StackPanel)sender;
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+                StackPanel seasonPanel = (StackPanel)sender;
 
-            short season = Int16.Parse((String)seasonPanel.DataContext);
+                short season = Int16.Parse((String)seasonPanel.DataContext);
 
-            App.ShowViewModel.currentSeason = season;
+                App.ShowViewModel.currentSeason = season;
 
-            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
-            String id;
-            NavigationContext.QueryString.TryGetValue("id", out id);
-            LoadEpisodeData();
+                App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+                String id;
+                NavigationContext.QueryString.TryGetValue("id", out id);
+                LoadEpisodeData();
 
-            EpisodeGrid.Visibility = System.Windows.Visibility.Visible;
-            SeasonGrid.Visibility = System.Windows.Visibility.Collapsed;
+                EpisodeGrid.Visibility = System.Windows.Visibility.Visible;
+                SeasonGrid.Visibility = System.Windows.Visibility.Collapsed;
+
+                this.LoadingActive = false;
+            }
         }
 
         private void TvdbButton_Tap(object sender, System.Windows.Input.GestureEventArgs e)
@@ -376,8 +397,8 @@ namespace WPtrakt
             if (!App.ShowViewModel.InWatchlist)
                 CreateAddToWatchlist(appBar);
             else
-                CreateRemoveFromWatchlist(appBar); 
-            
+                CreateRemoveFromWatchlist(appBar);
+
             CreateRating(appBar);
 
             CreateWatchedButton(appBar, !App.ShowViewModel.Watched);
@@ -420,7 +441,10 @@ namespace WPtrakt
                     UriKind.Relative),
                     NewTileData);
             }
+            catch (InvalidOperationException)
+            {
 
+            }
         }
 
         #region Refresh
@@ -432,19 +456,26 @@ namespace WPtrakt
             refreshButton.Text = "Refresh";
             refreshButton.Click += new EventHandler(refreshButton_Click);
 
+
             appBar.Buttons.Add(refreshButton);
         }
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
-   
-            String tvdbId  = this.Show.tvdb_id;
-        
-            App.ShowViewModel.Name = null;
-            App.ShowViewModel.RefreshAll();
-         
-            showController.deleteShow(this.Show);
-            LoadShow(tvdbId);
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+
+                String tvdbId = this.Show.tvdb_id;
+
+                App.ShowViewModel.Name = null;
+                App.ShowViewModel.RefreshAll();
+
+                showController.deleteShow(this.Show);
+                LoadShow(tvdbId);
+
+                this.LoadingActive = false;
+            }
         }
 
         #endregion
@@ -463,21 +494,19 @@ namespace WPtrakt
 
         private async void disabledAddtoWatchlist_Click(object sender, EventArgs e)
         {
-            try
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (await this.showController.addShowToWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year))
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await this.showController.addShowToWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
                 App.ShowViewModel.InWatchlist = true;
 
                 ToastNotification.ShowToast("Show", "Show added to watchlist.");
 
                 InitAppBarMain();
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
@@ -493,19 +522,18 @@ namespace WPtrakt
 
         private async void removeFromWatchlist_Click(object sender, EventArgs e)
         {
-            try
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (await this.showController.removeShowFromWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year))
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await this.showController.removeShowFromWatchlist(this.Show.tvdb_id, this.Show.imdb_id, this.Show.Title, this.Show.year);
                 ToastNotification.ShowToast("Show", "Show removed from watchlist.");
                 App.ShowViewModel.InWatchlist = false;
                 InitAppBarMain();
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -546,19 +574,18 @@ namespace WPtrakt
 
         private async void WatchedIconButton_Click(object sender, EventArgs e)
         {
-            try
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (await showController.markShowAsSeen(this.Show.imdb_id, this.Show.Title, this.Show.year))
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await showController.markShowAsSeen(this.Show.imdb_id, this.Show.Title, this.Show.year);
                 ToastNotification.ShowToast("Show", "Show marked as watched.");
                 App.ShowViewModel.Watched = true;
                 InitAppBarMain();
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -592,6 +619,8 @@ namespace WPtrakt
 
             nextSeason.Text = "Next";
             appBar.Buttons.Add(nextSeason);
+
+            CreateRefreshSeasonButton(appBar);
             this.ApplicationBar = appBar;
         }
 
@@ -601,26 +630,35 @@ namespace WPtrakt
             watchedMenuItem.Text = "Mark season as seen.";
 
             watchedMenuItem.Click += new EventHandler(SeasonWatchedIconButton_Click);
-             
+
             appBar.MenuItems.Add(watchedMenuItem);
         }
 
         private async void SeasonWatchedIconButton_Click(object sender, EventArgs e)
         {
-            try
+            if (!this.LoadingActive)
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await this.showController.markShowSeasonAsSeen(this.Show, App.ShowViewModel.currentSeason);
-                ToastNotification.ShowToast("Show", "Season marked as watched.");
-                LoadEpisodeData();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+                this.LoadingActive = true;
 
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                if (await this.showController.markShowSeasonAsSeen(this.Show, App.ShowViewModel.currentSeason))
+                {
+                    ToastNotification.ShowToast("Show", "Season marked as watched.");
+                    foreach (ListItemViewModel model in App.ShowViewModel.EpisodeItems)
+                    {
+                        if (!String.IsNullOrEmpty(model.Tvdb))
+                            model.Watched = true;
+                    }
+                }
+                else
+                {
+                    ErrorManager.ShowConnectionErrorPopup();
+                }
+
+                progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+
+                this.LoadingActive = false;
+            }
         }
 
         void showSeasons_Click(object sender, EventArgs e)
@@ -632,39 +670,80 @@ namespace WPtrakt
 
         private void PanoramaItem_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            String id;
-            NavigationContext.QueryString.TryGetValue("id", out id);
-            LoadEpisodeData();
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+
+                String id;
+                NavigationContext.QueryString.TryGetValue("id", out id);
+                LoadEpisodeData();
+
+                this.LoadingActive = false;
+            }
         }
 
 
         private void ApplicationBarIconButton_Click_EpisodeBack(object sender, EventArgs e)
         {
-            if (App.ShowViewModel.currentSeason == 1)
-                App.ShowViewModel.currentSeason = App.ShowViewModel.NumberOfSeasons;
-            else
-                App.ShowViewModel.currentSeason -= 1;
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+                if (App.ShowViewModel.currentSeason == 1)
+                    App.ShowViewModel.currentSeason = App.ShowViewModel.NumberOfSeasons;
+                else
+                    App.ShowViewModel.currentSeason -= 1;
 
-            String id;
-            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
-            NavigationContext.QueryString.TryGetValue("id", out id);
-            LoadEpisodeData();
-            InitAppBarSeasons();
+                String id;
+                App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+                NavigationContext.QueryString.TryGetValue("id", out id);
+
+                LoadEpisodeData();
+                InitAppBarSeasons();
+
+                this.LoadingActive = false;
+            }
         }
 
         private void ApplicationBarIconButton_Click_EpisodeForward(object sender, EventArgs e)
         {
-            if (App.ShowViewModel.currentSeason == App.ShowViewModel.NumberOfSeasons)
-                App.ShowViewModel.currentSeason = 1;
-            else
-                App.ShowViewModel.currentSeason += 1;
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+                if (App.ShowViewModel.currentSeason == App.ShowViewModel.NumberOfSeasons)
+                    App.ShowViewModel.currentSeason = 1;
+                else
+                    App.ShowViewModel.currentSeason += 1;
 
-            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
-            String id;
-            NavigationContext.QueryString.TryGetValue("id", out id);
-            LoadEpisodeData();
+                App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+                String id;
+                NavigationContext.QueryString.TryGetValue("id", out id);
+                LoadEpisodeData();
 
-            InitAppBarSeasons();
+                InitAppBarSeasons();
+                this.LoadingActive = false;
+            }
+        }
+
+        private void CreateRefreshSeasonButton(ApplicationBar appBar)
+        {
+            ApplicationBarMenuItem refreshButton = new ApplicationBarMenuItem();
+
+            refreshButton.Text = "Refresh season";
+            refreshButton.Click += new EventHandler(seasonRefreshButton_Click);
+            appBar.MenuItems.Add(refreshButton);
+        }
+
+        private void seasonRefreshButton_Click(object sender, EventArgs e)
+        {
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+                showController.deleteSeason(this.Show, App.ShowViewModel.currentSeason);
+
+                LoadEpisodeData();
+
+                this.LoadingActive = false;
+            }
         }
 
         #endregion
@@ -706,19 +785,16 @@ namespace WPtrakt
         {
             if (!String.IsNullOrEmpty((ShoutText.Text)))
             {
-               try
+                if (await this.showController.addShoutToShow(ShoutText.Text, this.Show.imdb_id, this.Show.Title, this.Show.year))
                 {
-                    await this.showController.addShoutToShow(ShoutText.Text, this.Show.imdb_id, this.Show.Title, this.Show.year);
                     ToastNotification.ShowToast("Show", "Shout posted.");
                     ShoutText.Text = "";
-
                     this.Focus();
                 }
-                catch (WebException)
+                else
                 {
                     ErrorManager.ShowConnectionErrorPopup();
                 }
-                catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             }
         }
 
@@ -727,28 +803,10 @@ namespace WPtrakt
             this.LoadShoutData(App.ShowViewModel.Tvdb);
         }
 
-        private String LastShout { get; set; }
-        void client_UploadShoutStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
-            {
-                String jsonString = e.Result;
-                ToastNotification.ShowToast("Show", "Shout posted.");
-
-                ShoutText.Text = "";
-
-                this.Focus();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-        }
-
         #endregion
 
         #region Unwatched AppBar
+
         private void InitAppBarUnwatched()
         {
 
@@ -771,8 +829,12 @@ namespace WPtrakt
 
         private void unwatchedRefreshButton_Click(object sender, EventArgs e)
         {
-
-           LoadUnwatchedEpisodeData();
+            if (!this.LoadingActive)
+            {
+                this.LoadingActive = true;
+                LoadUnwatchedEpisodeData();
+                this.LoadingActive = false;
+            }
         }
 
         #endregion
@@ -784,17 +846,16 @@ namespace WPtrakt
         private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            try
+
+            if (await episodeController.markEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
             {
-                await episodeController.markEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
                 lastModel.Watched = true;
                 ToastNotification.ShowToast("Show", "Episode marked as watched.");
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             lastModel = null;
         }
 
@@ -802,18 +863,15 @@ namespace WPtrakt
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
-            try
+            if (await episodeController.addEpisodeToWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
             {
-                await episodeController.addEpisodeToWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
-
                 lastModel.InWatchList = true;
                 ToastNotification.ShowToast("Show", "Episode added to watchlist.");
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             lastModel = null;
         }
@@ -823,19 +881,15 @@ namespace WPtrakt
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
-            try
+            if (await episodeController.removeEpisodeFromWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
             {
-                await episodeController.removeEpisodeFromWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
-
                 lastModel.InWatchList = false;
-                
                 ToastNotification.ShowToast("Show", "Episode removed from watchlist.");
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             lastModel = null;
         }
@@ -843,36 +897,34 @@ namespace WPtrakt
         private async void UnSeenEpisode_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            try
+
+            if (await episodeController.unMarkEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
             {
-                await episodeController.unMarkEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
                 lastModel.Watched = false;
                 ToastNotification.ShowToast("Show", "Episode unmarked as watched.");
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
             lastModel = null;
         }
 
         private async void CheckinEpisode_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            try
+
+            if (await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
             {
-                await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode);
                 ToastNotification.ShowToast("Show", "Checked in!");
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             lastModel = null;
-
         }
 
         #endregion
@@ -891,7 +943,7 @@ namespace WPtrakt
                 ShoutList.Height = 420;
                 EpisodeList.Height = 440;
                 SeasonsList.Width = 400;
-                
+
             }
             else
             {

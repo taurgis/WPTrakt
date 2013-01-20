@@ -183,9 +183,14 @@ namespace WPtrakt
 
                     controller.updateEpisode(traktEpisode);
 
-                    if (App.ShowViewModel != null && App.ShowViewModel.Tvdb.Equals(show.tvdb_id))
+                    if (App.ShowViewModel != null && !String.IsNullOrEmpty(App.ShowViewModel.Tvdb) && App.ShowViewModel.Tvdb.Equals(show.tvdb_id))
                     {
                         App.ShowViewModel.updateEpisode(traktEpisode);
+                    }
+
+                    if (App.EpisodeViewModel != null && App.EpisodeViewModel.Tvdb.Equals(show.tvdb_id))
+                    {
+                        App.EpisodeViewModel.MyRatingAdvanced = rating;
                     }
                 }
                 MessageBox.Show("Rated successfull.");

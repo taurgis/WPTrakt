@@ -293,6 +293,8 @@ namespace WPtrakt
                 if (value != _myRatingAdvanced)
                 {
                     _myRatingAdvanced = value;
+                    NotifyPropertyChanged("MyRatingAdvanced");
+                    NotifyPropertyChanged("RatingString");
                 }
             }
         }
@@ -449,7 +451,7 @@ namespace WPtrakt
         public bool IsDataLoaded
         {
             get;
-            private set;
+            set;
         }
 
         #endregion
@@ -465,6 +467,7 @@ namespace WPtrakt
             this.Number = episode.Number;
             this.Screen = episode.Images.Screen;
             this.Imdb = show.imdb_id;
+            this.Tvdb = show.tvdb_id;
             this._airDate = episode.FirstAired;
             this.Watched = episode.Watched;
             this.InWatchlist = episode.InWatchlist;

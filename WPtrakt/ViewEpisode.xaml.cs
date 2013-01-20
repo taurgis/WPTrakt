@@ -24,6 +24,7 @@ namespace WPtrakt
         private ShowController showController;
         private TraktEpisode episode;
         private TraktShow show;
+        private Boolean LoadingActive;
 
         public ViewEpisode()
         {
@@ -32,6 +33,7 @@ namespace WPtrakt
             DataContext = App.EpisodeViewModel;
             this.episodeController = new EpisodeController();
             this.showController = new ShowController();
+            LoadingActive = false;
             this.Loaded += new RoutedEventHandler(ViewEpisode_Loaded);
         }
 
@@ -39,7 +41,7 @@ namespace WPtrakt
         {
             if (this.EpisodePanorama.SelectedIndex == 1)
             {
-                if (!App.EpisodeViewModel.ShoutsLoading)
+                if (!App.EpisodeViewModel.ShoutsLoading && App.EpisodeViewModel.ShoutItems.Count == 1)
                 {
                     String id;
                     String season;
@@ -64,52 +66,47 @@ namespace WPtrakt
 
         private void ViewEpisode_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadEpisode();
+            if (!App.EpisodeViewModel.IsDataLoaded)
+            {
+                LoadEpisode();
+            }
         }
 
         private async void LoadEpisode()
         {
-            
-            String id;
-            String season;
-            String episodeNr;
-            NavigationContext.QueryString.TryGetValue("id", out id);
-            NavigationContext.QueryString.TryGetValue("season", out season);
-            NavigationContext.QueryString.TryGetValue("episode", out episodeNr);
-
-            LayoutRoot.Opacity = 1;
-
-            show = await showController.getShowByTVDBID(id);
-            episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr, show);
-
-            DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
-            airTime = airTime.AddSeconds(episode.FirstAired);
-
-            int daysSinceRelease = (DateTime.Now - airTime).Days;
-
-            System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+            if (!LoadingActive)
             {
-                App.EpisodeViewModel.UpdateEpisodeView(episode, show);
-                LoadBackgroundImage(show);
-                LoadScreenImage(episode);
-            });
+                LoadingActive = true;
+                String id;
+                String season;
+                String episodeNr;
+                NavigationContext.QueryString.TryGetValue("id", out id);
+                NavigationContext.QueryString.TryGetValue("season", out season);
+                NavigationContext.QueryString.TryGetValue("episode", out episodeNr);
 
-            InitAppBar();
+                LayoutRoot.Opacity = 1;
+
+                show = await showController.getShowByTVDBID(id);
+                episode = await episodeController.getEpisodeByTvdbAndSeasonInfo(id, season, episodeNr, show);
+                if (episode != null)
+                {
+                    DateTime airTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                    airTime = airTime.AddSeconds(episode.FirstAired);
+
+                    int daysSinceRelease = (DateTime.Now - airTime).Days;
+
+                    App.EpisodeViewModel.UpdateEpisodeView(episode, show);
+                    App.EpisodeViewModel.IsDataLoaded = true;
+                    LoadBackgroundImage(show);
+                    LoadScreenImage(episode);
+
+                    InitAppBar();
+                }
+
+                LoadingActive = false;
+            }
         }
 
-        private async void LoadSeasons(String TvdbId)
-        {
-            TraktSeason[] seasons = await this.showController.getSeasonsByTVDBID(TvdbId);
-            foreach (TraktSeason season in seasons)
-                season.SeasonEpisodes = new EntitySet<TraktEpisode>();
-
-            this.showController.AddSeasonsToShow(show, seasons);
-        }
-
-        private async void FetchEpisodesForSeason(string id, String season)
-        {
-             await this.showController.getEpisodesOfSeason(show, Int16.Parse(season));
-        }
 
         #endregion
 
@@ -133,11 +130,7 @@ namespace WPtrakt
                 if (status == System.Net.HttpStatusCode.OK)
                 {
                     Stream str = webResponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        App.EpisodeViewModel.BackgroundImage = ImageController.saveImage(show.tvdb_id + "background.jpg", str, 800, 450, 100);
-                    }));
+                    App.EpisodeViewModel.BackgroundImage = ImageController.saveImage(show.tvdb_id + "background.jpg", str, 1280, 100);
                 }
             }
         }
@@ -164,11 +157,7 @@ namespace WPtrakt
                 if (status == System.Net.HttpStatusCode.OK)
                 {
                     Stream str = webResponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        App.EpisodeViewModel.ScreenImage = ImageController.saveImage(episode.Tvdb + episode.Season + episode.Number + "screenlarge" + ".jpg", str, 318, 90);
-                    }));
+                    App.EpisodeViewModel.ScreenImage = ImageController.saveImage(episode.Tvdb + episode.Season + episode.Number + "screenlarge" + ".jpg", str, 318, 90);
                 }
 
             }
@@ -519,7 +508,7 @@ namespace WPtrakt
 
         private void ShoutsIconButton_Click(object sender, EventArgs e)
         {
-          LoadShoutData(App.EpisodeViewModel.Tvdb, App.EpisodeViewModel.Season, App.EpisodeViewModel.Number);
+          LoadShoutData(this.show.tvdb_id, App.EpisodeViewModel.Season, App.EpisodeViewModel.Number);
         }
 
         #endregion

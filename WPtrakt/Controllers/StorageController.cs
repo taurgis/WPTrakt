@@ -11,7 +11,6 @@ namespace WPtrakt.Controllers
     {
         public static Boolean UserIsHighEndDevice()
         {
-
             // Place call in a try block in case the user is not running the most recent version of the Windows Phone OS and this method call is not supported.
             try
             {
