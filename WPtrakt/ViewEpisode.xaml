@@ -21,7 +21,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                      <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusEpisode}"/>
-                    <ListBox Margin="0, 0,0,-3" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
+                    <ListBox Margin="0, 0,0,-3" Visibility="{Binding DetailVisibility}" >
                         <ListBoxItem Height="Auto" >
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">

@@ -135,7 +135,7 @@ namespace WPtrakt
                     else
                         movie.MyRating = "Hated";
 
-                    dao.saveMovie(movie);
+                    await dao.saveMovie(movie);
                 }
                 else if (type.Equals("show"))
                 {

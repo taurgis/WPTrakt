@@ -170,11 +170,6 @@ namespace WPtrakt
 
         #region AppBar
 
-        private void ListBox_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            InitAppBar();
-        }
-
         private void InitAppBar()
         {
             ApplicationBar appBar = new ApplicationBar();
