@@ -44,6 +44,7 @@
     <Reference Include="Coding4Fun.Phone.Controls">
       <HintPath>.\Coding4Fun.Phone.Controls.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Threading.Tasks">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.12-beta\lib\sl4-windowsphone71\Microsoft.Threading.Tasks.dll</HintPath>
     </Reference>
