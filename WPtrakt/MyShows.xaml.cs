@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
+using WPtraktBase.Controllers;
 
 namespace WPtrakt
 {

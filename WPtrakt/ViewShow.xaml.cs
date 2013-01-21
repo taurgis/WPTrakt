@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Controller;
+using WPtraktBase.Controllers;
 using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
@@ -163,38 +164,29 @@ namespace WPtrakt
 
         public async void LoadEpisodeData()
         {
-            try
+            App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
+            App.ShowViewModel.RefreshEpisodes();
+            if (this.Show != null && this.Show.Seasons != null && this.Show.Seasons.Count > 0)
             {
-                App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
-                App.ShowViewModel.RefreshEpisodes();
-                if (this.Show != null && this.Show.Seasons != null && this.Show.Seasons.Count > 0)
+                if (App.ShowViewModel.currentSeason <= this.Show.Seasons.Count)
                 {
-                    if (App.ShowViewModel.currentSeason <= this.Show.Seasons.Count)
+                    TraktEpisode[] episodes = await this.showController.getEpisodesOfSeason(Show, App.ShowViewModel.currentSeason);
+                    if (episodes != null)
                     {
-                        TraktEpisode[] episodes = await this.showController.getEpisodesOfSeason(Show, App.ShowViewModel.currentSeason);
-                        if (episodes != null)
+                        foreach (TraktEpisode episodeIt in episodes)
                         {
-                            foreach (TraktEpisode episodeIt in episodes)
-                            {
-                                episodeIt.Tvdb = this.Show.tvdb_id;
-                                TraktEpisode episode = episodeIt;
+                            episodeIt.Tvdb = this.Show.tvdb_id;
+                            TraktEpisode episode = episodeIt;
 
-                                App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                            App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
 
-                            }
-
-                            App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
-                            App.ShowViewModel.RefreshEpisodes();
                         }
+
+                        App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
+                        App.ShowViewModel.RefreshEpisodes();
                     }
                 }
-
-
             }
-
-            catch (NullReferenceException)
-            { }
-
 
             RefreshBottomBar();
         }
@@ -235,7 +227,6 @@ namespace WPtrakt
 
                 foreach (KeyValuePair<Int16, List<TraktEpisode>> keyvalue in seasonEpisodes.OrderBy(item => item.Key))
                 {
-
                     CalendarListItemViewModel model = new CalendarListItemViewModel();
                     model.DateString = "Season " + keyvalue.Key;
                     model.Items = new ObservableCollection<ListItemViewModel>();
@@ -246,7 +237,14 @@ namespace WPtrakt
                     }
 
                     App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
+                }
 
+                if (App.ShowViewModel.UnWatchedEpisodeItems.Count() == 0)
+                {
+                    CalendarListItemViewModel model = new CalendarListItemViewModel();
+                    model.DateString = "All done :-(";
+                    model.Items = new ObservableCollection<ListItemViewModel>();
+                    App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
                 }
 
                 App.ShowViewModel.LoadingUnwatched = false;
@@ -288,39 +286,7 @@ namespace WPtrakt
 
         private async void LoadBackgroundImage()
         {
-            String fileName = this.Show.tvdb_id + "background" + ".jpg";
-
-            if (StorageController.doesFileExist(fileName))
-            {
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    App.ShowViewModel.BackgroundImage = ImageController.getImageFromStorage(fileName);
-                }));
-            }
-            else
-            {
-                try
-                {
-                    HttpWebRequest request;
-
-                    request = (HttpWebRequest)WebRequest.Create(new Uri(this.Show.Images.Fanart));
-                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
-
-                    System.Net.HttpStatusCode status = webResponse.StatusCode;
-                    if (status == System.Net.HttpStatusCode.OK)
-                    {
-                        Stream str = webResponse.GetResponseStream();
-
-                        Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            App.ShowViewModel.BackgroundImage = ImageController.saveImage(this.Show.tvdb_id + "background.jpg", str, 800, 100);
-                        }));
-                    }
-                }
-                catch (WebException) { }
-                catch (TargetInvocationException)
-                { }
-            }
+           App.ShowViewModel.BackgroundImage = await showController.getFanartImage(this.Show.tvdb_id, this.Show.Images.Fanart);
         }
 
         #endregion
@@ -605,6 +571,9 @@ namespace WPtrakt
             previousSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeBack);
             previousSeason.Text = "Previous";
 
+            if (this.Show.Seasons.Count() == 1)
+                previousSeason.IsEnabled = false;
+
             appBar.Buttons.Add(previousSeason);
 
             CreateSeasonsWatchedButton(appBar);
@@ -612,7 +581,8 @@ namespace WPtrakt
             ApplicationBarIconButton showSeasons = new ApplicationBarIconButton(new Uri("Images/appbar.phone.numbersign.rest.png", UriKind.Relative));
             showSeasons.Click += new EventHandler(showSeasons_Click);
             showSeasons.Text = "Seasons";
-
+            if (this.Show.Seasons.Count() == 1)
+                showSeasons.IsEnabled = false;
 
             appBar.Buttons.Add(showSeasons);
 
@@ -621,6 +591,9 @@ namespace WPtrakt
 
             nextSeason.Text = "Next";
             appBar.Buttons.Add(nextSeason);
+
+            if (this.Show.Seasons.Count() == 1)
+                nextSeason.IsEnabled = false;
 
             CreateRefreshSeasonButton(appBar);
             this.ApplicationBar = appBar;

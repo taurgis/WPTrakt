@@ -91,8 +91,6 @@
     <Compile Include="Controllers\Animation.cs" />
     <Compile Include="Controllers\ErrorManager.cs" />
     <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
-    <Compile Include="Controllers\ImageController.cs" />
-    <Compile Include="Controllers\StorageController.cs" />
     <Compile Include="Controllers\ToastNotification.cs" />
     <Compile Include="RatingSelector.xaml.cs">
       <DependentUpon>RatingSelector.xaml</DependentUpon>
@@ -184,6 +182,7 @@
     <None Include="Properties\WMAppManifest.xml">
       <SubType>Designer</SubType>
     </None>
+    <None Include="WPtrakt_2013_01_21_13_41_58.sap" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Background.png" />

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
+using WPtraktBase.Controllers;
 
 namespace WPtrakt
 {

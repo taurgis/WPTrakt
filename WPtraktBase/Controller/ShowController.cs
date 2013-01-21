@@ -3,6 +3,7 @@ using System.Data.Linq;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
@@ -250,6 +251,16 @@ namespace WPtraktBase.Controller
 
                 showDao.deleteSeasonEpisodes(traktseason);
             }
+        }
+
+        public async Task<BitmapImage> getFanartImage(String TVDBID, String fanartUrl)
+        {
+            return await showDao.getFanartImage(TVDBID, fanartUrl);
+        }
+
+        public async Task<BitmapImage> getLargeScreenImage(String TVDBID, String season, String episode, String screenUrl)
+        {
+            return await showDao.getLargeScreenImage(TVDBID, season, episode, screenUrl);
         }
     }
 }

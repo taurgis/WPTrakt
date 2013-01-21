@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Controller;
+using WPtraktBase.Controllers;
 using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt

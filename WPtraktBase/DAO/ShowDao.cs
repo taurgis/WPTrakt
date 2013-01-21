@@ -27,9 +27,11 @@ using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
+using WPtraktBase.Controllers;
 using WPtraktBase.Model.Trakt;
 using WPtraktBase.Model.Trakt.Request;
 
@@ -201,8 +203,10 @@ namespace WPtraktBase.DAO
                     show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
                     show.Seasons = new EntitySet<TraktSeason>();
 
-                    await saveShow(show);
+                 
                     Debug.WriteLine("Show " + show.Title + " fetched from Trakt Server.");
+
+                    await saveShow(show);
                     return show;
                 }
             }
@@ -532,6 +536,72 @@ namespace WPtraktBase.DAO
 
         #endregion
 
+        #region Images
+
+        internal async Task<BitmapImage> getFanartImage(String TVDBID, String fanartUrl)
+        {
+            String fileName = TVDBID + "background" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName))
+            {
+                Debug.WriteLine("Fetching background image for " + TVDBID + " from storage.");
+                return ImageController.getImageFromStorage(fileName);
+            }
+            else
+            {
+                try
+                {
+                    HttpWebRequest request;
+
+                    request = (HttpWebRequest)WebRequest.Create(new Uri(fanartUrl));
+                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+
+                    System.Net.HttpStatusCode status = webResponse.StatusCode;
+                    if (status == System.Net.HttpStatusCode.OK)
+                    {
+                        Stream str = webResponse.GetResponseStream();
+
+                       Debug.WriteLine("Fetching background image for " + TVDBID + " from Trakt.");
+                       return ImageController.saveImage(TVDBID + "background.jpg", str, 1280, 100);
+                    }
+                }
+                catch (WebException) { }
+                catch (TargetInvocationException)
+                { }
+            }
+
+            return null;
+        }
+
+        internal async Task<BitmapImage> getLargeScreenImage(String TVDBID, String season, String episode, String screenUrl)
+        {
+            String fileName = TVDBID + season + episode + "screenlarge" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName))
+            {
+                Debug.WriteLine("Fetching large screen image for " + TVDBID + " from storage.");
+                return ImageController.getImageFromStorage(fileName);
+            }
+            else
+            {
+                HttpWebRequest request;
+
+                request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
+                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                System.Net.HttpStatusCode status = webResponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = webResponse.GetResponseStream();
+                    Debug.WriteLine("Fetching large screen image for " + TVDBID + " from Trakt and saving to " + fileName + ".");
+                    return ImageController.saveImage(fileName, str, 318, 90);
+                }
+            }
+
+            return null;
+        }
+
+        #endregion
+
         #endregion
 
         #region Episode
@@ -583,9 +653,9 @@ namespace WPtraktBase.DAO
 
                     tEpisode.Tvdb = TVDB;
                     
-                    await saveEpisode(tEpisode);
-
                     Debug.WriteLine("Episode " + tEpisode.Title + " fetched from Trakt server.");
+
+                    await saveEpisode(tEpisode);
                     return tEpisode;
                 }
             }
@@ -691,7 +761,7 @@ namespace WPtraktBase.DAO
 
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
-                TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(IMDBID, season, episode);
+                TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.InWatchlist = true;
 
                 return await saveEpisode(traktEpisode);

@@ -5,7 +5,7 @@ using System.IO.IsolatedStorage;
 using System.Runtime.Serialization.Json;
 using WPtrakt.Model.Trakt;
 
-namespace WPtrakt.Controllers
+namespace WPtraktBase.Controllers
 {
     public class StorageController
     {
