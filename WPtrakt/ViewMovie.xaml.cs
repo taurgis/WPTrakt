@@ -26,7 +26,7 @@ namespace WPtrakt
         {
             if (this.MoviePanorama.SelectedIndex == 1)
             {
-                if (!App.MovieViewModel.ShoutsLoading)
+                if (!App.MovieViewModel.ShoutsLoading && App.MovieViewModel.ShoutItems.Count == 1)
                 {
                     App.MovieViewModel.ShoutsLoading = true;
                     String id;
@@ -75,7 +75,6 @@ namespace WPtrakt
             }
         }
 
-
         #endregion
 
         #region Load Shouts
@@ -84,25 +83,17 @@ namespace WPtrakt
         {
             App.MovieViewModel.clearShouts();
             App.MovieViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
-            try
-            {
-                TraktShout[] shouts = await this.movieController.getShoutsForMovie(this.Movie.imdb_id);
-                App.MovieViewModel.clearShouts();
 
-                foreach (TraktShout shout in shouts)
-                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Movie.imdb_id, SubItemText = shout.Shout });
+            TraktShout[] shouts = await this.movieController.getShoutsForMovie(this.Movie.imdb_id);
+            App.MovieViewModel.clearShouts();
 
-                if (App.MovieViewModel.ShoutItems.Count == 0)
-                    App.MovieViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+            foreach (TraktShout shout in shouts)
+                App.MovieViewModel.addShout(new ListItemViewModel() { Name = shout.User.Username, ImageSource = shout.User.Avatar, Imdb = this.Movie.imdb_id, SubItemText = shout.Shout });
 
-                App.MovieViewModel.ShoutsLoading = false;
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException)
-            { ErrorManager.ShowConnectionErrorPopup(); }
+            if (App.MovieViewModel.ShoutItems.Count == 0)
+                App.MovieViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
+
+            App.MovieViewModel.ShoutsLoading = false;
         }
 
         #endregion
@@ -111,37 +102,7 @@ namespace WPtrakt
 
         private async void LoadBackgroundImage()
         {
-            String fileName = this.Movie.imdb_id + "background" + ".jpg";
-
-            if (StorageController.doesFileExist(fileName))
-            {
-                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                   {
-                       App.MovieViewModel.BackgroundImage = ImageController.getImageFromStorage(fileName);
-                   }));
-            }
-            else
-            {
-                try
-                {
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(new Uri(this.Movie.Images.Fanart));
-                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
-
-                    System.Net.HttpStatusCode status = webResponse.StatusCode;
-
-                    if (status == System.Net.HttpStatusCode.OK)
-                    {
-                        Stream str = webResponse.GetResponseStream();
-
-                        Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            App.MovieViewModel.BackgroundImage = ImageController.saveImage(this.Movie.imdb_id + "background.jpg", str, 800, 450, 100);
-                        }));
-                    }
-                }
-                catch (WebException) { }
-                catch (TargetInvocationException) { }
-            }
+            App.MovieViewModel.BackgroundImage = await movieController.getFanartImage(this.Movie.imdb_id, this.Movie.Images.Fanart);
         }
 
         #endregion
@@ -283,19 +244,17 @@ namespace WPtrakt
 
         private async void removeFromWatchlist_Click(object sender, EventArgs e)
         {
-            try
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (await this.movieController.removeMovieFromWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await this.movieController.removeMovieFromWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 App.MovieViewModel.InWatchlist = false;
                 ToastNotification.ShowToast("Movie", "Movie removed from watchlist.");
                 InitAppBar();
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -312,21 +271,19 @@ namespace WPtrakt
 
         private async void AddToWatchList_Click(object sender, EventArgs e)
         {
-            try
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (await this.movieController.addMovieToWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await this.movieController.addMovieToWatchlist(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 App.MovieViewModel.InWatchlist = true;
 
                 ToastNotification.ShowToast("Movie", "Movie added to watchlist.");
 
                 InitAppBar();
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
@@ -347,23 +304,16 @@ namespace WPtrakt
 
         private async void checkinButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
 
-                if (await this.movieController.checkinMovie(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
-                    ToastNotification.ShowToast("Movie", "Checked in!");
-                else
-                    ToastNotification.ShowToast("Movie", "There is already a checkin in progress.");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+
+            if (await this.movieController.checkinMovie(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
+                ToastNotification.ShowToast("Movie", "Checked in!");
+            else
+                ToastNotification.ShowToast("Movie", "There is already a checkin in progress or connection problem!");
+
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
-
 
         #endregion Checkin
 
@@ -381,19 +331,17 @@ namespace WPtrakt
 
         private async void SeenClick(object sender, EventArgs e)
         {
-            try
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (await movieController.markMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await movieController.markMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 ToastNotification.ShowToast("Movie", "Movie marked as watched.");
                 App.MovieViewModel.Watched = true;
                 InitAppBar();
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -409,19 +357,18 @@ namespace WPtrakt
 
         private async void unseeButton_Click(object sender, EventArgs e)
         {
-            try
+            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (await this.movieController.unMarkMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
             {
-                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-                await this.movieController.unMarkMovieAsSeen(this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                 ToastNotification.ShowToast("Movie", "Movie unmarked as watched.");
                 App.MovieViewModel.Watched = false;
+
                 InitAppBar();
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
@@ -470,19 +417,17 @@ namespace WPtrakt
         {
             if (!String.IsNullOrEmpty((ShoutText.Text)))
             {
-                try
+                if (await this.movieController.addShoutToMovie(ShoutText.Text, this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
                 {
-                    await this.movieController.addShoutToMovie(ShoutText.Text, this.Movie.imdb_id, this.Movie.Title, this.Movie.year);
                     ToastNotification.ShowToast("Movie", "Shout posted.");
                     ShoutText.Text = "";
 
                     this.Focus();
                 }
-                catch (WebException)
+                else
                 {
                     ErrorManager.ShowConnectionErrorPopup();
                 }
-                catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
             }
         }
 

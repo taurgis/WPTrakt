@@ -187,8 +187,6 @@ namespace WPtrakt
                     }
                 }
             }
-
-            RefreshBottomBar();
         }
 
         #endregion
@@ -236,14 +234,6 @@ namespace WPtrakt
                         model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
                     }
 
-                    App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
-                }
-
-                if (App.ShowViewModel.UnWatchedEpisodeItems.Count() == 0)
-                {
-                    CalendarListItemViewModel model = new CalendarListItemViewModel();
-                    model.DateString = "All done :-(";
-                    model.Items = new ObservableCollection<ListItemViewModel>();
                     App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
                 }
 
@@ -676,7 +666,6 @@ namespace WPtrakt
                 NavigationContext.QueryString.TryGetValue("id", out id);
 
                 LoadEpisodeData();
-                InitAppBarSeasons();
 
                 this.LoadingActive = false;
             }
@@ -697,7 +686,6 @@ namespace WPtrakt
                 NavigationContext.QueryString.TryGetValue("id", out id);
                 LoadEpisodeData();
 
-                InitAppBarSeasons();
                 this.LoadingActive = false;
             }
         }

@@ -255,7 +255,14 @@ namespace WPtraktBase.Controller
 
         public async Task<BitmapImage> getFanartImage(String TVDBID, String fanartUrl)
         {
-            return await showDao.getFanartImage(TVDBID, fanartUrl);
+            if (!String.IsNullOrEmpty(TVDBID))
+            {
+                return await showDao.getFanartImage(TVDBID, fanartUrl);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<BitmapImage> getLargeScreenImage(String TVDBID, String season, String episode, String screenUrl)
