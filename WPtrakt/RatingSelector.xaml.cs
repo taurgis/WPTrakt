@@ -127,15 +127,15 @@ namespace WPtrakt
                     String imdb;
                     Int16 rating = Int16.Parse(this.selector.DataSource.SelectedItem.ToString());
                     NavigationContext.QueryString.TryGetValue("imdb", out imdb);
-                    MovieDao dao = MovieDao.Instance;
-                    TraktMovie movie = await dao.getMovieByIMDB(imdb);
+                    MovieController controller = new MovieController();
+                    TraktMovie movie = await controller.getMovieByImdbId(imdb);
                     movie.MyRatingAdvanced = rating;
                     if (rating > 5)
                         movie.MyRating = "Loved";
                     else
                         movie.MyRating = "Hated";
 
-                    await dao.saveMovie(movie);
+                    controller.updateMovie(movie);
                 }
                 else if (type.Equals("show"))
                 {
@@ -150,7 +150,7 @@ namespace WPtrakt
                     else
                         show.MyRating = "Hated";
 
-                    await controller.updateShow(show);
+                    controller.updateShow(show);
                 }
                 else if (type.Equals("episode"))
                 {
@@ -181,7 +181,7 @@ namespace WPtrakt
                     else
                         traktEpisode.MyRating = "Hated";
 
-                    if (await controller.updateEpisode(traktEpisode))
+                    if (controller.updateEpisode(traktEpisode))
                     {
 
                         if (App.ShowViewModel != null && !String.IsNullOrEmpty(App.ShowViewModel.Tvdb) && App.ShowViewModel.Tvdb.Equals(show.tvdb_id))

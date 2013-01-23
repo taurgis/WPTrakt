@@ -39,6 +39,7 @@ namespace WPtraktBase.DAO
     public class MovieDao : Dao
     {
         private static MovieDao _Instance { get; set; }
+
         public static MovieDao Instance
         {
             get
@@ -55,7 +56,15 @@ namespace WPtraktBase.DAO
             _Instance = null;
         }
 
-        public async Task<TraktMovie> getMovieByIMDB(String IMDB)
+        #region Fetch movie and save movie
+
+        /// <summary>
+        /// Fetches the movie from Trakt when not available in the local database, once fetched 
+        /// the local database will be used to fetch the data without a network connection.
+        /// </summary>
+        /// <param name="IMDB">The IMDB of the movie.</param>
+        /// <returns>The TraktMovie object. If there is a network/database error, NULL will be returned.</returns>
+        internal async Task<TraktMovie> getMovieByIMDB(String IMDB)
         {
             try
             {
@@ -63,13 +72,12 @@ namespace WPtraktBase.DAO
                     this.CreateDatabase();
 
                 if (this.Movies.Where(t => t.imdb_id == IMDB).Count() > 0)
+                {
+                    Debug.WriteLine("Fetching movie " + IMDB + " from DB.");
                     return this.Movies.Where(t => t.imdb_id == IMDB).FirstOrDefault();
+                }
                 else
                     return await getMovieByIMDBThroughTrakt(IMDB);
-            }
-            catch (WebException)
-            {
-                Debug.WriteLine("WebException in getMovieByIMDB(" + IMDB + ").");
             }
             catch (OperationCanceledException)
             {
@@ -83,6 +91,11 @@ namespace WPtraktBase.DAO
             return null;
         }
 
+        /// <summary>
+        /// Fetches the JSON object from https://api.trakt.tv/movie/summary.json/[KEY]
+        /// </summary>
+        /// <param name="IMDB">The IMDB of the movie.</param>
+        /// <returns>The TraktMovie object. If there is a network/database error, NULL will be returned.</returns>
         private async Task<TraktMovie> getMovieByIMDBThroughTrakt(String IMDB)
         {
             try
@@ -93,23 +106,31 @@ namespace WPtraktBase.DAO
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie));
-                    TraktMovie Movie = (TraktMovie)ser.ReadObject(ms);
-                    Movie.DownloadTime = DateTime.Now;
+                    
+                    TraktMovie movie = (TraktMovie)ser.ReadObject(ms);
 
-                    if (Movie.Genres != null && Movie.Genres.Length > 0)
+                    Debug.WriteLine("Fetching movie " + IMDB + " from trakt.");
+                    movie.DownloadTime = DateTime.Now;
+
+                    if (movie.Genres != null && movie.Genres.Length > 0)
                     {
-                        foreach (String genre in Movie.Genres)
-                            Movie.GenresAsString += genre + "|";
+                        foreach (String genre in movie.Genres)
+                            movie.GenresAsString += genre + "|";
 
-                        Movie.GenresAsString = Movie.GenresAsString.Remove(Movie.GenresAsString.Length - 1);
+                        movie.GenresAsString = movie.GenresAsString.Remove(movie.GenresAsString.Length - 1);
                     }
-                    if (await saveMovie(Movie))
+
+                    if (saveMovie(movie))
                     {
-                        return Movie;
+                        return movie;
                     }
                     else
                         return null;
                 }
+            }
+            catch (WebException)
+            {
+                Debug.WriteLine("WebException in getMovieByIMDBThroughTrakt(" + IMDB + ").");
             }
             catch (OperationCanceledException)
             {
@@ -123,21 +144,22 @@ namespace WPtraktBase.DAO
             return null;
         }
 
-        public async Task<Boolean> saveMovie(TraktMovie traktMovie)
+        /// <summary>
+        /// Save/update a movie to the local database.
+        /// </summary>
+        /// <param name="traktMovie">The TraktMovie object.</param>
+        /// <returns>Returns TRUE when saving/updating was successfull. If it fails, FALSE is returned.</returns>
+        internal Boolean saveMovie(TraktMovie traktMovie)
         {
             try
             {
                 if (!this.DatabaseExists())
                     this.CreateDatabase();
 
-                if (this.Movies.Where(t => t.imdb_id == traktMovie.imdb_id).Count() > 0)
-                {
-                    return await updateMovie(traktMovie);
-                }
-                else
-                {
+                if (this.Movies.Where(t => t.imdb_id == traktMovie.imdb_id).Count() == 0)
                     this.Movies.InsertOnSubmit(traktMovie);
-                }
+
+                Debug.WriteLine("Saving movie " + traktMovie.Title + " to DB.");
 
                 this.SubmitChanges(ConflictMode.FailOnFirstConflict);
 
@@ -151,45 +173,20 @@ namespace WPtraktBase.DAO
             return false;
         }
 
-        private async Task<Boolean> updateMovie(TraktMovie traktMovie)
-        {
-            try
-            {
-                TraktMovie dbMovie = await getMovieByIMDB(traktMovie.imdb_id);
-                dbMovie.Certification = traktMovie.Certification;
-                dbMovie.DownloadTime = traktMovie.DownloadTime;
-                dbMovie.Genres = traktMovie.Genres;
-                dbMovie.GenresAsString = traktMovie.GenresAsString;
-                dbMovie.Images = traktMovie.Images;
-                dbMovie.imdb_id = traktMovie.imdb_id;
-                dbMovie.InWatchlist = traktMovie.InWatchlist;
-                dbMovie.MyRating = traktMovie.MyRating;
-                dbMovie.MyRatingAdvanced = traktMovie.MyRatingAdvanced;
-                dbMovie.Overview = traktMovie.Overview;
-                dbMovie.Ratings = traktMovie.Ratings;
-                dbMovie.Released = traktMovie.Released;
-                dbMovie.Runtime = traktMovie.Runtime;
-                dbMovie.Tagline = traktMovie.Tagline;
-                dbMovie.Title = traktMovie.Title;
-                dbMovie.Tmdb = traktMovie.Tmdb;
-                dbMovie.Trailer = traktMovie.Trailer;
-                dbMovie.Url = traktMovie.Url;
-                dbMovie.Watched = traktMovie.Watched;
-                dbMovie.Watchers = traktMovie.Watchers;
-                dbMovie.year = traktMovie.year;
-
-                return true;
-            }
-            catch (OperationCanceledException)
-            { Debug.WriteLine("OperationCanceledException in updateMovie(" + traktMovie.Title + ")."); }
-            catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in updateMovie(" + traktMovie.Title + ")."); }
-
-            return false;
-        }
+        #endregion
 
         #region Watchlist
 
+        /// <summary>
+        /// Adds a movie to the Trakt watchlist through URL https://api.trakt.tv/movie/watchlist/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the movie.</param>
+        /// <param name="title">The name of the movie. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the movie premiered.</param>
+        /// <returns>
+        /// If the movie was successfully added to the watchlist on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> addMovieToWatchlist(String IMDBID, String title, Int16 year)
         {
             try
@@ -198,16 +195,29 @@ namespace WPtraktBase.DAO
                 WatchlistAuth auth = CreateWatchListAuth(IMDBID, title, year);
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
                 TraktMovie movie = await getMovieByIMDB(IMDBID);
+                
                 movie.InWatchlist = true;
-                return await saveMovie(movie);
+                
+                return saveMovie(movie);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in addMovieToWatchlist(" + IMDBID + ", " + title + ")."); }
             catch (TargetInvocationException)
             { Debug.WriteLine("TargetInvocationException in addMovieToWatchlist(" + IMDBID + ", " + title + ")."); }
+
             return false;
         }
 
+        /// <summary>
+        /// Removes a movie from the Trakt watchlist through URL https://api.trakt.tv/movie/unwatchlist/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the movie.</param>
+        /// <param name="title">The name of the movie. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the movie premiered.</param>
+        /// <returns>
+        /// If the movie was successfully removed from the watchlist on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> removeMovieFromWatchlist(String IMDBID, String title, Int16 year)
         {
             try
@@ -216,14 +226,16 @@ namespace WPtraktBase.DAO
                 WatchlistAuth auth = CreateWatchListAuth(IMDBID, title, year);
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
                 TraktMovie movie = await getMovieByIMDB(IMDBID);
+               
                 movie.InWatchlist = false;
 
-                return await saveMovie(movie);
+                return saveMovie(movie);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in removeMovieFromWatchlist(" + IMDBID + ", " + title + ")."); }
             catch (TargetInvocationException)
             { Debug.WriteLine("TargetInvocationException in removeMovieFromWatchlist(" + IMDBID + ", " + title + ")."); }
+           
             return false;
         }
 
@@ -242,44 +254,65 @@ namespace WPtraktBase.DAO
 
         #region Seen
 
+        /// <summary>
+        /// Marks a movie as seen through URL https://api.trakt.tv/movie/seen/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the movie.</param>
+        /// <param name="title">The name of the movie. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the movie premiered.</param>
+        /// <returns>
+        /// If the movie was successfully marked as seen on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> markMovieAsSeen(String IMDBID, String title, Int16 year)
         {
             try
             {
                 WebClient watchlistClient = new WebClient();
                 WatchedAuth auth = createWatchedAuth(IMDBID, title, year);
-
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-
                 TraktMovie movie = await getMovieByIMDB(IMDBID);
-                movie.Watched = true;
-                return await saveMovie(movie);
 
+                movie.Watched = true;
+
+                return saveMovie(movie);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in markMovieAsSeen(" + IMDBID + ", " + title + ")."); }
             catch (TargetInvocationException)
             { Debug.WriteLine("TargetInvocationException in markMovieAsSeen(" + IMDBID + ", " + title + ")."); }
+
             return false;
         }
 
+        /// <summary>
+        /// Unmarks a movie as seen through URL https://api.trakt.tv/movie/unseen/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the movie.</param>
+        /// <param name="title">The name of the movie. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the movie premiered.</param>
+        /// <returns>
+        /// If the movie was successfully unmarked as seen on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> unMarkMovieAsSeen(String IMDBID, String title, Int16 year)
         {
             try
             {
                 WebClient watchlistClient = new WebClient();
                 WatchedAuth auth = createWatchedAuth(IMDBID, title, year);
-
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/unseen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-
                 TraktMovie movie = await getMovieByIMDB(IMDBID);
+
                 movie.Watched = false;
-                return await saveMovie(movie);
+
+                return saveMovie(movie);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in unMarkMovieAsSeen(" + IMDBID + ", " + title + ")."); }
             catch (TargetInvocationException)
             { Debug.WriteLine("TargetInvocationException in unMarkMovieAsSeen(" + IMDBID + ", " + title + ")."); }
+
             return false;
         }
 
@@ -302,29 +335,37 @@ namespace WPtraktBase.DAO
 
         #region Checkin
 
+        /// <summary>
+        /// Checks in a movie through URL https://api.trakt.tv/movie/checkin/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the movie.</param>
+        /// <param name="title">The name of the movie. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the movie premiered.</param>
+        /// <returns>
+        /// If the movie was successfully checked in on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         public async Task<Boolean> checkinMovie(String IMDBID, String title, Int16 year)
         {
             try
             {
                 WebClient checkinClient = new WebClient();
+                String assembly = Assembly.GetExecutingAssembly().FullName;
+                String fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+               
                 CheckinAuth auth = new CheckinAuth();
-
                 auth.imdb_id = IMDBID;
                 auth.Title = title;
                 auth.year = year;
                 auth.AppDate = AppUser.getReleaseDate();
-
-                var assembly = Assembly.GetExecutingAssembly().FullName;
-                var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
                 auth.AppVersion = fullVersionNumber;
-
+                
                 String jsonString = await checkinClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
 
                 if (jsonString.Contains("failure"))
                     return false;
                 else
                     return true;
-
             }
             catch (WebException)
             { Debug.WriteLine("WebException in checkinMovie(" + IMDBID + ", " + title + ")."); }
@@ -337,7 +378,12 @@ namespace WPtraktBase.DAO
 
         #region Shouts
 
-        public async Task<TraktShout[]> getShoutsForMovie(String IMDBID)
+        /// <summary>
+        /// Fetches the shouts for a movie through URL https://api.trakt.tv/movie/shouts.json/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the movie</param>
+        /// <returns>A list of shouts. If there was an error an empty array will be returned.</returns>
+        internal async Task<TraktShout[]> getShoutsForMovie(String IMDBID)
         {
             try
             {
@@ -348,6 +394,7 @@ namespace WPtraktBase.DAO
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
+                    
                     return (TraktShout[])ser.ReadObject(ms);
                 }
             }
@@ -355,10 +402,22 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("WebException in getShoutsForMovie(" + IMDBID + ")."); }
             catch (TargetInvocationException)
             { Debug.WriteLine("TargetInvocationException in getShoutsForMovie(" + IMDBID + ")."); }
+           
             return new TraktShout[0];
         }
 
-        public async Task<Boolean> addShoutToMovie(String shout, String IMDBID, String title, Int16 year)
+        /// <summary>
+        /// Adds a shout to a movie through URL https://api.trakt.tv/shout/movie/[KEY]
+        /// </summary>
+        /// <param name="shout">The shout message.</param>
+        /// <param name="IMDBID">The IMDBID of the movie.</param>
+        /// <param name="title">The name of the movie. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the movie premiered.</param>
+        /// <returns>
+        /// If the shout was successfully added to the movie on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
+        internal async Task<Boolean> addShoutToMovie(String shout, String IMDBID, String title, Int16 year)
         {
             try
             {
@@ -384,6 +443,12 @@ namespace WPtraktBase.DAO
 
         #region Images
 
+        /// <summary>
+        /// Fetches the fanart image from trakt.tv
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the movie.</param>
+        /// <param name="fanartUrl">The URL of the fanart image.</param>
+        /// <returns>A BitmapImage of the fanart.</returns>
         internal async Task<BitmapImage> getFanartImage(String IMDBID, String fanartUrl)
         {
             String fileName = IMDBID + "background" + ".jpg";

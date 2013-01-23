@@ -132,5 +132,15 @@ namespace WPtraktBase.Controller
                 return null;
             }
         }
+
+        public Boolean updateMovie(TraktMovie movie)
+        {
+            if (movie != null)
+            {
+               return movieDao.saveMovie(movie);
+            }
+
+            return false;
+        }
     }
 }

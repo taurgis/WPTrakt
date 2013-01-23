@@ -148,7 +148,7 @@ namespace WPtrakt
                 foreach (TraktSeason season in seasons)
                     season.SeasonEpisodes = new EntitySet<TraktEpisode>();
 
-                await this.showController.AddSeasonsToShow(this.Show, seasons);
+                this.showController.AddSeasonsToShow(this.Show, seasons);
 
                 App.ShowViewModel.NumberOfSeasons = (Int16)this.Show.Seasons.Count;
             }
@@ -883,6 +883,8 @@ namespace WPtrakt
 
             if (await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
             {
+                lastModel.Watched = true;
+               
                 ToastNotification.ShowToast("Show", "Checked in!");
             }
             else

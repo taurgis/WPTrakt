@@ -55,7 +55,7 @@ namespace WPtraktBase.Controller
             }
         }
 
-        public async Task<Boolean> AddSeasonsToShow(TraktShow show, TraktSeason[] seasons)
+        public Boolean AddSeasonsToShow(TraktShow show, TraktSeason[] seasons)
         {
             if (show != null && seasons != null)
             {
@@ -70,7 +70,7 @@ namespace WPtraktBase.Controller
                     }
                 }
 
-                return await showDao.saveShow(show);
+                return showDao.saveShow(show);
             }
 
             return false;
@@ -86,11 +86,11 @@ namespace WPtraktBase.Controller
             return false;
         }
 
-        public async Task<Boolean> updateShow(TraktShow show)
+        public Boolean updateShow(TraktShow show)
         {
             if (show != null)
             {
-                return await showDao.saveShow(show);
+                return showDao.saveShow(show);
             }
 
             return false;
@@ -129,8 +129,8 @@ namespace WPtraktBase.Controller
                     if (lastEpisode.FirstAiredAsDate >= DateTime.UtcNow && NetworkInterface.GetIsNetworkAvailable())
                     {
                         showDao.deleteSeasonEpisodes(currentSeason);
-                        episodes = await showDao.getSeasonFromTrakt(show, season, episodes);
-                        await showDao.AddEpisodesToShowSeason(show, episodes, season);
+                        episodes = await showDao.getSeasonFromTrakt(show, season);
+                        showDao.AddEpisodesToShowSeason(show, episodes, season);
                     }
                     else
                     {
@@ -143,7 +143,7 @@ namespace WPtraktBase.Controller
                 }
                 else
                 {
-                    episodes = await showDao.getSeasonFromTrakt(show, season, episodes);
+                    episodes = await showDao.getSeasonFromTrakt(show, season);
                 }
 
                 return episodes;
@@ -166,8 +166,8 @@ namespace WPtraktBase.Controller
                         TraktSeason currentSeason = showDao.getSeasonFromShow(show, season);
                         if (currentSeason.SeasonEpisodes.Count == 0)
                         {
-                            episodes = await showDao.getSeasonFromTrakt(show, season, episodes);
-                            await showDao.AddEpisodesToShowSeason(show, episodes, season);
+                            episodes = await showDao.getSeasonFromTrakt(show, season);
+                            showDao.AddEpisodesToShowSeason(show, episodes, season);
                         }
                         else
                         {
@@ -177,8 +177,8 @@ namespace WPtraktBase.Controller
                                 if (lastEpisode.FirstAiredAsDate >= DateTime.UtcNow)
                                 {
                                     showDao.deleteSeasonEpisodes(currentSeason);
-                                    episodes = await showDao.getSeasonFromTrakt(show, season, episodes);
-                                    await showDao.AddEpisodesToShowSeason(show, episodes, season);
+                                    episodes = await showDao.getSeasonFromTrakt(show, season);
+                                    showDao.AddEpisodesToShowSeason(show, episodes, season);
                                 }
                             }
                         }

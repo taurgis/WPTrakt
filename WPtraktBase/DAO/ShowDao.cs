@@ -59,67 +59,71 @@ namespace WPtraktBase.DAO
 
         #region Show
 
-        internal async Task<TraktShow> getShowByTVDB(String TVDB)
+        /// <summary>
+        /// Fetches the show from Trakt when not available in the local database, once fetched 
+        /// the local database will be used to fetch the data without a network connection.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <returns>Returns the TraktShow object. If there is a network/database error, NULL will be returned.</returns>
+        internal async Task<TraktShow> getShowByTVDB(String TVDBID)
         {
             try
             {
                 if (!this.DatabaseExists())
                     this.CreateDatabase();
 
-                if (this.Shows.Where(t => t.tvdb_id == TVDB).Count() > 0)
+                if (this.Shows.Where(t => t.tvdb_id == TVDBID).Count() > 0)
                 {
-                    TraktShow show = this.Shows.Where(t => t.tvdb_id == TVDB).FirstOrDefault();
+                    TraktShow show = this.Shows.Where(t => t.tvdb_id == TVDBID).FirstOrDefault();
 
                     Debug.WriteLine("Show " + show.Title + " fetched from DB.");
 
                     return show;
                 }
                 else
-                    return await getShowByTVDBThroughTrakt(TVDB);
+                    return await getShowByTVDBThroughTrakt(TVDBID);
             }
             catch (OperationCanceledException)
-            {
-                Debug.WriteLine("OperationCanceledException in getShowByTVDB(" + TVDB + ").");
-               
-                return null;
-            }
+            { Debug.WriteLine("OperationCanceledException in getShowByTVDB(" + TVDBID + ")."); }
             catch (InvalidOperationException)
-            {
-                Debug.WriteLine("InvalidOperationException in getShowByTVDB(" + TVDB + ").");
-                
-                return null;
-            }
+            { Debug.WriteLine("InvalidOperationException in getShowByTVDB(" + TVDBID + ")."); }
+
+            return null;
         }
 
-        internal TraktShow getShowByIMDB(String IMDB)
+        /// <summary>
+        /// Fetches the show the local database. If it is not available in the database NULL will be returned.
+        /// </summary>
+        /// <param name="IMDBID">The IMDB ID of the show.</param>
+        /// <returns>Returns the TraktShow object. If there is a database error, NULL will be returned.</returns>
+        internal TraktShow getShowByIMDB(String IMDBID)
         {
             try
             {
-                TraktShow show = this.Shows.Where(t => t.imdb_id == IMDB).FirstOrDefault();
+                TraktShow show = this.Shows.Where(t => t.imdb_id == IMDBID).FirstOrDefault();
 
                 Debug.WriteLine("Show " + show.Title + " fetched from DB.");
 
                 return show;
             }
             catch (OperationCanceledException)
-            {
-                Debug.WriteLine("OperationCanceledException in getShowByIMDB(" + IMDB + ").");
-
-                return null;
-            }
+            { Debug.WriteLine("OperationCanceledException in getShowByIMDB(" + IMDBID + ")."); }
             catch (InvalidOperationException)
-            {
-                Debug.WriteLine("InvalidOperationException in getShowByIMDB(" + IMDB + ").");
+            { Debug.WriteLine("InvalidOperationException in getShowByIMDB(" + IMDBID + ")."); }
 
-                return null;
-            }
+            return null;
         }
 
-        internal async Task<Boolean> deleteShowByTvdbId(String TVDBid)
+        /// <summary>
+        /// Removes a show from the database.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID from the show.</param>
+        /// <returns></returns>
+        internal async Task<Boolean> deleteShowByTvdbId(String TVDBID)
         {
             try
             {
-                TraktShow show = await getShowByTVDB(TVDBid);
+                TraktShow show = await getShowByTVDB(TVDBID);
 
                 this.Episodes.DeleteAllOnSubmit(this.Episodes.Where(t => (t.Tvdb == show.tvdb_id)));
                 this.Seasons.DeleteAllOnSubmit(this.Seasons.Where(t => t.Tvdb == show.tvdb_id));
@@ -130,13 +134,22 @@ namespace WPtraktBase.DAO
                 return true;
             }
             catch (OperationCanceledException)
-            { Debug.WriteLine("OperationCanceledException in deleteShowByTvdbId(" + TVDBid + ")."); }
+            { Debug.WriteLine("OperationCanceledException in deleteShowByTvdbId(" + TVDBID + ")."); }
             catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in deleteShowByTvdbId(" + TVDBid + ")."); }
+            { Debug.WriteLine("InvalidOperationException in deleteShowByTvdbId(" + TVDBID + ")."); }
 
             return false;
         }
 
+        /// <summary>
+        /// Removes all episodes from a season, but does not delete the season itself from the show. An empty episode
+        /// list will be put into the season.
+        /// </summary>
+        /// <param name="season">The TraktSeason object</param>
+        /// <returns>
+        /// If all episodes were successfully deleted from the database TRUE is returned. If it fails FALSE
+        /// is returned.
+        /// </returns>
         internal Boolean deleteSeasonEpisodes(TraktSeason season)
         {
             if (season.SeasonEpisodes != null && season.SeasonEpisodes.Count > 0)
@@ -158,39 +171,53 @@ namespace WPtraktBase.DAO
             return false;
         }
 
-
-        internal async Task<TraktEpisode[]> getSeasonFromTrakt(TraktShow show, Int16 season, TraktEpisode[] episodes)
+        /// <summary>
+        /// Fetches the season from Trakt when not available in the local database, once fetched 
+        /// the local database will be used to fetch the data without a network connection.
+        /// </summary>
+        /// <param name="show">The TraktShow object.</param>
+        /// <param name="season">The season number.</param>
+        /// <param name="episodes"></param>
+        /// <returns></returns>
+        internal async Task<TraktEpisode[]> getSeasonFromTrakt(TraktShow show, Int16 season)
         {
             try
             {
                 var showClient = new WebClient();
                 String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/season.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + show.tvdb_id + "/" + season), AppUser.createJsonStringForAuthentication());
 
+
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
-                    episodes = (TraktEpisode[])ser.ReadObject(ms);
+                    TraktEpisode[] episodes = (TraktEpisode[])ser.ReadObject(ms);
+                   
                     Debug.WriteLine("Fetched season " + season + " of show " + show.Title + " from Trakt.");
-                    await AddEpisodesToShowSeason(show, episodes, season);
+                    AddEpisodesToShowSeason(show, episodes, season);
+
+                    return episodes;
                 }
-                return episodes;
             }
             catch (WebException)
-            { Debug.WriteLine("WebException in GetSeasonFromTrakt(" + show.Title + ", " + season + ", " + episodes.Length + ")."); }
+            { Debug.WriteLine("WebException in GetSeasonFromTrakt(" + show.Title + ", " + season + ")."); }
             catch (TargetInvocationException)
-            { Debug.WriteLine("TargetInvocationException in GetSeasonFromTrakt(" + show.Title + ", " + season + ", " + episodes.Length + ")."); }
+            { Debug.WriteLine("TargetInvocationException in GetSeasonFromTrakt(" + show.Title + ", " + season + ")."); }
 
             return new TraktEpisode[0];
         }
 
-
-        private async Task<TraktShow> getShowByTVDBThroughTrakt(String TVDB)
+        /// <summary>
+        /// Fetches the JSON object from https://api.trakt.tv/show/summary.json/[KEY]
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <returns>The TraktMovie object. If there is a network/database error, NULL will be returned.</returns>
+        private async Task<TraktShow> getShowByTVDBThroughTrakt(String TVDBID)
         {
             try
             {
                 var showClient = new WebClient();
 
-                String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDB), AppUser.createJsonStringForAuthentication());
+                String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDBID), AppUser.createJsonStringForAuthentication());
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktShow));
@@ -203,17 +230,17 @@ namespace WPtraktBase.DAO
                     show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
                     show.Seasons = new EntitySet<TraktSeason>();
 
-                 
+
                     Debug.WriteLine("Show " + show.Title + " fetched from Trakt Server.");
 
-                    await saveShow(show);
+                    saveShow(show);
                     return show;
                 }
             }
             catch (WebException)
-            { Debug.WriteLine("WebException in getShowByTVDBThroughTrakt(" + TVDB + ")."); }
+            { Debug.WriteLine("WebException in getShowByTVDBThroughTrakt(" + TVDBID + ")."); }
             catch (TargetInvocationException)
-            { Debug.WriteLine("TargetInvocationException in getShowByTVDBThroughTrakt(" + TVDB + ")."); }
+            { Debug.WriteLine("TargetInvocationException in getShowByTVDBThroughTrakt(" + TVDBID + ")."); }
 
             return null;
         }
@@ -239,25 +266,20 @@ namespace WPtraktBase.DAO
             return false;
         }
 
-        internal async Task<Boolean> saveShow(TraktShow traktShow)
+        internal Boolean saveShow(TraktShow traktShow)
         {
             try
             {
                 if (!this.DatabaseExists())
                     this.CreateDatabase();
 
-                if (this.Shows.Where(t => t.tvdb_id == traktShow.tvdb_id).Count() > 0)
-                {
-                    if (!await updateShow(traktShow))
-                        return false;
-
-                    Debug.WriteLine("Show " + traktShow.Title + " updated to DB.");
-                }
-                else
+                if (this.Shows.Where(t => t.tvdb_id == traktShow.tvdb_id).Count() == 0)
                 {
                     this.Shows.InsertOnSubmit(traktShow);
                     Debug.WriteLine("Show " + traktShow.Title + " saved to DB.");
                 }
+                else
+                    Debug.WriteLine("Show " + traktShow.Title + " updated to DB.");
 
                 this.SubmitChanges(ConflictMode.FailOnFirstConflict);
 
@@ -267,41 +289,6 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("OperationCanceledException in saveShow(" + traktShow.Title + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in saveShow(" + traktShow.Title + ")."); }
-
-            return false;
-        }
-
-        private async Task<Boolean> updateShow(TraktShow traktShow)
-        {
-            try
-            {
-                TraktShow dbShow = await getShowByTVDB(traktShow.tvdb_id);
-                dbShow.Certification = traktShow.Certification;
-                dbShow.DownloadTime = traktShow.DownloadTime;
-                dbShow.Genres = traktShow.Genres;
-                dbShow.GenresAsString = traktShow.GenresAsString;
-                dbShow.Images = traktShow.Images;
-                dbShow.imdb_id = traktShow.imdb_id;
-                dbShow.InWatchlist = traktShow.InWatchlist;
-                dbShow.MyRating = traktShow.MyRating;
-                dbShow.MyRatingAdvanced = traktShow.MyRatingAdvanced;
-                dbShow.Overview = traktShow.Overview;
-                dbShow.Ratings = traktShow.Ratings;
-                dbShow.Runtime = traktShow.Runtime;
-                dbShow.Title = traktShow.Title;
-                dbShow.tvdb_id = traktShow.tvdb_id;
-                dbShow.Url = traktShow.Url;
-                dbShow.Watched = traktShow.Watched;
-                dbShow.Watchers = traktShow.Watchers;
-                dbShow.year = traktShow.year;
-                dbShow.Seasons = traktShow.Seasons;
-
-                return true;
-            }
-            catch (OperationCanceledException)
-            { Debug.WriteLine("OperationCanceledException in updateShow(" + traktShow.Title + ")."); }
-            catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in updateShow(" + traktShow.Title + ")."); }
 
             return false;
         }
@@ -326,7 +313,7 @@ namespace WPtraktBase.DAO
             return new TraktSeason[0];
         }
 
-        internal async Task<Boolean> AddEpisodesToShowSeason(TraktShow show, TraktEpisode[] episodes, int SeasonNumber)
+        internal Boolean AddEpisodesToShowSeason(TraktShow show, TraktEpisode[] episodes, int SeasonNumber)
         {
             foreach (TraktSeason season in show.Seasons)
             {
@@ -342,7 +329,7 @@ namespace WPtraktBase.DAO
                 }
             }
 
-            return await saveShow(show);
+            return saveShow(show);
         }
 
         internal TraktEpisode[] getUnwatchedEpisodesForShow(String TVDB)
@@ -373,7 +360,7 @@ namespace WPtraktBase.DAO
                 TraktShow show = await getShowByTVDB(TVDBID);
                 show.InWatchlist = true;
 
-                return await saveShow(show);
+                return saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in addShowToWatchlist(" + TVDBID + ", " + IMDBID + ", " + title + ", " + year + ")."); }
@@ -395,8 +382,8 @@ namespace WPtraktBase.DAO
 
                 TraktShow show = await getShowByTVDB(TVDBID);
                 show.InWatchlist = false;
-               
-                return await saveShow(show);
+
+                return saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in removeShowFromWatchlist(" + TVDBID + ", " + IMDBID + ", " + title + ", " + year + ")."); }
@@ -432,7 +419,7 @@ namespace WPtraktBase.DAO
 
                 TraktShow show = getShowByIMDB(IMDBID);
                 show.Watched = true;
-                return await saveShow(show);
+                return saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in markShowAsSeen(" + IMDBID + ", " + title + ", " + year + ")."); }
@@ -461,7 +448,7 @@ namespace WPtraktBase.DAO
                     episode.Watched = true;
                 }
 
-                return await saveShow(show);
+                return saveShow(show);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in markShowSeasonAsSeen(" + show.Title + ", " + season + ")."); }
@@ -561,8 +548,8 @@ namespace WPtraktBase.DAO
                     {
                         Stream str = webResponse.GetResponseStream();
 
-                       Debug.WriteLine("Fetching background image for " + TVDBID + " from Trakt.");
-                       return ImageController.saveImage(TVDBID + "background.jpg", str, 1280, 100);
+                        Debug.WriteLine("Fetching background image for " + TVDBID + " from Trakt.");
+                        return ImageController.saveImage(TVDBID + "background.jpg", str, 1280, 100);
                     }
                 }
                 catch (WebException) { }
@@ -652,10 +639,10 @@ namespace WPtraktBase.DAO
                     }
 
                     tEpisode.Tvdb = TVDB;
-                    
+
                     Debug.WriteLine("Episode " + tEpisode.Title + " fetched from Trakt server.");
 
-                    await saveEpisode(tEpisode);
+                    saveEpisode(tEpisode);
                     return tEpisode;
                 }
             }
@@ -667,23 +654,20 @@ namespace WPtraktBase.DAO
             return null;
         }
 
-        internal async Task<Boolean> saveEpisode(TraktEpisode traktEpisode)
+        internal Boolean saveEpisode(TraktEpisode traktEpisode)
         {
             try
             {
                 if (!this.DatabaseExists())
                     this.CreateDatabase();
 
-                if (this.Episodes.Where(t => (t.Tvdb == traktEpisode.Tvdb) && (t.Season == traktEpisode.Season) && (t.Number == traktEpisode.Number)).Count() > 0)
-                {
-                    await updateEpisode(traktEpisode);
-                    Debug.WriteLine("Episode " + traktEpisode.Title + " updated to DB.");
-                }
-                else
+                if (this.Episodes.Where(t => (t.Tvdb == traktEpisode.Tvdb) && (t.Season == traktEpisode.Season) && (t.Number == traktEpisode.Number)).Count() == 0)
                 {
                     this.Episodes.InsertOnSubmit(traktEpisode);
                     Debug.WriteLine("Episode " + traktEpisode.Title + " saved to DB.");
                 }
+                else
+                    Debug.WriteLine("Episode " + traktEpisode.Title + " updated to DB.");
 
                 this.SubmitChanges(ConflictMode.FailOnFirstConflict);
 
@@ -693,41 +677,6 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("OperationCanceledException in saveEpisode(" + traktEpisode.Title + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in saveEpisode(" + traktEpisode.Title + ")."); }
-
-            return false;
-        }
-
-        private async Task<Boolean> updateEpisode(TraktEpisode traktEpisode)
-        {
-            try
-            {
-                TraktEpisode dbEpisode = await getEpisodeByTVDBThroughTrakt(traktEpisode.Tvdb, traktEpisode.Season, traktEpisode.Number);
-
-                if (dbEpisode != null)
-                {
-                    dbEpisode.DownloadTime = traktEpisode.DownloadTime;
-                    dbEpisode.EpisodeID = traktEpisode.EpisodeID;
-                    dbEpisode.FirstAired = traktEpisode.FirstAired;
-                    dbEpisode.Images = traktEpisode.Images;
-                    dbEpisode.InWatchlist = traktEpisode.InWatchlist;
-                    dbEpisode.MyRating = traktEpisode.MyRating;
-                    dbEpisode.MyRatingAdvanced = traktEpisode.MyRatingAdvanced;
-                    dbEpisode.Number = traktEpisode.Number;
-                    dbEpisode.Overview = traktEpisode.Overview;
-                    dbEpisode.Ratings = traktEpisode.Ratings;
-                    dbEpisode.Season = traktEpisode.Season;
-                    dbEpisode.SeasonID = traktEpisode.SeasonID;
-                    dbEpisode.Title = traktEpisode.Title;
-                    dbEpisode.Tvdb = traktEpisode.Tvdb;
-                    dbEpisode.Watched = traktEpisode.Watched;
-
-                    return true;
-                }
-            }
-            catch (OperationCanceledException)
-            { Debug.WriteLine("OperationCanceledException in updateEpisode(" + traktEpisode.Title + ")."); }
-            catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in updateEpisode(" + traktEpisode.Title + ")."); }
 
             return false;
         }
@@ -764,7 +713,7 @@ namespace WPtraktBase.DAO
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.InWatchlist = true;
 
-                return await saveEpisode(traktEpisode);
+                return saveEpisode(traktEpisode);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in addEpisodeToWatchlist(" + TVDBID + ", " + season + ", " + episode + ")."); }
@@ -786,7 +735,7 @@ namespace WPtraktBase.DAO
 
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.InWatchlist = false;
-                return await saveEpisode(traktEpisode);
+                return saveEpisode(traktEpisode);
             }
             catch (WebException)
             { Debug.WriteLine("WebException in removeEpisodeFromWatchlist(" + TVDBID + ", " + season + ", " + episode + ")."); }
@@ -834,11 +783,20 @@ namespace WPtraktBase.DAO
 
                 String jsonString = await checkinClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
 
+                TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
+
+                traktEpisode.Watched = true;
+
+                if (!saveEpisode(traktEpisode))
+                    return false;
+
                 if (jsonString.Contains("failure"))
                     return false;
                 else
                     return true;
             }
+            catch (WebException)
+            { Debug.WriteLine("WebException in checkinEpisode(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in checkinEpisode(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
@@ -863,13 +821,15 @@ namespace WPtraktBase.DAO
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.Watched = true;
 
-                return await saveEpisode(traktEpisode);
+                return saveEpisode(traktEpisode);
             }
+            catch (WebException)
+            { Debug.WriteLine("WebException in markEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in markEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
             { Debug.WriteLine("InvalidOperationException in markEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }
-           
+
             return false;
         }
 
@@ -884,9 +844,11 @@ namespace WPtraktBase.DAO
 
                 TraktEpisode traktEpisode = await getEpisodeByTvdbAndSeasonInfo(TVDBID, season, episode);
                 traktEpisode.Watched = false;
-                
-                return await saveEpisode(traktEpisode);
+
+                return saveEpisode(traktEpisode);
             }
+            catch (WebException)
+            { Debug.WriteLine("WebException in unMarkEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in unMarkEpisodeAsSeen(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
@@ -930,6 +892,8 @@ namespace WPtraktBase.DAO
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/shout/episode/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(ShoutAuth), auth));
                 return true;
             }
+            catch (WebException)
+            { Debug.WriteLine("WebException in addShoutToEpisode(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in addShoutToEpisode(" + shout + ", " + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
@@ -952,10 +916,12 @@ namespace WPtraktBase.DAO
                     return (TraktShout[])ser.ReadObject(ms);
                 }
             }
+            catch (WebException)
+            { Debug.WriteLine("WebException in getShoutsForEpisode(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (OperationCanceledException)
             { Debug.WriteLine("OperationCanceledException in getShoutsForEpisode(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in getShoutsForEpisode("  + TVDBID + ", " + season + ", " + episode + ")."); }
+            { Debug.WriteLine("InvalidOperationException in getShoutsForEpisode(" + TVDBID + ", " + season + ", " + episode + ")."); }
 
             return new TraktShout[0];
         }
