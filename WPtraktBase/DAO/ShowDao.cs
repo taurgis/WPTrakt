@@ -191,7 +191,7 @@ namespace WPtraktBase.DAO
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktEpisode[]));
                     TraktEpisode[] episodes = (TraktEpisode[])ser.ReadObject(ms);
-                   
+
                     Debug.WriteLine("Fetched season " + season + " of show " + show.Title + " from Trakt.");
                     AddEpisodesToShowSeason(show, episodes, season);
 
@@ -210,7 +210,7 @@ namespace WPtraktBase.DAO
         /// Fetches the JSON object from https://api.trakt.tv/show/summary.json/[KEY]
         /// </summary>
         /// <param name="TVDBID">The TVDB ID of the show.</param>
-        /// <returns>The TraktMovie object. If there is a network/database error, NULL will be returned.</returns>
+        /// <returns>The TraktShow object. If there is a network/database error, NULL will be returned.</returns>
         private async Task<TraktShow> getShowByTVDBThroughTrakt(String TVDBID)
         {
             try
@@ -245,13 +245,22 @@ namespace WPtraktBase.DAO
             return null;
         }
 
-        internal Boolean saveSeasons(TraktSeason[] seasons, String TVDB)
+        /// <summary>
+        /// Submits all seasons to the database after setting their TVDBID correctly
+        /// </summary>
+        /// <param name="seasons">The array of all seasons.</param>
+        /// <param name="TVDBID">The TVDB ID.</param>
+        /// <returns>
+        /// If the seasons have been successfully saved to the database, TRUE is returned. If an
+        /// error has occured during saving, FALSE is returned.
+        /// </returns>
+        internal Boolean saveSeasons(TraktSeason[] seasons, String TVDBID)
         {
             try
             {
                 foreach (TraktSeason season in seasons)
                 {
-                    season.Tvdb = TVDB;
+                    season.Tvdb = TVDBID;
                     this.Seasons.InsertOnSubmit(season);
                 }
                 this.SubmitChanges();
@@ -259,13 +268,18 @@ namespace WPtraktBase.DAO
                 return true;
             }
             catch (OperationCanceledException)
-            { Debug.WriteLine("OperationCanceledException in saveSeasons(" + seasons.Length + ", " + TVDB + ")."); }
+            { Debug.WriteLine("OperationCanceledException in saveSeasons(" + seasons.Length + ", " + TVDBID + ")."); }
             catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in saveSeasons(" + seasons.Length + ", " + TVDB + ")."); }
+            { Debug.WriteLine("InvalidOperationException in saveSeasons(" + seasons.Length + ", " + TVDBID + ")."); }
 
             return false;
         }
 
+        /// <summary>
+        /// Save/update a show to the local database.
+        /// </summary>
+        /// <param name="traktShow">The TraktShow object.</param>
+        /// <returns>Returns TRUE when saving/updating was successfull. If it fails, FALSE is returned.</returns>
         internal Boolean saveShow(TraktShow traktShow)
         {
             try
@@ -293,12 +307,17 @@ namespace WPtraktBase.DAO
             return false;
         }
 
-        internal async Task<TraktSeason[]> getSeasonsForTvShowByTVDBID(String TVDB)
+        /// <summary>
+        /// Fetches all seasons from the Trakt website using URL https://api.trakt.tv/show/seasons.json/[KEY]
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <returns>An array of all seasons for that show. If an error occurs an empty array is returned.</returns>
+        internal async Task<TraktSeason[]> getSeasonsForTvShowByTVDBID(String TVDBID)
         {
             try
             {
                 WebClient seasonClient = new WebClient();
-                String jsonString = await seasonClient.DownloadStringTaskAsync(new Uri("https://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDB));
+                String jsonString = await seasonClient.DownloadStringTaskAsync(new Uri("https://api.trakt.tv/show/seasons.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDBID));
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktSeason[]));
@@ -306,13 +325,20 @@ namespace WPtraktBase.DAO
                 }
             }
             catch (WebException)
-            { Debug.WriteLine("WebException in getSeasonsForTvShowByTVDBID(" + TVDB + ")."); }
+            { Debug.WriteLine("WebException in getSeasonsForTvShowByTVDBID(" + TVDBID + ")."); }
             catch (TargetInvocationException)
-            { Debug.WriteLine("TargetInvocationException in getSeasonsForTvShowByTVDBID(" + TVDB + ")."); }
+            { Debug.WriteLine("TargetInvocationException in getSeasonsForTvShowByTVDBID(" + TVDBID + ")."); }
 
             return new TraktSeason[0];
         }
 
+        /// <summary>
+        /// Links episodes to a certain season of a show in the local database.
+        /// </summary>
+        /// <param name="show">The TraktShow object.</param>
+        /// <param name="episodes">The episodes to be added to the show season.</param>
+        /// <param name="SeasonNumber">The number of the season where the episodes need to be added.</param>
+        /// <returns>If the data is saved correctly TRUE is returned. If it fails FALSE is returned.</returns>
         internal Boolean AddEpisodesToShowSeason(TraktShow show, TraktEpisode[] episodes, int SeasonNumber)
         {
             foreach (TraktSeason season in show.Seasons)
@@ -332,29 +358,44 @@ namespace WPtraktBase.DAO
             return saveShow(show);
         }
 
-        internal TraktEpisode[] getUnwatchedEpisodesForShow(String TVDB)
+        /// <summary>
+        /// Fetches all unwatched episodes for a show from the local database.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID.</param>
+        /// <returns>The array of unwatched episodes. If an error occurs, an empty array is returned.</returns>
+        internal TraktEpisode[] getUnwatchedEpisodesForShow(String TVDBID)
         {
             try
             {
-                return this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Watched == false)).ToArray();
+                return this.Episodes.Where(t => (t.Tvdb == TVDBID) && (t.Watched == false)).ToArray();
             }
             catch (OperationCanceledException)
-            { Debug.WriteLine("OperationCanceledException in getUnwatchedEpisodesForShow(" + TVDB + ")."); }
+            { Debug.WriteLine("OperationCanceledException in getUnwatchedEpisodesForShow(" + TVDBID + ")."); }
             catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in getUnwatchedEpisodesForShow(" + TVDB + ")."); }
+            { Debug.WriteLine("InvalidOperationException in getUnwatchedEpisodesForShow(" + TVDBID + ")."); }
 
             return new TraktEpisode[0];
         }
 
         #region Watchlist
 
+        /// <summary>
+        /// Adds a show to the Trakt watchlist through URL https://api.trakt.tv/show/watchlist/[KEY]
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="IMDBID">The IMDB ID of the show.</param>
+        /// <param name="title">The name of the show. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the show premiered.</param>
+        /// <returns>
+        /// If the show was successfully added to the watchlist on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> addShowToWatchlist(String TVDBID, String IMDBID, String title, Int16 year)
         {
             try
             {
                 WebClient watchlistClient = new WebClient();
                 WatchlistAuth auth = CreateWatchListAuth(IMDBID, title, year);
-
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
 
                 TraktShow show = await getShowByTVDB(TVDBID);
@@ -370,14 +411,23 @@ namespace WPtraktBase.DAO
             return false;
         }
 
+        /// <summary>
+        /// Removes a show to the Trakt watchlist through URL https://api.trakt.tv/show/unwatchlist/[KEY]
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="IMDBID">The IMDB ID of the show.</param>
+        /// <param name="title">The name of the show. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the show premiered.</param>
+        /// <returns>
+        /// If the show was successfully removed from the watchlist on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> removeShowFromWatchlist(String TVDBID, String IMDBID, String title, Int16 year)
         {
             try
             {
                 WebClient watchlistClient = new WebClient();
-
                 WatchlistAuth auth = CreateWatchListAuth(IMDBID, title, year);
-
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
 
                 TraktShow show = await getShowByTVDB(TVDBID);
@@ -408,13 +458,22 @@ namespace WPtraktBase.DAO
 
         #region Seen
 
+        /// <summary>
+        /// Marks a show as seen through URL https://api.trakt.tv/show/seen/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the show.</param>
+        /// <param name="title">The name of the show. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the show premiered.</param>
+        /// <returns>
+        /// If the show was successfully marked as seen on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> markShowAsSeen(String IMDBID, String title, Int16 year)
         {
             try
             {
                 WebClient watchlistClient = new WebClient();
                 WatchedEpisodeAuth auth = createWatchedAuth(IMDBID, title, year);
-
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedEpisodeAuth), auth));
 
                 TraktShow show = getShowByIMDB(IMDBID);
@@ -429,6 +488,15 @@ namespace WPtraktBase.DAO
             return false;
         }
 
+        /// <summary>
+        /// Marks a show season as seen through URL https://api.trakt.tv/show/season/seen/[KEY]
+        /// </summary>
+        /// <param name="show">The TraktShow object.</param>
+        /// <param name="season">The season that has been watched.</param>
+        /// <returns>
+        /// If the season was successfully marked as seen on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> markShowSeasonAsSeen(TraktShow show, Int16 season)
         {
             try
@@ -458,6 +526,12 @@ namespace WPtraktBase.DAO
             return false;
         }
 
+        /// <summary>
+        /// Gets the season object from the show based on its season number.
+        /// </summary>
+        /// <param name="show">The TraktShow object.</param>
+        /// <param name="SeasonNumber">The season number.</param>
+        /// <returns>The TraktSeason object.</returns>
         internal TraktSeason getSeasonFromShow(TraktShow show, int SeasonNumber)
         {
             foreach (TraktSeason season in show.Seasons)
@@ -485,11 +559,15 @@ namespace WPtraktBase.DAO
 
         #region Shouts
 
-        internal async Task<TraktShout[]> getShoutsForShow(String imdbID)
+        /// <summary>
+        /// Fetches the shouts for a show through URL https://api.trakt.tv/show/shouts.json/[KEY]
+        /// </summary>
+        /// <param name="IMDBID">The IMDBID of the show.</param>
+        /// <returns>A list of shouts. If there was an error an empty array will be returned.</returns>
+        internal async Task<TraktShout[]> getShoutsForShow(String IMDBID)
         {
             var showClient = new WebClient();
-
-            String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + imdbID), AppUser.createJsonStringForAuthentication());
+            String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/shouts.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + IMDBID), AppUser.createJsonStringForAuthentication());
 
             using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
             {
@@ -498,6 +576,17 @@ namespace WPtraktBase.DAO
             }
         }
 
+        /// <summary>
+        /// Adds a shout to a show through URL https://api.trakt.tv/shout/show/[KEY]
+        /// </summary>
+        /// <param name="shout">The shout message.</param>
+        /// <param name="IMDBID">The IMDBID of the show.</param>
+        /// <param name="title">The name of the show. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the show premiered.</param>
+        /// <returns>
+        /// If the shout was successfully added to the show on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> addShoutToShow(String shout, String IMDBID, String title, Int16 year)
         {
             try
@@ -525,6 +614,12 @@ namespace WPtraktBase.DAO
 
         #region Images
 
+        /// <summary>
+        /// Fetches the fanart image from trakt.tv
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="fanartUrl">The URL of the fanart image.</param>
+        /// <returns>A BitmapImage of the fanart.</returns>
         internal async Task<BitmapImage> getFanartImage(String TVDBID, String fanartUrl)
         {
             String fileName = TVDBID + "background" + ".jpg";
@@ -560,6 +655,15 @@ namespace WPtraktBase.DAO
             return null;
         }
 
+
+        /// <summary>
+        /// Fetches the screen image from trakt.tv
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="season"></param>
+        /// <param name="episode"></param>
+        /// <param name="screenUrl"></param>
+        /// <returns>A BitmapImage of the fanart.</returns>
         internal async Task<BitmapImage> getLargeScreenImage(String TVDBID, String season, String episode, String screenUrl)
         {
             String fileName = TVDBID + season + episode + "screenlarge" + ".jpg";
@@ -593,44 +697,59 @@ namespace WPtraktBase.DAO
 
         #region Episode
 
-        internal async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String TVDB, String season, String episode)
+        /// <summary>
+        /// Fetches the episode from Trakt when not available in the local database, once fetched 
+        /// the local database will be used to fetch the data without a network connection.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>The TraktEpisode object is returned. If an error occurs NULL is returned.</returns>
+        internal async Task<TraktEpisode> getEpisodeByTvdbAndSeasonInfo(String TVDBID, String season, String episode)
         {
             try
             {
                 if (!this.DatabaseExists())
                     this.CreateDatabase();
 
-                if (this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).Count() > 0)
+                if (this.Episodes.Where(t => (t.Tvdb == TVDBID) && (t.Season == season) && (t.Number == episode)).Count() > 0)
                 {
-                    TraktEpisode traktEpisode = this.Episodes.Where(t => (t.Tvdb == TVDB) && (t.Season == season) && (t.Number == episode)).FirstOrDefault();
+                    TraktEpisode traktEpisode = this.Episodes.Where(t => (t.Tvdb == TVDBID) && (t.Season == season) && (t.Number == episode)).FirstOrDefault();
                     Debug.WriteLine("Episode " + traktEpisode.Title + " fetched from DB.");
                     return traktEpisode;
                 }
                 else
-                    return await getEpisodeByTVDBThroughTrakt(TVDB, season, episode);
+                    return await getEpisodeByTVDBThroughTrakt(TVDBID, season, episode);
             }
             catch (OperationCanceledException)
-            { Debug.WriteLine("OperationCanceledException in getEpisodeByTvdbAndSeasonInfo(" + TVDB + ", " + season + ", " + episode + ")."); }
+            { Debug.WriteLine("OperationCanceledException in getEpisodeByTvdbAndSeasonInfo(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in getEpisodeByTvdbAndSeasonInfo(" + TVDB + ", " + season + ", " + episode + ")."); }
+            { Debug.WriteLine("InvalidOperationException in getEpisodeByTvdbAndSeasonInfo(" + TVDBID + ", " + season + ", " + episode + ")."); }
 
             return null;
         }
 
-        private async Task<TraktEpisode> getEpisodeByTVDBThroughTrakt(String TVDB, String season, String episode)
+        /// <summary>
+        /// Fetches the episodes from trakt.tv.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>Returns the TraktEpisode object, if an error occurs NULL is returned.</returns>
+        private async Task<TraktEpisode> getEpisodeByTVDBThroughTrakt(String TVDBID, String season, String episode)
         {
             try
             {
                 var showClient = new WebClient();
 
-                String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDB + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
+                String jsonString = await showClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/episode/summary.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + TVDBID + "/" + season + "/" + episode), AppUser.createJsonStringForAuthentication());
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktWatched));
                     TraktEpisode tEpisode = ((TraktWatched)ser.ReadObject(ms)).Episode;
                     tEpisode.DownloadTime = DateTime.Now;
 
-                    TraktShow show = await getShowByTVDB(TVDB);
+                    TraktShow show = await getShowByTVDB(TVDBID);
 
                     foreach (TraktSeason traktSeason in show.Seasons)
                     {
@@ -638,7 +757,7 @@ namespace WPtraktBase.DAO
                             tEpisode.SeasonID = traktSeason.SeasonID;
                     }
 
-                    tEpisode.Tvdb = TVDB;
+                    tEpisode.Tvdb = TVDBID;
 
                     Debug.WriteLine("Episode " + tEpisode.Title + " fetched from Trakt server.");
 
@@ -647,13 +766,21 @@ namespace WPtraktBase.DAO
                 }
             }
             catch (WebException)
-            { Debug.WriteLine("WebException in getEpisodeByTVDBThroughTrakt(" + TVDB + ", " + season + ", " + episode + ")."); }
+            { Debug.WriteLine("WebException in getEpisodeByTVDBThroughTrakt(" + TVDBID + ", " + season + ", " + episode + ")."); }
             catch (InvalidOperationException)
-            { Debug.WriteLine("InvalidOperationException in getEpisodeByTVDBThroughTrakt(" + TVDB + ", " + season + ", " + episode + ")."); }
+            { Debug.WriteLine("InvalidOperationException in getEpisodeByTVDBThroughTrakt(" + TVDBID + ", " + season + ", " + episode + ")."); }
 
             return null;
         }
 
+        /// <summary>
+        /// Saves/updates an episode to the local database.
+        /// </summary>
+        /// <param name="traktEpisode">The TraktEpisode object.</param>
+        /// <returns>
+        /// If the episode has been successfully saved/updated TRUE is returned, if something goes wrong
+        /// false is returned.
+        /// </returns>
         internal Boolean saveEpisode(TraktEpisode traktEpisode)
         {
             try
@@ -681,6 +808,17 @@ namespace WPtraktBase.DAO
             return false;
         }
 
+        /// <summary>
+        /// Deletes an episode(s) from the local database. This function also removes floating 
+        /// episodes that aren't linked to anything.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB id of the show.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>
+        /// Returns TRUE if the deletion was successfull. If something goes wrong
+        /// false is returned.
+        /// </returns>
         internal Boolean deleteEpisodeBySeasonInfo(string TVDBID, string season, string episode)
         {
             try
@@ -700,6 +838,19 @@ namespace WPtraktBase.DAO
 
         #region Watchlist
 
+        /// <summary>
+        /// Adds an episode to the watchlist on trakt.tv.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="IMDBID">The IMDB ID of the show.</param>
+        /// <param name="title">The name of the show.</param>
+        /// <param name="year">The year the show premiered.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>
+        /// If the episode has successfully been added to the watchlist 
+        /// TRUE is returned. If it has failed FALSE is returned.
+        /// </returns>
         internal async Task<Boolean> addEpisodeToWatchlist(String TVDBID, String IMDBID, String title, Int16 year, String season, String episode)
         {
             try
@@ -723,6 +874,19 @@ namespace WPtraktBase.DAO
             return false;
         }
 
+        /// <summary>
+        /// Removes an episode from the watchlist on trakt.tv.
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="IMDBID">The IMDB ID of the show.</param>
+        /// <param name="title">The name of the show.</param>
+        /// <param name="year">The year the show premiered.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>
+        /// If the episode has successfully been removed from the watchlist 
+        /// TRUE is returned. If it has failed FALSE is returned.
+        /// </returns>
         internal async Task<Boolean> removeEpisodeFromWatchlist(String TVDBID, String IMDBID, String title, Int16 year, String season, String episode)
         {
             try
@@ -763,6 +927,15 @@ namespace WPtraktBase.DAO
 
         #region Checkin
 
+        /// <summary>
+        /// Checks an episode in on trakt.tv
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="title">The name of the show.</param>
+        /// <param name="year">The year the show first premiered.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>Returns true if the episode has been successfully check in, if it fails FALSE is returned.</returns>
         internal async Task<Boolean> checkinEpisode(String TVDBID, String title, Int16 year, String season, String episode)
         {
             try
@@ -809,6 +982,16 @@ namespace WPtraktBase.DAO
 
         #region Seen
 
+        /// <summary>
+        /// Marks an episode as seen on trakt.tv
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show</param>
+        /// <param name="IMDBID">The IMDB ID of the show.</param>
+        /// <param name="title">The name of the show.</param>
+        /// <param name="year">The year the show first premiered.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>If the episode has been marked as seen TRUE is returned. If it fails, FALSE is returned.</returns>
         internal async Task<Boolean> markEpisodeAsSeen(String TVDBID, String IMDBID, String title, Int16 year, String season, String episode)
         {
             try
@@ -833,6 +1016,16 @@ namespace WPtraktBase.DAO
             return false;
         }
 
+        /// <summary>
+        /// Unmarks an episode as seen on trakt.tv
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show</param>
+        /// <param name="IMDBID">The IMDB ID of the show.</param>
+        /// <param name="title">The name of the show.</param>
+        /// <param name="year">The year the show first premiered.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>If the episode has been unmarked as seen TRUE is returned. If it fails, FALSE is returned.</returns>
         internal async Task<Boolean> unMarkEpisodeAsSeen(String TVDBID, String IMDBID, String title, Int16 year, String season, String episode)
         {
             try
@@ -875,6 +1068,19 @@ namespace WPtraktBase.DAO
 
         #region Shouts
 
+        /// <summary>
+        /// Adds a shout to a show through URL https://api.trakt.tv/shout/show/[KEY]
+        /// </summary>
+        /// <param name="shout">The shout message.</param>
+        /// <param name="TVDBID">The TVDB ID of the episode.</param>
+        /// <param name="title">The name of the episode. (Attribute is title on trakt.tv).</param>
+        /// <param name="year">The year the episode premiered.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>
+        /// If the shout was successfully added to the episode on trakt.tv, it will return TRUE. If it
+        /// fails FALSE will be returned.
+        /// </returns>
         internal async Task<Boolean> addShoutToEpisode(String shout, String TVDBID, String title, Int16 year, String season, String episode)
         {
             try
@@ -902,6 +1108,13 @@ namespace WPtraktBase.DAO
             return false;
         }
 
+        /// <summary>
+        /// Fetches the shouts for an episode through URL https://api.trakt.tv/episode/shouts.json/[KEY]
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="season">The season of the episode.</param>
+        /// <param name="episode">The episode number.</param>
+        /// <returns>A list of shouts. If there was an error an empty array will be returned.</returns>
         internal async Task<TraktShout[]> getShoutsForEpisode(String TVDBID, String season, String episode)
         {
             try
