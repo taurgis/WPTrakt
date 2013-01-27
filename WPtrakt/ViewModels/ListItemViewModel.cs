@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
+using WPtraktBase.Controller;
 using WPtraktBase.Controllers;
 
 namespace WPtrakt
@@ -405,35 +406,35 @@ namespace WPtrakt
         {
             get
             {
+                if (String.IsNullOrEmpty(ImageSource))
+                    return null;
+
                 if (_screenImage == null)
                 {
-                    String fileName = this._imdb + "screen" + ".jpg";
-
-                    if (StorageController.doesFileExist(fileName))
-                    {
-                        _screenImage = ImageController.getImageFromStorage(fileName);
-                    }
-                    else
-                    {
-                        if (_imageSource != null)
-                        {
-                            HttpWebRequest request;
-
-                            request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource));
-                            request.BeginGetResponse(new AsyncCallback(request_OpenReadScreenCompleted), new object[] { request });
-                           
-                            BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
-                            return tempImage;
-                        }
-                    }
-
-                    return _screenImage;
+                    LoadScreenImage();
+                    BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
+                    return tempImage;
                 }
                 else
                 {
                     return _screenImage;
                 }
             }
+
+            set
+            {
+                _screenImage = value;
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    NotifyPropertyChanged("ScreenImage");
+                }));
+            }
+        }
+
+        private async void LoadScreenImage()
+        { 
+           this.ScreenImage = await ShowController.getSmallScreenImage(this.Imdb, this.Season, this.Episode, this.ImageSource); 
         }
 
         private BitmapImage _mediumImage;
@@ -443,79 +444,30 @@ namespace WPtrakt
             {
                 if (_mediumImage == null)
                 {
-                    String fileName = this._imdb + "medium" + ".jpg";
-
-                    if (StorageController.doesFileExist(fileName))
-                    {
-                        _mediumImage = ImageController.getImageFromStorage(fileName);
-                    }
-                    else
-                    {
-                        HttpWebRequest request;
-
-                        request = (HttpWebRequest)WebRequest.Create(new Uri(_imageSource.Replace(".2.jpg", "-138.2.jpg")));
-                        request.BeginGetResponse(new AsyncCallback(request_OpenReadMediumCompleted), new object[] { request });
-
-                        BitmapImage tempImage = new BitmapImage(new Uri("Images/poster-small.jpg", UriKind.Relative));
-                        return tempImage;
-                    }
-                    return _mediumImage;  
+                    LoadMediumImage();
+                    BitmapImage tempImage = new BitmapImage(new Uri("Images/poster-small.jpg", UriKind.Relative));
+                    return tempImage;
                 }
                 else
                 {
                     return _mediumImage;
                 }
             }
+
+            set
+            {
+                this._mediumImage = value;
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    NotifyPropertyChanged("MediumImage");
+                }));
+            }
         }
 
-        void request_OpenReadMediumCompleted(IAsyncResult r)
+        private async void LoadMediumImage()
         {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        _mediumImage = ImageController.saveImage(_imdb + "medium.jpg", str, 160, 90);
-                        NotifyPropertyChanged("MediumImage");
-                    }));
-                }
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException) { }
-
-        }
-        void request_OpenReadScreenCompleted(IAsyncResult r)
-        {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        _screenImage = ImageController.saveImage(_imdb + "screen.jpg", str, 150, 90);
-
-                        NotifyPropertyChanged("ScreenImage");
-                    }));
-                }
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException) {}
-
+            this.MediumImage = await ShowController.getMediumCoverImage(this._imdb, _imageSource.Replace(".2.jpg", "-138.2.jpg"));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

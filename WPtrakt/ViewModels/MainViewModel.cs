@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
@@ -25,7 +26,7 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> TrendingItems { get; private set; }
         public ObservableCollection<ActivityDateListItemViewModel> HistoryItems { get; private set; }
         private List<TraktActivity> history;
-        private DateTime firstCall { get; set; }
+     
         public Boolean LoadingTrendingItems { get; set; }
         public Boolean LoadingHistory { get; set;} 
         public MainViewModel()
@@ -183,88 +184,17 @@ namespace WPtrakt
 
         #region Profile
 
-        DispatcherTimer userValidationTimer;
+
 
         public void LoadData()
         {
             this.Profile = null;
             this.IsDataLoaded = true;
 
-            CallValidationService();
+            LoadProfile();
         }
 
-        private void CallValidationService()
-        {
-            firstCall = DateTime.Now;
-            userValidationTimer = new DispatcherTimer();
-            userValidationTimer.Interval = TimeSpan.FromSeconds(2);
-            userValidationTimer.Tick += OnTimerTick;
-            userValidationTimer.Start();
-
-            HttpWebRequest request;
-
-            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
-            request.Method = "POST";
-            request.BeginGetRequestStream(new AsyncCallback(GetValidationRequestStreamCallback), request);
-        }
-
-
-        void GetValidationRequestStreamCallback(IAsyncResult asynchronousResult)
-        {
-            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
-            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
-
-            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
-
-            postStream.Write(byteArray, 0, byteArray.Length);
-            postStream.Close();
-
-            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadValidationStringCompleted), webRequest);
-        }
-
-        void client_DownloadValidationStringCompleted(IAsyncResult r)
-        {
-            try
-            {
-                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                HttpStatusCode status = httpResoponse.StatusCode;
-
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        userValidationTimer.Stop();
-
-                        LoadProfile();
-                    });
-                }
-            }
-            catch (WebException)
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
-                    userValidationTimer.Stop();
-
-                    Profile = new TraktProfileWithWatching();
-                    NotifyPropertyChanged("LoadingStatus");
-                });
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-        }
-
-        void OnTimerTick(object sender, EventArgs e)
-        {
-            int seconds = (DateTime.Now - firstCall).Seconds;
-
-            if (seconds > 10)
-            {
-                ToastNotification.ShowToast("Connection", "Slow connection to trakt!");
-                userValidationTimer.Stop();
-            }
-        }
+       
 
         private void LoadProfile()
         {
@@ -807,7 +737,7 @@ namespace WPtrakt
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private void NotifyPropertyChanged(String propertyName)
+        public void NotifyPropertyChanged(String propertyName)
         {
             PropertyChangedEventHandler handler = PropertyChanged;
             if (null != handler)

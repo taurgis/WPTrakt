@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Controller;
@@ -102,7 +104,15 @@ namespace WPtrakt
 
         private async void LoadBackgroundImage()
         {
-            App.MovieViewModel.BackgroundImage = await movieController.getFanartImage(this.Movie.imdb_id, this.Movie.Images.Fanart);
+            BitmapImage bgImage = await movieController.getFanartImage(this.Movie.imdb_id, this.Movie.Images.Fanart);
+            this.MoviePanorama.Background = new ImageBrush
+            {
+                ImageSource = bgImage,
+                Opacity = 0.0,
+                Stretch = Stretch.UniformToFill,
+            };
+
+            Animation.BackgroundFadeIn(this.MoviePanorama.Background);
         }
 
         #endregion

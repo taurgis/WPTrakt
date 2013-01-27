@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
+using WPtraktBase.Controller;
 using WPtraktBase.Controllers;
 
 namespace WPtrakt.ViewModels
@@ -59,92 +60,35 @@ namespace WPtrakt.ViewModels
         {
             get
             {
+                if (String.IsNullOrEmpty(Screen))
+                    return null;
+
                 if (_screenImage == null)
                 {
-                     String fileName = "";
-                     if (!String.IsNullOrEmpty(Imdb) && this.Season == 0)
-                     {
-                         fileName = this.Imdb + "screen" + ".jpg";
-                     }
-                     else
-                     {
-                         if (this.Season > 0)
-                         {
-                             fileName = this.Tvdb + Season + Episode + "screen" + ".jpg";
-                         }
-                         else
-                         {
-                             fileName = this.Tvdb + "screen" + ".jpg";
-                         }
-                     }
-
-                    if (StorageController.doesFileExist(fileName))
-                    {
-                        _screenImage = ImageController.getImageFromStorage(fileName);
-                    }
-                    else
-                    {
-                        if (Screen != null)
-                        {
-                            HttpWebRequest request;
-
-                            request = (HttpWebRequest)WebRequest.Create(new Uri(Screen));
-                            request.BeginGetResponse(new AsyncCallback(request_OpenReadScreenCompleted), new object[] { request });
-
-                            BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
-                            return tempImage;
-                        }
-                    }
-
-                    return _screenImage;
+                    LoadScreenImage();
+                    BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
+                    return tempImage;
                 }
                 else
                 {
                     return _screenImage;
                 }
             }
+
+            set
+            {
+                _screenImage = value;
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    NotifyPropertyChanged("ScreenImage");
+                }));
+            }
         }
 
-        void request_OpenReadScreenCompleted(IAsyncResult r)
+        private async void LoadScreenImage()
         {
-            try
-            {
-                object[] param = (object[])r.AsyncState;
-                HttpWebRequest httpRequest = (HttpWebRequest)param[0];
-
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    Stream str = httpResoponse.GetResponseStream();
-
-                    Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        String fileName;
-                        if (!String.IsNullOrEmpty(Imdb) && this.Season == 0)
-                        {
-                            fileName = this.Imdb + "screen" + ".jpg";
-                        }
-                        else
-                        {
-                            if (this.Season > 0)
-                            {
-                                fileName = this.Tvdb + Season + Episode + "screen" + ".jpg";
-                            }
-                            else
-                            {
-                                fileName = this.Tvdb + "screen" + ".jpg";
-                            }
-                        }
-                        _screenImage = ImageController.saveImage(fileName, str, 100, 100);
-
-                        NotifyPropertyChanged("ScreenImage");
-                    }));
-                }
-            }
-            catch (WebException) { }
-            catch (TargetInvocationException) { }
-
+            this.ScreenImage = await ShowController.getSmallScreenImage(this.Imdb, this.Season.ToString(), this.Episode.ToString(), this.Screen);
         }
 
         private String _activity;

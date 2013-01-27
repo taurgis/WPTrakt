@@ -341,53 +341,6 @@ namespace WPtrakt
             }
         }
 
-        public String LoadingStatusShow
-        {
-            get
-            {
-                if (_name == null)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        private Boolean _loadingUnwatched;
-        public Boolean LoadingUnwatched 
-        {
-            get
-            {
-                return _loadingUnwatched;
-            }
-
-            set
-            {
-                _loadingUnwatched = value;
-                NotifyPropertyChanged("LoadingStatusUnwatched");
-            }
-        
-        }
-        public String LoadingStatusUnwatched
-        {
-            get
-            {
-                if (_loadingUnwatched)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        
-
         private Int16 _rating;
         public Int16 Rating
         {
@@ -489,37 +442,6 @@ namespace WPtrakt
             }
         }
 
-
-        public String LoadingStatusSeason
-        {
-            get
-            {
-                if (EpisodeItems.Count == 0)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
-        public String LoadingStatusShouts
-        {
-            get
-            {
-                if (ShoutItems.Count == 0)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
         public bool IsDataLoaded
         {
             get;
@@ -541,7 +463,6 @@ namespace WPtrakt
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             App.ShowViewModel.UnWatchedEpisodeItems = null;
 
-            NotifyPropertyChanged("LoadingStatusShow");
             NotifyPropertyChanged("DetailVisibility");
            
             clearShouts();
@@ -574,7 +495,6 @@ namespace WPtrakt
             NotifyPropertyChanged("Certification");
             NotifyPropertyChanged("Year");
             NotifyPropertyChanged("Runtime");
-            NotifyPropertyChanged("LoadingStatusShow");
             NotifyPropertyChanged("DetailVisibility");
             NotifyPropertyChanged("RatingString");
         }
@@ -583,14 +503,12 @@ namespace WPtrakt
         public void RefreshEpisodes()
         {
             NotifyPropertyChanged("EpisodeItems");
-            NotifyPropertyChanged("LoadingStatusSeason");
         }
 
 
         public void RefreshUnwatchedEpisodes()
         {
             NotifyPropertyChanged("UnWatchedEpisodeItems");
-            NotifyPropertyChanged("LoadingStatusUnwatched");
         }
      
 
@@ -634,7 +552,6 @@ namespace WPtrakt
                     */
                 }
                 NotifyPropertyChanged("EpisodeItems");
-                NotifyPropertyChanged("LoadingStatusSeason");
             }
             catch (WebException)
             {

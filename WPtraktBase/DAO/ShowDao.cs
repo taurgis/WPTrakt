@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+using Microsoft.Phone.Net.NetworkInformation;
 using System;
 using System.Data.Linq;
 using System.Diagnostics;
@@ -668,7 +669,7 @@ namespace WPtraktBase.DAO
         {
             String fileName = TVDBID + season + episode + "screenlarge" + ".jpg";
 
-            if (StorageController.doesFileExist(fileName))
+            if (StorageController.doesFileExist(fileName) && !DeviceNetworkInformation.IsWiFiEnabled)
             {
                 Debug.WriteLine("Fetching large screen image for " + TVDBID + " from storage.");
                 return ImageController.getImageFromStorage(fileName);
@@ -685,6 +686,69 @@ namespace WPtraktBase.DAO
                     Stream str = webResponse.GetResponseStream();
                     Debug.WriteLine("Fetching large screen image for " + TVDBID + " from Trakt and saving to " + fileName + ".");
                     return ImageController.saveImage(fileName, str, 318, 90);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Fetches the screen image from trakt.tv
+        /// </summary>
+        /// <param name="TVDBID">The TVDB ID of the show.</param>
+        /// <param name="season"></param>
+        /// <param name="episode"></param>
+        /// <param name="screenUrl"></param>
+        /// <returns>A BitmapImage of the fanart.</returns>
+        internal async Task<BitmapImage> getSmallScreenImage(String TVDBID, String season, String episode, String screenUrl)
+        {
+            String fileName = TVDBID + season + episode + "screensmall" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName) && !DeviceNetworkInformation.IsWiFiEnabled)
+            {
+                Debug.WriteLine("Fetching small screen image for " + TVDBID + " from storage.");
+                return ImageController.getImageFromStorage(fileName);
+            }
+            else
+            {
+                HttpWebRequest request;
+
+                request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
+                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                System.Net.HttpStatusCode status = webResponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = webResponse.GetResponseStream();
+                    Debug.WriteLine("Fetching small screen image for " + TVDBID + " from Trakt and saving to " + fileName + ".");
+                    return ImageController.saveImage(fileName, str, 160, 100);
+                }
+            }
+
+            return null;
+        }
+
+
+        internal async Task<BitmapImage> getMediumCoverImage(String ID, String screenUrl)
+        {
+            String fileName = ID + "medium" + ".jpg";
+
+            if (StorageController.doesFileExist(fileName) && !DeviceNetworkInformation.IsWiFiEnabled)
+            {
+                Debug.WriteLine("Fetching medium image for " + ID + " from storage.");
+                return ImageController.getImageFromStorage(fileName);
+            }
+            else
+            {
+                HttpWebRequest request;
+
+                request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
+                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                System.Net.HttpStatusCode status = webResponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = webResponse.GetResponseStream();
+                    Debug.WriteLine("Fetching medium image for " + ID + " from Trakt and saving to " + fileName + ".");
+                    return ImageController.saveImage(fileName, str, 160, 100);
                 }
             }
 

@@ -390,16 +390,13 @@ namespace WPtrakt
         {
             get
             {
-
                 return _screenImage;
-
             }
             set
             {
 
                 _screenImage = value;
                 NotifyPropertyChanged("ScreenImage");
-
             }
         }
 

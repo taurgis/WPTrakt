@@ -6,6 +6,8 @@ using System.Net;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt;
@@ -108,7 +110,15 @@ namespace WPtrakt
 
         private async void LoadBackgroundImage(TraktShow show)
         {
-            App.EpisodeViewModel.BackgroundImage = await showController.getFanartImage(show.tvdb_id, show.Images.Fanart);
+            BitmapImage bgImage = await showController.getFanartImage(show.tvdb_id, show.Images.Fanart);
+            EpisodePanorama.Background = new ImageBrush
+            {
+                ImageSource = bgImage,
+                Opacity = 0.0,
+                Stretch = Stretch.UniformToFill,
+            };
+
+
         }
 
 

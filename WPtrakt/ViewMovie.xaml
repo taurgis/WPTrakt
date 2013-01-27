@@ -15,9 +15,6 @@
     shell:SystemTray.IsVisible="False"  BackKeyPress="PhoneApplicationPage_BackKeyPress" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
     <Grid x:Name="LayoutRoot">
-        <Grid.Background>
-            <ImageBrush Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill" />
-        </Grid.Background>
         <ProgressBar  VerticalAlignment="Top"  Width="400" HorizontalAlignment="Center" Visibility="{Binding LoadingStatusMovie}" Name="progressBarLoading" IsIndeterminate="True" />
 
         <controls:Panorama Title="{Binding Name}" Name="MoviePanorama" SelectionChanged="MoviePanorama_SelectionChanged">

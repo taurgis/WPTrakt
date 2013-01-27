@@ -3,10 +3,13 @@ using Microsoft.Phone.Net.NetworkInformation;
 using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Tasks;
 using System;
+using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
@@ -40,11 +43,10 @@ namespace WPtrakt
 
                 if (!App.ViewModel.IsDataLoaded)
                 {
-                    ReloadLiveTile();
-                    if (String.IsNullOrEmpty(AppUser.Instance.AppVersion) && (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
+                    if ((String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
                     {
                         AppUser.Instance.AppVersion = fullVersionNumber;
-                        NavigationService.Navigate(new Uri("/Settings.xaml", UriKind.Relative));
+                        NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
                     }
                     else
                     {
@@ -55,12 +57,91 @@ namespace WPtrakt
                             AppUser.Instance.AppVersion = fullVersionNumber;
                         }
 
-                        App.ViewModel.LoadData();
+                        CallValidationService();
                     }
                 }
             }
             catch (InvalidOperationException) { }
         }
+
+        private DateTime firstCall { get; set; }
+        DispatcherTimer userValidationTimer;
+
+        private void CallValidationService()
+        {
+            firstCall = DateTime.Now;
+            userValidationTimer = new DispatcherTimer();
+            userValidationTimer.Interval = TimeSpan.FromSeconds(2);
+            userValidationTimer.Tick += OnTimerTick;
+            userValidationTimer.Start();
+
+            HttpWebRequest request;
+
+            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
+            request.Method = "POST";
+            request.BeginGetRequestStream(new AsyncCallback(GetValidationRequestStreamCallback), request);
+        }
+
+
+        void GetValidationRequestStreamCallback(IAsyncResult asynchronousResult)
+        {
+            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
+            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
+
+            postStream.Write(byteArray, 0, byteArray.Length);
+            postStream.Close();
+
+            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadValidationStringCompleted), webRequest);
+        }
+
+        void client_DownloadValidationStringCompleted(IAsyncResult r)
+        {
+            try
+            {
+                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
+                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
+                HttpStatusCode status = httpResoponse.StatusCode;
+
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        userValidationTimer.Stop();
+
+                        App.ViewModel.LoadData();
+                    });
+                }
+            }
+            catch (WebException)
+            {
+                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                {
+                     userValidationTimer.Stop();
+
+                    App.ViewModel.Profile = new TraktProfileWithWatching();
+                    App.ViewModel.NotifyPropertyChanged("LoadingStatus");
+                    NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
+                    ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
+                 
+                });
+            }
+            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+        }
+
+        void OnTimerTick(object sender, EventArgs e)
+        {
+            int seconds = (DateTime.Now - firstCall).Seconds;
+
+            if (seconds > 10)
+            {
+                ToastNotification.ShowToast("Connection", "Slow connection to trakt!");
+                userValidationTimer.Stop();
+            }
+        }
+
 
         private static void ReloadLiveTile()
         {
@@ -388,5 +469,13 @@ namespace WPtrakt
 
             marketplaceReviewTask.Show();
         }
+
+        private void LogoutMenuItem_Click_1(object sender, EventArgs e)
+        {
+            AppUser.Instance.UserName = "";
+            AppUser.Instance.Password = "";
+            NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
+        }
+      
     }
 }

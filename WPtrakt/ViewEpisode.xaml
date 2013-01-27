@@ -9,9 +9,6 @@
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" OrientationChanged="PhoneApplicationPage_OrientationChanged">
     <Grid x:Name="LayoutRoot">
-        <Grid.Background>
-            <ImageBrush  Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill"  />
-        </Grid.Background>
         <ProgressBar VerticalAlignment="Top" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusEpisode}" Name="progressBarLoading" IsIndeterminate="True" />
 
         <controls:Panorama  Title="{Binding Name}" Name="EpisodePanorama" SelectionChanged="EpisodePanorama_SelectionChanged">

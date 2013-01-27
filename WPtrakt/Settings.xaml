@@ -11,45 +11,6 @@
     shell:SystemTray.IsVisible="False">
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <controls:Panorama Margin="0,12,0,0" Name="SettingsPanorama">   
-           <controls:PanoramaItem Header="Login" Width="480">
-                <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-                    <ListBoxItem>
-                        <ProgressBar Visibility="Collapsed"  Name="progressBar" IsIndeterminate="True" Width="400" />
-                    </ListBoxItem>
-                    <ListBoxItem>
-                        <StackPanel Width="465" Height="60" Orientation="Horizontal" Visibility="{Binding ShowCreateAccount}">
-                            <TextBlock Margin="10 2" HorizontalAlignment="Left" Height="30"  Text="Don't have an account yet?" TextWrapping="Wrap" Width="250" />
-                            <TextBlock Margin="10 2" HorizontalAlignment="Left" Height="30"  Text="Create one!" TextDecorations="Underline"  TextWrapping="Wrap" Width="317" Tap="TextBlock_Tap_1" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBox Height="586" HorizontalAlignment="Left" Name="listBox1" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                        <ListBoxItem>
-                            <StackPanel Width="465" Height="100" Orientation="Horizontal">
-                                <TextBlock Text="Username:" Width="163" Height="46" Style="{StaticResource PhoneTextLargeStyle}"/>
-                                <TextBox Text="{Binding UserName, Mode=TwoWay}" Name="txtUsername"  Width="255" Height="70" />
-                            </StackPanel>
-                        </ListBoxItem>
-                        <ListBoxItem>
-                            <StackPanel Width="465" Height="100" Orientation="Horizontal">
-                                <TextBlock Text="Password:" Width="163" Height="46" Style="{StaticResource PhoneTextLargeStyle}"/>
-                                <PasswordBox Name="txtPassword" Password="{Binding Password, Mode=TwoWay}" Width="255" Height="70" />
-                            </StackPanel>
-                        </ListBoxItem>
-                        <ListBoxItem  Name="EmailText" Visibility="Collapsed">
-                            <StackPanel Width="465" Height="100" Orientation="Horizontal">
-                                <TextBlock Text="Email:" Width="163" Height="46" Style="{StaticResource PhoneTextLargeStyle}"/>
-                                <TextBox Name="txtEmail" Text="{Binding Email, Mode=TwoWay}" Width="255" Height="70" />
-                            </StackPanel>
-                        </ListBoxItem>
-                        <ListBoxItem Width="200" Name="CreateButton" Visibility="Collapsed">
-                            <Button HorizontalAlignment="Center" Content="Create" Click="Button_Click" Name="btnCreate"  />
-                        </ListBoxItem>
-                        <ListBoxItem Width="200" Name="LoginButton" Visibility="Collapsed">
-                            <Button HorizontalAlignment="Center" Content="Login" Click="btnLogin_Click_1" Name="btnLogin"  />
-                        </ListBoxItem>
-                    </ListBox>
-                     </StackPanel>
-            </controls:PanoramaItem>
             <controls:PanoramaItem Header="Cache" Width="480">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
@@ -82,7 +43,7 @@
                         </ListBoxItem>
                         <ListBoxItem Visibility="Collapsed" Height="50"></ListBoxItem>
                         <ListBoxItem Visibility="Collapsed">
-                            <toolkit:ToggleSwitch x:Name="togglePoster" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Disabled" IsChecked="false"  Header="Use Show/Movie poster" Checked="togglePoster_Checked_1" Unchecked="togglePoster_Unchecked_1" Height="120" Width="420" />
+                            <toolkit:ToggleSwitch x:Name="togglePoster" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Disabled" IsChecked="false"  Header="Use Show/Movie poster" Height="120" Width="420" />
                         </ListBoxItem>
                         <ListBoxItem Visibility="Collapsed">
                             <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="Attempts to show the poster of the show as the live tile image. If images do not appear, try opening the show in the application to make sure the image is downloaded." TextWrapping="Wrap" Width="420" />

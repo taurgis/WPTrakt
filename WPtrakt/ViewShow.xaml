@@ -10,18 +10,13 @@
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
     <Grid x:Name="LayoutRoot">
-        <Grid.Background>
-            <ImageBrush Opacity="0.3" ImageSource="{Binding BackgroundImage}" Stretch="UniformToFill" />
-        </Grid.Background>
-        <ProgressBar VerticalAlignment="Top" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusUnwatched}" Name="progressBarUnwatched" IsIndeterminate="True" />
+        <ProgressBar VerticalAlignment="Top" HorizontalAlignment="Left" Width="400" Visibility="Collapsed" Name="progressBarLoading" IsIndeterminate="True" />
         <controls:Panorama  Title="{Binding Name}" Name="ShowPanorama" SelectionChanged="MoviePanorama_SelectionChanged">
             <controls:PanoramaItem Header="Overview" Margin="0, -25">
                 <Grid Margin="0 -30">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <ProgressBar Grid.Column="1" Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusShow}" Name="progressBarLoading" IsIndeterminate="True" />
-                    <TextBlock Grid.Column="1"  Name="loadingText" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusShow}"/>
                     <ListBox Grid.Column="1" Margin="0,0,0,-3" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
                         <ListBoxItem Height="Auto">
                             <StackPanel>
@@ -60,9 +55,7 @@
             <controls:PanoramaItem Margin="0 -25" Header="Episodes" Orientation="Horizontal">
                 <Grid>
                     <Grid Name="EpisodeGrid">
-                        <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Visibility="{Binding LoadingStatusSeason}" Name="progressBarSeason" IsIndeterminate="True" />
-                        <TextBlock  Name="loadingTextSeason" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusSeason}"/>
-                        <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList">
+                         <ListBox ItemsSource="{Binding EpisodeItems}" Name="EpisodeList">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel  Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
@@ -113,7 +106,6 @@
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" Header="Unwatched" Orientation="Horizontal">
                 <Grid>
-                    <TextBlock  Name="loadingTextUnwatched" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusUnwatched}"/>
                     <TextBlock  Name="NoUnWatchedEpisodes" Text="No unwatched episodes!" Visibility="Collapsed"  FontSize="30" HorizontalAlignment="Center"/>
 
                     <ListBox Grid.Row="1" ItemsSource="{Binding UnWatchedEpisodeItems}" x:Name="ListUpcomming">

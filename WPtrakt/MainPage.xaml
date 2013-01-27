@@ -171,6 +171,8 @@
             <shell:ApplicationBarIconButton IconUri="Images/appbar.feature.settings.rest.png" Text="Settings" Click="ApplicationBarSettingsButton_Click" />
             <shell:ApplicationBarIconButton IconUri="Images/appbar.refresh.rest.png" Text="Refresh" Click="ApplicationBarRefreshButton_Click" />
             <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem x:Name="LogoutMenuItem" Text="Logout" Click="LogoutMenuItem_Click_1"></shell:ApplicationBarMenuItem>
+
                 <shell:ApplicationBarMenuItem x:Name="CancelCheckin" Text="Cancel check in" Click="CancelCheckin_Click"></shell:ApplicationBarMenuItem>
                 <shell:ApplicationBarMenuItem x:Name="RateApp" Text="Rate and Review" Click="RateApp_Click_1"></shell:ApplicationBarMenuItem>
             </shell:ApplicationBar.MenuItems>

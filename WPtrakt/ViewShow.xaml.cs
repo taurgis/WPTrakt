@@ -11,6 +11,8 @@ using System.Net;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Controller;
@@ -107,6 +109,8 @@ namespace WPtrakt
 
         private async void LoadShow(String tvdb)
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+
             this.Show = await showController.getShowByTVDBID(tvdb);
 
             if (this.Show != null)
@@ -115,8 +119,6 @@ namespace WPtrakt
                 this.Show.Genres = this.Show.GenresAsString.Split('|');
 
                 App.ShowViewModel.UpdateShowView(this.Show);
-
-
 
                 if (this.Show.Seasons.Count == 0)
                 {
@@ -133,6 +135,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
 
@@ -164,6 +168,7 @@ namespace WPtrakt
 
         public async void LoadEpisodeData()
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             App.ShowViewModel.EpisodeItems = new ObservableCollection<ListItemViewModel>();
             App.ShowViewModel.RefreshEpisodes();
             if (this.Show != null && this.Show.Seasons != null && this.Show.Seasons.Count > 0)
@@ -187,6 +192,8 @@ namespace WPtrakt
                     }
                 }
             }
+
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         #endregion
@@ -195,8 +202,8 @@ namespace WPtrakt
 
         private async void LoadUnwatchedEpisodeData()
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<CalendarListItemViewModel>();
-            App.ShowViewModel.LoadingUnwatched = true;
             App.ShowViewModel.RefreshUnwatchedEpisodes();
 
             TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
@@ -237,15 +244,14 @@ namespace WPtrakt
                     App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
                 }
 
-                App.ShowViewModel.LoadingUnwatched = false;
                 App.ShowViewModel.RefreshUnwatchedEpisodes();
             }
             else
             {
-
-                App.ShowViewModel.LoadingUnwatched = false;
                 NoUnWatchedEpisodes.Visibility = System.Windows.Visibility.Visible;
             }
+
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         #endregion
@@ -254,6 +260,7 @@ namespace WPtrakt
 
         public async void LoadShoutData(String imdbId)
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             App.ShowViewModel.clearShouts();
 
             App.ShowViewModel.addShout(new ListItemViewModel() { Name = "Loading..." });
@@ -267,7 +274,9 @@ namespace WPtrakt
             if (App.ShowViewModel.ShoutItems.Count == 0)
                 App.ShowViewModel.addShout(new ListItemViewModel() { Name = "No shouts" });
 
-            App.ShowViewModel.ShoutsLoaded = true; ;
+            App.ShowViewModel.ShoutsLoaded = true;
+
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         #endregion
@@ -276,7 +285,15 @@ namespace WPtrakt
 
         private async void LoadBackgroundImage()
         {
-           App.ShowViewModel.BackgroundImage = await showController.getFanartImage(this.Show.tvdb_id, this.Show.Images.Fanart);
+            BitmapImage bgImage = await showController.getFanartImage(this.Show.tvdb_id, this.Show.Images.Fanart);
+           this.ShowPanorama.Background = new ImageBrush
+            {
+                ImageSource = bgImage,
+                Opacity = 0.0,
+                Stretch = Stretch.UniformToFill,
+            } ;
+
+           Animation.BackgroundFadeIn(this.ShowPanorama.Background);
         }
 
         #endregion
@@ -811,6 +828,7 @@ namespace WPtrakt
 
         private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.markEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
@@ -823,10 +841,12 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             lastModel = null;
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         private async void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.addEpisodeToWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
@@ -840,11 +860,13 @@ namespace WPtrakt
             }
 
             lastModel = null;
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
 
         private async void RemoveWatchlistEpisode_Click(object sender, RoutedEventArgs e)
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.removeEpisodeFromWatchlist(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
@@ -858,10 +880,12 @@ namespace WPtrakt
             }
 
             lastModel = null;
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         private async void UnSeenEpisode_Click(object sender, RoutedEventArgs e)
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.unMarkEpisodeAsSeen(lastModel.Tvdb, App.ShowViewModel.Imdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
@@ -875,10 +899,12 @@ namespace WPtrakt
             }
 
             lastModel = null;
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         private async void CheckinEpisode_Click(object sender, RoutedEventArgs e)
         {
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
@@ -893,6 +919,7 @@ namespace WPtrakt
             }
 
             lastModel = null;
+            this.progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         #endregion

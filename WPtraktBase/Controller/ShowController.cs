@@ -269,5 +269,15 @@ namespace WPtraktBase.Controller
         {
             return await showDao.getLargeScreenImage(TVDBID, season, episode, screenUrl);
         }
+
+        public static async Task<BitmapImage> getSmallScreenImage(String TVDBID, String season, String episode, String screenUrl)
+        {
+            return await ShowDao.Instance.getSmallScreenImage(TVDBID, season, episode, screenUrl);
+        }
+
+        public static async Task<BitmapImage> getMediumCoverImage(String ID,  String screenUrl)
+        {
+            return await ShowDao.Instance.getMediumCoverImage(ID, screenUrl);
+        }
     }
 }

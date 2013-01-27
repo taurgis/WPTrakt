@@ -15,6 +15,13 @@
                     <LinearDoubleKeyFrame KeyTime="0:0:0.4" Value="0.0"/>
                 </DoubleAnimationUsingKeyFrames>
             </Storyboard>
+
+        <Storyboard x:Key="FadeIn">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
+                <LinearDoubleKeyFrame KeyTime="0" Value="0.0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.6" Value="0.3"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
     </Application.Resources>
     <Application.ApplicationLifetimeObjects>
         <!--Required object that handles lifetime events for the application-->

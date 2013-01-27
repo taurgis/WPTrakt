@@ -26,11 +26,6 @@ namespace WPtrakt
             DataContext = App.SettingsViewModel;
            
             this.Loaded += new RoutedEventHandler(SettingsPage_Loaded);
-
-            if (String.IsNullOrEmpty(AppUser.Instance.UserName) && String.IsNullOrEmpty(AppUser.Instance.Password))
-            {
-                LoginButton.Visibility = System.Windows.Visibility.Visible;
-            }
             
         }
 
@@ -215,87 +210,6 @@ namespace WPtrakt
             }
         }
 
-        private void TextBlock_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            LoginButton.Visibility = System.Windows.Visibility.Collapsed;
-            CreateButton.Visibility = System.Windows.Visibility.Visible;
-            EmailText.Visibility = System.Windows.Visibility.Visible;
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-         
-            string MatchEmailPattern =
-            @"^(([\w-]+\.)+[\w-]+|([a-zA-Z]{1}|[\w-]{2,}))@"
-     + @"((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\.([0-1]?
-				[0-9]{1,2}|25[0-5]|2[0-4][0-9])\."
-     + @"([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\.([0-1]?
-				[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
-     + @"([a-zA-Z]+[\w-]+\.)+[a-zA-Z]{2,4})$";
-
-            if (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password) || String.IsNullOrEmpty(txtEmail.Text))
-            {
-                MessageBox.Show("Please fill in all fields");
-                return;
-            }
-
-            if (Regex.IsMatch(txtEmail.Text, MatchEmailPattern))
-            {
-                btnCreate.IsEnabled = false;
-                btnCreate.Content = "Creating..";
-                progressBar.Visibility = System.Windows.Visibility.Visible;
-                var registerClient = new WebClient();
-                registerClient.UploadStringCompleted += new UploadStringCompletedEventHandler(registerClient_UploadStringCompleted);
-
-                RegisterAuth auth = new RegisterAuth();
-                auth.Email = txtEmail.Text;
-                registerClient.UploadStringAsync(new Uri("https://api.trakt.tv/account/create/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RegisterAuth), auth));
-            }
-            else
-                MessageBox.Show("Invalid email!");
-        }
-
-        void registerClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            btnCreate.IsEnabled = true;
-            btnCreate.Content = "Create";
-            try
-            {
-                String jsonString = e.Result;
-                if (jsonString.Contains(" is already a registered e-mail"))
-                {
-                    MessageBox.Show("Email already in use.");
-                    progressBar.Visibility = System.Windows.Visibility.Collapsed;
-                    return;
-                }
-
-                if (jsonString.Contains("is already a registered username"))
-                {
-                    MessageBox.Show("Username already in use.");
-                    progressBar.Visibility = System.Windows.Visibility.Collapsed;
-                    return;
-                }
-
-                if (jsonString.Contains("created account for"))
-                {
-                    MessageBox.Show("Successfully created an account! It could take up to a minute for your account to work.");
-                    try
-                    {
-                        IsolatedStorageFile.GetUserStoreForApplication().DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
-                    }
-                    catch (IsolatedStorageException) { }
-                    App.ViewModel.Profile = null;
-                    NavigationService.GoBack();
-                    App.ViewModel.LoadData();
-                }
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-          
-        }
 
         private void toggleRandom_Checked_1(object sender, RoutedEventArgs e)
         {
@@ -307,27 +221,7 @@ namespace WPtrakt
             toggleRandom.Content = "Disabled";
         }
 
-        private void togglePoster_Checked_1(object sender, RoutedEventArgs e)
-        {
-            togglePoster.Content = "Enabled";
-        }
-
-        private void togglePoster_Unchecked_1(object sender, RoutedEventArgs e)
-        {
-            togglePoster.Content = "Disabled";
-        }
-
-        private void btnLogin_Click_1(object sender, RoutedEventArgs e)
-        {
-            if (String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password))
-            {
-                MessageBox.Show("Please fill in all fields");
-                return;
-            }
-
-            GoBack();
-            NavigationService.GoBack();
-        }
+        
 
         private void Twitter_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
         {
