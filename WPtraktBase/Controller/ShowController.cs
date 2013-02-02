@@ -122,7 +122,7 @@ namespace WPtraktBase.Controller
             {
                 TraktEpisode[] episodes = null;
                 TraktSeason currentSeason = showDao.getSeasonFromShow(show, season);
-                if (currentSeason.SeasonEpisodes.Count > 0)
+                if (currentSeason != null && currentSeason.SeasonEpisodes.Count > 0)
                 {
 
                     TraktEpisode lastEpisode = currentSeason.SeasonEpisodes[currentSeason.SeasonEpisodes.Count - 1];

@@ -346,7 +346,7 @@ namespace WPtrakt
 
                     if (nextEpisode == null && show.Seasons.Count > Int16.Parse(watched.Episode.Season))
                     {
-                        episodes = await showController.getEpisodesOfSeason(show, Int16.Parse(watched.Episode.Season + 1));
+                        episodes = await showController.getEpisodesOfSeason(show, (Int16)(Int16.Parse(watched.Episode.Season) + 1));
 
                         foreach (TraktEpisode seasonEpisode in episodes)
                         {
