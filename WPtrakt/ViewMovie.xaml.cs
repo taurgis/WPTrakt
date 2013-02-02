@@ -112,7 +112,7 @@ namespace WPtrakt
                 Stretch = Stretch.UniformToFill,
             };
 
-            Animation.BackgroundFadeIn(this.MoviePanorama.Background);
+            Animation.ImageFadeIn(this.MoviePanorama.Background);
         }
 
         #endregion

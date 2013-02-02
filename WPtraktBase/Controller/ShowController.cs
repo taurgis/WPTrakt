@@ -265,10 +265,28 @@ namespace WPtraktBase.Controller
             }
         }
 
+        public static async Task<BitmapImage> getFanart(String TVDBID, String fanartUrl)
+        {
+            if (!String.IsNullOrEmpty(TVDBID))
+            {
+                return await ShowDao.Instance.getFanartImage(TVDBID, fanartUrl);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public async Task<BitmapImage> getLargeScreenImage(String TVDBID, String season, String episode, String screenUrl)
         {
             return await showDao.getLargeScreenImage(TVDBID, season, episode, screenUrl);
         }
+
+        public static async Task<BitmapImage> getLargeScreenImageStatic(String TVDBID, String season, String episode, String screenUrl)
+        {
+            return await ShowDao.Instance.getLargeScreenImage(TVDBID, season, episode, screenUrl);
+        }
+
 
         public static async Task<BitmapImage> getSmallScreenImage(String TVDBID, String season, String episode, String screenUrl)
         {

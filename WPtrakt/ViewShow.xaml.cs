@@ -293,7 +293,7 @@ namespace WPtrakt
                 Stretch = Stretch.UniformToFill,
             } ;
 
-           Animation.BackgroundFadeIn(this.ShowPanorama.Background);
+           Animation.ImageFadeIn(this.ShowPanorama.Background);
         }
 
         #endregion
@@ -910,7 +910,8 @@ namespace WPtrakt
             if (await episodeController.checkinEpisode(lastModel.Tvdb, App.ShowViewModel.Name, Int16.Parse(App.ShowViewModel.Year), lastModel.Season, lastModel.Episode))
             {
                 lastModel.Watched = true;
-               
+                TraktShow show = await showController.getShowByTVDBID(lastModel.Tvdb);
+                App.MainPage.ShowWatchingNow(await episodeController.getEpisodeByTvdbAndSeasonInfo(lastModel.Tvdb, lastModel.Season, lastModel.Episode, show), show, DateTime.UtcNow);
                 ToastNotification.ShowToast("Show", "Checked in!");
             }
             else

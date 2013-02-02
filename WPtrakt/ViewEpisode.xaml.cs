@@ -118,7 +118,7 @@ namespace WPtrakt
                 Stretch = Stretch.UniformToFill,
             };
 
-
+            Animation.ImageFadeIn(this.EpisodePanorama.Background);
         }
 
 
@@ -306,9 +306,13 @@ namespace WPtrakt
             try
             {
                 if (await episodeController.checkinEpisode(this.show.tvdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
-                   ToastNotification.ShowToast("Episode", "Checked in!");
+                {
+                    ToastNotification.ShowToast("Episode", "Checked in!");
+                    App.MainPage.ShowWatchingNow(await episodeController.getEpisodeByTvdbAndSeasonInfo(this.show.tvdb_id, this.episode.Season, this.episode.Number, this.show), this.show, DateTime.UtcNow);
+              
+                }
                 else
-                   ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
+                    ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
                 InitAppBar();
             }
             catch (WebException)

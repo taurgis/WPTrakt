@@ -8,7 +8,7 @@ namespace WPtrakt.Controllers
 {
     public class Animation
     {
-        public static void BackgroundFadeIn(Brush targetElement)
+        public static void ImageFadeIn(Brush targetElement)
         {
             try
             {
@@ -21,6 +21,27 @@ namespace WPtrakt.Controllers
                     storyboard.Completed -= completedHandlerMainPage;
                     storyboard.Stop();
                     targetElement.Opacity = 0.3;
+                };
+
+                storyboard.Completed += completedHandlerMainPage;
+                storyboard.Begin();
+            }
+            catch (InvalidOperationException) { }
+        }
+
+        public static void ControlFadeIn(UIElement targetElement)
+        {
+            try
+            {
+                Storyboard storyboard = Application.Current.Resources["FadeInComplete"] as Storyboard;
+                Storyboard.SetTarget(storyboard, targetElement);
+                EventHandler completedHandlerMainPage = delegate { };
+
+                completedHandlerMainPage = delegate
+                {
+                    storyboard.Completed -= completedHandlerMainPage;
+                    storyboard.Stop();
+                    targetElement.Opacity = 1;
                 };
 
                 storyboard.Completed += completedHandlerMainPage;

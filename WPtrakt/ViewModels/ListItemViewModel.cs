@@ -109,6 +109,8 @@ namespace WPtrakt
            
         }
 
+        public Int16 Year { get; set; }
+
         public String ContextMarkAsWatchedVisibility
         {
             get
@@ -191,6 +193,20 @@ namespace WPtrakt
                     return new Uri("Images/badge-1.png", UriKind.Relative) ;
             }
 
+        }
+
+        private Double _watchedCompletion;
+        public Double WatchedCompletion
+        {
+            get
+            {
+                return _watchedCompletion;
+            }
+            set
+            {
+                this._watchedCompletion = value;
+                NotifyPropertyChanged("WatchedCompletion");
+            }
         }
 
         public long WatchedTime { get; set; }
@@ -435,6 +451,42 @@ namespace WPtrakt
         private async void LoadScreenImage()
         { 
            this.ScreenImage = await ShowController.getSmallScreenImage(this.Imdb, this.Season, this.Episode, this.ImageSource); 
+        }
+
+        private BitmapImage _largeScreenImage;
+        public BitmapImage LargeScreenImage
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(ImageSource))
+                    return null;
+
+                if (_largeScreenImage == null)
+                {
+                    LoadLargeScreenImage();
+                    BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
+                    return tempImage;
+                }
+                else
+                {
+                    return _largeScreenImage;
+                }
+            }
+
+            set
+            {
+                _largeScreenImage = value;
+
+                Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    NotifyPropertyChanged("LargeScreenImage");
+                }));
+            }
+        }
+
+        private async void LoadLargeScreenImage()
+        {
+            this.LargeScreenImage = await ShowController.getLargeScreenImageStatic(this.Imdb, this.Season, this.Episode, this.ImageSource);
         }
 
         private BitmapImage _mediumImage;

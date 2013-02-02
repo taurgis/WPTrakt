@@ -76,9 +76,11 @@
     <Compile Include="Controller\ShowController.cs" />
     <Compile Include="Controller\MovieController.cs" />
     <Compile Include="Controller\StorageController.cs" />
+    <Compile Include="Controller\UserController.cs" />
     <Compile Include="DAO\ShowDao.cs" />
     <Compile Include="DAO\Dao.cs" />
     <Compile Include="DAO\MovieDao.cs" />
+    <Compile Include="DAO\UserDao.cs" />
     <Compile Include="Model\AppUser.cs" />
     <Compile Include="Model\Enums.cs" />
     <Compile Include="Model\Trakt\Request\BasicAuth.cs" />
@@ -100,6 +102,8 @@
     <Compile Include="Model\Trakt\TraktEpisode.cs" />
     <Compile Include="Model\Trakt\TraktFriendsActivity.cs" />
     <Compile Include="Model\Trakt\TraktImage.cs" />
+    <Compile Include="Model\Trakt\TraktLastActivity.cs" />
+    <Compile Include="Model\Trakt\TraktLastActivityType.cs" />
     <Compile Include="Model\Trakt\TraktMovie.cs" />
     <Compile Include="Model\Trakt\TraktObject.cs" />
     <Compile Include="Model\Trakt\TraktProfile.cs" />

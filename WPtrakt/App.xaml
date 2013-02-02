@@ -9,6 +9,17 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <Application.Resources>
+        <Style TargetType="ListBox" x:Name="HorizontalListBox">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel Orientation="Horizontal" CanHorizontallyScroll="True" CanVerticallyScroll="False"/>
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+        </Style>
         <Storyboard x:Key="FadeOut">
                 <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
                     <LinearDoubleKeyFrame KeyTime="0" Value="1"/>
@@ -20,6 +31,12 @@
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
                 <LinearDoubleKeyFrame KeyTime="0" Value="0.0"/>
                 <LinearDoubleKeyFrame KeyTime="0:0:0.6" Value="0.3"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Storyboard x:Key="FadeInComplete">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
+                <LinearDoubleKeyFrame KeyTime="0" Value="0.0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.4" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
     </Application.Resources>

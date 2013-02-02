@@ -24,15 +24,24 @@ namespace WPtrakt
     public class MainViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<ListItemViewModel> TrendingItems { get; private set; }
+        public ObservableCollection<ListItemViewModel> UpNextItems { get; private set; }
+        public ObservableCollection<ListItemViewModel> WatchingNow { get; private set; }
         public ObservableCollection<ActivityDateListItemViewModel> HistoryItems { get; private set; }
         private List<TraktActivity> history;
-     
+        private Main mainPage;
         public Boolean LoadingTrendingItems { get; set; }
         public Boolean LoadingHistory { get; set;} 
         public MainViewModel()
         {
             this.TrendingItems = new ObservableCollection<ListItemViewModel>();
             this.HistoryItems = new ObservableCollection<ActivityDateListItemViewModel>();
+            this.UpNextItems = new ObservableCollection<ListItemViewModel>();
+            this.WatchingNow = new ObservableCollection<ListItemViewModel>();
+        }
+
+        public void SetMainPage(Main mainPage)
+        {
+            this.mainPage = mainPage;
         }
 
         #region Getters/Setters
@@ -47,6 +56,19 @@ namespace WPtrakt
             set
             {
                 _profile = value;
+            }
+        }
+
+        public Uri SearchIcon
+        {
+            get
+            {
+                bool dark = ((Visibility)Application.Current.Resources["PhoneDarkThemeVisibility"] == Visibility.Visible);
+               if(dark)
+                   return new Uri("Images/appbar.search.rest.white.png", UriKind.Relative);
+               else
+                   return new Uri("Images/appbar.search.rest.black.png", UriKind.Relative);
+
             }
         }
 
@@ -288,7 +310,6 @@ namespace WPtrakt
                         }
                         System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                         {
-                            NotifyPropertyChanged("HistoryItems");
                             RefreshProfile();
                         });
                     }
@@ -322,6 +343,7 @@ namespace WPtrakt
             NotifyPropertyChanged("LoadingStatus");
             NotifyPropertyChanged("MainVisibility");
             NotifyPropertyChanged("PanoramaEnabled");
+            mainPage.FadeInMainMenu();
         }
 
         #endregion
@@ -744,6 +766,16 @@ namespace WPtrakt
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        internal void clearUpNextItems()
+        {
+            this.UpNextItems = new ObservableCollection<ListItemViewModel>();
+        }
+
+        internal void clearWatching()
+        {
+            this.WatchingNow = new ObservableCollection<ListItemViewModel>();
         }
     }
 }

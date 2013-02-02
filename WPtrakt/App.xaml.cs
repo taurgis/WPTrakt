@@ -37,6 +37,21 @@ namespace WPtrakt
 
         }
 
+        private static Main mainPage;
+        public static Main MainPage
+        {
+            get
+            {
+
+                return mainPage;
+            }
+            set
+            {
+                mainPage = value;
+            }
+
+        }
+
         public static SearchViewModel SearchViewModel
         {
             get

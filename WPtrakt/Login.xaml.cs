@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using WPtrakt.Model.Trakt.Request;
 using System.IO.IsolatedStorage;
 using WPtrakt.Model.Trakt;
+using System.Windows.Media;
 
 namespace WPtrakt
 {
@@ -24,6 +25,28 @@ namespace WPtrakt
         public Login()
         {
             InitializeComponent();
+            this.Loaded += Login_Loaded;
+        }
+
+        void Login_Loaded(object sender, RoutedEventArgs e)
+        {
+            bool dark = ((Visibility)Application.Current.Resources["PhoneDarkThemeVisibility"] == Visibility.Visible);
+
+            if (!dark)
+            {
+                EmailGrid.Background = new SolidColorBrush(Colors.White);
+                LoginGrid.Background = new SolidColorBrush(Colors.White); 
+                PasswordGrid.Background = new SolidColorBrush(Colors.White);
+                LabelLogin.Foreground = new SolidColorBrush(Colors.Black);
+                LabelMail.Foreground = new SolidColorBrush(Colors.Black);
+                LabelPassword.Foreground = new SolidColorBrush(Colors.Black); 
+            }
+
+            if (!String.IsNullOrEmpty(AppUser.Instance.UserName))
+                this.LoginBox.Text = AppUser.Instance.UserName;
+
+            if (!String.IsNullOrEmpty(AppUser.Instance.Password))
+                this.PasswordBox.Password = AppUser.Instance.Password;
         }
 
         private void SigninButton_Click_1(object sender, RoutedEventArgs e)
@@ -38,8 +61,8 @@ namespace WPtrakt
                 request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
                 request.Method = "POST";
                 request.BeginGetRequestStream(new AsyncCallback(GetValidationRequestStreamCallback), request);
-                SigninButton.IsEnabled = false;
-                JoinButton.IsEnabled = false;
+                SigninButton.Visibility = System.Windows.Visibility.Collapsed;
+                JoinButton.Visibility = System.Windows.Visibility.Collapsed;
                 progressBar.Visibility = System.Windows.Visibility.Visible;
             }
             else
@@ -83,8 +106,8 @@ namespace WPtrakt
             {
                 System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    SigninButton.IsEnabled = true;
-                    JoinButton.IsEnabled = true;
+                    SigninButton.Visibility = System.Windows.Visibility.Visible;
+                    JoinButton.Visibility = System.Windows.Visibility.Visible;
                     progressBar.Visibility = System.Windows.Visibility.Collapsed;
                     ToastNotification.ShowToast("Error!", "Login data incorrect, or server connection problems.");
                 });
@@ -199,8 +222,5 @@ namespace WPtrakt
             NavigationService.RemoveBackEntry();
             base.OnBackKeyPress(e);
         }
-
-         
-
     }
 }
