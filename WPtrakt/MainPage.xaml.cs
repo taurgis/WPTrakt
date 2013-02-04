@@ -5,16 +5,15 @@ using Microsoft.Phone.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Data.Linq;
-using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using WPtrakt.Controllers;
+using WPtrakt.Custom;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
@@ -30,7 +29,8 @@ namespace WPtrakt
         private ShowController showController;
         private EpisodeController episodeController;
         private UserController userController;
-
+        private MovieController movieController;
+        private Boolean Loading;
 
         public Main()
         {
@@ -40,12 +40,18 @@ namespace WPtrakt
             this.showController = new ShowController();
             this.episodeController = new EpisodeController();
             this.userController = new UserController();
+            this.movieController = new MovieController();
+            this.Loading = false;
             this.Loaded += new RoutedEventHandler(MainPage_Loaded);
+
             App.MainPage = this;
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
+            if (App.ViewModel.Profile != null)
+                return;
+
             try
             {
                 if (!NetworkInterface.GetIsNetworkAvailable())
@@ -72,78 +78,103 @@ namespace WPtrakt
                             AppUser.Instance.AppVersion = fullVersionNumber;
                         }
 
-                        CallValidationService();
+                        if (!AppUser.Instance.SmallScreenshotsEnabled)
+                        {
+                            this.TrendingPanoramaItem.Visibility = System.Windows.Visibility.Collapsed;
+                        }
+
+                        LoadProfile();
                     }
                 }
             }
             catch (InvalidOperationException) { }
         }
 
-        private DateTime firstCall { get; set; }
-        DispatcherTimer userValidationTimer;
-
-        private void CallValidationService()
-        {
-            firstCall = DateTime.Now;
-            userValidationTimer = new DispatcherTimer();
-            userValidationTimer.Interval = TimeSpan.FromSeconds(2);
-            userValidationTimer.Tick += OnTimerTick;
-            userValidationTimer.Start();
-
-            HttpWebRequest request;
-
-            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
-            request.Method = "POST";
-            request.BeginGetRequestStream(new AsyncCallback(GetValidationRequestStreamCallback), request);
-        }
-
-
-        void GetValidationRequestStreamCallback(IAsyncResult asynchronousResult)
-        {
-            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
-            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
-
-            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
-
-            postStream.Write(byteArray, 0, byteArray.Length);
-            postStream.Close();
-
-            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadValidationStringCompleted), webRequest);
-        }
-
-        void client_DownloadValidationStringCompleted(IAsyncResult r)
+        private static void ReloadLiveTile()
         {
             try
             {
-                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                HttpStatusCode status = httpResoponse.StatusCode;
-
-                if (status == System.Net.HttpStatusCode.OK)
+                if (AppUser.Instance.LiveTileEnabled)
                 {
-                    System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        userValidationTimer.Stop();
+                    var taskName = "WPtraktLiveTile";
 
-                        App.ViewModel.LoadData();
-                    });
+                    // If the task exists
+                    var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
+                    if (oldTask != null)
+                    {
+                        ScheduledActionService.Remove(taskName);
+                    }
+
+                    // Create the Task
+                    PeriodicTask task = new PeriodicTask(taskName);
+
+                    // Description is required
+                    task.Description = "This task updates the WPtrakt live tile.";
+
+                    // Add it to the service to execute
+                    ScheduledActionService.Add(task);
+                    //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
+                   
                 }
             }
-            catch (WebException)
+            catch (InvalidOperationException) { }
+        }
+
+        #region Profile
+
+        private DateTime firstCall { get; set; }
+        DispatcherTimer userValidationTimer;
+
+        private async void LoadProfile()
+        {
+            if (!Loading)
             {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
+                Loading = true;
+
+                firstCall = DateTime.Now;
+                userValidationTimer = new DispatcherTimer();
+                userValidationTimer.Interval = TimeSpan.FromSeconds(2);
+                userValidationTimer.Tick += OnTimerTick;
+                userValidationTimer.Start();
+                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+
+                if (await userController.ValidateUser())
                 {
                     userValidationTimer.Stop();
 
-                    App.ViewModel.Profile = new TraktProfileWithWatching();
-                    App.ViewModel.NotifyPropertyChanged("LoadingStatus");
-                    NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
-                    ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
+                    TraktProfile profile = await userController.GetUserProfile();
 
-                });
+                    if (profile != null)
+                    {
+
+                        App.ViewModel.Profile = profile;
+                        App.ViewModel.RefreshProfile();
+                        FadeInHomeScreen();
+                    }
+                    else
+                    {
+                        ValidationFailed();
+                        Loading = false;
+                    }
+                }
+                else
+                {
+                    ValidationFailed();
+                    Loading = false;
+                }
+
+
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+        }
 
+        private void ValidationFailed()
+        {
+            userValidationTimer.Stop();
+
+            App.ViewModel.Profile = new TraktProfileWithWatching();
+            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
+            ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
         }
 
         void OnTimerTick(object sender, EventArgs e)
@@ -157,10 +188,8 @@ namespace WPtrakt
             }
         }
 
-        public async void FadeInMainMenu()
+        public async void FadeInHomeScreen()
         {
-            
-
             App.ViewModel.clearWatching();
 
             if (App.ViewModel.Profile.GetType() == typeof(TraktProfileWithWatching))
@@ -168,28 +197,24 @@ namespace WPtrakt
                 if (((TraktProfileWithWatching)App.ViewModel.Profile).Watching != null)
                 {
                     TraktLastActivity lastActivity = await userController.getLastActivityForUser();
+                  
                     if (((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie != null)
                     {
-                        BitmapImage image = await showController.getFanartImage(((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie.imdb_id, ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie.Images.Fanart);
-                        this.LayoutRoot.Background = new ImageBrush
-                        {
-                            ImageSource = image,
-                            Opacity = 0.0,
-                            Stretch = Stretch.UniformToFill,
-                        };
-                        Animation.ImageFadeIn(this.LayoutRoot.Background);
-
+                        TraktMovie movie = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie;
+                        Int64 lastCheckinScrobble = (lastActivity.Movie.Checkin > lastActivity.Movie.Scrobble) ? lastActivity.Movie.Checkin : lastActivity.Movie.Scrobble;
+                        DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                        DateTime watchTime = baseTime.AddSeconds(lastCheckinScrobble);
+                        ShowWatchingNowMovie(movie, watchTime);
                     }
                     else
                     {
-
-                        TraktEpisode episode = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Episode;
-                        TraktShow show = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Show;
                         Int64 lastCheckinScrobble = (lastActivity.Episode.Checkin > lastActivity.Episode.Scrobble) ? lastActivity.Episode.Checkin : lastActivity.Episode.Scrobble;
-
                         DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                         DateTime watchTime = baseTime.AddSeconds(lastCheckinScrobble);
-                        ShowWatchingNow(episode, show, watchTime);
+                        TraktEpisode episode = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Episode;
+                        TraktShow show = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Show;
+
+                        ShowWatchingNowShow(episode, show, watchTime);
                     }
                 }
                 else
@@ -201,18 +226,51 @@ namespace WPtrakt
             }
             else
             {
-                this.WatchingNow.Visibility = System.Windows.Visibility.Collapsed;
-                if (this.LayoutRoot.Background != null)
-                    this.LayoutRoot.Background = null;
+                ClearWatchingNow();
             }
 
             LoadUpNextEpisodes();
         }
 
-        public async void ShowWatchingNow(TraktEpisode episode, TraktShow show, DateTime watchTime)
+        private void ClearWatchingNow()
+        {
+            this.WatchingNow.Visibility = System.Windows.Visibility.Collapsed;
+            if (this.LayoutRoot.Background != null)
+                this.LayoutRoot.Background = null;
+        }
+
+
+        public async void ShowWatchingNowMovie(TraktMovie movie, DateTime watchTime)
         {
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
-            BitmapImage bitmapImage =  await showController.getFanartImage(show.tvdb_id, show.Images.Fanart);
+            BitmapImage bitmapImage =  await movieController.getFanartImage(movie.imdb_id, movie.Images.Fanart);
+            this.LayoutRoot.Background = new ImageBrush
+            {
+                ImageSource = bitmapImage,
+                Opacity = 0.0,
+                Stretch = Stretch.UniformToFill,
+            };
+
+            App.ViewModel.clearWatching();
+            this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
+            ListItemViewModel model = new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Fanart, Imdb = movie.imdb_id, SubItemText = movie.year.ToString() };
+
+            TimeSpan percentageCompleteTimeSpan = DateTime.UtcNow - watchTime;
+
+            model.WatchedCompletion = ((Double)percentageCompleteTimeSpan.Minutes / (Double)(movie.Runtime)) * 100;
+
+            App.ViewModel.WatchingNow.Add(model);
+            Animation.ImageFadeIn(this.LayoutRoot.Background);
+            Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                App.ViewModel.NotifyPropertyChanged("WatchingNow");
+            }));
+        }
+
+        public async void ShowWatchingNowShow(TraktEpisode episode, TraktShow show, DateTime watchTime)
+        {
+            this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
+            BitmapImage bitmapImage = await showController.getFanartImage(show.tvdb_id, show.Images.Fanart);
             this.LayoutRoot.Background = new ImageBrush
                   {
                       ImageSource = bitmapImage,
@@ -239,68 +297,6 @@ namespace WPtrakt
               {
                   App.ViewModel.NotifyPropertyChanged("WatchingNow");
               }));
-        }
-
-
-
-        private static void ReloadLiveTile()
-        {
-            try
-            {
-                if (AppUser.Instance.LiveTileEnabled)
-                {
-                    var taskName = "WPtraktLiveTile";
-
-                    // If the task exists
-                    var oldTask = ScheduledActionService.Find(taskName) as PeriodicTask;
-                    if (oldTask != null)
-                    {
-                        ScheduledActionService.Remove(taskName);
-                    }
-
-                    // Create the Task
-                    PeriodicTask task = new PeriodicTask(taskName);
-
-                    // Description is required
-                    task.Description = "This task updates the WPtrakt live tile.";
-
-                    // Add it to the service to execute
-                    ScheduledActionService.Add(task);
-                    //ScheduledActionService.LaunchForTest(taskName, TimeSpan.FromSeconds(3));
-                }
-            }
-            catch (InvalidOperationException) { }
-        }
-
-        private void MainPanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (MainPanorama.SelectedIndex == 1)
-            {
-                if (App.ViewModel.TrendingItems.Count == 0)
-                {
-                    App.ViewModel.loadTrending();
-                }
-            }
-            else if (MainPanorama.SelectedIndex == 2)
-            {
-                if (App.ViewModel.HistoryItems.Count == 0)
-                {
-                    App.ViewModel.LoadHistoryData();
-                }
-            }
-        }
-
-        private Int32 lastSelection;
-        private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (this.Filter != null)
-            {
-                if (this.lastSelection != this.Filter.SelectedIndex)
-                {
-                    this.lastSelection = this.Filter.SelectedIndex;
-                    App.ViewModel.FilterHistory(this.Filter.SelectedIndex);
-                }
-            }
         }
 
         #region Upnext episodes
@@ -350,7 +346,7 @@ namespace WPtrakt
 
                         foreach (TraktEpisode seasonEpisode in episodes)
                         {
-                            if (Int16.Parse(seasonEpisode.Number) == (Int16.Parse(watched.Episode.Number) + 1))
+                            if (Int16.Parse(seasonEpisode.Number) == 1)
                             {
                                 nextEpisode = seasonEpisode;
                                 break;
@@ -370,6 +366,7 @@ namespace WPtrakt
 
 
                 }
+
             }
 
 
@@ -379,8 +376,40 @@ namespace WPtrakt
                 App.ViewModel.NotifyPropertyChanged("UpNextItems");
 
             }
+            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.MainPanorama.Visibility = System.Windows.Visibility.Visible;
+            Loading = false;
+            Animation.ControlFadeInSlow(this.MainPanorama);
+        }
 
-            Animation.ControlFadeIn(this.MainMenuStackpanel);
+        #endregion
+
+        #endregion
+
+        #region Trending
+
+        public async void loadTrending()
+        {
+            if (!Loading)
+            {
+                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+                this.Loading = true;
+                App.ViewModel.ClearTrending();
+
+                int count = 0;
+                foreach (TraktMovie movie in await movieController.GetTrendinMovies())
+                {
+                    if (++count > 8)
+                        break;
+
+
+                    App.ViewModel.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.MyRatingAdvanced, NumberOfRatings = movie.Ratings.Votes.ToString(), Type = "Movie", InWatchList = movie.InWatchlist, SubItemText = movie.year.ToString(), Year = movie.year });
+                    App.ViewModel.NotifyPropertyChanged("TrendingItems");
+                }
+
+                this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+                this.Loading = false;
+            }
         }
 
         #endregion
@@ -392,12 +421,17 @@ namespace WPtrakt
             if (MainPanorama.SelectedIndex == 0)
             {
                 StorageController.DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
+                this.MainPanorama.Visibility = System.Windows.Visibility.Collapsed;
+                App.ViewModel.Profile = null;
+                App.ViewModel.NotifyPropertyChanged("LoadingStatus");
+                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+                this.MainPanorama.Opacity = 0;
 
-                App.ViewModel.LoadData();
+                LoadProfile();
             }
             else if (MainPanorama.SelectedIndex == 1)
             {
-                App.ViewModel.loadTrending();
+                loadTrending();
             }
             else if (MainPanorama.SelectedIndex == 2)
             {
@@ -417,7 +451,7 @@ namespace WPtrakt
         {
             if (lastModel == null)
             {
-                ListItemViewModel model = (ListItemViewModel)((Image)sender).DataContext;
+                ListItemViewModel model = (ListItemViewModel)((DelayLoadImage)sender).DataContext;
                 Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
             }
         }
@@ -440,19 +474,40 @@ namespace WPtrakt
             }
         }
 
-        private void UpNextEpisodeGrid_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
-        {
-            ListItemViewModel model = (ListItemViewModel)((Grid)sender).DataContext;
-
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-        }
-
         private void StackPanel_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
         {
             ListItemViewModel model = (ListItemViewModel)((StackPanel)sender).DataContext;
 
             Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
 
+        }
+
+        private void WatchingNowGrid_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            Grid temp = (Grid)sender;
+
+            ContextMenu contextMenu = ContextMenuService.GetContextMenu(temp);
+
+            if (contextMenu.Parent == null)
+            {
+                contextMenu.IsOpen = true;
+            }
+
+        }
+
+        private void GestureListener_Tap_1(object sender, GestureEventArgs e)
+        {
+            if (lastModel == null)
+            {
+                Grid temp = (Grid)sender;
+
+                ContextMenu contextMenu = ContextMenuService.GetContextMenu(temp);
+
+                if (contextMenu.Parent == null)
+                {
+                    contextMenu.IsOpen = true;
+                }
+            }
         }
 
         #endregion
@@ -469,25 +524,18 @@ namespace WPtrakt
             Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/MyMovies.xaml", UriKind.Relative));
         }
 
-        private void CancelCheckin_Click(object sender, EventArgs e)
+        private void RateApp_Click_1(object sender, EventArgs e)
         {
-            var cancelCheckinClient = new WebClient();
+            MarketplaceReviewTask marketplaceReviewTask = new MarketplaceReviewTask();
 
-            cancelCheckinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(cancelCheckinClient_UploadStringCompleted);
-            cancelCheckinClient.UploadStringAsync(new Uri("https://api.trakt.tv/movie/cancelcheckin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+            marketplaceReviewTask.Show();
         }
 
-        void cancelCheckinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
+        private void LogoutMenuItem_Click_1(object sender, EventArgs e)
         {
-            try
-            {
-                ToastNotification.ShowToast("Cancel", "Cancelled any active check in!");
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+            AppUser.Instance.UserName = "";
+            AppUser.Instance.Password = "";
+            NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
         }
 
         private void ApplicationBarSettingsButton_Click(object sender, EventArgs e)
@@ -499,6 +547,21 @@ namespace WPtrakt
 
         #region EpisodeContextMenu
 
+
+        private async void CancelCheckinEpisode_Click_1(object sender, RoutedEventArgs e)
+        {
+            lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            if (await userController.CancelActiveCheckin())
+            {
+                ClearWatchingNow();
+                ToastNotification.ShowToast("Cancel", "Cancelled any active check in!");
+            }
+            else
+            {
+                ErrorManager.ShowConnectionErrorPopup();
+            }
+        }
 
         private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
         {
@@ -586,7 +649,7 @@ namespace WPtrakt
                 lastModel.Watched = true;
                 TraktShow show = await showController.getShowByTVDBID(lastModel.Tvdb);
 
-                ShowWatchingNow(await episodeController.getEpisodeByTvdbAndSeasonInfo(lastModel.Tvdb, lastModel.Season, lastModel.Episode, show), show, DateTime.UtcNow);
+                ShowWatchingNowShow(await episodeController.getEpisodeByTvdbAndSeasonInfo(lastModel.Tvdb, lastModel.Season, lastModel.Episode, show), show, DateTime.UtcNow);
 
                 ToastNotification.ShowToast("Show", "Checked in!");
             }
@@ -597,6 +660,22 @@ namespace WPtrakt
 
             lastModel = null;
             this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        private void ViewEpisode_Click_1(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+
+        }
+
+        private void ViewShow_Click_1(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+
         }
 
         #endregion
@@ -674,43 +753,19 @@ namespace WPtrakt
             lastModel = null;
         }
 
-        private void CheckinMovie_Click(object sender, RoutedEventArgs e)
+        private async void CheckinMovie_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
-            var checkinClient = new WebClient();
-             checkinClient.UploadStringCompleted += new UploadStringCompletedEventHandler(checkinClient_UploadStringCompleted);
-            CheckinAuth auth = new CheckinAuth();
-
-            auth.imdb_id = lastModel.Imdb;
-            auth.Title = lastModel.Name;
-            auth.year = Int16.Parse(lastModel.SubItemText);
-            auth.AppDate = AppUser.getReleaseDate();
-
-            var assembly = Assembly.GetExecutingAssembly().FullName;
-            var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-            auth.AppVersion = fullVersionNumber;
-
-            checkinClient.UploadStringAsync(new Uri("https://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
-        }
-
-        void checkinClient_UploadStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
+            if (await movieController.checkinMovie(lastModel.Imdb, lastModel.Name, lastModel.Year))
             {
-                String jsonString = e.Result;
-                if (jsonString.Contains("failure"))
-                    ToastNotification.ShowToast("Movie", "There is already a checkin in progress.");
-                else
-                    ToastNotification.ShowToast("Movie", "Checked in!");
+                ShowWatchingNowMovie(await movieController.getMovieByImdbId(lastModel.Imdb), DateTime.UtcNow);
+                ToastNotification.ShowToast("Movie", "Checked in!");
             }
-            catch (WebException)
+            else
             {
-                ErrorManager.ShowConnectionErrorPopup();
+                ToastNotification.ShowToast("Movie", "There is already a checkin in progress.");
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
-            lastModel = null;
         }
 
         #endregion
@@ -760,20 +815,36 @@ namespace WPtrakt
             LayoutRoot.Opacity = 1;
         }
 
-        private void RateApp_Click_1(object sender, EventArgs e)
+        private void MainPanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            MarketplaceReviewTask marketplaceReviewTask = new MarketplaceReviewTask();
-
-            marketplaceReviewTask.Show();
+            if (MainPanorama.SelectedIndex == 1)
+            {
+                if (App.ViewModel.TrendingItems.Count == 0)
+                {
+                    loadTrending();
+                }
+            }
+            else if (MainPanorama.SelectedIndex == 2)
+            {
+                if (App.ViewModel.HistoryItems.Count == 0)
+                {
+                    App.ViewModel.LoadHistoryData();
+                }
+            }
         }
 
-        private void LogoutMenuItem_Click_1(object sender, EventArgs e)
+        private Int32 lastSelection;
+        private void Filter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            AppUser.Instance.UserName = "";
-            AppUser.Instance.Password = "";
-            NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
+            if (this.Filter != null)
+            {
+                if (this.lastSelection != this.Filter.SelectedIndex)
+                {
+                    this.lastSelection = this.Filter.SelectedIndex;
+                    App.ViewModel.FilterHistory(this.Filter.SelectedIndex);
+                }
+            }
         }
-
-
+      
     }
 }

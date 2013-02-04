@@ -179,14 +179,6 @@ namespace WPtrakt
 
         }
 
-        private void Application_Activated(object sender, ActivatedEventArgs e)
-        {
-            if (!App.ViewModel.IsDataLoaded)
-            {
-                App.ViewModel.LoadData();
-            }
-        }
-
 
         private void RootFrame_NavigationFailed(object sender, NavigationFailedEventArgs e)
         {

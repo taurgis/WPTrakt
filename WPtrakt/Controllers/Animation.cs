@@ -50,6 +50,27 @@ namespace WPtrakt.Controllers
             catch (InvalidOperationException) { }
         }
 
+        public static void ControlFadeInSlow(UIElement targetElement)
+        {
+            try
+            {
+                Storyboard storyboard = Application.Current.Resources["FadeInCompleteSlow"] as Storyboard;
+                Storyboard.SetTarget(storyboard, targetElement);
+                EventHandler completedHandlerMainPage = delegate { };
+
+                completedHandlerMainPage = delegate
+                {
+                    storyboard.Completed -= completedHandlerMainPage;
+                    storyboard.Stop();
+                    targetElement.Opacity = 1;
+                };
+
+                storyboard.Completed += completedHandlerMainPage;
+                storyboard.Begin();
+            }
+            catch (InvalidOperationException) { }
+        }
+
         public static void NavigateToFadeOut(PhoneApplicationPage page, UIElement targetElement, Uri targetPage)
         {
             try

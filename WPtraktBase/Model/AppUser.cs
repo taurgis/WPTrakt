@@ -44,6 +44,40 @@ namespace WPtrakt.Model
             }
         }
 
+        public Boolean BackgroundWallpapersEnabled
+        {
+            get
+            {
+
+                if (settings.Contains("BackgroundWallpapers"))
+                    return (Boolean)settings["BackgroundWallpapers"];
+                else
+                    return true;
+            }
+            set
+            {
+                settings["BackgroundWallpapers"] = value;
+                settings.Save();
+            }
+        }
+
+        public Boolean SmallScreenshotsEnabled
+        {
+            get
+            {
+
+                if (settings.Contains("SmallScreenshots"))
+                    return (Boolean)settings["SmallScreenshots"];
+                else
+                    return true;
+            }
+            set
+            {
+                settings["SmallScreenshots"] = value;
+                settings.Save();
+            }
+        }
+
         public Boolean LiveTileEnabled
         {
             get
@@ -161,16 +195,30 @@ namespace WPtrakt.Model
             }
             set
             {
-                if (value != _oldPassword && !String.IsNullOrEmpty(value))
+                if (value != _oldPassword)
                 {
-                    SHA1Managed s = new SHA1Managed();
-                    UTF8Encoding enc = new UTF8Encoding();
-                    s.ComputeHash(enc.GetBytes(value));
-
-                    settings["Password"] = BitConverter.ToString(s.Hash).Replace("-", "");
-                    settings.Save();
+                    if (String.IsNullOrEmpty(value))
+                    {
+                        settings["Password"] = "";
+                        settings.Save();
+                    }
+                    else
+                    {
+                        String newPassword = ShaPassword(value);
+                        settings["Password"] = newPassword;
+                        settings.Save();
+                    }
                 }
             }
+        }
+
+        internal static string ShaPassword(string value)
+        {
+            SHA1Managed s = new SHA1Managed();
+            UTF8Encoding enc = new UTF8Encoding();
+            s.ComputeHash(enc.GetBytes(value));
+            String newPassword = BitConverter.ToString(s.Hash).Replace("-", "");
+            return newPassword;
         }
 
         public static String createJsonStringForAuthentication()
@@ -247,16 +295,16 @@ namespace WPtrakt.Model
                         {
                             try
                             {
-                            ShowDao.Instance.DeleteDatabase();
-                            ShowDao.Instance.Dispose();
-                            ShowDao.DisposeDB();
+                                ShowDao.Instance.DeleteDatabase();
+                                ShowDao.Instance.Dispose();
+                                ShowDao.DisposeDB();
                             }
                             catch (IOException) { }
                         }
                     }
-                
+
                     myIsolatedStorage.DeleteFile(file);
-                    
+
                 }
                 catch (IsolatedStorageException) { };
 

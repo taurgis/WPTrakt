@@ -77,6 +77,7 @@
     <Compile Include="Controller\MovieController.cs" />
     <Compile Include="Controller\StorageController.cs" />
     <Compile Include="Controller\UserController.cs" />
+    <Compile Include="DAO\Enums.cs" />
     <Compile Include="DAO\ShowDao.cs" />
     <Compile Include="DAO\Dao.cs" />
     <Compile Include="DAO\MovieDao.cs" />

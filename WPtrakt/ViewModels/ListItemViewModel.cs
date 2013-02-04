@@ -428,8 +428,8 @@ namespace WPtrakt
                 if (_screenImage == null)
                 {
                     LoadScreenImage();
-                    BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
-                    return tempImage;
+                    
+                    return null;
                 }
                 else
                 {
@@ -464,8 +464,8 @@ namespace WPtrakt
                 if (_largeScreenImage == null)
                 {
                     LoadLargeScreenImage();
-                    BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
-                    return tempImage;
+                   // BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
+                    return null;
                 }
                 else
                 {
@@ -497,8 +497,7 @@ namespace WPtrakt
                 if (_mediumImage == null)
                 {
                     LoadMediumImage();
-                    BitmapImage tempImage = new BitmapImage(new Uri("Images/poster-small.jpg", UriKind.Relative));
-                    return tempImage;
+                    return null;
                 }
                 else
                 {

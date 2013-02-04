@@ -187,7 +187,7 @@ namespace WPtrakt
 
                         }
 
-                        App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel());
+                      
                         App.ShowViewModel.RefreshEpisodes();
                     }
                 }
@@ -333,7 +333,7 @@ namespace WPtrakt
                 NavigationContext.QueryString.TryGetValue("id", out id);
                 LoadEpisodeData();
 
-                EpisodeGrid.Visibility = System.Windows.Visibility.Visible;
+                EpisodeList.Visibility = System.Windows.Visibility.Visible;
                 SeasonGrid.Visibility = System.Windows.Visibility.Collapsed;
 
                 this.LoadingActive = false;
@@ -648,7 +648,7 @@ namespace WPtrakt
 
         void showSeasons_Click(object sender, EventArgs e)
         {
-            EpisodeGrid.Visibility = System.Windows.Visibility.Collapsed;
+            EpisodeList.Visibility = System.Windows.Visibility.Collapsed;
             SeasonGrid.Visibility = System.Windows.Visibility.Visible;
         }
 
@@ -911,7 +911,7 @@ namespace WPtrakt
             {
                 lastModel.Watched = true;
                 TraktShow show = await showController.getShowByTVDBID(lastModel.Tvdb);
-                App.MainPage.ShowWatchingNow(await episodeController.getEpisodeByTvdbAndSeasonInfo(lastModel.Tvdb, lastModel.Season, lastModel.Episode, show), show, DateTime.UtcNow);
+                App.MainPage.ShowWatchingNowShow(await episodeController.getEpisodeByTvdbAndSeasonInfo(lastModel.Tvdb, lastModel.Season, lastModel.Episode, show), show, DateTime.UtcNow);
                 ToastNotification.ShowToast("Show", "Checked in!");
             }
             else
@@ -937,17 +937,12 @@ namespace WPtrakt
                 this.ShowPanorama.Margin = new Thickness(0, 0, 0, 0);
                 ShoutList.Width = 405;
                 ShoutList.Height = 420;
-                EpisodeList.Height = 440;
-                SeasonsList.Width = 400;
-
             }
             else
             {
                 this.ShowPanorama.Margin = new Thickness(0, -180, 0, 0);
                 ShoutList.Width = 800;
                 ShoutList.Height = 340;
-                EpisodeList.Height = 360;
-                SeasonsList.Width = 700;
             }
 
             ShowPanorama.DefaultItem = ShowPanorama.Items[0];

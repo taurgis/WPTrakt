@@ -5,10 +5,79 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:controlsPrimitives="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls" 
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+     xmlns:custom="clr-namespace:WPtrakt.Custom"
+    
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <Application.Resources>
+        <Style x:Key="FadingListBox" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource PhoneForegroundBrush}"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <Grid>
+                            <ScrollViewer x:Name="ScrollViewer" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}" Padding="{TemplateBinding Padding}">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                            <Rectangle VerticalAlignment="top" Height="15" Fill="{StaticResource PhoneBackgroundBrush}">
+                                <Rectangle.OpacityMask>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Offset="0" Color="Black" />
+                                        <GradientStop Offset="1" Color="Transparent" />
+                                    </LinearGradientBrush>
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                            <Rectangle VerticalAlignment="bottom" Height="15" Fill="{StaticResource PhoneBackgroundBrush}">
+                                <Rectangle.OpacityMask>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Offset="0" Color="Transparent" />
+                                        <GradientStop Offset="1" Color="Black" />
+                                    </LinearGradientBrush>
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <Style TargetType="custom:DelayLoadImage">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="custom:DelayLoadImage">
+                        <Grid x:Name="PART_Root">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="STATE_Default">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0:0:1" To="1" Storyboard.TargetName="PART_DefaultImage" Storyboard.TargetProperty="Opacity" />
+                                            <DoubleAnimation Duration="0:0:1" To="0" Storyboard.TargetName="PART_ActualImage" Storyboard.TargetProperty="Opacity" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="STATE_Actual">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0:0:1" To="0" Storyboard.TargetName="PART_DefaultImage" Storyboard.TargetProperty="Opacity" />
+                                            <DoubleAnimation Duration="0:0:1" To="1" Storyboard.TargetName="PART_ActualImage" Storyboard.TargetProperty="Opacity" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Image Name="PART_DefaultImage" Opacity="1" Canvas.ZIndex="-1" />
+                            <Image Name="PART_ActualImage" Opacity="0" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="ListBox" x:Name="HorizontalListBox">
             <Setter Property="ItemsPanel">
                 <Setter.Value>
@@ -21,11 +90,11 @@
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
         </Style>
         <Storyboard x:Key="FadeOut">
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
-                    <LinearDoubleKeyFrame KeyTime="0" Value="1"/>
-                    <LinearDoubleKeyFrame KeyTime="0:0:0.4" Value="0.0"/>
-                </DoubleAnimationUsingKeyFrames>
-            </Storyboard>
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
+                <LinearDoubleKeyFrame KeyTime="0" Value="1"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:0.4" Value="0.0"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
 
         <Storyboard x:Key="FadeIn">
             <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
@@ -39,9 +108,15 @@
                 <LinearDoubleKeyFrame KeyTime="0:0:0.4" Value="1"/>
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
+        <Storyboard x:Key="FadeInCompleteSlow">
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(UIElement.Opacity)">
+                <LinearDoubleKeyFrame KeyTime="0" Value="0.0"/>
+                <LinearDoubleKeyFrame KeyTime="0:0:1.5" Value="1"/>
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
     </Application.Resources>
     <Application.ApplicationLifetimeObjects>
         <!--Required object that handles lifetime events for the application-->
-        <shell:PhoneApplicationService  Activated="Application_Activated" />
+        <shell:PhoneApplicationService />
     </Application.ApplicationLifetimeObjects>
 </Application>

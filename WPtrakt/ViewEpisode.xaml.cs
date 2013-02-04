@@ -301,27 +301,33 @@ namespace WPtrakt
 
         private async void checkinButton_Click(object sender, EventArgs e)
         {
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-
-            try
+            if (!LoadingActive)
             {
-                if (await episodeController.checkinEpisode(this.show.tvdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
+                LoadingActive = true;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+
+                try
                 {
-                    ToastNotification.ShowToast("Episode", "Checked in!");
-                    App.MainPage.ShowWatchingNow(await episodeController.getEpisodeByTvdbAndSeasonInfo(this.show.tvdb_id, this.episode.Season, this.episode.Number, this.show), this.show, DateTime.UtcNow);
-              
-                }
-                else
-                    ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
-                InitAppBar();
-            }
-            catch (WebException)
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+                    if (await episodeController.checkinEpisode(this.show.tvdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
+                    {
+                        ToastNotification.ShowToast("Episode", "Checked in!");
+                        App.MainPage.ShowWatchingNowShow(await episodeController.getEpisodeByTvdbAndSeasonInfo(this.show.tvdb_id, this.episode.Season, this.episode.Number, this.show), this.show, DateTime.UtcNow);
 
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+                    }
+                    else
+                        ToastNotification.ShowToast("Episode", "There is already a checkin in progress.");
+                    InitAppBar();
+                }
+                catch (WebException)
+                {
+                    ErrorManager.ShowConnectionErrorPopup();
+                }
+                catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
+
+                progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+
+                LoadingActive = false;
+            }
         }
 
         #endregion
@@ -340,20 +346,25 @@ namespace WPtrakt
 
         private async void Seen_Click(object sender, EventArgs e)
         {
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+            if (!LoadingActive)
+            {
+                LoadingActive = true;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
 
-            if (await episodeController.markEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
-            {
-                ToastNotification.ShowToast("Episode", "Episode marked as watched.");
-                App.EpisodeViewModel.Watched = true;
-                await updateOtherViews();
-                InitAppBar();
+                if (await episodeController.markEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
+                {
+                    ToastNotification.ShowToast("Episode", "Episode marked as watched.");
+                    App.EpisodeViewModel.Watched = true;
+                    await updateOtherViews();
+                    InitAppBar();
+                }
+                else
+                {
+                    ErrorManager.ShowConnectionErrorPopup();
+                }
+                progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+                LoadingActive = false;
             }
-            else
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         private void CreateUnSeenButton(ApplicationBar appBar)
@@ -368,20 +379,25 @@ namespace WPtrakt
 
         private async void unseeButton_Click(object sender, EventArgs e)
         {
-            progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            if (await episodeController.unMarkEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
+            if (!LoadingActive)
             {
-                App.EpisodeViewModel.Watched = false;
-                await updateOtherViews();
-                ToastNotification.ShowToast("Episode", "Episode unmarked as watched.");
+                LoadingActive = true;
+                progressBarLoading.Visibility = System.Windows.Visibility.Visible;
+                if (await episodeController.unMarkEpisodeAsSeen(this.show.tvdb_id, this.show.imdb_id, this.show.Title, this.show.year, this.episode.Season, this.episode.Number))
+                {
+                    App.EpisodeViewModel.Watched = false;
+                    await updateOtherViews();
+                    ToastNotification.ShowToast("Episode", "Episode unmarked as watched.");
 
-                InitAppBar();
+                    InitAppBar();
+                }
+                else
+                {
+                    ErrorManager.ShowConnectionErrorPopup();
+                }
+                progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
+                LoadingActive = false;
             }
-            else
-            {
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-            progressBarLoading.Visibility = System.Windows.Visibility.Collapsed;
         }
 
         #endregion

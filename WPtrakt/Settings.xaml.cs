@@ -66,6 +66,28 @@ namespace WPtrakt
             {
                 App.SettingsViewModel.LoadData();
 
+                if (AppUser.Instance.BackgroundWallpapersEnabled)
+                {
+                    this.toggleWallpaper.IsChecked = true;
+                    this.toggleWallpaper.Content = "Enabled";
+                }
+                else
+                {
+                    this.toggleWallpaper.IsChecked = false;
+                    this.toggleWallpaper.Content = "Disabled";
+                }
+
+                if (AppUser.Instance.SmallScreenshotsEnabled)
+                {
+                    this.toggleSmallScreens.IsChecked = true;
+                    this.toggleSmallScreens.Content = "Enabled";
+                }
+                else
+                {
+                    this.toggleSmallScreens.IsChecked = false;
+                    this.toggleSmallScreens.Content = "Disabled";
+                }
+
             }
             App.SettingsViewModel.Usage = "Calculating...";
             BackgroundWorker worker = new BackgroundWorker();
@@ -154,6 +176,10 @@ namespace WPtrakt
                 AppUser.Instance.LiveTileEnabled = false;
                 DisableLiveTile();
             }
+
+            AppUser.Instance.SmallScreenshotsEnabled = (Boolean)toggleSmallScreens.IsChecked;
+            AppUser.Instance.BackgroundWallpapersEnabled = (Boolean)toggleWallpaper.IsChecked;
+          
         }
 
         private void DisableLiveTile()
@@ -230,5 +256,29 @@ namespace WPtrakt
 
             task.Show();
         }
+        private void toggleWallpaper_Checked_1(object sender, RoutedEventArgs e)
+        {
+            this.toggleWallpaper.Content = "Enabled";
+
+        }
+
+        private void toggleWallpaper_Unchecked_1(object sender, RoutedEventArgs e)
+        {
+            this.toggleWallpaper.Content = "Disabled";
+
+        }
+
+        private void toggleSmallScreens_Checked_1(object sender, RoutedEventArgs e)
+        {
+            this.toggleSmallScreens.Content = "Enabled";
+
+        }
+
+        private void toggleSmallScreens_Unchecked_1(object sender, RoutedEventArgs e)
+        {
+            this.toggleSmallScreens.Content = "Disabled";
+     
+        }
+
     }
 }

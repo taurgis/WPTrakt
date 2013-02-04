@@ -89,6 +89,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controllers\Animation.cs" />
+    <Compile Include="Custom\DelayedLoadImage.cs" />
     <Compile Include="Controllers\ErrorManager.cs" />
     <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
     <Compile Include="Controllers\ToastNotification.cs" />

@@ -123,7 +123,7 @@ namespace WPtraktBase.Controller
 
         public async Task<BitmapImage> getFanartImage(String IMDBID, String fanartUrl)
         {
-            if (!String.IsNullOrEmpty(IMDBID))
+            if (!String.IsNullOrEmpty(IMDBID) && AppUser.Instance.BackgroundWallpapersEnabled)
             {
                 return await movieDao.getFanartImage(IMDBID, fanartUrl);
             }
@@ -137,10 +137,15 @@ namespace WPtraktBase.Controller
         {
             if (movie != null)
             {
-               return movieDao.saveMovie(movie);
+                return movieDao.saveMovie(movie);
             }
 
             return false;
+        }
+
+        public async Task<TraktMovie[]> GetTrendinMovies()
+        {
+            return await movieDao.FetchTrendingMovies();
         }
     }
 }

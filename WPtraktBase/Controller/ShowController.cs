@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
@@ -255,7 +256,7 @@ namespace WPtraktBase.Controller
 
         public async Task<BitmapImage> getFanartImage(String TVDBID, String fanartUrl)
         {
-            if (!String.IsNullOrEmpty(TVDBID))
+            if (!String.IsNullOrEmpty(TVDBID) && AppUser.Instance.BackgroundWallpapersEnabled)
             {
                 return await showDao.getFanartImage(TVDBID, fanartUrl);
             }

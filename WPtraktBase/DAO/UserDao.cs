@@ -12,12 +12,104 @@ using System.Windows.Media.Imaging;
 using System.Threading.Tasks;
 using WPtrakt.Model;
 using WPtraktBase.Model.Trakt;
+using WPtrakt.Model.Trakt;
+using WPtraktBase.Controllers;
+using WPtrakt.Model.Trakt.Request;
 
 namespace WPtraktBase.DAO
 {
     public class UserDao
     {
-        public async Task<TraktLastActivity> FetchLastActivity()
+        internal async Task<Boolean> ValidateUser()
+        {
+            try
+            {
+                var userClient = new WebClient();
+                String jsonString = await userClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/account/test/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+
+                return jsonString.Contains("all good!");
+            }
+            catch (WebException)
+            { Debug.WriteLine("WebException in FetchLastActivity()."); }
+            catch (TargetInvocationException)
+            { Debug.WriteLine("TargetInvocationException in FetchLastActivity()."); }
+
+            return false;
+        }
+
+        internal async Task<RegistrationResult> CreateUser(String username, String password, String email)
+        {
+            try
+            {
+                var userClient = new WebClient();
+
+                RegisterAuth auth = new RegisterAuth();
+                auth.Email = email;
+                auth.Username = username;
+                auth.Password = AppUser.ShaPassword(password);
+
+                String jsonString = await userClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/account/create/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(RegisterAuth), auth));
+
+                if (jsonString.Contains(" is already a registered e-mail"))
+                {
+                    return RegistrationResult.EMAILINUSE;
+                }
+
+                if (jsonString.Contains("is already a registered username"))
+                {
+                    return RegistrationResult.USERNAMEINUSE;
+                }
+
+                if (jsonString.Contains("created account for"))
+                {
+                    return RegistrationResult.OK;
+                }
+
+                return RegistrationResult.OK;
+            }
+            catch (WebException)
+            { Debug.WriteLine("WebException in CreateUser()."); }
+            catch (TargetInvocationException)
+            { Debug.WriteLine("TargetInvocationException in CreateUser()."); }
+
+            return RegistrationResult.FAILED;
+        }
+
+        internal async Task<TraktProfile> GetUserProfile()
+        {
+            try
+            {
+                var userClient = new WebClient();
+                TraktProfile profile = null;
+                String jsonString = await userClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/user/profile.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    if (jsonString.Contains("watching\":[]"))
+                    {
+                        var ser = new DataContractJsonSerializer(typeof(TraktProfile));
+
+                        profile = (TraktProfile)ser.ReadObject(ms);
+                    }
+                    else
+                    {
+                        var ser = new DataContractJsonSerializer(typeof(TraktProfileWithWatching));
+
+                        profile = (TraktProfileWithWatching)ser.ReadObject(ms);
+                    }
+                }
+
+                return profile;
+            }
+            catch (WebException)
+            { Debug.WriteLine("WebException in GetUserProfile()."); }
+            catch (TargetInvocationException)
+            { Debug.WriteLine("TargetInvocationException in GetUserProfile()."); }
+
+
+            return null;
+        }
+
+        internal async Task<TraktLastActivity> FetchLastActivity()
         {
             try
             {
@@ -41,6 +133,24 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("TargetInvocationException in FetchLastActivity()."); }
 
             return null;
+        }
+
+        internal async Task<Boolean> CancelActiveCheckin()
+        {
+            try
+            {
+                var cancelCheckinClient = new WebClient();
+
+                String jsonString = await cancelCheckinClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/cancelcheckin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+                jsonString = await cancelCheckinClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/show/cancelcheckin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+                return true;
+            }
+            catch (WebException)
+            { Debug.WriteLine("WebException in CancelActiveCheckin()."); }
+            catch (TargetInvocationException)
+            { Debug.WriteLine("TargetInvocationException in CancelActiveCheckin()."); }
+
+            return false;
         }
     }
 }

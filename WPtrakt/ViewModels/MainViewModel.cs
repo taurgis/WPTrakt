@@ -30,7 +30,8 @@ namespace WPtrakt
         private List<TraktActivity> history;
         private Main mainPage;
         public Boolean LoadingTrendingItems { get; set; }
-        public Boolean LoadingHistory { get; set;} 
+        public Boolean LoadingHistory { get; set; }
+
         public MainViewModel()
         {
             this.TrendingItems = new ObservableCollection<ListItemViewModel>();
@@ -64,10 +65,10 @@ namespace WPtrakt
             get
             {
                 bool dark = ((Visibility)Application.Current.Resources["PhoneDarkThemeVisibility"] == Visibility.Visible);
-               if(dark)
-                   return new Uri("Images/appbar.search.rest.white.png", UriKind.Relative);
-               else
-                   return new Uri("Images/appbar.search.rest.black.png", UriKind.Relative);
+                if (dark)
+                    return new Uri("Images/appbar.search.rest.white.png", UriKind.Relative);
+                else
+                    return new Uri("Images/appbar.search.rest.black.png", UriKind.Relative);
 
             }
         }
@@ -170,7 +171,7 @@ namespace WPtrakt
         {
             get
             {
-                if (Profile == null || this.LoadingHistory || this.LoadingTrendingItems)
+                if (this.LoadingHistory || this.LoadingTrendingItems)
                 {
                     return "Visible";
                 }
@@ -196,6 +197,13 @@ namespace WPtrakt
             }
         }
 
+        public void ClearTrending()
+        {
+            this.TrendingItems = new ObservableCollection<ListItemViewModel>();
+
+            App.ViewModel.NotifyPropertyChanged("TrendingItems");
+        }
+
         public bool IsDataLoaded
         {
             get;
@@ -206,222 +214,13 @@ namespace WPtrakt
 
         #region Profile
 
-
-
-        public void LoadData()
-        {
-            this.Profile = null;
-            this.IsDataLoaded = true;
-
-            LoadProfile();
-        }
-
-       
-
-        private void LoadProfile()
-        {
-            if (StorageController.doesFileExist(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json"))
-            {
-                BackgroundWorker worker = new BackgroundWorker();
-                worker.WorkerReportsProgress = false;
-                worker.WorkerSupportsCancellation = false;
-                worker.DoWork += new DoWorkEventHandler(profileworker_DoWork);
-
-                worker.RunWorkerAsync();
-            }
-            else
-            {
-                CallProfileService();
-            }
-
-        }
-
-        void profileworker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            
-            Profile = (TraktProfile)StorageController.LoadObject(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json", typeof(TraktProfileWithWatching));
-   
-
-                //Cache the profile for 4 hours, the history is prone to quick change. Though 4 hours is enough to catch server problems.
-            if ((DateTime.Now - Profile.DownloadTime).Hours < 2)
-            {
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    RefreshProfile();
-                });
-            }
-            else
-            {
-                CallProfileService();
-            }
-        }
-
-        private void CallProfileService()
-        {
-            HttpWebRequest request;
-
-            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/user/profile.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName));
-            request.Method = "POST";
-            request.BeginGetRequestStream(new AsyncCallback(GetProfileRequestStreamCallback), request);
-        }
-
-
-        void GetProfileRequestStreamCallback(IAsyncResult asynchronousResult)
-        {
-            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
-            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
-
-            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
-
-            postStream.Write(byteArray, 0, byteArray.Length);
-            postStream.Close();
-
-            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadProfileStringCompleted), webRequest);
-        }
-
-        void client_DownloadProfileStringCompleted(IAsyncResult r)
-        {
-            try
-            {
-                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
-
-                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                    {
-                        if (jsonString.Contains("watching\":[]"))
-                        {
-                            var ser = new DataContractJsonSerializer(typeof(TraktProfile));
-
-                            this.Profile = (TraktProfile)ser.ReadObject(ms);
-
-                            StorageController.saveObject(this.Profile, typeof(TraktProfile));
-                        }
-                        else
-                        {
-                            var ser = new DataContractJsonSerializer(typeof(TraktProfileWithWatching));
-
-                            this.Profile = (TraktProfileWithWatching)ser.ReadObject(ms);
-
-                            StorageController.saveObject(this.Profile, typeof(TraktProfileWithWatching));
-                        }
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            RefreshProfile();
-                        });
-                    }
-                }
-
-            }
-            catch (WebException)
-            {
-                Profile = new TraktProfileWithWatching();
-                System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    NotifyPropertyChanged("MainVisibility");
-                    NotifyPropertyChanged("LoadingStatus");
-                    ErrorManager.ShowConnectionErrorPopup();
-                });
-            }
-            catch (TargetInvocationException)
-            {
-                NotifyPropertyChanged("MainVisibility");
-                NotifyPropertyChanged("LoadingStatus");
-                ErrorManager.ShowConnectionErrorPopup();
-            }
-
-        }
-
-        private void RefreshProfile()
+        public void RefreshProfile()
         {
             NotifyPropertyChanged("UserAvatar");
             NotifyPropertyChanged("UserName");
             NotifyPropertyChanged("UserAbout");
-            NotifyPropertyChanged("LoadingStatus");
-            NotifyPropertyChanged("MainVisibility");
-            NotifyPropertyChanged("PanoramaEnabled");
-            mainPage.FadeInMainMenu();
         }
 
-        #endregion
-
-        #region Trending
-
-        public void loadTrending()
-        {
-            if (!LoadingTrendingItems)
-            {
-                this.LoadingTrendingItems = true;
-                this.TrendingItems = new ObservableCollection<ListItemViewModel>();
-
-                NotifyPropertyChanged("TrendingItems");
-                NotifyPropertyChanged("LoadingStatus");
-
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.trakt.tv/movies/trending.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"));
-                request.Method = "POST";
-                request.BeginGetRequestStream(new AsyncCallback(GetRequestStreamCallback), request);
-            }
-        }
-
-        void GetRequestStreamCallback(IAsyncResult asynchronousResult)
-        {
-            HttpWebRequest webRequest = (HttpWebRequest)asynchronousResult.AsyncState;
-            Stream postStream = webRequest.EndGetRequestStream(asynchronousResult);
-
-            byte[] byteArray = Encoding.UTF8.GetBytes(AppUser.createJsonStringForAuthentication());
-
-            postStream.Write(byteArray, 0, byteArray.Length);
-            postStream.Close();
-
-            webRequest.BeginGetResponse(new AsyncCallback(client_DownloadTrendingStringCompleted), webRequest);
-        }
-
-        void client_DownloadTrendingStringCompleted(IAsyncResult r)
-        {
-            try
-            {
-                HttpWebRequest httpRequest = (HttpWebRequest)r.AsyncState;
-                HttpWebResponse httpResoponse = (HttpWebResponse)httpRequest.EndGetResponse(r);
-                System.Net.HttpStatusCode status = httpResoponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
-                {
-                    String jsonString = new StreamReader(httpResoponse.GetResponseStream()).ReadToEnd();
-
-                    using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
-                    {
-                        //parse into jsonser
-                        var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
-                        TraktMovie[] obj = (TraktMovie[])ser.ReadObject(ms);
-                        this.TrendingItems = new ObservableCollection<ListItemViewModel>();
-                        int count = 0;
-                        foreach (TraktMovie traktMovie in obj)
-                        {
-                            if (++count > 8)
-                                break;
-
-                            TraktMovie movie = traktMovie;
-
-                            this.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.MyRatingAdvanced, NumberOfRatings = movie.Ratings.Votes.ToString(), Type = "Movie", InWatchList = movie.InWatchlist, SubItemText = movie.year.ToString() });
-                        }
-
-                        this.LoadingTrendingItems = false;
-
-                        System.Windows.Deployment.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            NotifyPropertyChanged("TrendingItems");
-                            NotifyPropertyChanged("LoadingStatus");
-                        });
-                    }
-                }
-            }
-            catch (WebException)
-            { }
-        }
         #endregion
 
         #region History
@@ -458,19 +257,19 @@ namespace WPtrakt
             try
             {
                 String jsonString = e.Result;
-                if(this.history == null)
-                 this.history = new List<TraktActivity>();
+                if (this.history == null)
+                    this.history = new List<TraktActivity>();
 
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
-          
+
                     TraktFriendsActivity myActivity = (TraktFriendsActivity)ser.ReadObject(ms);
-                   
+
                     this.fetchingMyActivity = false;
-                   
+
                     ms.Close();
-                    
+
                     CreateHistoryList(myActivity);
                 }
 
@@ -498,9 +297,9 @@ namespace WPtrakt
                     TraktFriendsActivity friendsActivity = (TraktFriendsActivity)ser.ReadObject(ms);
                     this.fetchingFriendsActivity = false;
 
-                   CreateHistoryList(friendsActivity);
+                    CreateHistoryList(friendsActivity);
 
-                    
+
 
                     ms.Close();
                 }
@@ -558,7 +357,7 @@ namespace WPtrakt
                             OrderHistory(activity, tempModel);
                         }
 
-                     
+
                     }
                     catch (NullReferenceException) { }
                 }
@@ -633,7 +432,7 @@ namespace WPtrakt
                         {
                             case "watchlist":
                                 if (type == 1 || type == 0)
-                                   tempModel = AddToWatchList(activity);
+                                    tempModel = AddToWatchList(activity);
                                 break;
                             case "rating":
                                 if (type == 2 || type == 0)
@@ -657,7 +456,7 @@ namespace WPtrakt
                                 break;
                         }
 
-                        if(tempModel != null)
+                        if (tempModel != null)
                             OrderHistory(activity, tempModel);
                     }
                 }
@@ -672,7 +471,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName))? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + ".\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + ".\r\n\r\n" + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to show " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":

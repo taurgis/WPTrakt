@@ -314,11 +314,14 @@ namespace WPtrakt
 
         private async void checkinButton_Click(object sender, EventArgs e)
         {
-
             progressBarLoading.Visibility = System.Windows.Visibility.Visible;
 
             if (await this.movieController.checkinMovie(this.Movie.imdb_id, this.Movie.Title, this.Movie.year))
+            {
+                App.MainPage.ShowWatchingNowMovie(this.Movie, DateTime.UtcNow);
+
                 ToastNotification.ShowToast("Movie", "Checked in!");
+            }
             else
                 ToastNotification.ShowToast("Movie", "There is already a checkin in progress or connection problem!");
 

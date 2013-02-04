@@ -480,5 +480,37 @@ namespace WPtraktBase.DAO
         }
 
         #endregion
+
+        internal async Task<TraktMovie[]> FetchTrendingMovies()
+        {
+            try
+            {
+                var movieClient = new WebClient();
+
+                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movies/trending.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    //parse into jsonser
+                    var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
+                    TraktMovie[] movies = (TraktMovie[])ser.ReadObject(ms);
+
+                    return movies;
+                }
+            }
+            catch (WebException)
+            {
+                Debug.WriteLine("WebException in FetchTrendingMovies().");
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine("OperationCanceledException in FetchTrendingMovies()");
+            }
+            catch (InvalidOperationException)
+            {
+                Debug.WriteLine("InvalidOperationException in FetchTrendingMovies().");
+            }
+
+            return new TraktMovie[0];
+        }
     }
 }
