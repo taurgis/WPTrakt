@@ -94,6 +94,18 @@
     <Compile Include="Controllers\ErrorManager.cs" />
     <Compile Include="Controllers\HybridOrientationChangesFrame.cs" />
     <Compile Include="Controllers\ToastNotification.cs" />
+    <Compile Include="Custom\LazyListBox\ILazyDataItem.cs" />
+    <Compile Include="Custom\LazyListBox\InvalidStateTransitionException.cs" />
+    <Compile Include="Custom\LazyListBox\LazyDataCharacteristics.cs" />
+    <Compile Include="Custom\LazyListBox\LazyDataItemPausedStateChangedEventArgs.cs" />
+    <Compile Include="Custom\LazyListBox\LazyDataItemStateChangedEventArgs.cs" />
+    <Compile Include="Custom\LazyListBox\LazyDataItemStateManagerHelper.cs" />
+    <Compile Include="Custom\LazyListBox\LazyDataLoadState.cs" />
+    <Compile Include="Custom\LazyListBox\LazyListBox.cs" />
+    <Compile Include="Custom\LazyListBox\LazyListBoxItem.cs" />
+    <Compile Include="Custom\LazyListBox\ScrollingStateChangedEventArgs.cs" />
+    <Compile Include="Custom\UIExtensionMethods\ExtensionMethods.cs" />
+    <Compile Include="Custom\UIExtensionMethods\ISupportOffsetChanges.cs" />
     <Compile Include="Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>

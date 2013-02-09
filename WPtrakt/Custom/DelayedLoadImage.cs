@@ -105,10 +105,13 @@ namespace WPtrakt.Custom
         private static void ActualImageSourceChanged(DependencyObject o, DependencyPropertyChangedEventArgs e)
         {
             DelayLoadImage instance = o as DelayLoadImage;
-            if (instance != null && e.NewValue != null && instance.actualImage != null)
+            if (instance != null && e.NewValue != null)
             {
                 instance.imageLoaded = true;
                 instance.image = (BitmapImage)e.NewValue;
+
+                if (instance.actualImage == null)
+                    instance.actualImage = new Image();
 
                 instance.actualImage.Source = (BitmapImage)e.NewValue;
                 VisualStateManager.GoToState(instance, STATE_ACTUAL_NAME, false);

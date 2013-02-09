@@ -705,7 +705,7 @@ namespace WPtraktBase.DAO
         {
             String fileName = TVDBID + season + episode + "screensmall" + ".jpg";
 
-            if (StorageController.doesFileExist(fileName) && !StorageController.IsConnectedToWifi())
+            if (StorageController.doesFileExist(fileName))
             {
                 Debug.WriteLine("Fetching small screen image for " + TVDBID + " from storage.");
                 return ImageController.getImageFromStorage(fileName);

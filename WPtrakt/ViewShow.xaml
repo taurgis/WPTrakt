@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:lazy="clr-namespace:LazyListBox"
     xmlns:custom="clr-namespace:WPtrakt.Custom"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
@@ -59,8 +60,24 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <ListBox Grid.Row="0" ItemsSource="{Binding EpisodeItems}" Margin="0,0, 0, 20" Name="EpisodeList">
-                        <ListBox.ItemTemplate>
+                    <lazy:LazyListBox Grid.Row="0" ItemsSource="{Binding EpisodeItems}" Margin="0,0, 0, 20" Name="EpisodeList">
+                        <lazy:LazyListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel  Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
+                                    <Grid Width="150" Visibility="{Binding ScreenVisibility}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Grid.Column="0" Source="Images/screen-small.jpg" HorizontalAlignment="Right"  Height="84" Visibility="{Binding ScreenVisibility}"/>
+                                    </Grid>
+                                    <StackPanel Orientation="Vertical">
+                                        <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                        <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </lazy:LazyListBox.ItemTemplate>
+                        <lazy:LazyListBox.LoadedItemTemplate>
                             <DataTemplate>
                                 <StackPanel  Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
                                     <Grid Width="150" Visibility="{Binding ScreenVisibility}">
@@ -87,8 +104,8 @@
                                     </toolkit:ContextMenuService.ContextMenu>
                                 </StackPanel>
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                        </lazy:LazyListBox.LoadedItemTemplate>
+                    </lazy:LazyListBox>
 
                     <Grid Grid.Row="0"  Name="SeasonGrid" Visibility="Collapsed">
                         <ListBox ItemsSource="{Binding SeasonItems}" Name="SeasonsList" Width="400">
