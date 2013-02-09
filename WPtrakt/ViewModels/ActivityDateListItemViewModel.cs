@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using WPtrakt.Model;
 
 namespace WPtrakt.ViewModels
 {
@@ -26,6 +27,7 @@ namespace WPtrakt.ViewModels
                 }
             }
         }
+
 
         public String DateString
         {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Phone.Info;
+using Microsoft.Phone.Net.NetworkInformation;
 using System;
 using System.IO;
 using System.IO.IsolatedStorage;
@@ -9,6 +10,23 @@ namespace WPtraktBase.Controllers
 {
     public class StorageController
     {
+        public static Boolean IsNetworkStateCached = false;
+        public static Boolean IsConnectedToWifiCache;
+
+        public static Boolean IsConnectedToWifi()
+        {
+         
+                if (!IsNetworkStateCached)
+                {
+                    IsConnectedToWifiCache = NetworkInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211;
+                    IsNetworkStateCached = true;
+           
+                }
+
+                return IsConnectedToWifiCache;
+
+        }
+
         public static Boolean UserIsHighEndDevice()
         {
             // Place call in a try block in case the user is not running the most recent version of the Windows Phone OS and this method call is not supported.

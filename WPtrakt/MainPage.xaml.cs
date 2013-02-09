@@ -4,8 +4,8 @@ using Microsoft.Phone.Scheduler;
 using Microsoft.Phone.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data.Linq;
-using System.Net;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +16,6 @@ using WPtrakt.Controllers;
 using WPtrakt.Custom;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
-using WPtrakt.Model.Trakt.Request;
 using WPtrakt.ViewModels;
 using WPtraktBase.Controller;
 using WPtraktBase.Controllers;
@@ -37,6 +36,7 @@ namespace WPtrakt
             InitializeComponent();
             DataContext = App.ViewModel;
             App.ViewModel.SetMainPage(this);
+    
             this.showController = new ShowController();
             this.episodeController = new EpisodeController();
             this.userController = new UserController();
@@ -50,8 +50,10 @@ namespace WPtrakt
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             if (App.ViewModel.Profile != null)
+            {
+                StorageController.IsNetworkStateCached = false;
                 return;
-
+            }
             try
             {
                 if (!NetworkInterface.GetIsNetworkAvailable())
@@ -59,11 +61,12 @@ namespace WPtrakt
                     ToastNotification.ShowToast("Connection", "No connection available!");
                     return;
                 }
-                var assembly = Assembly.GetExecutingAssembly().FullName;
-                var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
 
                 if (!App.ViewModel.IsDataLoaded)
                 {
+                    var assembly = Assembly.GetExecutingAssembly().FullName;
+                    var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+
                     if ((String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
                     {
                         AppUser.Instance.AppVersion = fullVersionNumber;
@@ -74,16 +77,19 @@ namespace WPtrakt
                         if (AppUser.Instance.AppVersion != fullVersionNumber)
                         {
                             MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
+                           
                             AppUser.ClearCache();
                             AppUser.Instance.AppVersion = fullVersionNumber;
                         }
 
-                        if (!AppUser.Instance.SmallScreenshotsEnabled)
+                        if (!AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
                         {
                             this.TrendingPanoramaItem.Visibility = System.Windows.Visibility.Collapsed;
                         }
 
                         LoadProfile();
+
+                        ReloadLiveTile();
                     }
                 }
             }
@@ -127,15 +133,12 @@ namespace WPtrakt
 
         private async void LoadProfile()
         {
-            if (!Loading)
+            if (!this.Loading)
             {
-                Loading = true;
+                this.Loading = true;
 
-                firstCall = DateTime.Now;
-                userValidationTimer = new DispatcherTimer();
-                userValidationTimer.Interval = TimeSpan.FromSeconds(2);
-                userValidationTimer.Tick += OnTimerTick;
-                userValidationTimer.Start();
+                InitiateSlowServerCounter();
+
                 this.progressBar.Visibility = System.Windows.Visibility.Visible;
 
                 if (await userController.ValidateUser())
@@ -146,35 +149,38 @@ namespace WPtrakt
 
                     if (profile != null)
                     {
-
                         App.ViewModel.Profile = profile;
                         App.ViewModel.RefreshProfile();
+                       
                         FadeInHomeScreen();
                     }
                     else
                     {
                         ValidationFailed();
-                        Loading = false;
+                        this.Loading = false;
                     }
                 }
                 else
                 {
                     ValidationFailed();
-                    Loading = false;
+                    userValidationTimer.Stop();
+                    this.Loading = false;
                 }
-
-
             }
         }
 
-        private void ValidationFailed()
+        private void InitiateSlowServerCounter()
         {
-            userValidationTimer.Stop();
+            if (this.userValidationTimer != null)
+            {
+                this.userValidationTimer.Stop();
+            }
 
-            App.ViewModel.Profile = new TraktProfileWithWatching();
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
-            NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
-            ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
+            this.firstCall = DateTime.Now;
+            this.userValidationTimer = new DispatcherTimer();
+            this.userValidationTimer.Interval = TimeSpan.FromSeconds(2);
+            this.userValidationTimer.Tick += OnTimerTick;
+            this.userValidationTimer.Start();
         }
 
         void OnTimerTick(object sender, EventArgs e)
@@ -188,6 +194,14 @@ namespace WPtrakt
             }
         }
 
+        private void ValidationFailed()
+        {
+            App.ViewModel.Profile = new TraktProfileWithWatching();
+            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
+            ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
+        }
+
         public async void FadeInHomeScreen()
         {
             App.ViewModel.clearWatching();
@@ -197,10 +211,10 @@ namespace WPtrakt
                 if (((TraktProfileWithWatching)App.ViewModel.Profile).Watching != null)
                 {
                     TraktLastActivity lastActivity = await userController.getLastActivityForUser();
-                  
+
                     if (((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie != null)
                     {
-                        TraktMovie movie = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie;
+                        TraktMovie movie = await movieController.getMovieByImdbId( ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie.imdb_id);
                         Int64 lastCheckinScrobble = (lastActivity.Movie.Checkin > lastActivity.Movie.Scrobble) ? lastActivity.Movie.Checkin : lastActivity.Movie.Scrobble;
                         DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                         DateTime watchTime = baseTime.AddSeconds(lastCheckinScrobble);
@@ -221,6 +235,7 @@ namespace WPtrakt
                 {
                     if (this.LayoutRoot.Background != null)
                         this.LayoutRoot.Background = null;
+
                     this.WatchingNow.Visibility = System.Windows.Visibility.Collapsed;
                 }
             }
@@ -235,6 +250,7 @@ namespace WPtrakt
         private void ClearWatchingNow()
         {
             this.WatchingNow.Visibility = System.Windows.Visibility.Collapsed;
+
             if (this.LayoutRoot.Background != null)
                 this.LayoutRoot.Background = null;
         }
@@ -243,24 +259,30 @@ namespace WPtrakt
         public async void ShowWatchingNowMovie(TraktMovie movie, DateTime watchTime)
         {
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
-            BitmapImage bitmapImage =  await movieController.getFanartImage(movie.imdb_id, movie.Images.Fanart);
+
+            BitmapImage image = await movieController.getFanartImage(movie.imdb_id, movie.Images.Fanart);
             this.LayoutRoot.Background = new ImageBrush
             {
-                ImageSource = bitmapImage,
+                ImageSource = image,
                 Opacity = 0.0,
                 Stretch = Stretch.UniformToFill,
             };
 
             App.ViewModel.clearWatching();
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
-            ListItemViewModel model = new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Fanart, Imdb = movie.imdb_id, SubItemText = movie.year.ToString() };
+
+            ListItemViewModel model = new ListItemViewModel() { Type = "movie", Year= movie.year, Name = movie.Title, ImageSource = movie.Images.Fanart, Imdb = movie.imdb_id, SubItemText = movie.year.ToString() };
 
             TimeSpan percentageCompleteTimeSpan = DateTime.UtcNow - watchTime;
 
-            model.WatchedCompletion = ((Double)percentageCompleteTimeSpan.Minutes / (Double)(movie.Runtime)) * 100;
+            model.WatchedCompletion =  ((Double)percentageCompleteTimeSpan.TotalMinutes / (Double)(movie.Runtime)) * 100;
+
+            if(Double.IsInfinity(model.WatchedCompletion))
+                model.WatchedCompletion = 0;
 
             App.ViewModel.WatchingNow.Add(model);
             Animation.ImageFadeIn(this.LayoutRoot.Background);
+
             Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 App.ViewModel.NotifyPropertyChanged("WatchingNow");
@@ -270,33 +292,33 @@ namespace WPtrakt
         public async void ShowWatchingNowShow(TraktEpisode episode, TraktShow show, DateTime watchTime)
         {
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
-            BitmapImage bitmapImage = await showController.getFanartImage(show.tvdb_id, show.Images.Fanart);
+
+            BitmapImage image = await showController.getFanartImage(show.tvdb_id, show.Images.Fanart);
             this.LayoutRoot.Background = new ImageBrush
-                  {
-                      ImageSource = bitmapImage,
-                      Opacity = 0.0,
-                      Stretch = Stretch.UniformToFill,
-                  };
+            {
+                ImageSource = image,
+                Opacity = 0.0,
+                Stretch = Stretch.UniformToFill,
+            };
 
             App.ViewModel.clearWatching();
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
-            ListItemViewModel model = new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = episode.Tvdb + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist };
-
-
+            ListItemViewModel model = new ListItemViewModel() { Type= "episode", Year = show.year, Name = show.Title, ImageSource = episode.Images.Screen, Imdb = show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist };
 
             TimeSpan percentageCompleteTimeSpan = DateTime.UtcNow - watchTime;
 
 
-            model.WatchedCompletion = ((Double)percentageCompleteTimeSpan.Minutes / (Double)(show.Runtime)) * 100;
-
+            model.WatchedCompletion = ((Double)percentageCompleteTimeSpan.TotalMinutes / (Double)(show.Runtime)) * 100;
+            if (Double.IsInfinity(model.WatchedCompletion))
+                model.WatchedCompletion = 0;
 
 
             App.ViewModel.WatchingNow.Add(model);
             Animation.ImageFadeIn(this.LayoutRoot.Background);
             Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
-              {
-                  App.ViewModel.NotifyPropertyChanged("WatchingNow");
-              }));
+            {
+                App.ViewModel.NotifyPropertyChanged("WatchingNow");
+            }));
         }
 
         #region Upnext episodes
@@ -311,9 +333,8 @@ namespace WPtrakt
             {
                 if (watched.Show != null && !ignoredShowsList.Contains(watched.Show.tvdb_id))
                 {
-
-
                     TraktShow show = await showController.getShowByTVDBID(watched.Show.tvdb_id);
+
                     ignoredShowsList.Add(show.tvdb_id);
                     if (show.Seasons.Count == 0)
                     {
@@ -357,7 +378,6 @@ namespace WPtrakt
 
                     if (nextEpisode != null)
                     {
-
                         App.ViewModel.UpNextItems.Add(new ListItemViewModel() { Name = show.Title + " (" + "S0" + nextEpisode.Season + "E" + nextEpisode.Number + ")", ImageSource = nextEpisode.Images.Screen, Imdb = show.imdb_id, Year = show.year, Episode = nextEpisode.Number, Season = nextEpisode.Season, Tvdb = nextEpisode.Tvdb, Watched = nextEpisode.Watched, Rating = nextEpisode.MyRatingAdvanced, InWatchList = nextEpisode.InWatchlist });
 
                         if (App.ViewModel.UpNextItems.Count == 2)
@@ -372,7 +392,12 @@ namespace WPtrakt
 
             if (App.ViewModel.UpNextItems.Count > 0)
             {
-                UpNextStackPanel.Visibility = System.Windows.Visibility.Visible;
+
+                if ((this.Orientation == PageOrientation.PortraitDown) || (this.Orientation == PageOrientation.PortraitUp))
+                {
+                    UpNextStackPanel.Visibility = System.Windows.Visibility.Visible;
+                }
+
                 App.ViewModel.NotifyPropertyChanged("UpNextItems");
 
             }
@@ -397,7 +422,7 @@ namespace WPtrakt
                 App.ViewModel.ClearTrending();
 
                 int count = 0;
-                foreach (TraktMovie movie in await movieController.GetTrendinMovies())
+                foreach (TraktMovie movie in await movieController.GetTrendingMovies())
                 {
                     if (++count > 8)
                         break;
@@ -411,6 +436,267 @@ namespace WPtrakt
                 this.Loading = false;
             }
         }
+
+        #endregion
+
+        #region History
+
+        private List<TraktActivity> newsFeedActivity;
+
+        public async void LoadHistoryData()
+        {
+            if (!this.Loading)
+            {
+                this.Loading = true;
+
+                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+
+                App.ViewModel.clearHistory();
+
+                CreateHistoryList(await userController.getNewsFeed());
+            }
+        }
+
+
+        private void CreateHistoryList(List<TraktActivity> newsFeedActivity)
+        {
+            int counter = 0;
+            this.newsFeedActivity = newsFeedActivity;
+            newsFeedActivity.Sort(TraktActivity.ActivityComparison);
+            foreach (TraktActivity activity in newsFeedActivity)
+            {
+                ActivityListItemViewModel tempModel = null;
+                try
+                {
+                    if (counter++ <= 40)
+                    {
+                        switch (activity.Action)
+                        {
+                            case "watchlist":
+                                tempModel = AddToWatchList(activity);
+                                break;
+                            case "rating":
+                                tempModel = Rated(activity);
+                                break;
+                            case "checkin":
+                                tempModel = Checkin(activity);
+                                break;
+                            case "scrobble":
+                                tempModel = Scrobble(activity);
+                                break;
+                            case "collection":
+                                tempModel = Collection(activity);
+                                break;
+                            case "shout":
+                                tempModel = Shout(activity);
+                                break;
+                        }
+
+                        OrderHistory(activity, tempModel);
+                    }
+
+
+                }
+                catch (NullReferenceException) { }
+
+              
+            }
+
+            if (newsFeedActivity.Count == 0)
+                ToastNotification.ShowToast("User", "News feed is empty!");
+
+            App.ViewModel.NotifyPropertyChanged("HistoryItems");
+            this.Loading = false;
+            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+
+        private void OrderHistory(TraktActivity activity, ActivityListItemViewModel tempModel)
+        {
+            if (App.ViewModel.HistoryItems.Count == 0)
+            {
+                DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                time = time.AddSeconds(activity.TimeStamp);
+                time = time.ToLocalTime();
+                DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
+
+                ActivityDateListItemViewModel firstActivity = new ActivityDateListItemViewModel();
+                firstActivity.Items = new ObservableCollection<ActivityListItemViewModel>();
+                firstActivity.Items.Add(tempModel);
+                firstActivity.Date = onlyDay;
+                App.ViewModel.HistoryItems.Add(firstActivity);
+            }
+            else
+            {
+                Boolean added = false;
+                DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                time = time.AddSeconds(activity.TimeStamp);
+                time = time.ToLocalTime();
+                foreach (ActivityDateListItemViewModel model in App.ViewModel.HistoryItems)
+                {
+                    if (model.Date.Year == time.Year && model.Date.Month == time.Month && model.Date.Day == time.Day)
+                    {
+                        model.Items.Add(tempModel);
+                        added = true;
+                        break;
+                    }
+                }
+                if (!added)
+                {
+
+                    DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
+                    ActivityDateListItemViewModel newDateActivity = new ActivityDateListItemViewModel();
+                    newDateActivity.Items = new ObservableCollection<ActivityListItemViewModel>();
+                    newDateActivity.Items.Add(tempModel);
+                    newDateActivity.Date = onlyDay;
+                    App.ViewModel.HistoryItems.Add(newDateActivity);
+                }
+
+            }
+        }
+
+        public void FilterHistory(int type)
+        {
+            if (newsFeedActivity == null)
+                return;
+
+            int counter = 0;
+            App.ViewModel.clearHistory();
+            foreach (TraktActivity activity in this.newsFeedActivity)
+            {
+                ActivityListItemViewModel tempModel = null;
+
+                try
+                {
+                    if (counter++ <= 40)
+                    {
+                        switch (activity.Action)
+                        {
+                            case "watchlist":
+                                if (type == 1 || type == 0)
+                                    tempModel = AddToWatchList(activity);
+                                break;
+                            case "rating":
+                                if (type == 2 || type == 0)
+                                    tempModel = Rated(activity);
+                                break;
+                            case "checkin":
+                                if (type == 3 || type == 0)
+                                    tempModel = Checkin(activity);
+                                break;
+                            case "scrobble":
+                                if (type == 4 || type == 0)
+                                    tempModel = Scrobble(activity);
+                                break;
+                            case "collection":
+                                if (type == 5 || type == 0)
+                                    tempModel = Collection(activity);
+                                break;
+                            case "shout":
+                                if (type == 6 || type == 0)
+                                    tempModel = Shout(activity);
+                                break;
+                        }
+
+                        if (tempModel != null)
+                            OrderHistory(activity, tempModel);
+                    }
+                }
+                catch (NullReferenceException) { }
+            }
+
+            App.ViewModel.NotifyPropertyChanged("HistoryItems");
+        }
+
+        private ActivityListItemViewModel Shout(TraktActivity activity)
+        {
+            switch (activity.Type)
+            {
+                case "movie":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + "" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                case "show":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to show " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                case "episode":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to episode " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+            }
+
+            return null;
+        }
+
+        private ActivityListItemViewModel Collection(TraktActivity activity)
+        {
+            switch (activity.Type)
+            {
+                case "movie":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the collection" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                case "show":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the collection.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                case "episode":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the collection", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+            }
+
+            return null;
+        }
+
+        private ActivityListItemViewModel Scrobble(TraktActivity activity)
+        {
+            switch (activity.Type)
+            {
+                case "movie":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Movie.Title + "" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                case "show":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                case "episode":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+            }
+
+            return null;
+        }
+
+        private ActivityListItemViewModel Checkin(TraktActivity activity)
+        {
+            switch (activity.Type)
+            {
+                case "movie":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Movie.Title + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                case "show":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                case "episode":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+            }
+
+            return null;
+        }
+
+        private ActivityListItemViewModel Rated(TraktActivity activity)
+        {
+            switch (activity.Type)
+            {
+                case "movie":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 " + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                case "show":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Show.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                case "episode":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+            }
+            return null;
+        }
+
+        private ActivityListItemViewModel AddToWatchList(TraktActivity activity)
+        {
+            switch (activity.Type)
+            {
+                case "movie":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the watchlist" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                case "show":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the watchlist.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                case "episode":
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the watchlist", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+            }
+
+            return null;
+        }
+
 
         #endregion
 
@@ -436,7 +722,7 @@ namespace WPtrakt
             else if (MainPanorama.SelectedIndex == 2)
             {
                 this.Filter.SelectedIndex = 0;
-                App.ViewModel.LoadHistoryData();
+                LoadHistoryData();
             }
         }
 
@@ -508,6 +794,8 @@ namespace WPtrakt
                     contextMenu.IsOpen = true;
                 }
             }
+
+         
         }
 
         #endregion
@@ -646,7 +934,10 @@ namespace WPtrakt
 
             if (await episodeController.checkinEpisode(lastModel.Tvdb, lastModel.Name, lastModel.Year, lastModel.Season, lastModel.Episode))
             {
-                lastModel.Watched = true;
+                if (lastModel != null)
+                {
+                    lastModel.Watched = true;
+                }
                 TraktShow show = await showController.getShowByTVDBID(lastModel.Tvdb);
 
                 ShowWatchingNowShow(await episodeController.getEpisodeByTvdbAndSeasonInfo(lastModel.Tvdb, lastModel.Season, lastModel.Episode, show), show, DateTime.UtcNow);
@@ -684,72 +975,36 @@ namespace WPtrakt
 
         private ListItemViewModel lastModel;
 
-        private void SeenMovie_Click(object sender, RoutedEventArgs e)
+        private async void SeenMovie_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            var seenClient = new WebClient();
 
-            seenClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieSeenStringCompleted);
-            WatchedAuth auth = new WatchedAuth();
-            auth.Movies = new TraktMovieRequest[1];
-            auth.Movies[0] = new TraktMovieRequest();
-            auth.Movies[0].imdb_id = lastModel.Imdb;
-            auth.Movies[0].Title = lastModel.Name;
-            auth.Movies[0].year = Int16.Parse(lastModel.SubItemText);
-            auth.Movies[0].Plays = 1;
-
-            DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            auth.Movies[0].LastPlayed = (long)(DateTime.UtcNow - UnixEpoch).TotalSeconds;
-
-            seenClient.UploadStringAsync(new Uri("https://api.trakt.tv/movie/seen/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchedAuth), auth));
-        }
-
-        private void client_UploadMovieSeenStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
+            if (await movieController.markMovieAsSeen(lastModel.Imdb, lastModel.Name, lastModel.Year))
             {
-                String jsonString = e.Result;
                 lastModel.Watched = true;
                 ToastNotification.ShowToast("Movie", "Movie marked as watched.");
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
 
             lastModel = null;
         }
 
-        private void WatchlistMovie_Click(object sender, RoutedEventArgs e)
+        private async void WatchlistMovie_Click(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-            var watchlistClient = new WebClient();
-            watchlistClient.UploadStringCompleted += new UploadStringCompletedEventHandler(client_UploadMovieWatchlistStringCompleted);
-            WatchlistAuth auth = new WatchlistAuth();
-            auth.Movies = new TraktMovie[1];
-            auth.Movies[0] = new TraktMovie();
-            auth.Movies[0].imdb_id =lastModel.Imdb;
-            auth.Movies[0].Title = lastModel.Name;
-            auth.Movies[0].year = Int16.Parse(lastModel.SubItemText);
-            watchlistClient.UploadStringAsync(new Uri("https://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
-        }
 
-        void client_UploadMovieWatchlistStringCompleted(object sender, UploadStringCompletedEventArgs e)
-        {
-            try
+            if (await movieController.addMovieToWatchlist(lastModel.Imdb, lastModel.Name, lastModel.Year))
             {
-                String jsonString = e.Result;
                 lastModel.InWatchList = true;
                 ToastNotification.ShowToast("Movie", "Movie added to watchlist.");
-
             }
-            catch (WebException)
+            else
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
-            catch (TargetInvocationException) { ErrorManager.ShowConnectionErrorPopup(); }
-
             lastModel = null;
         }
 
@@ -778,16 +1033,13 @@ namespace WPtrakt
             switch (model.Type)
             {
                 case "movie":
-                      StorageController.DeleteFile(TraktMovie.getFolderStatic() + "/" + model.Imdb + ".json");
-                      NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
                     break;
                 case "show":
-                    StorageController.DeleteFile(TraktShow.getFolderStatic() + "/" + model.Tvdb + ".json");
-                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
                     break;
                 case "episode":
-                    StorageController.DeleteFile(TraktWatched.getFolderStatic() + "/" + model.Tvdb + model.Season + model.Episode + ".json");
-                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
                     break;
             }
         }
@@ -798,13 +1050,18 @@ namespace WPtrakt
         {
             if ((e.Orientation == PageOrientation.PortraitDown) || (e.Orientation == PageOrientation.PortraitUp))
             {
-                HistoryList.Height = 550;
+                AvatarPanel.Visibility = System.Windows.Visibility.Visible;
+                if (App.ViewModel.UpNextItems.Count > 0)
+                {
+                    UpNextStackPanel.Visibility = System.Windows.Visibility.Visible;
+                }
                 HistoryList.Width = 420;
                 ListTrending.Width = 700;
             }
             else
             {
-                HistoryList.Height = 260;
+                AvatarPanel.Visibility = System.Windows.Visibility.Collapsed;
+                UpNextStackPanel.Visibility = System.Windows.Visibility.Collapsed;
                 HistoryList.Width = 700;
                 ListTrending.Width = 1370;
             }
@@ -813,6 +1070,27 @@ namespace WPtrakt
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
         {
             LayoutRoot.Opacity = 1;
+        }
+
+        private Boolean wallpaperNavigationFinished = false;
+        protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            string lockscreenKey = "WallpaperSettings";
+            string lockscreenValue = "0";
+
+            bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue(lockscreenKey, out lockscreenValue);
+
+            if (!wallpaperNavigationFinished)
+            {
+                if (lockscreenValueExists)
+                {
+                    NavigationService.Navigate(new Uri("/Settings.xaml?lockscreen=true", UriKind.Relative));
+                    wallpaperNavigationFinished = true;
+                }
+
+            }
         }
 
         private void MainPanorama_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -828,7 +1106,7 @@ namespace WPtrakt
             {
                 if (App.ViewModel.HistoryItems.Count == 0)
                 {
-                    App.ViewModel.LoadHistoryData();
+                    LoadHistoryData();
                 }
             }
         }
@@ -841,10 +1119,9 @@ namespace WPtrakt
                 if (this.lastSelection != this.Filter.SelectedIndex)
                 {
                     this.lastSelection = this.Filter.SelectedIndex;
-                    App.ViewModel.FilterHistory(this.Filter.SelectedIndex);
+                    FilterHistory(this.Filter.SelectedIndex);
                 }
             }
         }
-      
     }
 }

@@ -15,6 +15,7 @@ using WPtraktBase.Model.Trakt;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Controllers;
 using WPtrakt.Model.Trakt.Request;
+using System.Collections.Generic;
 
 namespace WPtraktBase.DAO
 {
@@ -151,6 +152,46 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("TargetInvocationException in CancelActiveCheckin()."); }
 
             return false;
+        }
+
+        internal async Task<List<TraktActivity>> getNewsFeed()
+        {
+            try
+            {
+                var myFeedClient = new WebClient();
+                String myFeedJsonString = await myFeedClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName), AppUser.createJsonStringForAuthentication());
+
+                var friendsFeedClient = new WebClient();
+                String friendsFeedJsonString = await myFeedClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/activity/friends.json/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication());
+
+                List<TraktActivity> activity = new List<TraktActivity>();
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(myFeedJsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
+
+                    TraktFriendsActivity myActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                    activity.AddRange(myActivity.Activity);
+                    ms.Close();
+                }
+
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(friendsFeedJsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
+
+                    TraktFriendsActivity friendsActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                    activity.AddRange(friendsActivity.Activity);
+                    ms.Close();
+                }
+
+                return activity;
+            }
+            catch (WebException)
+            { Debug.WriteLine("WebException in getNewsFeed()."); }
+            catch (TargetInvocationException)
+            { Debug.WriteLine("TargetInvocationException in getNewsFeed()."); }
+            return new List<TraktActivity>();
         }
     }
 }

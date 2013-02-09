@@ -1,11 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.IO;
-using System.Net;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using WPtrakt.Controllers;
+using WPtrakt.Model;
 using WPtraktBase.Controller;
 using WPtraktBase.Controllers;
 
@@ -55,19 +52,70 @@ namespace WPtrakt.ViewModels
             }
         }
 
+        public GridLength ColumnWidth
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return new GridLength(100);
+                }
+
+                else
+                {
+                    return new GridLength(5);
+                }
+            }
+        }
+
+        public String ScreenVisibility
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return "Visible";
+                }
+
+                else
+                {
+                    return "Collapsed";
+                }
+            }
+        }
+
+        public String ScreenVisibilityFiller
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return "Collapsed";
+                }
+
+                else
+                {
+                    return "Visible";
+                }
+            }
+        }
+
         private BitmapImage _screenImage;
         public BitmapImage ScreenImage
         {
             get
             {
+                if (!AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                    return null;
+
                 if (String.IsNullOrEmpty(Screen))
                     return null;
 
                 if (_screenImage == null)
                 {
                     LoadScreenImage();
-                    BitmapImage tempImage = new BitmapImage(new Uri("Images/screen-small.jpg", UriKind.Relative));
-                    return tempImage;
+                    
+                    return null;
                 }
                 else
                 {

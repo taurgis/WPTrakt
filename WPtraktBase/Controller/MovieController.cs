@@ -11,6 +11,7 @@ using System.Windows.Media.Imaging;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtrakt.Model.Trakt.Request;
+using WPtraktBase.Controllers;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
 
@@ -123,7 +124,7 @@ namespace WPtraktBase.Controller
 
         public async Task<BitmapImage> getFanartImage(String IMDBID, String fanartUrl)
         {
-            if (!String.IsNullOrEmpty(IMDBID) && AppUser.Instance.BackgroundWallpapersEnabled)
+            if (!String.IsNullOrEmpty(IMDBID) && (AppUser.Instance.BackgroundWallpapersEnabled  || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())))
             {
                 return await movieDao.getFanartImage(IMDBID, fanartUrl);
             }
@@ -143,9 +144,41 @@ namespace WPtraktBase.Controller
             return false;
         }
 
-        public async Task<TraktMovie[]> GetTrendinMovies()
+        public async Task<TraktMovie[]> GetTrendingMovies()
         {
             return await movieDao.FetchTrendingMovies();
         }
+
+        public async Task<TraktMovie[]> searchForMovies(String searchTerm)
+        {
+            if (!String.IsNullOrEmpty(searchTerm))
+            {
+                return await movieDao.searchForMovies(RemoveDiacritics(searchTerm));
+            }
+            else
+                return new TraktMovie[0];
+        }
+
+        static char[] frenchReplace = { 'a', 'a', 'a', 'a', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'o', 'o', 'u', 'u', 'u', '+' };
+        static char[] frenchAccents = { 'à', 'â', 'ä', 'æ', 'ç', 'é', 'è', 'ê', 'ë', 'î', 'ï', 'ô', 'œ', 'ù', 'û', 'ü', ' ' };
+
+        private static string RemoveDiacritics(string accentedStr)
+        {
+            char[] replacement = frenchReplace;
+            char[] accents = frenchAccents;
+
+            if (accents != null && replacement != null && accentedStr.IndexOfAny(accents) > -1)
+            {
+
+                for (int i = 0; i < accents.Length; i++)
+                {
+                    accentedStr = accentedStr.Replace(accents[i], replacement[i]);
+                }
+
+                return accentedStr;
+            }
+            else
+                return accentedStr;
+        } 
     }
 }

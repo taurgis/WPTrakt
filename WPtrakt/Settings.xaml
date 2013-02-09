@@ -9,25 +9,21 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     SupportedOrientations="Portrait" Orientation="Portrait"
     shell:SystemTray.IsVisible="False">
-    <Grid x:Name="LayoutRoot" Background="Transparent">
+    <Grid x:Name="LayoutRoot" Opacity="0">
         <controls:Panorama Margin="0,12,0,0" Name="SettingsPanorama">
             <controls:PanoramaItem Header="Images" Width="480">
                 <StackPanel>
                     <ListBox Height="720" HorizontalAlignment="Left" Name="listBoxLiveTile" VerticalAlignment="Top" Width="439" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                        <ListBoxItem>
+                        <ListBoxItem> 
                             <toolkit:ToggleSwitch Foreground="{StaticResource PhoneForegroundBrush}" Checked="toggleWallpaper_Checked_1" Unchecked="toggleWallpaper_Unchecked_1"   x:Name="toggleWallpaper" Content="Enabled" IsChecked="true"  Header="Background Wallpaper" Height="120" Width="420" />
-                        </ListBoxItem>
-                       
-                        <ListBoxItem >
-                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="Counts for 75% of the data usage of this app. On limited data plans it is advised to disable this option." TextWrapping="Wrap" Width="420" />
                         </ListBoxItem>
                         <ListBoxItem Height="20"></ListBoxItem>
                         <ListBoxItem Margin="0 -15">
                             <toolkit:ToggleSwitch x:Name="toggleSmallScreens" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Enabled" IsChecked="true"  Header="Small Screenshots" Height="120" Width="420" Checked="toggleSmallScreens_Checked_1" Unchecked="toggleSmallScreens_Unchecked_1" />
-                        </ListBoxItem>    
-                     
-                        <ListBoxItem>
-                            <TextBlock VerticalAlignment="Top" Margin="10 0"  Text="Counts for 15% of the data usage of this app." TextWrapping="Wrap" Width="420"/>
+                        </ListBoxItem>
+                        <ListBoxItem Height="20"></ListBoxItem>
+                        <ListBoxItem Margin="0 -15">
+                            <toolkit:ToggleSwitch x:Name="toggleWifi" Foreground="{StaticResource PhoneForegroundBrush}"  Content="Enabled" IsChecked="true"  Header="Show images anyway on WiFi" Height="120" Width="420" Checked="toggleWifi_Checked_1" Unchecked="toggleWifi_Unchecked_1" />
                         </ListBoxItem>
                     </ListBox>
                 </StackPanel>

@@ -34,7 +34,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Image Grid.Row="0" Grid.Column="0" Source="Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
-            <TextBlock Grid.Row="0" Grid.Column="1" CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
+            <TextBlock Grid.Row="0" VerticalAlignment="Center" Grid.Column="1" CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
             <Image Name="SearchIcon" Grid.Row="0" Grid.Column="2" Source="{Binding SearchIcon}" Tap="Search_Tap" HorizontalAlignment="Right" Height="40" Margin="10 0 5 0"/>
         </Grid>
         <Border Grid.Row="1" Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
@@ -43,7 +43,7 @@
         <controls:Panorama x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Grid.Row="3" Visibility="Collapsed" Opacity="0">
             <controls:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
                 <StackPanel HorizontalAlignment="Left" Name="MainMenuStackpanel">
-                    <StackPanel Margin="0,0,0,17"  Width="480" Height="90" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Margin="0,0,0,17"  Width="480" Height="90" Orientation="Horizontal" Name="AvatarPanel" HorizontalAlignment="Center">
                         <Image Width="60" Height="60" Margin="40 0 10 5" Source="{Binding UserAvatar}"/>
                         <StackPanel Margin="0,2,0,17"  Width="400" Height="90" Orientation="Vertical" HorizontalAlignment="Center">
                             <TextBlock Text="{Binding UserName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}" Height="40" />
@@ -65,7 +65,6 @@
                                             <ColumnDefinition Width="320"/>
                                         </Grid.ColumnDefinitions>
                                         <custom:DelayLoadImage Grid.Column="0" Grid.Row="0" DefaultImageSource="Images/screen-small.jpg" ActualImageSource="{Binding ScreenImage}" HorizontalAlignment="Right"  Height="90"/>
-
                                         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Margin="0 10" >
                                             <TextBlock Text="Watching now"  Style="{StaticResource PhoneTextSubtleStyle}"/>
                                             <TextBlock FontSize="25"   Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
@@ -182,8 +181,22 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <ListBox  Grid.Row="2" Height="Auto" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
+                    <ListBox Width="420"  Grid.Row="2" Height="Auto" HorizontalAlignment="Left" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate>
+                                            <ContentPresenter
+                                            HorizontalAlignment="Stretch" 
+                                            VerticalAlignment="Stretch" />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
+
                             <DataTemplate>
                                 <Grid   Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  >
                                     <Grid.ColumnDefinitions>
@@ -193,18 +206,32 @@
                                         <RowDefinition Height="55"/>
                                         <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-                                    <Grid Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
+                                    <Grid Margin="0 0 0 5" Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
                                         <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding DateString}"/>
                                     </Grid>
-                                    <ListBox Grid.Column="0"  Grid.Row="1" Height="Auto" HorizontalAlignment="Left" Width="420" ItemsSource="{Binding Items}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                    <ListBox Grid.Column="0"  Grid.Row="1" Height="Auto" HorizontalAlignment="Left"  ItemsSource="{Binding Items}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate>
+                                                            <ContentPresenter
+                                            HorizontalAlignment="Stretch" 
+                                            VerticalAlignment="Stretch" />
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="100"/>
+                                                        <ColumnDefinition Width="{Binding ColumnWidth}"/>
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <Image Grid.Column="1" Source="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 10" Width="100"/>
+                                                    <custom:DelayLoadImage Visibility="{Binding ScreenVisibility}" Grid.Column="1" DefaultImageSource="Images/screen-small.jpg" ActualImageSource="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 10" Width="100" />
+                                                    <Grid Visibility="{Binding ScreenVisibilityFiller}" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
                                                     <Grid Grid.Column="2" Height="Auto">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>

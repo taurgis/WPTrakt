@@ -13,9 +13,9 @@
     mc:Ignorable="d">
    
             <!--LayoutRoot is the root grid where all page content is placed-->
-    <Grid x:Name="LayoutRoot">
+    <Grid x:Name="LayoutRoot" Opacity="0">
         <Grid.Background>
-            <ImageBrush ImageSource="Images/login.png" Stretch="UniformToFill"/>
+            <ImageBrush ImageSource="Images/login1.png" Stretch="UniformToFill"/>
         </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="300"/>

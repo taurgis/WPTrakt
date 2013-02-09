@@ -49,7 +49,8 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Coding4Fun.Toolkit.Controls">
+    <Reference Include="Coding4Fun.Toolkit.Controls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>.\Coding4Fun.Toolkit.Controls.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Phone" />
@@ -224,7 +225,9 @@
     <Content Include="Images\episode-watched.png" />
     <Content Include="Images\fulllogo.png" />
     <Content Include="Images\heart-love.png" />
-    <Content Include="Images\login.png" />
+    <Content Include="Images\login1.png" />
+    <Content Include="Images\login2.png" />
+    <Content Include="Images\login3.png" />
     <Content Include="Images\poster-small.jpg" />
     <Content Include="Images\screen-small.jpg" />
     <Content Include="Images\seen.png" />

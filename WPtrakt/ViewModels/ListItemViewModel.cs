@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
+using WPtrakt.Model;
 using WPtraktBase.Controller;
 using WPtraktBase.Controllers;
 
@@ -31,6 +32,22 @@ namespace WPtrakt
                 {
                     _movieName = value;
                     NotifyPropertyChanged("Name");
+                }
+            }
+        }
+
+        public String ScreenVisibility
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return "Visible";
+                }
+
+                else
+                {
+                    return "Collapsed";
                 }
             }
         }
@@ -524,11 +541,15 @@ namespace WPtrakt
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (null != handler)
+            try
             {
-                handler(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if (null != handler)
+                {
+                    handler(this, new PropertyChangedEventArgs(propertyName));
+                }
             }
+            catch (Exception) { }
         }
 
 

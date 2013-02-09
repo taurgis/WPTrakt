@@ -189,7 +189,7 @@ namespace WPtrakt
                             App.ShowViewModel.updateEpisode(traktEpisode);
                         }
 
-                        if (App.EpisodeViewModel != null && App.EpisodeViewModel.Tvdb.Equals(show.tvdb_id))
+                        if (App.EpisodeViewModel != null &&  !String.IsNullOrEmpty(App.EpisodeViewModel.Tvdb) && App.EpisodeViewModel.Tvdb.Equals(show.tvdb_id))
                         {
                             App.EpisodeViewModel.MyRatingAdvanced = rating;
                         }

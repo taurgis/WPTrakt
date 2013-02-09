@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WPtrakt.Controllers;
+using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Controller;
 using WPtraktBase.Controllers;
@@ -116,7 +117,9 @@ namespace WPtrakt
             if (this.Show != null)
             {
                 App.ShowViewModel.LoadData(tvdb);
-                this.Show.Genres = this.Show.GenresAsString.Split('|');
+
+                if(!String.IsNullOrEmpty(this.Show.GenresAsString))
+                   this.Show.Genres = this.Show.GenresAsString.Split('|');
 
                 App.ShowViewModel.UpdateShowView(this.Show);
 
@@ -183,7 +186,7 @@ namespace WPtrakt
                             episodeIt.Tvdb = this.Show.tvdb_id;
                             TraktEpisode episode = episodeIt;
 
-                            App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                            App.ShowViewModel.EpisodeItems.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? episode.Images.Screen : null, Imdb = this.Show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = episode.Tvdb, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
 
                         }
 
@@ -238,7 +241,7 @@ namespace WPtrakt
 
                     foreach (TraktEpisode episode in seasonEpisodes[keyvalue.Key])
                     {
-                        model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = episode.Images.Screen, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
+                        model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? episode.Images.Screen : null, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
                     }
 
                     App.ShowViewModel.UnWatchedEpisodeItems.Add(model);

@@ -42,5 +42,10 @@ namespace WPtraktBase.Controller
         {
             return await userDao.CancelActiveCheckin();
         }
+
+        public async Task<List<TraktActivity>> getNewsFeed()
+        {
+            return await userDao.getNewsFeed();
+        }
     }
 }

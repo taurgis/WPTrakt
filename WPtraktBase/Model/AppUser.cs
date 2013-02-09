@@ -61,6 +61,24 @@ namespace WPtrakt.Model
             }
         }
 
+        public Boolean ImagesWithWIFI
+        {
+            get
+            {
+
+                if (settings.Contains("ImagesWithWIFI"))
+                    return (Boolean)settings["ImagesWithWIFI"];
+                else
+                    return true;
+            }
+            set
+            {
+                settings["ImagesWithWIFI"] = value;
+                settings.Save();
+            }
+        }
+
+
         public Boolean SmallScreenshotsEnabled
         {
             get

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
+using WPtraktBase.Controllers;
 using WPtraktBase.DAO;
 using WPtraktBase.Model.Trakt;
 
@@ -256,7 +257,7 @@ namespace WPtraktBase.Controller
 
         public async Task<BitmapImage> getFanartImage(String TVDBID, String fanartUrl)
         {
-            if (!String.IsNullOrEmpty(TVDBID) && AppUser.Instance.BackgroundWallpapersEnabled)
+            if (!String.IsNullOrEmpty(TVDBID) && (AppUser.Instance.BackgroundWallpapersEnabled  || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())))
             {
                 return await showDao.getFanartImage(TVDBID, fanartUrl);
             }
@@ -268,7 +269,7 @@ namespace WPtraktBase.Controller
 
         public static async Task<BitmapImage> getFanart(String TVDBID, String fanartUrl)
         {
-            if (!String.IsNullOrEmpty(TVDBID))
+            if (!String.IsNullOrEmpty(TVDBID) && (AppUser.Instance.BackgroundWallpapersEnabled  || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())))
             {
                 return await ShowDao.Instance.getFanartImage(TVDBID, fanartUrl);
             }
@@ -298,5 +299,38 @@ namespace WPtraktBase.Controller
         {
             return await ShowDao.Instance.getMediumCoverImage(ID, screenUrl);
         }
+
+        public async Task<TraktShow[]> searchForShows(String searchTerm)
+        {
+            if (!String.IsNullOrEmpty(searchTerm))
+            {
+                return await showDao.searchForShows(RemoveDiacritics(searchTerm));
+            }
+            else
+                return new TraktShow[0];
+        }
+
+
+        static char[] frenchReplace = { 'a', 'a', 'a', 'a', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'o', 'o', 'u', 'u', 'u', '+' };
+        static char[] frenchAccents = { 'à', 'â', 'ä', 'æ', 'ç', 'é', 'è', 'ê', 'ë', 'î', 'ï', 'ô', 'œ', 'ù', 'û', 'ü', ' ' };
+
+        private static string RemoveDiacritics(string accentedStr)
+        {
+            char[] replacement = frenchReplace;
+            char[] accents = frenchAccents;
+
+            if (accents != null && replacement != null && accentedStr.IndexOfAny(accents) > -1)
+            {
+
+                for (int i = 0; i < accents.Length; i++)
+                {
+                    accentedStr = accentedStr.Replace(accents[i], replacement[i]);
+                }
+
+                return accentedStr;
+            }
+            else
+                return accentedStr;
+        } 
     }
 }

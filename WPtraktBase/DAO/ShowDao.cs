@@ -228,7 +228,8 @@ namespace WPtraktBase.DAO
                     foreach (String genre in show.Genres)
                         show.GenresAsString += genre + "|";
 
-                    show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
+                    if(!String.IsNullOrEmpty(show.GenresAsString))
+                      show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
                     show.Seasons = new EntitySet<TraktSeason>();
 
 
@@ -669,7 +670,7 @@ namespace WPtraktBase.DAO
         {
             String fileName = TVDBID + season + episode + "screenlarge" + ".jpg";
 
-            if (StorageController.doesFileExist(fileName) && !DeviceNetworkInformation.IsWiFiEnabled)
+            if (StorageController.doesFileExist(fileName) && !StorageController.IsConnectedToWifi())
             {
                 Debug.WriteLine("Fetching large screen image for " + TVDBID + " from storage.");
                 return ImageController.getImageFromStorage(fileName);
@@ -704,7 +705,7 @@ namespace WPtraktBase.DAO
         {
             String fileName = TVDBID + season + episode + "screensmall" + ".jpg";
 
-            if (StorageController.doesFileExist(fileName) && !DeviceNetworkInformation.IsWiFiEnabled)
+            if (StorageController.doesFileExist(fileName) && !StorageController.IsConnectedToWifi())
             {
                 Debug.WriteLine("Fetching small screen image for " + TVDBID + " from storage.");
                 return ImageController.getImageFromStorage(fileName);
@@ -732,7 +733,7 @@ namespace WPtraktBase.DAO
         {
             String fileName = ID + "medium" + ".jpg";
 
-            if (StorageController.doesFileExist(fileName) && !DeviceNetworkInformation.IsWiFiEnabled)
+            if (StorageController.doesFileExist(fileName) && !StorageController.IsConnectedToWifi())
             {
                 Debug.WriteLine("Fetching medium image for " + ID + " from storage.");
                 return ImageController.getImageFromStorage(fileName);
@@ -1206,5 +1207,29 @@ namespace WPtraktBase.DAO
         #endregion
 
         #endregion
+
+        internal async Task<TraktShow[]> searchForShows(String searchTerm)
+        {
+            try
+            {
+                var movieClient = new WebClient();
+                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/search/shows.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + searchTerm), AppUser.createJsonStringForAuthentication());
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktShow[]));
+                    TraktShow[] shows = (TraktShow[])ser.ReadObject(ms);
+
+                    ms.Close();
+                    return shows;
+                }
+            }
+            catch (WebException)
+            { Debug.WriteLine("WebException in searchForShows(" + searchTerm + ")."); }
+            catch (InvalidOperationException)
+            { Debug.WriteLine("InvalidOperationException in searchForShows(" + searchTerm + ")."); }
+
+            return new TraktShow[0];
+        }
     }
 }

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
@@ -88,11 +89,33 @@ namespace WPtrakt
                     this.toggleSmallScreens.Content = "Disabled";
                 }
 
+
+                if (AppUser.Instance.ImagesWithWIFI)
+                {
+                    this.toggleWifi.IsChecked = true;
+                    this.toggleWifi.Content = "Enabled";
+                }
+                else
+                {
+                    this.toggleWifi.IsChecked = false;
+                    this.toggleWifi.Content = "Disabled";
+                }
+
+                App.SettingsViewModel.Usage = "Calculating...";
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+                worker.RunWorkerAsync();
+
+
+                string lockscreenValue = "";
+
+                bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue("lockscreen", out lockscreenValue);
+                if (lockscreenValueExists)
+                    this.SettingsPanorama.DefaultItem = this.SettingsPanorama.Items[3];
+
+ 
+                Animation.ControlFadeInSlow(this.LayoutRoot);
             }
-            App.SettingsViewModel.Usage = "Calculating...";
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-            worker.RunWorkerAsync();
         }
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
@@ -179,7 +202,7 @@ namespace WPtrakt
 
             AppUser.Instance.SmallScreenshotsEnabled = (Boolean)toggleSmallScreens.IsChecked;
             AppUser.Instance.BackgroundWallpapersEnabled = (Boolean)toggleWallpaper.IsChecked;
-          
+            AppUser.Instance.ImagesWithWIFI = (Boolean)toggleWifi.IsChecked;
         }
 
         private void DisableLiveTile()
@@ -280,5 +303,14 @@ namespace WPtrakt
      
         }
 
+        private void toggleWifi_Checked_1(object sender, RoutedEventArgs e)
+        {
+            this.toggleWifi.Content = "Enabled";
+        }
+
+        private void toggleWifi_Unchecked_1(object sender, RoutedEventArgs e)
+        {
+            this.toggleWifi.Content = "Disabled";
+        }
     }
 }

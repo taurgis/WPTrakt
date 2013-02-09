@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using WPtrakt.Controllers;
 using WPtrakt.Model;
@@ -23,6 +24,16 @@ namespace WPtrakt
 
         void Login_Loaded(object sender, RoutedEventArgs e)
         {
+            int count = new Random().Next(1,4);
+          
+           
+            this.LayoutRoot.Background = new ImageBrush
+            {
+                ImageSource = new BitmapImage(new Uri( "Images/login" + count + ".png", UriKind.Relative)),
+                Opacity = 1,
+                Stretch = Stretch.UniformToFill,
+            };
+
             bool dark = ((Visibility)Application.Current.Resources["PhoneDarkThemeVisibility"] == Visibility.Visible);
 
             if (!dark)
@@ -40,6 +51,8 @@ namespace WPtrakt
 
             if (!String.IsNullOrEmpty(AppUser.Instance.Password))
                 this.PasswordBox.Password = AppUser.Instance.Password;
+
+            Animation.ControlFadeIn(this.LayoutRoot);
         }
 
         private async void SigninButton_Click_1(object sender, RoutedEventArgs e)

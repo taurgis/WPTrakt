@@ -106,7 +106,7 @@ namespace WPtraktBase.DAO
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktMovie));
-                    
+
                     TraktMovie movie = (TraktMovie)ser.ReadObject(ms);
 
                     Debug.WriteLine("Fetching movie " + IMDB + " from trakt.");
@@ -195,9 +195,9 @@ namespace WPtraktBase.DAO
                 WatchlistAuth auth = CreateWatchListAuth(IMDBID, title, year);
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/watchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
                 TraktMovie movie = await getMovieByIMDB(IMDBID);
-                
+
                 movie.InWatchlist = true;
-                
+
                 return saveMovie(movie);
             }
             catch (WebException)
@@ -226,7 +226,7 @@ namespace WPtraktBase.DAO
                 WatchlistAuth auth = CreateWatchListAuth(IMDBID, title, year);
                 String jsonString = await watchlistClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/unwatchlist/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(WatchlistAuth), auth));
                 TraktMovie movie = await getMovieByIMDB(IMDBID);
-               
+
                 movie.InWatchlist = false;
 
                 return saveMovie(movie);
@@ -235,7 +235,7 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("WebException in removeMovieFromWatchlist(" + IMDBID + ", " + title + ")."); }
             catch (TargetInvocationException)
             { Debug.WriteLine("TargetInvocationException in removeMovieFromWatchlist(" + IMDBID + ", " + title + ")."); }
-           
+
             return false;
         }
 
@@ -352,14 +352,14 @@ namespace WPtraktBase.DAO
                 WebClient checkinClient = new WebClient();
                 String assembly = Assembly.GetExecutingAssembly().FullName;
                 String fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-               
+
                 CheckinAuth auth = new CheckinAuth();
                 auth.imdb_id = IMDBID;
                 auth.Title = title;
                 auth.year = year;
                 auth.AppDate = AppUser.getReleaseDate();
                 auth.AppVersion = fullVersionNumber;
-                
+
                 String jsonString = await checkinClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/movie/checkin/9294cac7c27a4b97d3819690800aa2fedf0959fa"), AppUser.createJsonStringForAuthentication(typeof(CheckinAuth), auth));
 
                 if (jsonString.Contains("failure"))
@@ -394,7 +394,7 @@ namespace WPtraktBase.DAO
                 using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
                 {
                     var ser = new DataContractJsonSerializer(typeof(TraktShout[]));
-                    
+
                     return (TraktShout[])ser.ReadObject(ms);
                 }
             }
@@ -402,7 +402,7 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("WebException in getShoutsForMovie(" + IMDBID + ")."); }
             catch (TargetInvocationException)
             { Debug.WriteLine("TargetInvocationException in getShoutsForMovie(" + IMDBID + ")."); }
-           
+
             return new TraktShout[0];
         }
 
@@ -508,6 +508,39 @@ namespace WPtraktBase.DAO
             catch (InvalidOperationException)
             {
                 Debug.WriteLine("InvalidOperationException in FetchTrendingMovies().");
+            }
+
+            return new TraktMovie[0];
+        }
+
+        internal async Task<TraktMovie[]> searchForMovies(String searchTerm)
+        {
+            try
+            {
+                var movieClient = new WebClient();
+                String jsonString = await movieClient.UploadStringTaskAsync(new Uri("https://api.trakt.tv/search/movies.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + searchTerm), AppUser.createJsonStringForAuthentication());
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(jsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktMovie[]));
+                    TraktMovie[] movies = (TraktMovie[])ser.ReadObject(ms);
+                    ms.Close();
+
+                    return movies;
+                }
+
+            }
+            catch (WebException)
+            {
+                Debug.WriteLine("WebException in searchForMovies(" + searchTerm + ").");
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.WriteLine("OperationCanceledException in searchForMovies(" + searchTerm + ")");
+            }
+            catch (InvalidOperationException)
+            {
+                Debug.WriteLine("InvalidOperationException in searchForMovies(" + searchTerm + ").");
             }
 
             return new TraktMovie[0];

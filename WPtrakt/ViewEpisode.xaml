@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:custom="clr-namespace:WPtrakt.Custom"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
@@ -17,12 +18,12 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                     <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusEpisode}"/>
+                    <TextBlock  Name="loadingTextSuggest" Text="Loading.." HorizontalAlignment="Center" Visibility="{Binding LoadingStatusEpisode}"/>
                     <ListBox Margin="0, 0,0,-3" Visibility="{Binding DetailVisibility}" >
                         <ListBoxItem Height="Auto" >
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Image VerticalAlignment="Bottom" Source="{Binding ScreenImage}" Margin="15" Height="246" Width="436"  />
+                                    <custom:DelayLoadImage VerticalAlignment="Bottom" DefaultImageSource="Images/screen-small.jpg" ActualImageSource="{Binding ScreenImage}" Margin="15" Height="246" Width="436"  />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Season:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />

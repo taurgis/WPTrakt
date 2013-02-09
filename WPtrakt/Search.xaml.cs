@@ -1,18 +1,28 @@
 ﻿using Microsoft.Phone.Controls;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using WPtrakt;
 using WPtrakt.Controllers;
+using WPtraktBase.Controller;
+using WPtraktBase.Model.Trakt;
 
 namespace WPtrakt
 {
     public partial class Search : PhoneApplicationPage
     {
+        private Boolean Loading;
+        private ShowController showController;
+        private MovieController movieController;
+
         public Search()
         {
             InitializeComponent();
+            this.Loading = false;
+            this.showController = new ShowController();
+            this.movieController = new MovieController();
             DataContext = App.SearchViewModel;
         }
 
@@ -34,22 +44,85 @@ namespace WPtrakt
             {
                 if (SearchText.Text.Length > 1)
                 {
-                    App.SearchViewModel.LoadData(SearchText.Text);
+                    LoadData(SearchText.Text);
                     this.Focus();
                 }
             }
         }
 
-        private void MovieCanvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+        public async void LoadData(String searchTerm)
         {
-            ListItemViewModel model = (ListItemViewModel)((Canvas)sender).DataContext;
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+            if (!this.Loading)
+            {
+                this.Loading = true;
+
+                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+
+                App.SearchViewModel.clearResult();
+
+                TraktShow[] shows = await showController.searchForShows(searchTerm);
+                TraktMovie[] movies = await movieController.searchForMovies(searchTerm);
+
+                List<Object> mergedList = new List<object>();
+
+                Boolean isShow = true;
+                Int16 showLocation = 0;
+                Int16 movieLocation = 0;
+                for (int i = 0; i < shows.Length + movies.Length; i++)
+                {
+                    if (isShow)
+                    {
+                        if (showLocation < shows.Length)
+                        {
+                            mergedList.Add(shows[showLocation++]);
+                        }
+
+                        isShow = false;
+                    }
+                    else
+                    {
+                        if (movieLocation < movies.Length)
+                        {
+                            mergedList.Add(movies[movieLocation++]);
+                        }
+
+                        isShow = true;
+                    }
+
+                }
+
+
+                foreach (Object result in mergedList)
+                {
+                    if (result.GetType() == typeof(TraktShow))
+                    {
+                        TraktShow show = (TraktShow)result;
+                        App.SearchViewModel.ResultItems.Add(new ListItemViewModel() { Name = show.Title, ImageSource = show.Images.Poster, Imdb = show.imdb_id, Tvdb = show.tvdb_id, SubItemText = show.year.ToString(), Genres = show.Genres, Type = "show" });
+             
+                    }
+                    else
+                    {
+                        TraktMovie movie = (TraktMovie)result;
+                        App.SearchViewModel.ResultItems.Add(new ListItemViewModel() {  Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, SubItemText = movie.year.ToString(), Genres = movie.Genres, Type = "movie" });
+                    }
+                }
+
+                App.SearchViewModel.NotifyPropertyChanged("ResultItems");
+
+                this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+                this.Loading = false;
+            }
         }
 
-        private void ShowCanvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
+
+        private void MovieCanvas_Tap(object sender, System.Windows.Input.GestureEventArgs e)
         {
-            ListItemViewModel model = (ListItemViewModel)((Canvas)sender).DataContext;
-            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
+            ListItemViewModel model = (ListItemViewModel)((TextBlock)sender).DataContext;
+
+            if(model.Type.Equals("movie"))
+                Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
+            else
+                Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
         }
 
         private void PhoneApplicationPage_Loaded(object sender, RoutedEventArgs e)
