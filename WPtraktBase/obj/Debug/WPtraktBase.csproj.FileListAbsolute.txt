@@ -1,0 +1,16 @@
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\WPtraktBase.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\WPtraktBase.pdb
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\Coding4Fun.Phone.Controls.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\Microsoft.Threading.Tasks.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\Microsoft.Threading.Tasks.Extensions.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\Microsoft.Threading.Tasks.Extensions.Phone.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\System.Runtime.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\System.Threading.Tasks.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\Microsoft.Threading.Tasks.xml
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\Microsoft.Threading.Tasks.Extensions.xml
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\Microsoft.Threading.Tasks.Extensions.Phone.xml
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\System.Runtime.xml
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\Bin\Debug\System.Threading.Tasks.xml
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\obj\Debug\WPtraktBase.csprojResolveAssemblyReference.cache
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\obj\Debug\WPtraktBase.dll
+C:\Users\Thomas\SkyDrive\Werk\TWorks\WPtrakt\7.1\WPtraktBase\obj\Debug\WPtraktBase.pdb

@@ -23,7 +23,7 @@
                         <ListBoxItem Height="Auto" >
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <custom:DelayLoadImage VerticalAlignment="Bottom" DefaultImageSource="Images/screen-small.jpg" ActualImageSource="{Binding ScreenImage}" Margin="15" Height="246" Width="436"  />
+                                    <Image VerticalAlignment="Bottom" Source="{Binding ScreenImage}" Margin="15" Height="246" Width="436"  />
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="Season:" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}"  Foreground="Coral" />

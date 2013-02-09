@@ -227,11 +227,10 @@
                                             <DataTemplate>
                                                 <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="{Binding ColumnWidth}"/>
+                                                        <ColumnDefinition Width="5"/>
                                                         <ColumnDefinition Width="*"/>
                                                     </Grid.ColumnDefinitions>
-                                                    <custom:DelayLoadImage Visibility="{Binding ScreenVisibility}" Grid.Column="1" DefaultImageSource="Images/screen-small.jpg" ActualImageSource="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 10" Width="100" />
-                                                    <Grid Visibility="{Binding ScreenVisibilityFiller}" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
+                                                    <Grid  Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
                                                     <Grid Grid.Column="2" Height="Auto">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>

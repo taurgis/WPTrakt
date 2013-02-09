@@ -52,8 +52,7 @@ namespace WPtraktBase.Controllers
                     using (IsolatedStorageFileStream stream = store.OpenFile(filename, FileMode.Open))
                     {
                         bi.SetSource(stream);
-                        stream.Dispose();
-                        stream.Close();
+
                     }
                     return bi;
                 }
