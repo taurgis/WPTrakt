@@ -14,7 +14,7 @@
         <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Name="progressBar" Visibility="Collapsed" IsIndeterminate="True" />
         <controls:Panorama Margin="0,66,0,50">
             <controls:PanoramaItem>
-                <ListBox ItemsSource="{Binding ResultItems}"  Height="Auto" Margin="0 -30">
+                <ListBox ItemsSource="{Binding ResultItems}"  Height="Auto" Margin="0,-25,0,1">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Canvas Height="55">
