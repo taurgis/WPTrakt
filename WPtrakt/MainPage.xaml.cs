@@ -215,10 +215,13 @@ namespace WPtrakt
                     if (((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie != null)
                     {
                         TraktMovie movie = await movieController.getMovieByImdbId(((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie.imdb_id);
-                        Int64 lastCheckinScrobble = (lastActivity.Movie.Checkin > lastActivity.Movie.Scrobble) ? lastActivity.Movie.Checkin : lastActivity.Movie.Scrobble;
-                        DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
-                        DateTime watchTime = baseTime.AddSeconds(lastCheckinScrobble);
-                        ShowWatchingNowMovie(movie, watchTime);
+                        if (movie != null)
+                        {
+                            Int64 lastCheckinScrobble = (lastActivity.Movie.Checkin > lastActivity.Movie.Scrobble) ? lastActivity.Movie.Checkin : lastActivity.Movie.Scrobble;
+                            DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+                            DateTime watchTime = baseTime.AddSeconds(lastCheckinScrobble);
+                            ShowWatchingNowMovie(movie, watchTime);
+                        }
                     }
                     else
                     {
@@ -227,8 +230,10 @@ namespace WPtrakt
                         DateTime watchTime = baseTime.AddSeconds(lastCheckinScrobble);
                         TraktEpisode episode = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Episode;
                         TraktShow show = ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Show;
-
-                        ShowWatchingNowShow(episode, show, watchTime);
+                        if (episode != null && show != null)
+                        {
+                            ShowWatchingNowShow(episode, show, watchTime);
+                        }
                     }
                 }
                 else
