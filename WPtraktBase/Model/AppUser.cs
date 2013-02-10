@@ -69,7 +69,7 @@ namespace WPtrakt.Model
                 if (settings.Contains("ImagesWithWIFI"))
                     return (Boolean)settings["ImagesWithWIFI"];
                 else
-                    return false;
+                    return true;
             }
             set
             {
@@ -87,7 +87,7 @@ namespace WPtrakt.Model
                 if (settings.Contains("SmallScreenshots"))
                     return (Boolean)settings["SmallScreenshots"];
                 else
-                    return false;
+                    return true;
             }
             set
             {

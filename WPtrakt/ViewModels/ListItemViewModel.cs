@@ -36,6 +36,47 @@ namespace WPtrakt
             }
         }
 
+        public Int16 MaxEpisodeWidth
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return 250;
+                }
+                else
+                    return 320;
+            }
+        }
+
+        public Thickness TextMarginForEpisode
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return new Thickness(0, 0, 0, 0);
+                }
+                else
+                {
+                    return new Thickness(0, 15, 0, 0);
+                }
+            }
+        }
+
+        public Int16 NumberWidth
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return 150;
+                }
+                else
+                    return 100;
+            }
+        }
+
         public String ScreenVisibility
         {
             get
@@ -48,6 +89,22 @@ namespace WPtrakt
                 else
                 {
                     return "Collapsed";
+                }
+            }
+        }
+
+        public String NumberVisibility
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return "Collapsed";
+                }
+
+                else
+                {
+                    return "Visible";
                 }
             }
         }

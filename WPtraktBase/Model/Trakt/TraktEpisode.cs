@@ -18,7 +18,7 @@ namespace WPtraktBase.Model.Trakt
           AutoSync = AutoSync.OnInsert)]
         public int EpisodeID { get; set; }
 
-        [Column(CanBeNull=false)]
+        [Column(CanBeNull = false)]
         public int SeasonID { get; set; }
 
         [Column]
@@ -32,6 +32,15 @@ namespace WPtraktBase.Model.Trakt
         [Column]
         [DataMember(Name = "number")]
         public String Number { get; set; }
+
+
+        public Int16 NumberAsInt
+        {
+            get
+            {
+                return Int16.Parse(this.Number);
+            }
+        }
 
         [Column]
         [DataMember(Name = "title")]
@@ -157,7 +166,7 @@ namespace WPtraktBase.Model.Trakt
             return "episode";
         }
 
-        public  String getIdentifier()
+        public String getIdentifier()
         {
             return this.Tvdb + this.Season;
         }

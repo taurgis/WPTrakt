@@ -77,7 +77,7 @@ namespace WPtrakt
                         if (AppUser.Instance.AppVersion != fullVersionNumber)
                         {
                             MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
-                           
+
                             AppUser.ClearCache();
                             AppUser.Instance.AppVersion = fullVersionNumber;
                         }
@@ -151,7 +151,7 @@ namespace WPtrakt
                     {
                         App.ViewModel.Profile = profile;
                         App.ViewModel.RefreshProfile();
-                       
+
                         FadeInHomeScreen();
                     }
                     else
@@ -214,7 +214,7 @@ namespace WPtrakt
 
                     if (((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie != null)
                     {
-                        TraktMovie movie = await movieController.getMovieByImdbId( ((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie.imdb_id);
+                        TraktMovie movie = await movieController.getMovieByImdbId(((TraktProfileWithWatching)App.ViewModel.Profile).Watching.Movie.imdb_id);
                         Int64 lastCheckinScrobble = (lastActivity.Movie.Checkin > lastActivity.Movie.Scrobble) ? lastActivity.Movie.Checkin : lastActivity.Movie.Scrobble;
                         DateTime baseTime = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
                         DateTime watchTime = baseTime.AddSeconds(lastCheckinScrobble);
@@ -271,13 +271,13 @@ namespace WPtrakt
             App.ViewModel.clearWatching();
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
 
-            ListItemViewModel model = new ListItemViewModel() { Type = "movie", Year= movie.year, Name = movie.Title, ImageSource = movie.Images.Fanart, Imdb = movie.imdb_id, SubItemText = movie.year.ToString() };
+            ListItemViewModel model = new ListItemViewModel() { Type = "movie", Year = movie.year, Name = movie.Title, ImageSource = movie.Images.Fanart, Imdb = movie.imdb_id, SubItemText = movie.year.ToString() };
 
             TimeSpan percentageCompleteTimeSpan = DateTime.UtcNow - watchTime;
 
-            model.WatchedCompletion =  ((Double)percentageCompleteTimeSpan.TotalMinutes / (Double)(movie.Runtime)) * 100;
+            model.WatchedCompletion = ((Double)percentageCompleteTimeSpan.TotalMinutes / (Double)(movie.Runtime)) * 100;
 
-            if(Double.IsInfinity(model.WatchedCompletion))
+            if (Double.IsInfinity(model.WatchedCompletion))
                 model.WatchedCompletion = 0;
 
             App.ViewModel.WatchingNow.Add(model);
@@ -303,7 +303,7 @@ namespace WPtrakt
 
             App.ViewModel.clearWatching();
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
-            ListItemViewModel model = new ListItemViewModel() { Type= "episode", Year = show.year, Name = show.Title, ImageSource = episode.Images.Screen, Imdb = show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist };
+            ListItemViewModel model = new ListItemViewModel() { Type = "episode", Year = show.year, Name = show.Title, ImageSource = episode.Images.Screen, Imdb = show.tvdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist };
 
             TimeSpan percentageCompleteTimeSpan = DateTime.UtcNow - watchTime;
 
@@ -499,7 +499,7 @@ namespace WPtrakt
                 }
                 catch (NullReferenceException) { }
 
-              
+
             }
 
             if (newsFeedActivity.Count == 0)
@@ -835,6 +835,28 @@ namespace WPtrakt
 
         #region EpisodeContextMenu
 
+        private void WatchingRate_Click(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+            switch (model.Type)
+            {
+                case "movie":
+                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                    break;
+                
+                case "episode":
+                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+                    break;
+            }
+        }
+
+
+        private void EpisodeRate_Click(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+
+            NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+        }
 
         private async void CancelCheckinEpisode_Click_1(object sender, RoutedEventArgs e)
         {
@@ -1033,10 +1055,10 @@ namespace WPtrakt
             switch (model.Type)
             {
                 case "movie":
-                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
                     break;
                 case "show":
-                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
+                    NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=show&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
                     break;
                 case "episode":
                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));

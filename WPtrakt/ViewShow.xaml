@@ -63,46 +63,55 @@
                     <lazy:LazyListBox Grid.Row="0" ItemsSource="{Binding EpisodeItems}" Margin="0,0, 0, 20" Name="EpisodeList">
                         <lazy:LazyListBox.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel  Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
-                                    <Grid Width="150" Visibility="{Binding ScreenVisibility}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Image Grid.Column="0" Source="Images/screen-small.jpg" HorizontalAlignment="Right"  Height="84" Visibility="{Binding ScreenVisibility}"/>
-                                    </Grid>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                        <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                <Grid>
+                                    <Grid HorizontalAlignment="Left"  Margin="0 3" Width="5" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
+
+                                    <StackPanel  Orientation="Horizontal"  Tap="StackPanel_Tap">
+                                        <Grid  Margin="0 3" Width="{Binding NumberWidth}" VerticalAlignment="Top" Height="84">
+                                            <TextBlock Grid.Row="0" FontSize="60" FontWeight="ExtraBold" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Episode}"  Style="{StaticResource PhoneTextLargeStyle}"/>
+                                        </Grid>
+                                        <StackPanel Orientation="Vertical" Margin="{Binding TextMarginForEpisode}">
+                                            <TextBlock  Height="Auto" MaxWidth="{Binding MaxEpisodeWidth}"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" FontSize="20" TextWrapping="Wrap" />
+                                            <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
+                                </Grid>
                             </DataTemplate>
                         </lazy:LazyListBox.ItemTemplate>
                         <lazy:LazyListBox.LoadedItemTemplate>
                             <DataTemplate>
-                                <StackPanel  Orientation="Horizontal" Margin="0,0,0,17"  Height="90" Tap="StackPanel_Tap">
-                                    <Grid Width="150" Visibility="{Binding ScreenVisibility}">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <custom:DelayLoadImage Grid.Column="0" ActualImageSource="{Binding ScreenImage}" DefaultImageSource="Images/screen-small.jpg" HorizontalAlignment="Right"  Height="84" Visibility="{Binding ScreenVisibility}"/>
-                                        <Image Margin="0 3" Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
-                                        <Image Margin="0 3" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
-                                        <Image Margin="0 3" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
-                                    </Grid>
-                                    <StackPanel Orientation="Vertical">
-                                        <TextBlock  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
-                                        <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                <Grid>
+                                    <Grid  Margin="0 3" Width="5" HorizontalAlignment="Left" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" Visibility="{Binding NumberVisibility}"/>
+
+                                    <StackPanel  Orientation="Horizontal" Tap="StackPanel_Tap">
+                                        <Grid Width="{Binding NumberWidth}" Visibility="{Binding ScreenVisibility}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <custom:DelayLoadImage VerticalAlignment="Top" Margin="0 3"  Grid.Column="0" ActualImageSource="{Binding ScreenImage}"  HorizontalAlignment="Right"  Height="84" Visibility="{Binding ScreenVisibility}"/>
+                                            <Image Margin="0 3" Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
+                                            <Image Margin="0 3" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
+                                            <Image Margin="0 3" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
+                                        </Grid>
+                                        <Grid  Margin="0 3" Width="{Binding NumberWidth}" Visibility="{Binding NumberVisibility}" VerticalAlignment="Top" Height="84">
+
+                                            <TextBlock Grid.Row="0" FontSize="60" FontWeight="ExtraBold" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Episode}"  Style="{StaticResource PhoneTextLargeStyle}"/>
+                                        </Grid>
+                                        <StackPanel Orientation="Vertical" Margin="{Binding TextMarginForEpisode}">
+                                            <TextBlock  Height="Auto" MaxWidth="{Binding MaxEpisodeWidth}"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" FontSize="20" TextWrapping="Wrap" />
+                                            <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </StackPanel>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinEpisode_Click" />
+                                                <toolkit:MenuItem Header="Mark as seen" Visibility="{Binding ContextMarkAsWatchedVisibility}" Name="SeenEpisode" Click="SeenEpisode_Click" />
+                                                <toolkit:MenuItem Header="Unmark as seen" Visibility="{Binding ContextUnMarkAsWatchedVisibility}" Name="UnSeenEpisode" Click="UnSeenEpisode_Click" />
+                                                <toolkit:MenuItem Header="Add to watchlist" Visibility="{Binding ContextWatchlist}" Name="WatchlistEpisode" Click="WatchlistEpisode_Click" />
+                                                <toolkit:MenuItem Header="Remove from watchlist" Visibility="{Binding ContextUnWatchlist}" Name="RemoveWatchlistEpisode" Click="RemoveWatchlistEpisode_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
                                     </StackPanel>
-                                    <toolkit:ContextMenuService.ContextMenu>
-                                        <toolkit:ContextMenu>
-                                            <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinEpisode_Click" />
-                                            <toolkit:MenuItem Header="Mark as seen" Visibility="{Binding ContextMarkAsWatchedVisibility}" Name="SeenEpisode" Click="SeenEpisode_Click" />
-                                            <toolkit:MenuItem Header="Unmark as seen" Visibility="{Binding ContextUnMarkAsWatchedVisibility}" Name="UnSeenEpisode" Click="UnSeenEpisode_Click" />
-                                            <toolkit:MenuItem Header="Add to watchlist" Visibility="{Binding ContextWatchlist}" Name="WatchlistEpisode" Click="WatchlistEpisode_Click" />
-                                            <toolkit:MenuItem Header="Remove from watchlist" Visibility="{Binding ContextUnWatchlist}" Name="RemoveWatchlistEpisode" Click="RemoveWatchlistEpisode_Click" />
-                                        </toolkit:ContextMenu>
-                                    </toolkit:ContextMenuService.ContextMenu>
-                                </StackPanel>
+                                </Grid>
                             </DataTemplate>
                         </lazy:LazyListBox.LoadedItemTemplate>
                     </lazy:LazyListBox>

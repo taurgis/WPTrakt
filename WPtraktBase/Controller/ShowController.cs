@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Linq;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
@@ -8,6 +9,7 @@ using WPtrakt.Model;
 using WPtrakt.Model.Trakt;
 using WPtraktBase.Controllers;
 using WPtraktBase.DAO;
+using System.Linq;
 using WPtraktBase.Model.Trakt;
 
 namespace WPtraktBase.Controller
@@ -148,7 +150,8 @@ namespace WPtraktBase.Controller
                     episodes = await showDao.getSeasonFromTrakt(show, season);
                 }
 
-                return episodes;
+
+                return episodes.OrderBy(b => b.NumberAsInt).ToArray();
             }
             else
             {

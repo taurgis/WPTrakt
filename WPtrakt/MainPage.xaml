@@ -54,12 +54,12 @@
                     <ListBox   ScrollViewer.VerticalScrollBarVisibility="Disabled"  Margin="0 0 0 15" ItemsSource="{Binding WatchingNow}" Visibility="Collapsed"  Name="WatchingNow">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Name="WatchingNowGrid" Tap="WatchingNowGrid_Tap_1">
+                                <Grid Name="WatchingNowGrid" Height="120" Width="480" >
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="110"/>
                                         <RowDefinition Height="10"/>
                                     </Grid.RowDefinitions>
-                                    <Grid Grid.Row="0"  Opacity="0.9">
+                                    <Grid Grid.Row="0" Width="480" Height="Auto"  Opacity="0.9" Tap="WatchingNowGrid_Tap_1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="160"/>
                                             <ColumnDefinition Width="320"/>
@@ -70,13 +70,15 @@
                                             <TextBlock FontSize="25"   Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
                                             <TextBlock   Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
                                         </StackPanel>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu Name="NextEpisodesContextMenu">
+                                                <toolkit:MenuItem Header="Rate" Name="EpisodeRate" Click="WatchingRate_Click" />
+                                                <toolkit:MenuItem Header="Cancel check in" Name="CancelCheckinEpisode" Click="CancelCheckinEpisode_Click_1" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
                                     </Grid>
                                     <ProgressBar Grid.Row="1" Name="WatchingCompletion"  Value="{Binding WatchedCompletion}" IsIndeterminate="False" Height="10" Margin="-10 0" />
-                                    <toolkit:ContextMenuService.ContextMenu>
-                                        <toolkit:ContextMenu Name="NextEpisodesContextMenu">
-                                            <toolkit:MenuItem Header="Cancel check in" Name="CancelCheckinEpisode" Click="CancelCheckinEpisode_Click_1" />
-                                        </toolkit:ContextMenu>
-                                    </toolkit:ContextMenuService.ContextMenu>
+                                    
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -108,6 +110,7 @@
                                                 <toolkit:MenuItem Header="Unmark as seen" Visibility="{Binding ContextUnMarkAsWatchedVisibility}" Name="UnSeenEpisode" Click="UnSeenEpisode_Click" />
                                                 <toolkit:MenuItem Header="Add to watchlist" Visibility="{Binding ContextWatchlist}" Name="WatchlistEpisode" Click="WatchlistEpisode_Click" />
                                                 <toolkit:MenuItem Header="Remove from watchlist" Visibility="{Binding ContextUnWatchlist}" Name="RemoveWatchlistEpisode" Click="RemoveWatchlistEpisode_Click" />
+                                                <toolkit:MenuItem Header="Rate" Name="EpisodeRate" Click="EpisodeRate_Click" />
                                             </toolkit:ContextMenu>
                                         </toolkit:ContextMenuService.ContextMenu>
                                     </Grid>
