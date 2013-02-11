@@ -81,7 +81,25 @@
                         <lazy:LazyListBox.LoadedItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <Grid  Margin="0 3" Width="5" HorizontalAlignment="Left" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
+                                    <Grid.Triggers>
+                                        <!--Show a nice animation to fade the minimal content into the full content-->
+                                        <EventTrigger RoutedEvent="Grid.Loaded">
+                                            <BeginStoryboard>
+                                                <BeginStoryboard.Storyboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation Storyboard.TargetName="LeftMarker" Storyboard.TargetProperty="Opacity" From="0.5" To="0" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                       
+                                                    </Storyboard>
+                                                </BeginStoryboard.Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Grid.Triggers>
+
+                                    <Grid  Margin="0 3" Width="5" Name="LeftMarker" HorizontalAlignment="Left" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
                                     <Grid  Margin="0 3" Width="{Binding NumberWidth}" VerticalAlignment="Top" HorizontalAlignment="Left" Height="84">
                                         <TextBlock Grid.Row="0" FontSize="60" FontWeight="ExtraBold" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Episode}"  Style="{StaticResource PhoneTextLargeStyle}"/>
                                     </Grid>
