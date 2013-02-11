@@ -59,7 +59,22 @@ namespace WPtrakt
                 }
                 else
                 {
-                    return new Thickness(0, 15, 0, 0);
+                    return new Thickness(0, 20, 0, 0);
+                }
+            }
+        }
+
+        public Thickness TextMarginForEpisodeLoaded
+        {
+            get
+            {
+                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                {
+                    return new Thickness(0, 0, 0, 0);
+                }
+                else
+                {
+                    return new Thickness(100, 20, 0, 0);
                 }
             }
         }
