@@ -221,7 +221,7 @@
     <Content Include="Images\appbar.phone.numbersign.rest.png" />
     <Content Include="Images\appbar.refresh.rest.png" />
     <Resource Include="Images\appbar.search.rest.black.png" />
-    <Resource Include="Images\appbar.search.rest.png" />
+    <Content Include="Images\appbar.search.rest.png" />
     <Content Include="Images\appbar.search.rest.white.png" />
     <Content Include="Images\appbar.seen.rest.png" />
     <Content Include="Images\appbar.send.text.rest.png" />

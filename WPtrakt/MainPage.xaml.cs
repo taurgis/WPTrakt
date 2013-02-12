@@ -198,7 +198,7 @@ namespace WPtrakt
 
         private void ValidationFailed()
         {
-            App.ViewModel.Profile = new TraktProfileWithWatching();
+            App.ViewModel.Profile = null;
             this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
             NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
             ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
