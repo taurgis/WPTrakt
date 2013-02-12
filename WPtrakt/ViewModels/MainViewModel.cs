@@ -209,11 +209,7 @@ namespace WPtrakt
             App.ViewModel.NotifyPropertyChanged("TrendingItems");
         }
 
-        public bool IsDataLoaded
-        {
-            get;
-            private set;
-        }
+  
 
         #endregion
 

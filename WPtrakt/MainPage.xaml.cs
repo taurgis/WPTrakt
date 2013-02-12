@@ -57,43 +57,42 @@ namespace WPtrakt
                     return;
                 }
 
-                if (!App.ViewModel.IsDataLoaded)
+
+                App.ViewModel.SetMainPage(this);
+                App.MainPage = this;
+                this.showController = new ShowController();
+                this.episodeController = new EpisodeController();
+                this.userController = new UserController();
+                this.movieController = new MovieController();
+
+                var assembly = Assembly.GetExecutingAssembly().FullName;
+                var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
+
+                if ((String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
                 {
-                    App.ViewModel.SetMainPage(this);
-                    App.MainPage = this;
-                    this.showController = new ShowController();
-                    this.episodeController = new EpisodeController();
-                    this.userController = new UserController();
-                    this.movieController = new MovieController();
-
-                    var assembly = Assembly.GetExecutingAssembly().FullName;
-                    var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
-
-                    if ((String.IsNullOrEmpty(AppUser.Instance.UserName) || String.IsNullOrEmpty(AppUser.Instance.Password)))
-                    {
-                        AppUser.Instance.AppVersion = fullVersionNumber;
-                        NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
-                    }
-                    else
-                    {
-                        if (AppUser.Instance.AppVersion != fullVersionNumber)
-                        {
-                            MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
-
-                            AppUser.ClearCache();
-                            AppUser.Instance.AppVersion = fullVersionNumber;
-                        }
-
-                        if (!AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
-                        {
-                            this.TrendingPanoramaItem.Visibility = System.Windows.Visibility.Collapsed;
-                        }
-
-                        LoadProfile();
-
-                        ReloadLiveTile();
-                    }
+                    AppUser.Instance.AppVersion = fullVersionNumber;
+                    NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
                 }
+                else
+                {
+                    if (AppUser.Instance.AppVersion != fullVersionNumber)
+                    {
+                        MessageBox.Show("Application update. Clearing cache, the application will hang for a few seconds.");
+
+                        AppUser.ClearCache();
+                        AppUser.Instance.AppVersion = fullVersionNumber;
+                    }
+
+                    if (!AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
+                    {
+                        this.TrendingPanoramaItem.Visibility = System.Windows.Visibility.Collapsed;
+                    }
+
+                    LoadProfile();
+
+                    ReloadLiveTile();
+                }
+
             }
             catch (InvalidOperationException) { }
         }
