@@ -14,12 +14,12 @@
         <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Name="progressBar" Visibility="Collapsed" IsIndeterminate="True" />
         <controls:Panorama Margin="0,66,0,50">
             <controls:PanoramaItem>
-                <ListBox ItemsSource="{Binding ResultItems}"  Height="Auto" Margin="0,-25,0,1">
+                <ListBox ItemsSource="{Binding ResultItems}"  Margin="0,-25,0,1">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Canvas Height="55">
-                                <TextBlock  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" MaxWidth="800" Tap="MovieCanvas_Tap" />
-                            </Canvas>
+                           
+                                <TextBlock FontSize="35" Margin="0 7" TextWrapping="Wrap"  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" Tap="MovieCanvas_Tap" />
+                         
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

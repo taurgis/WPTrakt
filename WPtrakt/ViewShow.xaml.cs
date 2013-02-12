@@ -35,15 +35,17 @@ namespace WPtrakt
             InitializeComponent();
 
             DataContext = App.ShowViewModel;
-            this.showController = new ShowController();
-            this.episodeController = new EpisodeController();
-            this.LoadingActive = false;
+           
             this.Loaded += new RoutedEventHandler(ViewShow_Loaded);
         }
 
 
         private void ViewShow_Loaded(object sender, RoutedEventArgs e)
         {
+            this.showController = new ShowController();
+            this.episodeController = new EpisodeController();
+            this.LoadingActive = false;
+
             String tvdb;
             NavigationContext.QueryString.TryGetValue("id", out tvdb);
 

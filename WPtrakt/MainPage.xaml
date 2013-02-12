@@ -33,7 +33,7 @@
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Image Grid.Row="0" Grid.Column="0" Source="Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
+            <Image Grid.Row="0" Grid.Column="0" Source="/WPtrakt;component/Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
             <TextBlock Grid.Row="0" VerticalAlignment="Center" Grid.Column="1" CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
             <Image Name="SearchIcon" Grid.Row="0" Grid.Column="2" Source="{Binding SearchIcon}" Tap="Search_Tap" HorizontalAlignment="Right" Height="40" Margin="10 0 5 0"/>
         </Grid>

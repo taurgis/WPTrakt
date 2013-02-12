@@ -29,9 +29,7 @@ namespace WPtrakt
             InitializeComponent();
     
             DataContext = App.EpisodeViewModel;
-            this.episodeController = new EpisodeController();
-            this.showController = new ShowController();
-            LoadingActive = false;
+          
             this.Loaded += new RoutedEventHandler(ViewEpisode_Loaded);
         }
 
@@ -66,6 +64,10 @@ namespace WPtrakt
         {
             if (!App.EpisodeViewModel.IsDataLoaded)
             {
+                this.episodeController = new EpisodeController();
+                this.showController = new ShowController();
+                LoadingActive = false;
+
                 LoadEpisode();
             }
         }

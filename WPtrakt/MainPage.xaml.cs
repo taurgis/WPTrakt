@@ -35,25 +35,20 @@ namespace WPtrakt
         {
             InitializeComponent();
             DataContext = App.ViewModel;
-            App.ViewModel.SetMainPage(this);
-    
-            this.showController = new ShowController();
-            this.episodeController = new EpisodeController();
-            this.userController = new UserController();
-            this.movieController = new MovieController();
+           
             this.Loading = false;
-            this.Loaded += new RoutedEventHandler(MainPage_Loaded);
-
-            App.MainPage = this;
+            this.Loaded += new RoutedEventHandler(MainPage_Loaded);    
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             if (App.ViewModel.Profile != null)
             {
+                lastModel = null;
                 StorageController.IsNetworkStateCached = false;
                 return;
             }
+
             try
             {
                 if (!NetworkInterface.GetIsNetworkAvailable())
@@ -64,6 +59,13 @@ namespace WPtrakt
 
                 if (!App.ViewModel.IsDataLoaded)
                 {
+                    App.ViewModel.SetMainPage(this);
+                    App.MainPage = this;
+                    this.showController = new ShowController();
+                    this.episodeController = new EpisodeController();
+                    this.userController = new UserController();
+                    this.movieController = new MovieController();
+
                     var assembly = Assembly.GetExecutingAssembly().FullName;
                     var fullVersionNumber = assembly.Split('=')[1].Split(',')[0];
 
@@ -843,6 +845,8 @@ namespace WPtrakt
         private void WatchingRate_Click(object sender, RoutedEventArgs e)
         {
             ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+            lastModel = model;
+
             switch (model.Type)
             {
                 case "movie":
@@ -853,14 +857,17 @@ namespace WPtrakt
                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
                     break;
             }
+
+     
         }
 
 
         private void EpisodeRate_Click(object sender, RoutedEventArgs e)
         {
             ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
-
+            lastModel = model;
             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
+         
         }
 
         private async void CancelCheckinEpisode_Click_1(object sender, RoutedEventArgs e)
@@ -876,6 +883,8 @@ namespace WPtrakt
             {
                 ErrorManager.ShowConnectionErrorPopup();
             }
+
+            lastModel = null;
         }
 
         private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
@@ -983,17 +992,17 @@ namespace WPtrakt
         private void ViewEpisode_Click_1(object sender, RoutedEventArgs e)
         {
             ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
-
+            lastModel = model;
             Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-
+          
         }
 
         private void ViewShow_Click_1(object sender, RoutedEventArgs e)
         {
             ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
-
+            lastModel = model;
             Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
-
+          
         }
 
         #endregion

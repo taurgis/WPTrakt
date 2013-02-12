@@ -220,8 +220,8 @@
     <Content Include="Images\appbar.next.rest.png" />
     <Content Include="Images\appbar.phone.numbersign.rest.png" />
     <Content Include="Images\appbar.refresh.rest.png" />
-    <Content Include="Images\appbar.search.rest.black.png" />
-    <Content Include="Images\appbar.search.rest.png" />
+    <Resource Include="Images\appbar.search.rest.black.png" />
+    <Resource Include="Images\appbar.search.rest.png" />
     <Content Include="Images\appbar.search.rest.white.png" />
     <Content Include="Images\appbar.seen.rest.png" />
     <Content Include="Images\appbar.send.text.rest.png" />
@@ -239,7 +239,7 @@
     <Content Include="Images\badge-9.png" />
     <Content Include="Images\collection.png" />
     <Content Include="Images\episode-watched.png" />
-    <Content Include="Images\fulllogo.png" />
+    <Resource Include="Images\fulllogo.png" />
     <Content Include="Images\heart-love.png" />
     <Content Include="Images\login1.png" />
     <Content Include="Images\login2.png" />

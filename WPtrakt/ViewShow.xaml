@@ -92,7 +92,24 @@
                                                                 <PowerEase EasingMode="EaseIn" Power="3"/>
                                                             </DoubleAnimation.EasingFunction>
                                                         </DoubleAnimation>
-                                                       
+
+                                                        <DoubleAnimation Storyboard.TargetName="WatchlistIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+
+                                                        <DoubleAnimation Storyboard.TargetName="SeenIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+
+                                                        <DoubleAnimation Storyboard.TargetName="RatingIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
                                                     </Storyboard>
                                                 </BeginStoryboard.Storyboard>
                                             </BeginStoryboard>
@@ -109,9 +126,9 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <custom:DelayLoadImage VerticalAlignment="Top" Margin="0 3"  Grid.Column="0" ActualImageSource="{Binding ScreenImage}"  HorizontalAlignment="Right"  Height="84" Visibility="{Binding ScreenVisibility}"/>
-                                            <Image Margin="0 3" Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
-                                            <Image Margin="0 3" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
-                                            <Image Margin="0 3" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
+                                            <Image Margin="0 3" Opacity="0" Name="WatchlistIcon" Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
+                                            <Image Margin="0 3" Opacity="0" Name="SeenIcon" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
+                                            <Image Margin="0 3" Opacity="0" Name="RatingIcon" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
                                         </Grid>
                                        
                                         <StackPanel Orientation="Vertical" Margin="{Binding TextMarginForEpisodeLoaded}">
