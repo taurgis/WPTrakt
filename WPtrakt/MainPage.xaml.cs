@@ -287,7 +287,11 @@ namespace WPtrakt
                 model.WatchedCompletion = 0;
 
             App.ViewModel.WatchingNow.Add(model);
-            Animation.ImageFadeIn(this.LayoutRoot.Background);
+
+            if (this.LayoutRoot.Background != null)
+            {
+                Animation.ImageFadeIn(this.LayoutRoot.Background);
+            }
 
             Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -320,7 +324,12 @@ namespace WPtrakt
 
 
             App.ViewModel.WatchingNow.Add(model);
-            Animation.ImageFadeIn(this.LayoutRoot.Background);
+
+            if (this.LayoutRoot.Background != null)
+            {
+                Animation.ImageFadeIn(this.LayoutRoot.Background);
+            }
+
             Deployment.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 App.ViewModel.NotifyPropertyChanged("WatchingNow");
