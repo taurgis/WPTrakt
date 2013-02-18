@@ -112,10 +112,9 @@ namespace WPtrakt
                 bool lockscreenValueExists = NavigationContext.QueryString.TryGetValue("lockscreen", out lockscreenValue);
                 if (lockscreenValueExists)
                     this.SettingsPanorama.DefaultItem = this.SettingsPanorama.Items[3];
-
- 
-                Animation.ControlFadeInSlow(this.LayoutRoot);
             }
+
+            Animation.ControlFadeInSlow(this.LayoutRoot);
         }
 
         void worker_DoWork(object sender, DoWorkEventArgs e)

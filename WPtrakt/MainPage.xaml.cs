@@ -520,22 +520,23 @@ namespace WPtrakt
 
             }
 
-            foreach (DateTime key in sortedOrderHistory.Keys)
+            if (sortedOrderHistory != null)
             {
-                Boolean isFirst = true;
-
-                foreach (ActivityListItemViewModel model in sortedOrderHistory[key])
+                foreach (DateTime key in sortedOrderHistory.Keys)
                 {
-                    if (isFirst)
+                    Boolean isFirst = true;
+
+                    foreach (ActivityListItemViewModel model in sortedOrderHistory[key])
                     {
-                        model.HasHeader = true;
-                        isFirst = false;
+                        if (isFirst)
+                        {
+                            model.HasHeader = true;
+                            isFirst = false;
+                        }
+
+                        App.ViewModel.HistoryItems.Add(model);
                     }
-
-             
-                    App.ViewModel.HistoryItems.Add(model);
                 }
-
             }
 
             if (newsFeedActivity.Count == 0)
@@ -579,6 +580,8 @@ namespace WPtrakt
         {
             if (newsFeedActivity == null)
                 return;
+
+            sortedOrderHistory = null;
 
             int counter = 0;
             App.ViewModel.clearHistory();
@@ -624,6 +627,26 @@ namespace WPtrakt
                 }
                 catch (NullReferenceException) { }
             }
+
+            if (sortedOrderHistory != null)
+            {
+                foreach (DateTime key in sortedOrderHistory.Keys)
+                {
+                    Boolean isFirst = true;
+
+                    foreach (ActivityListItemViewModel model in sortedOrderHistory[key])
+                    {
+                        if (isFirst)
+                        {
+                            model.HasHeader = true;
+                            isFirst = false;
+                        }
+
+                        App.ViewModel.HistoryItems.Add(model);
+                    }
+                }
+            }
+
 
             App.ViewModel.NotifyPropertyChanged("HistoryItems");
         }
