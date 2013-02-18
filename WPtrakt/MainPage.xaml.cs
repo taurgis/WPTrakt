@@ -35,9 +35,9 @@ namespace WPtrakt
         {
             InitializeComponent();
             DataContext = App.ViewModel;
-           
+
             this.Loading = false;
-            this.Loaded += new RoutedEventHandler(MainPage_Loaded);    
+            this.Loaded += new RoutedEventHandler(MainPage_Loaded);
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -274,6 +274,7 @@ namespace WPtrakt
                 Stretch = Stretch.UniformToFill,
             };
 
+
             App.ViewModel.clearWatching();
             this.WatchingNow.Visibility = System.Windows.Visibility.Visible;
 
@@ -472,11 +473,13 @@ namespace WPtrakt
             }
         }
 
+        private Dictionary<DateTime, List<ActivityListItemViewModel>> sortedOrderHistory;
 
         private void CreateHistoryList(List<TraktActivity> newsFeedActivity)
         {
             int counter = 0;
             this.newsFeedActivity = newsFeedActivity;
+            sortedOrderHistory = null;
             newsFeedActivity.Sort(TraktActivity.ActivityComparison);
             foreach (TraktActivity activity in newsFeedActivity)
             {
@@ -517,6 +520,24 @@ namespace WPtrakt
 
             }
 
+            foreach (DateTime key in sortedOrderHistory.Keys)
+            {
+                Boolean isFirst = true;
+
+                foreach (ActivityListItemViewModel model in sortedOrderHistory[key])
+                {
+                    if (isFirst)
+                    {
+                        model.HasHeader = true;
+                        isFirst = false;
+                    }
+
+             
+                    App.ViewModel.HistoryItems.Add(model);
+                }
+
+            }
+
             if (newsFeedActivity.Count == 0)
                 ToastNotification.ShowToast("User", "News feed is empty!");
 
@@ -525,49 +546,33 @@ namespace WPtrakt
             this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
         }
 
-
+    
         private void OrderHistory(TraktActivity activity, ActivityListItemViewModel tempModel)
         {
-            if (App.ViewModel.HistoryItems.Count == 0)
+            if (sortedOrderHistory == null)
             {
-                DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
-                time = time.AddSeconds(activity.TimeStamp);
-                time = time.ToLocalTime();
-                DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
-
-                ActivityDateListItemViewModel firstActivity = new ActivityDateListItemViewModel();
-                firstActivity.Items = new ObservableCollection<ActivityListItemViewModel>();
-                firstActivity.Items.Add(tempModel);
-                firstActivity.Date = onlyDay;
-                App.ViewModel.HistoryItems.Add(firstActivity);
+                sortedOrderHistory = new Dictionary<DateTime,List<ActivityListItemViewModel>>();
             }
-            else
-            {
-                Boolean added = false;
-                DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
-                time = time.AddSeconds(activity.TimeStamp);
-                time = time.ToLocalTime();
-                foreach (ActivityDateListItemViewModel model in App.ViewModel.HistoryItems)
-                {
-                    if (model.Date.Year == time.Year && model.Date.Month == time.Month && model.Date.Day == time.Day)
-                    {
-                        model.Items.Add(tempModel);
-                        added = true;
-                        break;
-                    }
-                }
-                if (!added)
-                {
 
-                    DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
-                    ActivityDateListItemViewModel newDateActivity = new ActivityDateListItemViewModel();
-                    newDateActivity.Items = new ObservableCollection<ActivityListItemViewModel>();
-                    newDateActivity.Items.Add(tempModel);
-                    newDateActivity.Date = onlyDay;
-                    App.ViewModel.HistoryItems.Add(newDateActivity);
-                }
 
-            }
+              DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+               time = time.AddSeconds(activity.TimeStamp);
+               time = time.ToLocalTime();
+             DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
+
+             tempModel.Date = onlyDay;
+
+             if (sortedOrderHistory.ContainsKey(onlyDay))
+             {
+                
+                 sortedOrderHistory[onlyDay].Add(tempModel);
+             }
+             else
+             {
+                 List<ActivityListItemViewModel> tempList = new List<ActivityListItemViewModel>();
+                 tempList.Add(tempModel);
+                 sortedOrderHistory.Add(onlyDay, tempList);
+             }
         }
 
         public void FilterHistory(int type)
@@ -628,7 +633,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + "" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + "" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to show " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -643,7 +648,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the collection" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the collection" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the collection.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -658,7 +663,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Movie.Title + "" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Movie.Title + "" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -673,7 +678,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Movie.Title + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Movie.Title , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -688,7 +693,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 " + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 " , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Show.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -702,7 +707,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the watchlist" + ((AppUser.Instance.SmallScreenshotsEnabled && !(AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? ".\r\n\r\n" : "\r\n") + activity.Movie.year.ToString(), Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the watchlist" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the watchlist.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -860,13 +865,13 @@ namespace WPtrakt
                 case "movie":
                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=movie&imdb=" + model.Imdb + "&year=" + model.Year + "&title=" + model.Name, UriKind.Relative));
                     break;
-                
+
                 case "episode":
                     NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
                     break;
             }
 
-     
+
         }
 
 
@@ -875,7 +880,7 @@ namespace WPtrakt
             ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
             lastModel = model;
             NavigationService.Navigate(new Uri("/RatingSelector.xaml?type=episode&imdb=" + model.Imdb + "&tvdb=" + model.Tvdb + "&year=" + model.Year + "&title=" + model.Name + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-         
+
         }
 
         private async void CancelCheckinEpisode_Click_1(object sender, RoutedEventArgs e)
@@ -1002,7 +1007,7 @@ namespace WPtrakt
             ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
             lastModel = model;
             Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewEpisode.xaml?id=" + model.Tvdb + "&season=" + model.Season + "&episode=" + model.Episode, UriKind.Relative));
-          
+
         }
 
         private void ViewShow_Click_1(object sender, RoutedEventArgs e)
@@ -1010,7 +1015,7 @@ namespace WPtrakt
             ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
             lastModel = model;
             Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewShow.xaml?id=" + model.Tvdb, UriKind.Relative));
-          
+
         }
 
         #endregion

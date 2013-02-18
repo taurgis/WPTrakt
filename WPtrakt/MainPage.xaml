@@ -8,6 +8,7 @@
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:controlsPrimitives="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls" 
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:lazy="clr-namespace:LazyListBox"
     x:Class="WPtrakt.Main"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
     shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
@@ -78,7 +79,7 @@
                                         </toolkit:ContextMenuService.ContextMenu>
                                     </Grid>
                                     <ProgressBar Grid.Row="1" Name="WatchingCompletion"  Value="{Binding WatchedCompletion}" IsIndeterminate="False" Height="10" Margin="-10 0" />
-                                    
+
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -184,8 +185,9 @@
                             </DataTemplate>
                         </toolkit:ListPicker.FullModeItemTemplate>
                     </toolkit:ListPicker>
-                    <ListBox Width="420"  Grid.Row="2" Height="Auto" HorizontalAlignment="Left" ItemsSource="{Binding HistoryItems}" x:Name="HistoryList" Margin="0 0 0 60"  >
-                        <ListBox.ItemContainerStyle>
+
+                    <lazy:LazyListBox Grid.Row="2" Height="Auto" Margin="0 0 0 60" HorizontalAlignment="Left" Width="420"  ItemsSource="{Binding HistoryItems}" Name="HistoryList">
+                        <lazy:LazyListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Template">
                                     <Setter.Value>
@@ -197,78 +199,89 @@
                                     </Setter.Value>
                                 </Setter>
                             </Style>
-                        </ListBox.ItemContainerStyle>
-                        <ListBox.ItemTemplate>
-
+                        </lazy:LazyListBox.ItemContainerStyle>
+                        <lazy:LazyListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid   Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  >
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="55"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <Grid Margin="0 0 0 5" Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
-                                        <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding DateString}"/>
+                                <StackPanel  Height="Auto" VerticalAlignment="Stretch"  >
+                                    <Grid Visibility="{Binding HeaderVisibility}" Margin="0 0 0 5" Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
+                                        <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding Header}"/>
                                     </Grid>
-                                    <ListBox Grid.Column="0"  Grid.Row="1" Height="Auto" HorizontalAlignment="Left"  ItemsSource="{Binding Items}" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                                        <ListBox.ItemContainerStyle>
-                                            <Style TargetType="ListBoxItem">
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate>
-                                                            <ContentPresenter
-                                            HorizontalAlignment="Stretch" 
-                                            VerticalAlignment="Stretch" />
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </ListBox.ItemContainerStyle>
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid  Tap="Grid_Tap_1"  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="5"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid  Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
-                                                    <Grid Grid.Column="2" Height="Auto">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Grid.RowDefinitions>
-                                                            <RowDefinition Height="Auto"></RowDefinition>
-                                                            <RowDefinition Height="30"></RowDefinition>
-                                                        </Grid.RowDefinitions>
-                                                        <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
-                                                        <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTime}" Style="{StaticResource PhoneTextSubtleStyle}" />
-                                                    </Grid>
-                                                    <toolkit:ContextMenuService.ContextMenu>
-                                                        <toolkit:ContextMenu>
-                                                            <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
-                                                        </toolkit:ContextMenu>
-                                                    </toolkit:ContextMenuService.ContextMenu>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel/>
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                    </ListBox>
-                                </Grid>
+                                    <Grid Margin="0 5"  Tap="Grid_Tap_1" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Opacity="0.3" Grid.Column="1" Source="Images/screen-small.jpg" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 7" Height="68" MaxWidth="100" Stretch="Fill" Name="ScreenImage"  />
+                                        <Grid Grid.Column="2" Height="Auto">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="30"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                            <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTimeString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </Grid>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
+                                    </Grid>
+                                </StackPanel>
                             </DataTemplate>
-                        </ListBox.ItemTemplate>
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel/>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                    </ListBox>
-
+                        </lazy:LazyListBox.ItemTemplate>
+                        <lazy:LazyListBox.LoadedItemTemplate>
+                            <DataTemplate>
+                                <StackPanel  Height="Auto" VerticalAlignment="Stretch"  >
+                                    <Grid Visibility="{Binding HeaderVisibility}" Margin="0 0 0 5" Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
+                                        <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding Header}"/>
+                                    </Grid>
+                                    <Grid Margin="0 5"  Tap="Grid_Tap_1" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
+                                        <Grid.Triggers>
+                                            <!--Show a nice animation to fade the minimal content into the full content-->
+                                            <EventTrigger RoutedEvent="Grid.Loaded">
+                                                <BeginStoryboard>
+                                                    <BeginStoryboard.Storyboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetName="ScreenImage" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+                                                        </Storyboard>
+                                                    </BeginStoryboard.Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Grid.Triggers>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Opacity="0.3" Grid.Column="1" Source="Images/screen-small.jpg" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 7" Height="68" MaxWidth="100" Stretch="Fill"  />
+                                        <Image Grid.Column="1" Opacity="0" Source="{Binding ScreenImage}" Name="ScreenImage" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 7" Height="68" MaxWidth="100" Stretch="UniformToFill"  />
+                                        <Grid Grid.Column="2" Height="Auto">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="30"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                            <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTimeString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </Grid>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </lazy:LazyListBox.LoadedItemTemplate>
+                    </lazy:LazyListBox>
                 </Grid>
             </controls:PanoramaItem>
         </controls:Panorama>

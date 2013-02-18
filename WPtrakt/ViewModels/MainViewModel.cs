@@ -26,7 +26,7 @@ namespace WPtrakt
         public ObservableCollection<ListItemViewModel> TrendingItems { get; private set; }
         public ObservableCollection<ListItemViewModel> UpNextItems { get; private set; }
         public ObservableCollection<ListItemViewModel> WatchingNow { get; private set; }
-        public ObservableCollection<ActivityDateListItemViewModel> HistoryItems { get; private set; }
+        public ObservableCollection<ActivityListItemViewModel> HistoryItems { get; private set; }
         public List<TraktActivity> history;
         private Main mainPage;
         public Boolean LoadingTrendingItems { get; set; }
@@ -35,7 +35,7 @@ namespace WPtrakt
         public MainViewModel()
         {
             this.TrendingItems = new ObservableCollection<ListItemViewModel>();
-            this.HistoryItems = new ObservableCollection<ActivityDateListItemViewModel>();
+            this.HistoryItems = new ObservableCollection<ActivityListItemViewModel>();
             this.UpNextItems = new ObservableCollection<ListItemViewModel>();
             this.WatchingNow = new ObservableCollection<ListItemViewModel>();
         }
@@ -49,7 +49,7 @@ namespace WPtrakt
 
         public void clearHistory()
         {
-            this.HistoryItems = new ObservableCollection<ActivityDateListItemViewModel>();
+            this.HistoryItems = new ObservableCollection<ActivityListItemViewModel>();
         }
 
         private TraktProfile _profile;

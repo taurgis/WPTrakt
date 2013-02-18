@@ -35,6 +35,55 @@ namespace WPtrakt.ViewModels
             }
         }
 
+        private DateTime _date;
+        public DateTime Date
+        {
+            get
+            {
+                return _date;
+            }
+            set
+            {
+                if (value != _date)
+                {
+                    _date = value;
+                    NotifyPropertyChanged("Date");
+                }
+            }
+        }
+
+
+        public String Header
+        {
+            get
+            {
+                if (this.Date.Day == DateTime.Now.Day && this.Date.Month == DateTime.Now.Month && this.Date.Year == DateTime.Now.Year)
+                {
+                    return "Today";
+                }
+                else if (this.Date.Day == DateTime.Now.AddDays(-1).Day && this.Date.Month == DateTime.Now.Month && this.Date.Year == DateTime.Now.Year)
+                {
+                    return "Yesterday";
+                }
+                else
+                    return this.Date.ToShortDateString();
+
+            }
+        }
+
+        public Boolean HasHeader { get; set; }
+
+        public String HeaderVisibility
+        {
+            get
+            {
+                if (HasHeader)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
+        }
+
         private string _screen;
         public string Screen
         {
@@ -48,22 +97,6 @@ namespace WPtrakt.ViewModels
                 {
                     _screen = value;
                     NotifyPropertyChanged("Screen");
-                }
-            }
-        }
-
-        public GridLength ColumnWidth
-        {
-            get
-            {
-                if (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi()))
-                {
-                    return new GridLength(100);
-                }
-
-                else
-                {
-                    return new GridLength(5);
                 }
             }
         }
@@ -177,7 +210,7 @@ namespace WPtrakt.ViewModels
             }
         }
 
-        public String DateTime
+        public String DateTimeString
         {
             get
             {

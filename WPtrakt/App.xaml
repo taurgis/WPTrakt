@@ -6,13 +6,12 @@
     xmlns:controlsPrimitives="clr-namespace:Microsoft.Phone.Controls.Primitives;assembly=Microsoft.Phone.Controls" 
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
      xmlns:custom="clr-namespace:WPtrakt.Custom"
-    xmlns:local="clr-namespace:LazyListBox"
+    xmlns:lazy="clr-namespace:LazyListBox"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <Application.Resources>
-
-        <Style TargetType="local:LazyListBoxItem">
+        <Style TargetType="lazy:LazyListBoxItem">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
@@ -23,7 +22,7 @@
             <Setter Property="VerticalContentAlignment" Value="Top"/>
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="local:LazyListBoxItem">
+                    <ControlTemplate TargetType="lazy:LazyListBoxItem">
                         <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" HorizontalAlignment="{TemplateBinding HorizontalAlignment}" VerticalAlignment="{TemplateBinding VerticalAlignment}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                             <VisualStateManager.VisualStateGroups>
                                 <VisualStateGroup x:Name="CommonStates">
