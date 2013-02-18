@@ -486,7 +486,7 @@ namespace WPtrakt
                 ActivityListItemViewModel tempModel = null;
                 try
                 {
-                    if (counter++ <= 40)
+                    if (counter++ <= 60)
                     {
                         switch (activity.Action)
                         {

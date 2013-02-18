@@ -239,28 +239,12 @@
                                         <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding Header}"/>
                                     </Grid>
                                     <Grid Margin="0 5"  Tap="Grid_Tap_1" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
-                                        <Grid.Triggers>
-                                            <!--Show a nice animation to fade the minimal content into the full content-->
-                                            <EventTrigger RoutedEvent="Grid.Loaded">
-                                                <BeginStoryboard>
-                                                    <BeginStoryboard.Storyboard>
-                                                        <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetName="ScreenImage" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
-                                                                <DoubleAnimation.EasingFunction>
-                                                                    <PowerEase EasingMode="EaseIn" Power="3"/>
-                                                                </DoubleAnimation.EasingFunction>
-                                                            </DoubleAnimation>
-                                                        </Storyboard>
-                                                    </BeginStoryboard.Storyboard>
-                                                </BeginStoryboard>
-                                            </EventTrigger>
-                                        </Grid.Triggers>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="100"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Image Opacity="0.3" Grid.Column="1" Source="Images/screen-small.jpg" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 7" Height="68" MaxWidth="100" Stretch="Fill"  />
-                                        <Image Grid.Column="1" Opacity="0" Source="{Binding ScreenImage}" Name="ScreenImage" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 7" Height="68" MaxWidth="100" Stretch="UniformToFill"  />
+                                        <custom:DelayLoadImage Grid.Column="1" ActualImageSource="{Binding ScreenImage}" Name="ScreenImage" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-100 7" Height="68" MaxWidth="100" Stretch="UniformToFill"  />
                                         <Grid Grid.Column="2" Height="Auto">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
