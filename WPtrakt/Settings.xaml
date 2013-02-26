@@ -8,7 +8,7 @@
     xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     SupportedOrientations="Portrait" Orientation="Portrait"
-    shell:SystemTray.IsVisible="False">
+    shell:SystemTray.IsVisible="True">
     <Grid x:Name="LayoutRoot" Opacity="0">
         <controls:Panorama Margin="0,12,0,0" Name="SettingsPanorama">
             <controls:PanoramaItem Header="Images" Width="480">

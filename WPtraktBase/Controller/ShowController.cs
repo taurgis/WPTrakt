@@ -303,6 +303,11 @@ namespace WPtraktBase.Controller
             return await ShowDao.Instance.getMediumCoverImage(ID, screenUrl);
         }
 
+        public static async Task<BitmapImage> getTrendingImage(String imageSource, Int16 width)
+        {
+            return await ShowDao.Instance.getTrendingImage(imageSource, width);
+        }
+
         public async Task<TraktShow[]> searchForShows(String searchTerm)
         {
             if (!String.IsNullOrEmpty(searchTerm))
@@ -334,6 +339,8 @@ namespace WPtraktBase.Controller
             }
             else
                 return accentedStr;
-        } 
+        }
+
+
     }
 }

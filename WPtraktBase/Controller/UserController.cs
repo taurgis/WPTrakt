@@ -47,5 +47,12 @@ namespace WPtraktBase.Controller
         {
             return await userDao.getNewsFeed();
         }
+
+
+
+        public async Task<List<TraktActivity>> getCheckinHistory()
+        {
+            return await userDao.getCheckinHistory();
+        }
     }
 }

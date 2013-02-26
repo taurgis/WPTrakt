@@ -134,6 +134,19 @@ namespace WPtraktBase.Controllers
             return bmp;
         }
 
+        internal static BitmapImage resizeImageWithoutSaving(Stream pic, Int16 width)
+        {
+            var bi = new BitmapImage();
+            bi.SetSource(pic);
+
+         
+                BitmapImage lowEndDeviceImage = resizeImage(bi, pic, width);
+                pic.Dispose();
+                pic.Close();
+                return lowEndDeviceImage;
+            
+        }
+
         public static BitmapImage saveImage(String fileName, Stream pic, Int16 width, Int16 quality)
         {
             using (var isoStore = IsolatedStorageFile.GetUserStoreForApplication())

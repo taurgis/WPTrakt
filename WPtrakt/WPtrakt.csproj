@@ -89,6 +89,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CheckinHistory.xaml.cs">
+      <DependentUpon>CheckinHistory.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\Animation.cs" />
     <Compile Include="Custom\DelayedLoadImage.cs" />
     <Compile Include="Controllers\ErrorManager.cs" />
@@ -120,6 +123,10 @@
     </Compile>
     <Compile Include="ViewModels\ActivityListItemViewModel.cs" />
     <Compile Include="ViewModels\ActivityViewModel.cs" />
+    <Compile Include="ViewModels\CheckinHistoryViewModel.cs" />
+    <Compile Include="ViewModels\FullTrendingViewModel.cs" />
+    <Compile Include="ViewModels\TrendingListItemViewModel.cs" />
+    <Compile Include="ViewModels\TrendingViewModel.cs" />
     <Compile Include="ViewModels\SearchViewModel.cs" />
     <Compile Include="ViewModels\EpisodeViewModel.cs" />
     <Compile Include="ViewModels\ShowViewModel.cs" />
@@ -149,12 +156,19 @@
     <Compile Include="ViewMovie.xaml.cs">
       <DependentUpon>ViewMovie.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewTrending.xaml.cs">
+      <DependentUpon>ViewTrending.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="CheckinHistory.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Login.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -195,6 +209,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ViewTrending.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -203,6 +221,8 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="WPtrakt_2013_01_21_13_41_58.sap" />
+    <None Include="WPtrakt_2013_02_23_15_26_52.sap" />
+    <None Include="WPtrakt_2013_02_23_15_30_00.sap" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Background.png" />

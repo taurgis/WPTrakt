@@ -23,7 +23,7 @@ namespace WPtrakt
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<ListItemViewModel> TrendingItems { get; private set; }
+        public ObservableCollection<TrendingViewModel> TrendingItems { get; private set; }
         public ObservableCollection<ListItemViewModel> UpNextItems { get; private set; }
         public ObservableCollection<ListItemViewModel> WatchingNow { get; private set; }
         public ObservableCollection<ActivityListItemViewModel> HistoryItems { get; private set; }
@@ -34,7 +34,7 @@ namespace WPtrakt
 
         public MainViewModel()
         {
-            this.TrendingItems = new ObservableCollection<ListItemViewModel>();
+            this.TrendingItems = new ObservableCollection<TrendingViewModel>();
             this.HistoryItems = new ObservableCollection<ActivityListItemViewModel>();
             this.UpNextItems = new ObservableCollection<ListItemViewModel>();
             this.WatchingNow = new ObservableCollection<ListItemViewModel>();
@@ -172,21 +172,6 @@ namespace WPtrakt
             }
         }
 
-        public String LoadingStatus
-        {
-            get
-            {
-                if (this.LoadingHistory || this.LoadingTrendingItems)
-                {
-                    return "Visible";
-                }
-                else
-                {
-                    return "Collapsed";
-                }
-            }
-        }
-
         public Boolean PanoramaEnabled
         {
             get
@@ -204,7 +189,7 @@ namespace WPtrakt
 
         public void ClearTrending()
         {
-            this.TrendingItems = new ObservableCollection<ListItemViewModel>();
+            this.TrendingItems = new ObservableCollection<TrendingViewModel>();
 
             App.ViewModel.NotifyPropertyChanged("TrendingItems");
         }

@@ -193,5 +193,59 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("TargetInvocationException in getNewsFeed()."); }
             return new List<TraktActivity>();
         }
+
+        internal async Task<List<TraktActivity>> getCheckinHistory()
+        {
+            try
+            {
+                var myFeedClientScrobble = new WebClient();
+                String myFeedJsonString = await myFeedClientScrobble.UploadStringTaskAsync(new Uri("https://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName + "/all/scrobble"), AppUser.createJsonStringForAuthentication());
+                var myFeedClientCheckin = new WebClient();
+                String myFeedJsonStringCheckin = await myFeedClientScrobble.UploadStringTaskAsync(new Uri("https://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName + "/all/checkin"), AppUser.createJsonStringForAuthentication());
+               
+                var myFeedClientSeen = new WebClient();
+
+                String myFeedJsonStringSeen = await myFeedClientSeen.UploadStringTaskAsync(new Uri("https://api.trakt.tv/activity/user.json/9294cac7c27a4b97d3819690800aa2fedf0959fa/" + AppUser.Instance.UserName + "/all/seen"), AppUser.createJsonStringForAuthentication());
+               
+           
+                List<TraktActivity> activity = new List<TraktActivity>();
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(myFeedJsonString)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
+
+                    TraktFriendsActivity myActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                    activity.AddRange(myActivity.Activity);
+                    ms.Close();
+                }
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(myFeedJsonStringCheckin)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
+
+                    TraktFriendsActivity myActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                    activity.AddRange(myActivity.Activity);
+                    ms.Close();
+                }
+
+
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(myFeedJsonStringSeen)))
+                {
+                    var ser = new DataContractJsonSerializer(typeof(TraktFriendsActivity));
+
+                    TraktFriendsActivity myActivity = (TraktFriendsActivity)ser.ReadObject(ms);
+                    activity.AddRange(myActivity.Activity);
+                    ms.Close();
+                }
+
+
+                return activity;
+            }
+            catch (WebException)
+            { Debug.WriteLine("WebException in getNewsFeed()."); }
+            catch (TargetInvocationException)
+            { Debug.WriteLine("TargetInvocationException in getNewsFeed()."); }
+            return new List<TraktActivity>();
+        }
     }
 }

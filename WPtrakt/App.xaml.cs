@@ -16,6 +16,10 @@ namespace WPtrakt
         private static ShowViewModel showViewModel = null;
         private static EpisodeViewModel episodeViewModel = null;
         private static ActivityViewModel activityViewModel = null;
+        private static CheckinHistoryViewModel checkinHistoryViewModel = null;
+        private static FullTrendingViewModel trendingViewModel = null;
+
+        private bool reset;
         public PhoneApplicationFrame RootFrame { get; private set; }
         
 
@@ -50,6 +54,17 @@ namespace WPtrakt
                 mainPage = value;
             }
 
+        }
+
+        public static FullTrendingViewModel TrendingViewModel
+        {
+            get
+            {
+                if (trendingViewModel == null)
+                    trendingViewModel = new FullTrendingViewModel();
+
+                return trendingViewModel;
+            }
         }
 
         public static SearchViewModel SearchViewModel
@@ -161,7 +176,39 @@ namespace WPtrakt
             }
         }
 
+        public static CheckinHistoryViewModel CheckinHistoryViewModel
+        {
+            get
+            {
+                if (checkinHistoryViewModel == null)
+                    checkinHistoryViewModel = new CheckinHistoryViewModel();
+
+                return checkinHistoryViewModel;
+            }
+
+            set
+            {
+                checkinHistoryViewModel = value;
+            }
+        }
+
+
         #endregion
+
+        public static ProgressIndicator ShowLoading(PhoneApplicationPage page)
+        {
+            var indicator = new ProgressIndicator
+            {
+                IsVisible = true,
+                IsIndeterminate = true,
+                Text = "Loading..."
+            };
+
+            if (page != null)
+                SystemTray.SetProgressIndicator(page, indicator);
+
+            return indicator;
+        }
 
         public App()
         {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Phone.Controls;
 using Microsoft.Phone.Net.NetworkInformation;
 using Microsoft.Phone.Scheduler;
+using Microsoft.Phone.Shell;
 using Microsoft.Phone.Tasks;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace WPtrakt
         private UserController userController;
         private MovieController movieController;
         private Boolean Loading;
+        private ProgressIndicator indicator;
 
         public Main()
         {
@@ -140,7 +142,7 @@ namespace WPtrakt
 
                 InitiateSlowServerCounter();
 
-                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+                this.indicator = App.ShowLoading(this);
 
                 if (await userController.ValidateUser())
                 {
@@ -198,7 +200,7 @@ namespace WPtrakt
         private void ValidationFailed()
         {
             App.ViewModel.Profile = null;
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.indicator.IsVisible = false;
             NavigationService.Navigate(new Uri("/Login.xaml", UriKind.Relative));
             ToastNotification.ShowToast("User incorrect!", "Login data incorrect, or server connection problems.");
         }
@@ -368,12 +370,30 @@ namespace WPtrakt
 
                     TraktEpisode nextEpisode = null;
 
+                    Boolean forceNext = false;
+
                     foreach (TraktEpisode seasonEpisode in episodes)
                     {
-                        if (Int16.Parse(seasonEpisode.Number) == (Int16.Parse(watched.Episode.Number) + 1))
+                        if ((Int16.Parse(seasonEpisode.Number) == (Int16.Parse(watched.Episode.Number) + 1)) || forceNext)
                         {
-                            nextEpisode = seasonEpisode;
-                            break;
+                            if ((App.ViewModel.WatchingNow.Count == 1) && App.ViewModel.WatchingNow[0].Type.Equals("episode"))
+                            {
+                                if (App.ViewModel.WatchingNow[0].Tvdb == seasonEpisode.Tvdb && App.ViewModel.WatchingNow[0].Season.Equals(seasonEpisode.Season) && App.ViewModel.WatchingNow[0].Episode.Equals(seasonEpisode.Number))
+                                {
+                                    forceNext = true;
+                                }
+                                else
+                                {
+                                    nextEpisode = seasonEpisode;
+                                    break;
+                                }
+
+                            }
+                            else
+                            {
+                                nextEpisode = seasonEpisode;
+                                break;
+                            }
                         }
                     }
 
@@ -417,7 +437,9 @@ namespace WPtrakt
                 App.ViewModel.NotifyPropertyChanged("UpNextItems");
 
             }
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+
+            this.indicator.IsVisible = false;
+
             this.MainPanorama.Visibility = System.Windows.Visibility.Visible;
             Loading = false;
             Animation.ControlFadeInSlow(this.MainPanorama);
@@ -433,22 +455,31 @@ namespace WPtrakt
         {
             if (!Loading)
             {
-                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+                this.indicator = App.ShowLoading(this);
                 this.Loading = true;
                 App.ViewModel.ClearTrending();
-
+                Random rand = new Random();
                 int count = 0;
                 foreach (TraktMovie movie in await movieController.GetTrendingMovies())
                 {
-                    if (++count > 8)
+                    if (++count > 4)
                         break;
 
+                    if (count == 1)
+                    {
+                        App.ViewModel.TrendingItems.Add(new TrendingViewModel() { ImageSource = movie.Images.Fanart, ImageWidth = 420, Imdb = movie.imdb_id });
+                    }
+                    else
+                    {
+                        App.ViewModel.TrendingItems.Add(new TrendingViewModel() { ImageSource = movie.Images.Poster.Replace(".2.jpg", "-138.2.jpg"), ImageWidth = 130, Imdb = movie.imdb_id });
+                    }
 
-                    App.ViewModel.TrendingItems.Add(new ListItemViewModel() { Name = movie.Title, ImageSource = movie.Images.Poster, Imdb = movie.imdb_id, Watched = movie.Watched, Rating = movie.MyRatingAdvanced, NumberOfRatings = movie.Ratings.Votes.ToString(), Type = "Movie", InWatchList = movie.InWatchlist, SubItemText = movie.year.ToString(), Year = movie.year });
                     App.ViewModel.NotifyPropertyChanged("TrendingItems");
                 }
 
-                this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+                MoreTrending.Visibility = System.Windows.Visibility.Visible;
+
+                this.indicator.IsVisible = false;
                 this.Loading = false;
             }
         }
@@ -465,7 +496,7 @@ namespace WPtrakt
             {
                 this.Loading = true;
 
-                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+                this.indicator = App.ShowLoading(this);
 
                 App.ViewModel.clearHistory();
 
@@ -501,10 +532,7 @@ namespace WPtrakt
                                 break;
                             case "scrobble":
                                 tempModel = Scrobble(activity);
-                                break;
-                            case "collection":
-                                tempModel = Collection(activity);
-                                break;
+                                break;  
                             case "shout":
                                 tempModel = Shout(activity);
                                 break;
@@ -544,36 +572,36 @@ namespace WPtrakt
 
             App.ViewModel.NotifyPropertyChanged("HistoryItems");
             this.Loading = false;
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.indicator.IsVisible = false;
         }
 
-    
+
         private void OrderHistory(TraktActivity activity, ActivityListItemViewModel tempModel)
         {
             if (sortedOrderHistory == null)
             {
-                sortedOrderHistory = new Dictionary<DateTime,List<ActivityListItemViewModel>>();
+                sortedOrderHistory = new Dictionary<DateTime, List<ActivityListItemViewModel>>();
             }
 
 
-              DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
-               time = time.AddSeconds(activity.TimeStamp);
-               time = time.ToLocalTime();
-             DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
+            DateTime time = new DateTime(1970, 1, 1, 0, 0, 9, DateTimeKind.Utc);
+            time = time.AddSeconds(activity.TimeStamp);
+            time = time.ToLocalTime();
+            DateTime onlyDay = new DateTime(time.Year, time.Month, time.Day);
 
-             tempModel.Date = onlyDay;
+            tempModel.Date = onlyDay;
 
-             if (sortedOrderHistory.ContainsKey(onlyDay))
-             {
-                
-                 sortedOrderHistory[onlyDay].Add(tempModel);
-             }
-             else
-             {
-                 List<ActivityListItemViewModel> tempList = new List<ActivityListItemViewModel>();
-                 tempList.Add(tempModel);
-                 sortedOrderHistory.Add(onlyDay, tempList);
-             }
+            if (sortedOrderHistory.ContainsKey(onlyDay))
+            {
+
+                sortedOrderHistory[onlyDay].Add(tempModel);
+            }
+            else
+            {
+                List<ActivityListItemViewModel> tempList = new List<ActivityListItemViewModel>();
+                tempList.Add(tempModel);
+                sortedOrderHistory.Add(onlyDay, tempList);
+            }
         }
 
         public void FilterHistory(int type)
@@ -596,28 +624,79 @@ namespace WPtrakt
                         switch (activity.Action)
                         {
                             case "watchlist":
-                                if (type == 1 || type == 0)
+                                if (type == 4 || (type >= 0 && type < 4))
+                                {
+                                    if (type == 1 && activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+                                    else if (type == 2 && !activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+
                                     tempModel = AddToWatchList(activity);
+                                }
                                 break;
                             case "rating":
-                                if (type == 2 || type == 0)
+                                if (type == 5 || (type >= 0 && type < 4))
+                                {
+                                    if (type == 1 && activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+                                    else if (type == 2 && !activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+
                                     tempModel = Rated(activity);
+                                }
                                 break;
                             case "checkin":
-                                if (type == 3 || type == 0)
+                                if (type == 6 || (type >= 0 && type < 4))
+                                {
+                                    if (type == 1 && activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+                                    else if (type == 2 && !activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+
                                     tempModel = Checkin(activity);
+                                }
                                 break;
                             case "scrobble":
-                                if (type == 4 || type == 0)
+                                if (type == 7 || (type >= 0 && type < 4))
+                                {
+                                    if (type == 1 && activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+                                    else if (type == 2 && !activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+
                                     tempModel = Scrobble(activity);
-                                break;
-                            case "collection":
-                                if (type == 5 || type == 0)
-                                    tempModel = Collection(activity);
+                                }
                                 break;
                             case "shout":
-                                if (type == 6 || type == 0)
+                                if (type == 8 || (type >= 0 && type < 4))
+                                {
+                                    if (type == 1 && activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+                                    else if (type == 2 && !activity.User.Username.Equals(AppUser.Instance.UserName))
+                                    {
+                                        break;
+                                    }
+
                                     tempModel = Shout(activity);
+                                }
                                 break;
                         }
 
@@ -656,7 +735,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + "" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to movie " + activity.Movie.Title + "", Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added shout to show " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -666,16 +745,16 @@ namespace WPtrakt
             return null;
         }
 
-        private ActivityListItemViewModel Collection(TraktActivity activity)
+        private ActivityListItemViewModel Seen(TraktActivity activity)
         {
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the collection" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "saw " + activity.Movie.Title + ".", Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the collection.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "saw " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the collection", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "saw " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
 
             return null;
@@ -686,7 +765,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Movie.Title + "" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Movie.Title + "", Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "scrobbled " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -701,7 +780,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Movie.Title , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Movie.Title, Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "checked in " + activity.Show.Title + ".", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -716,7 +795,7 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 " , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Movie.Title + ": " + activity.RatingAdvanced + "/10 ", Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "rated " + activity.Show.Title + ": " + activity.RatingAdvanced + "/10 .", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
@@ -730,11 +809,11 @@ namespace WPtrakt
             switch (activity.Type)
             {
                 case "movie":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the watchlist" , Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Movie.Title + " to the watchlist", Name = activity.Movie.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Movie.imdb_id, Screen = activity.Movie.Images.Poster, Type = "movie", Year = activity.Movie.year };
                 case "show":
                     return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " to the watchlist.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Tvdb = activity.Show.tvdb_id, Imdb = activity.Show.imdb_id, Screen = activity.Show.Images.Poster, Type = "show", Year = activity.Show.year };
                 case "episode":
-                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the watchlist", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
+                    return new ActivityListItemViewModel() { Activity = ((activity.User.Username.Equals(AppUser.Instance.UserName)) ? "You " : activity.User.Username + " ") + "added " + activity.Show.Title + " - " + activity.Episode.Title + " ( " + activity.Episode.Season + "x" + activity.Episode.Number + " ) " + "to the watchlist.", Name = activity.Show.Title, TimeStamp = activity.TimeStamp, Imdb = activity.Show.imdb_id, Tvdb = activity.Show.tvdb_id, Screen = activity.Episode.Images.Screen, Type = "episode", Season = Int16.Parse(activity.Episode.Season), Episode = Int16.Parse(activity.Episode.Number), Year = activity.Show.year };
             }
 
             return null;
@@ -752,8 +831,8 @@ namespace WPtrakt
                 StorageController.DeleteFile(TraktProfile.getFolderStatic() + "/" + AppUser.Instance.UserName + ".json");
                 this.MainPanorama.Visibility = System.Windows.Visibility.Collapsed;
                 App.ViewModel.Profile = null;
-                App.ViewModel.NotifyPropertyChanged("LoadingStatus");
-                this.progressBar.Visibility = System.Windows.Visibility.Visible;
+
+                this.indicator = App.ShowLoading(this);
                 this.MainPanorama.Opacity = 0;
 
                 LoadProfile();
@@ -780,10 +859,17 @@ namespace WPtrakt
         {
             if (lastModel == null)
             {
-                ListItemViewModel model = (ListItemViewModel)((DelayLoadImage)sender).DataContext;
+                TrendingViewModel model = (TrendingViewModel)((DelayLoadImage)sender).DataContext;
                 Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewMovie.xaml?id=" + model.Imdb, UriKind.Relative));
             }
         }
+
+        private void MoreTrending_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
+        {
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/ViewTrending.xaml", UriKind.Relative));
+        }
+
+
 
         private void Grid_Tap_1(object sender, System.Windows.Input.GestureEventArgs e)
         {
@@ -874,6 +960,13 @@ namespace WPtrakt
             NavigationService.Navigate(new Uri("/Settings.xaml", UriKind.Relative));
         }
 
+        private void CheckinHistoryMenuItem_Click_1(object sender, EventArgs e)
+        {
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/CheckinHistory.xaml", UriKind.Relative));
+
+        }
+
+
         #endregion
 
         #region EpisodeContextMenu
@@ -897,6 +990,16 @@ namespace WPtrakt
 
         }
 
+        private void RecentlyWatched_Click_1(object sender, RoutedEventArgs e)
+        {
+            ListItemViewModel model = (ListItemViewModel)((MenuItem)sender).DataContext;
+            lastModel = model;
+
+            Animation.NavigateToFadeOut(this, LayoutRoot, new Uri("/CheckinHistory.xaml", UriKind.Relative));
+
+        }
+
+
 
         private void EpisodeRate_Click(object sender, RoutedEventArgs e)
         {
@@ -909,7 +1012,7 @@ namespace WPtrakt
         private async void CancelCheckinEpisode_Click_1(object sender, RoutedEventArgs e)
         {
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
-
+            this.indicator = App.ShowLoading(this);
             if (await userController.CancelActiveCheckin())
             {
                 ClearWatchingNow();
@@ -920,12 +1023,13 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
 
+            this.indicator.IsVisible = false;
             lastModel = null;
         }
 
         private async void SeenEpisode_Click(object sender, RoutedEventArgs e)
         {
-            this.progressBar.Visibility = System.Windows.Visibility.Visible;
+            this.indicator = App.ShowLoading(this);
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.markEpisodeAsSeen(lastModel.Tvdb, lastModel.Imdb, lastModel.Name, lastModel.Year, lastModel.Season, lastModel.Episode))
@@ -938,12 +1042,12 @@ namespace WPtrakt
                 ErrorManager.ShowConnectionErrorPopup();
             }
             lastModel = null;
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.indicator.IsVisible = false;
         }
 
         private async void WatchlistEpisode_Click(object sender, RoutedEventArgs e)
         {
-            this.progressBar.Visibility = System.Windows.Visibility.Visible;
+            this.indicator = App.ShowLoading(this);
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.addEpisodeToWatchlist(lastModel.Tvdb, lastModel.Imdb, lastModel.Name, lastModel.Year, lastModel.Season, lastModel.Episode))
@@ -957,13 +1061,13 @@ namespace WPtrakt
             }
 
             lastModel = null;
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.indicator.IsVisible = false;
         }
 
 
         private async void RemoveWatchlistEpisode_Click(object sender, RoutedEventArgs e)
         {
-            this.progressBar.Visibility = System.Windows.Visibility.Visible;
+            this.indicator = App.ShowLoading(this);
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.removeEpisodeFromWatchlist(lastModel.Tvdb, lastModel.Imdb, lastModel.Name, lastModel.Year, lastModel.Season, lastModel.Episode))
@@ -977,12 +1081,12 @@ namespace WPtrakt
             }
 
             lastModel = null;
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.indicator.IsVisible = false;
         }
 
         private async void UnSeenEpisode_Click(object sender, RoutedEventArgs e)
         {
-            this.progressBar.Visibility = System.Windows.Visibility.Visible;
+            this.indicator = App.ShowLoading(this);
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.unMarkEpisodeAsSeen(lastModel.Tvdb, lastModel.Imdb, lastModel.Name, lastModel.Year, lastModel.Season, lastModel.Episode))
@@ -996,12 +1100,12 @@ namespace WPtrakt
             }
 
             lastModel = null;
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.indicator.IsVisible = false;
         }
 
         private async void CheckinEpisode_Click(object sender, RoutedEventArgs e)
         {
-            this.progressBar.Visibility = System.Windows.Visibility.Visible;
+            this.indicator = App.ShowLoading(this);
             lastModel = (ListItemViewModel)((MenuItem)sender).DataContext;
 
             if (await episodeController.checkinEpisode(lastModel.Tvdb, lastModel.Name, lastModel.Year, lastModel.Season, lastModel.Episode))
@@ -1022,7 +1126,7 @@ namespace WPtrakt
             }
 
             lastModel = null;
-            this.progressBar.Visibility = System.Windows.Visibility.Collapsed;
+            this.indicator.IsVisible = false;
         }
 
         private void ViewEpisode_Click_1(object sender, RoutedEventArgs e)
@@ -1128,14 +1232,12 @@ namespace WPtrakt
                     UpNextStackPanel.Visibility = System.Windows.Visibility.Visible;
                 }
                 HistoryList.Width = 420;
-                ListTrending.Width = 700;
             }
             else
             {
                 AvatarPanel.Visibility = System.Windows.Visibility.Collapsed;
                 UpNextStackPanel.Visibility = System.Windows.Visibility.Collapsed;
-                HistoryList.Width = 700;
-                ListTrending.Width = 1370;
+                HistoryList.Width = 680;
             }
         }
 
@@ -1188,6 +1290,12 @@ namespace WPtrakt
         {
             if (this.Filter != null)
             {
+                if (this.Filter.SelectedIndex == 3)
+                {
+                    this.Filter.SelectedIndex = this.lastSelection;
+                    return;
+                }
+
                 if (this.lastSelection != this.Filter.SelectedIndex)
                 {
                     this.lastSelection = this.Filter.SelectedIndex;
@@ -1195,5 +1303,6 @@ namespace WPtrakt
                 }
             }
         }
+
     }
 }

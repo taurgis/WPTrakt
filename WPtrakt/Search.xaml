@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:delay="clr-namespace:Delay;assembly=PhonePerformance"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" BackKeyPress="PhoneApplicationPage_BackKeyPress_1">
+    shell:SystemTray.IsVisible="True" Loaded="PhoneApplicationPage_Loaded" BackKeyPress="PhoneApplicationPage_BackKeyPress_1">
     <Grid x:Name="LayoutRoot">
         <TextBox Text="Search..." InputScope="Text"  Height="75"  VerticalAlignment="Top" Name="SearchText" GotFocus="SearchText_GotFocus" LostFocus="SearchText_LostFocus" KeyDown="SearchText_KeyDown" />
         <ProgressBar Margin="0 40" HorizontalAlignment="Left" Width="400" Name="progressBar" Visibility="Collapsed" IsIndeterminate="True" />

@@ -35,7 +35,7 @@ namespace WPtrakt
             InitializeComponent();
 
             DataContext = App.ShowViewModel;
-           
+
             this.Loaded += new RoutedEventHandler(ViewShow_Loaded);
         }
 
@@ -120,8 +120,8 @@ namespace WPtrakt
             {
                 App.ShowViewModel.LoadData(tvdb);
 
-                if(!String.IsNullOrEmpty(this.Show.GenresAsString))
-                   this.Show.Genres = this.Show.GenresAsString.Split('|');
+                if (!String.IsNullOrEmpty(this.Show.GenresAsString))
+                    this.Show.Genres = this.Show.GenresAsString.Split('|');
 
                 App.ShowViewModel.UpdateShowView(this.Show);
 
@@ -192,7 +192,7 @@ namespace WPtrakt
 
                         }
 
-                      
+
                         App.ShowViewModel.RefreshEpisodes();
                     }
                 }
@@ -208,7 +208,7 @@ namespace WPtrakt
         private async void LoadUnwatchedEpisodeData()
         {
             this.progressBarLoading.Visibility = System.Windows.Visibility.Visible;
-            App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<CalendarListItemViewModel>();
+            App.ShowViewModel.UnWatchedEpisodeItems = new ObservableCollection<ListItemViewModel>();
             App.ShowViewModel.RefreshUnwatchedEpisodes();
 
             TraktEpisode[] episodes = await this.showController.getAllUnwatchedEpisodesOfShow(this.Show);
@@ -220,7 +220,7 @@ namespace WPtrakt
                 int counter = 0;
                 foreach (TraktEpisode episodeIt in episodes)
                 {
-                    if (counter++ < 30)
+                    if (counter++ < 60)
                     {
                         if (seasonEpisodes.ContainsKey(Int16.Parse(episodeIt.Season)))
                             seasonEpisodes[Int16.Parse(episodeIt.Season)].Add(episodeIt);
@@ -237,16 +237,19 @@ namespace WPtrakt
 
                 foreach (KeyValuePair<Int16, List<TraktEpisode>> keyvalue in seasonEpisodes.OrderBy(item => item.Key))
                 {
-                    CalendarListItemViewModel model = new CalendarListItemViewModel();
-                    model.DateString = "Season " + keyvalue.Key;
-                    model.Items = new ObservableCollection<ListItemViewModel>();
-
+                    Boolean isHeader = true;
                     foreach (TraktEpisode episode in seasonEpisodes[keyvalue.Key])
                     {
-                        model.Items.Add(new ListItemViewModel() { Name = episode.Title, ImageSource = (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? episode.Images.Screen : null, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist });
-                    }
+                        ListItemViewModel model = new ListItemViewModel() { Name = episode.Title, ImageSource = (AppUser.Instance.SmallScreenshotsEnabled || (AppUser.Instance.ImagesWithWIFI && StorageController.IsConnectedToWifi())) ? episode.Images.Screen : null, Imdb = this.Show.imdb_id + episode.Season + episode.Number, SubItemText = "Season " + episode.Season + ", Episode " + episode.Number, Episode = episode.Number, Season = episode.Season, Tvdb = this.Show.tvdb_id, Watched = episode.Watched, Rating = episode.MyRatingAdvanced, InWatchList = episode.InWatchlist };
+                        if (isHeader)
+                        {
+                            model.HasHeader = true;
+                            model.Header = "Season " + keyvalue.Key;
+                            isHeader = false;
+                        }
 
-                    App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
+                        App.ShowViewModel.UnWatchedEpisodeItems.Add(model);
+                    }
                 }
 
                 App.ShowViewModel.RefreshUnwatchedEpisodes();

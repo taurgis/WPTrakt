@@ -11,14 +11,14 @@
     xmlns:lazy="clr-namespace:LazyListBox"
     x:Class="WPtrakt.Main"
     SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="False" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
+    shell:SystemTray.IsVisible="True" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
 
     <Grid x:Name="LayoutRoot" >
         <!-- Header-->
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="7"/>
-            <RowDefinition Height="5"/>
+
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -39,7 +39,6 @@
             <Image Name="SearchIcon" Grid.Row="0" Grid.Column="2" Source="{Binding SearchIcon}" Tap="Search_Tap" HorizontalAlignment="Right" Height="40" Margin="10 0 5 0"/>
         </Grid>
         <Border Grid.Row="1" Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
-        <ProgressBar Grid.Row="2" VerticalAlignment="Top" Visibility="{Binding LoadingStatus}" x:Name="progressBar" IsIndeterminate="True" />
         <!-- Header end-->
         <controls:Panorama x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Grid.Row="3" Visibility="Collapsed" Opacity="0">
             <controls:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
@@ -74,6 +73,7 @@
                                         <toolkit:ContextMenuService.ContextMenu>
                                             <toolkit:ContextMenu Name="NextEpisodesContextMenu">
                                                 <toolkit:MenuItem Header="Rate" Name="EpisodeRate" Click="WatchingRate_Click" />
+                                                <toolkit:MenuItem Header="Check in history" Name="RecentlyWatched" Click="RecentlyWatched_Click_1" />
                                                 <toolkit:MenuItem Header="Cancel check in" Name="CancelCheckinEpisode" Click="CancelCheckinEpisode_Click_1" />
                                             </toolkit:ContextMenu>
                                         </toolkit:ContextMenuService.ContextMenu>
@@ -94,11 +94,12 @@
                                 <DataTemplate>
                                     <Grid Name="UpNextEpisodeGrid" Margin="0 0 8 0">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="205"/>
                                         </Grid.ColumnDefinitions>
                                         <custom:DelayLoadImage  Grid.Column="0"  DefaultImageSource="Images/screen-small.jpg" ActualImageSource="{Binding LargeScreenImage}" HorizontalAlignment="Left" Width="205" Height="145" Stretch="UniformToFill"/>
-                                        <Canvas Grid.Column="0" VerticalAlignment="Bottom" Height="22" Background="Black" Opacity="0.7" />
-                                        <TextBlock HorizontalAlignment="Center" Foreground="White" Margin="5 -6" VerticalAlignment="Bottom" Height="30" Text="{Binding Name}" Style="{StaticResource PhoneTextSubtleStyle}" FontSize="18"  />
+                                        <Grid Grid.Column="0" VerticalAlignment="Bottom" Width="205" Height="Auto" Background="Black" Opacity="0.7" >
+                                            <TextBlock HorizontalAlignment="Center" Foreground="White" VerticalAlignment="Bottom"  Height="Auto" Width="175" TextWrapping="Wrap" Text="{Binding Name}" Style="{StaticResource PhoneTextSubtleStyle}" FontSize="18"  />
+                                        </Grid>
                                         <toolkit:GestureService.GestureListener>
                                             <toolkit:GestureListener Tap="GestureListener_Tap_1" />
                                         </toolkit:GestureService.GestureListener>
@@ -129,34 +130,33 @@
                     </StackPanel>
                 </StackPanel>
             </controls:PanoramaItem>
+
             <controls:PanoramaItem  Margin="0 -25" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
-                <StackPanel>
-                    <TextBlock Text="Trending" FontSize="40" />
-                    <ListBox Margin="0 5" Name="ListTrending" ItemsSource="{Binding TrendingItems}" Width="700" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <toolkit:WrapPanel ItemWidth="160" ItemHeight="250" Name="WrapPanelTrending"/>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        <ListBox.ItemTemplate >
-                            <DataTemplate>
-                                <Grid>
-                                    <custom:DelayLoadImage DefaultImageSource="Images/poster-small.jpg"  ActualImageSource="{Binding MediumImage}" Width="150" Height="240" Tap="TrendingImage_Tap" VerticalAlignment="Top" />
-                                    <Image Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
-                                    <Image Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="60" Height="60"  Grid.Column="0" Source="Images/episode-watched.png"/>
-                                    <Image Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="30" Height="30"  Grid.Column="0" Source="{Binding RatingImage}"/>
-                                    <toolkit:ContextMenuService.ContextMenu>
-                                        <toolkit:ContextMenu>
-                                            <toolkit:MenuItem Header="Check In" Name="CheckinMovie" Click="CheckinMovie_Click" />
-                                            <toolkit:MenuItem Header="Mark as seen" Name="SeenMovie" Click="SeenMovie_Click" />
-                                            <toolkit:MenuItem Header="Add to watchlist" Name="WatchlistEpisode" Click="WatchlistMovie_Click" />
-                                        </toolkit:ContextMenu>
-                                    </toolkit:ContextMenuService.ContextMenu>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="65" />
+                        <RowDefinition Height="*" />
+           
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Trending" FontSize="40" />
+                    <ScrollViewer Grid.Row="1">
+                        <StackPanel>
+                        <ListBox  Margin="0 0 0 80" Name="ListTrending" ItemsSource="{Binding TrendingItems}" ScrollViewer.VerticalScrollBarVisibility="Disabled" Width="420" HorizontalAlignment="Stretch">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <toolkit:WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate >
+                                <DataTemplate>
+                                    <custom:DelayLoadImage Margin="10 0 0 10" DefaultImageSource="Images/poster-small.jpg"  ActualImageSource="{Binding TrendingImage}" Width="{Binding ImageWidth}" MaxHeight="200" Tap="TrendingImage_Tap" VerticalAlignment="Top" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock  Text="more..." Tap="MoreTrending_Tap_1" FontSize="40" Margin="10 -70 0 30" Visibility="Collapsed" Name="MoreTrending" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
             </controls:PanoramaItem>
             <controls:PanoramaItem Margin="0 -25" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
                 <Grid Name="HistoryGrid">
@@ -168,11 +168,13 @@
                     <TextBlock Grid.Row="0" Text="News Feed" FontSize="40" />
                     <toolkit:ListPicker Background="Transparent" BorderBrush="Transparent" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="50" Foreground="{StaticResource PhoneAccentBrush}"  Name="Filter" SelectionChanged="Filter_SelectionChanged" Grid.Row="1">
                         <sys:String>All</sys:String>
+                        <sys:String>My friends</sys:String>
+                        <sys:String>Just me</sys:String>
+                        <sys:String>-----</sys:String>
                         <sys:String>Watchlist</sys:String>
                         <sys:String>Rating</sys:String>
                         <sys:String>Checkin</sys:String>
                         <sys:String>Scrobble</sys:String>
-                        <sys:String>Collection</sys:String>
                         <sys:String>Shout</sys:String>
                         <toolkit:ListPicker.FullModeItemTemplate>
                             <DataTemplate>
@@ -275,6 +277,8 @@
             <shell:ApplicationBarIconButton IconUri="Images/appbar.feature.settings.rest.png" Text="Settings" Click="ApplicationBarSettingsButton_Click" />
             <shell:ApplicationBarIconButton IconUri="Images/appbar.refresh.rest.png" Text="Refresh" Click="ApplicationBarRefreshButton_Click" />
             <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem x:Name="CheckinHistoryMenuItem" Text="Checkin in history" Click="CheckinHistoryMenuItem_Click_1"></shell:ApplicationBarMenuItem>
+
                 <shell:ApplicationBarMenuItem x:Name="LogoutMenuItem" Text="Logout" Click="LogoutMenuItem_Click_1"></shell:ApplicationBarMenuItem>
                 <shell:ApplicationBarMenuItem x:Name="RateApp" Text="Rate and Review" Click="RateApp_Click_1"></shell:ApplicationBarMenuItem>
             </shell:ApplicationBar.MenuItems>

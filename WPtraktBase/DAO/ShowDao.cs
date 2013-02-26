@@ -228,8 +228,8 @@ namespace WPtraktBase.DAO
                     foreach (String genre in show.Genres)
                         show.GenresAsString += genre + "|";
 
-                    if(!String.IsNullOrEmpty(show.GenresAsString))
-                      show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
+                    if (!String.IsNullOrEmpty(show.GenresAsString))
+                        show.GenresAsString = show.GenresAsString.Remove(show.GenresAsString.Length - 1);
                     show.Seasons = new EntitySet<TraktSeason>();
 
 
@@ -677,17 +677,23 @@ namespace WPtraktBase.DAO
             }
             else
             {
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
-                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
-                System.Net.HttpStatusCode status = webResponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
+                try
                 {
-                    Stream str = webResponse.GetResponseStream();
-                    Debug.WriteLine("Fetching large screen image for " + TVDBID + " from Trakt and saving to " + fileName + ".");
-                    return ImageController.saveImage(fileName, str, 318, 90);
+                    HttpWebRequest request;
+
+                    request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
+                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                    System.Net.HttpStatusCode status = webResponse.StatusCode;
+                    if (status == System.Net.HttpStatusCode.OK)
+                    {
+                        Stream str = webResponse.GetResponseStream();
+                        Debug.WriteLine("Fetching large screen image for " + TVDBID + " from Trakt and saving to " + fileName + ".");
+                        return ImageController.saveImage(fileName, str, 318, 90);
+                    }
                 }
+                catch (WebException) { }
+                catch (TargetInvocationException)
+                { }
             }
 
             return null;
@@ -712,17 +718,23 @@ namespace WPtraktBase.DAO
             }
             else
             {
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
-                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
-                System.Net.HttpStatusCode status = webResponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
+                try
                 {
-                    Stream str = webResponse.GetResponseStream();
-                    Debug.WriteLine("Fetching small screen image for " + TVDBID + " from Trakt and saving to " + fileName + ".");
-                    return ImageController.saveImage(fileName, str, 160, 100);
+                    HttpWebRequest request;
+
+                    request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
+                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                    System.Net.HttpStatusCode status = webResponse.StatusCode;
+                    if (status == System.Net.HttpStatusCode.OK)
+                    {
+                        Stream str = webResponse.GetResponseStream();
+                        Debug.WriteLine("Fetching small screen image for " + TVDBID + " from Trakt and saving to " + fileName + ".");
+                        return ImageController.saveImage(fileName, str, 160, 100);
+                    }
                 }
+                catch (WebException) { }
+                catch (TargetInvocationException)
+                { }
             }
 
             return null;
@@ -740,17 +752,23 @@ namespace WPtraktBase.DAO
             }
             else
             {
-                HttpWebRequest request;
-
-                request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
-                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
-                System.Net.HttpStatusCode status = webResponse.StatusCode;
-                if (status == System.Net.HttpStatusCode.OK)
+                try
                 {
-                    Stream str = webResponse.GetResponseStream();
-                    Debug.WriteLine("Fetching medium image for " + ID + " from Trakt and saving to " + fileName + ".");
-                    return ImageController.saveImage(fileName, str, 160, 100);
+                    HttpWebRequest request;
+
+                    request = (HttpWebRequest)WebRequest.Create(new Uri(screenUrl));
+                    HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                    System.Net.HttpStatusCode status = webResponse.StatusCode;
+                    if (status == System.Net.HttpStatusCode.OK)
+                    {
+                        Stream str = webResponse.GetResponseStream();
+                        Debug.WriteLine("Fetching medium image for " + ID + " from Trakt and saving to " + fileName + ".");
+                        return ImageController.saveImage(fileName, str, 160, 100);
+                    }
                 }
+                catch (WebException) { }
+                catch (TargetInvocationException)
+                { }
             }
 
             return null;
@@ -1230,6 +1248,28 @@ namespace WPtraktBase.DAO
             { Debug.WriteLine("InvalidOperationException in searchForShows(" + searchTerm + ")."); }
 
             return new TraktShow[0];
+        }
+
+        internal async Task<BitmapImage> getTrendingImage(string imageSource, Int16 width)
+        {
+            try
+            {
+                HttpWebRequest request;
+
+                request = (HttpWebRequest)WebRequest.Create(new Uri(imageSource));
+                HttpWebResponse webResponse = await request.GetResponseAsync() as HttpWebResponse;
+                System.Net.HttpStatusCode status = webResponse.StatusCode;
+                if (status == System.Net.HttpStatusCode.OK)
+                {
+                    Stream str = webResponse.GetResponseStream();
+
+                    return ImageController.resizeImageWithoutSaving(str, width);
+                }
+            }
+            catch (WebException) { }
+            catch (TargetInvocationException)
+            { }
+            return null;
         }
     }
 }

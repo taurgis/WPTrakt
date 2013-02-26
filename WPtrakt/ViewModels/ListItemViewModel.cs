@@ -414,20 +414,6 @@ namespace WPtrakt
             }
         }
 
-
-        public string ImageSourceMedium
-        {
-            get
-            {
-                if (_type.Equals("Movie"))
-                {
-                    return _imageSource.Replace(".2.jpg", ".1-300.jpg");
-                }
-                else
-                  return _imageSource.Replace(".2.jpg", "-138.2.jpg");
-            }
-        }
-
         private String _type;
         public String Type
         {
@@ -635,6 +621,21 @@ namespace WPtrakt
             }
 
             return key.ToString();
+        }
+
+        public string Header { get; set; }
+
+        public Boolean HasHeader { get; set; }
+
+        public String HeaderVisibility
+        {
+            get
+            {
+                if (HasHeader)
+                    return "Visible";
+                else
+                    return "Collapsed";
+            }
         }
     }
 }

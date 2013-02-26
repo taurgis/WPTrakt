@@ -19,7 +19,7 @@ namespace WPtrakt
 
         public ObservableCollection<ListItemViewModel> ShoutItems { get; private set; }
         public ObservableCollection<ListItemViewModel> EpisodeItems { get; set; }
-        public ObservableCollection<CalendarListItemViewModel> UnWatchedEpisodeItems { get; set; }
+        public ObservableCollection<ListItemViewModel> UnWatchedEpisodeItems { get; set; }
         private Int16 numberOfSeasons { get; set; }
         public Int16 currentSeason { get; set; }
         public Boolean ShoutsLoaded { get; set; }
@@ -64,23 +64,21 @@ namespace WPtrakt
 
             if (UnWatchedEpisodeItems != null)
             {
-                foreach (CalendarListItemViewModel model in UnWatchedEpisodeItems)
+                foreach (ListItemViewModel subModel in UnWatchedEpisodeItems)
                 {
-                    foreach (ListItemViewModel subModel in model.Items)
+                    if (!String.IsNullOrEmpty(subModel.Season))
                     {
-                        if (!String.IsNullOrEmpty(subModel.Season))
+                        if (subModel.Season.Equals(traktEpisode.Season) && subModel.Episode.Equals(traktEpisode.Number))
                         {
-                            if (subModel.Season.Equals(traktEpisode.Season) && subModel.Episode.Equals(traktEpisode.Number))
+                            if (traktEpisode.Watched)
                             {
-                                if (traktEpisode.Watched)
-                                {
-                                    model.Items.Remove(subModel);
-                                    break;
-                                }
+                                UnWatchedEpisodeItems.Remove(subModel);
+                                break;
                             }
                         }
                     }
                 }
+
             }
         }
 
