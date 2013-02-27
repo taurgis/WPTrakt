@@ -583,38 +583,41 @@ namespace WPtrakt
 
         private void InitAppBarSeasons()
         {
-            ApplicationBar appBar = new ApplicationBar();
+            if (this.Show != null && this.Show.Seasons != null)
+            {
+                ApplicationBar appBar = new ApplicationBar();
 
-            ApplicationBarIconButton previousSeason = new ApplicationBarIconButton(new Uri("Images/appbar.back.rest.png", UriKind.Relative));
-            previousSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeBack);
-            previousSeason.Text = "Previous";
+                ApplicationBarIconButton previousSeason = new ApplicationBarIconButton(new Uri("Images/appbar.back.rest.png", UriKind.Relative));
+                previousSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeBack);
+                previousSeason.Text = "Previous";
 
-            if (this.Show.Seasons.Count() == 1)
-                previousSeason.IsEnabled = false;
+                if (this.Show.Seasons.Count() == 1)
+                    previousSeason.IsEnabled = false;
 
-            appBar.Buttons.Add(previousSeason);
+                appBar.Buttons.Add(previousSeason);
 
-            CreateSeasonsWatchedButton(appBar);
+                CreateSeasonsWatchedButton(appBar);
 
-            ApplicationBarIconButton showSeasons = new ApplicationBarIconButton(new Uri("Images/appbar.phone.numbersign.rest.png", UriKind.Relative));
-            showSeasons.Click += new EventHandler(showSeasons_Click);
-            showSeasons.Text = "Seasons";
-            if (this.Show.Seasons.Count() == 1)
-                showSeasons.IsEnabled = false;
+                ApplicationBarIconButton showSeasons = new ApplicationBarIconButton(new Uri("Images/appbar.phone.numbersign.rest.png", UriKind.Relative));
+                showSeasons.Click += new EventHandler(showSeasons_Click);
+                showSeasons.Text = "Seasons";
+                if (this.Show.Seasons.Count() == 1)
+                    showSeasons.IsEnabled = false;
 
-            appBar.Buttons.Add(showSeasons);
+                appBar.Buttons.Add(showSeasons);
 
-            ApplicationBarIconButton nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
-            nextSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeForward);
+                ApplicationBarIconButton nextSeason = new ApplicationBarIconButton(new Uri("Images/appbar.next.rest.png", UriKind.Relative));
+                nextSeason.Click += new EventHandler(ApplicationBarIconButton_Click_EpisodeForward);
 
-            nextSeason.Text = "Next";
-            appBar.Buttons.Add(nextSeason);
+                nextSeason.Text = "Next";
+                appBar.Buttons.Add(nextSeason);
 
-            if (this.Show.Seasons.Count() == 1)
-                nextSeason.IsEnabled = false;
+                if (this.Show.Seasons.Count() == 1)
+                    nextSeason.IsEnabled = false;
 
-            CreateRefreshSeasonButton(appBar);
-            this.ApplicationBar = appBar;
+                CreateRefreshSeasonButton(appBar);
+                this.ApplicationBar = appBar;
+            }
         }
 
         private void CreateSeasonsWatchedButton(ApplicationBar appBar)
