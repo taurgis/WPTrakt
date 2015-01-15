@@ -1,0 +1,128 @@
+﻿<phone:PhoneApplicationPage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    x:Class="WPtrakt.MyShows"
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True"  BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded" OrientationChanged="PhoneApplicationPage_OrientationChanged">
+
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True" Mode="Minimized">
+            <shell:ApplicationBarIconButton IconUri="Images/appbar.refresh.rest.png" Text="Refresh" Click="ApplicationBarIconButton_Click" />
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+
+	<Grid x:Name="LayoutRoot">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="60"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+		<StackPanel x:Name="TitlePanel" Grid.Row="0">
+			<StackPanel Orientation="Horizontal">
+				<Image Source="Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
+				<TextBlock CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
+			</StackPanel>
+			<Border Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+		</StackPanel>
+		<phone:Panorama x:Name="MyShowsPanorama" SelectionChanged="Panorama_SelectionChanged" Grid.Row="1">
+			<phone:PanoramaItem Orientation="Horizontal"  Margin="0 -30">
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="25" />
+						<RowDefinition Height="30" />
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+					<TextBlock Margin="16,0,0,0" Grid.Row="0" FontWeight="SemiBold" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Text="SHOWS"/>
+					<TextBlock Margin="16,0,0,0" Grid.Row="1" x:Name="AllText" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+						<Run Text="showing"/>
+						<Run Text="all" Foreground="{StaticResource PhoneAccentBrush}"/>
+						<Run Text="shows"/>
+					</TextBlock>
+					<TextBlock  Margin="15,0,0,0" Visibility="Collapsed" x:Name="WatchlistText" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+						<Run Text="showing"/>
+						<Run Text="your watchlist" Foreground="{StaticResource PhoneAccentBrush}"/>
+						<Run Text="shows"/>
+					</TextBlock>
+					<TextBlock  Margin="15,0,0,0" Visibility="Collapsed" x:Name="SeenText" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+						<Run Text="showing"/>
+						<Run Text="completely watched" Foreground="{StaticResource PhoneAccentBrush}"/>
+						<Run Text="shows"/>
+					</TextBlock>
+					<TextBlock  Margin="15,0,0,0" Visibility="Collapsed" x:Name="UnSeenText" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+						<Run Text="showing shows with"/>
+						<Run Text="unseen episodes" Foreground="{StaticResource PhoneAccentBrush}"/>
+					</TextBlock>
+					<toolkit:ListPicker Grid.Row="0"  ExpansionMode="FullscreenOnly" Margin="0 -30" Height="50" Foreground="{StaticResource PhoneAccentBrush}" BorderBrush="{StaticResource PhoneBackgroundBrush}"  Background="{StaticResource PhoneBackgroundBrush}" x:Name="Filter" SelectionChanged="Filter_SelectionChanged" Visibility="Collapsed">
+						<toolkit:ListPicker.FullModeItemTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal" Margin="16 21 0 20">
+									<TextBlock Text="{Binding}"
+										Margin="0 0 0 0"
+										FontSize="43" 
+										FontFamily="{StaticResource PhoneFontFamilyLight}"/>
+								</StackPanel>
+							</DataTemplate>
+						</toolkit:ListPicker.FullModeItemTemplate>
+						<sys:String>All</sys:String>
+						<sys:String>Watchlist</sys:String>
+						<sys:String>Seen completely</sys:String>
+						<sys:String>Unseen episodes</sys:String>
+					</toolkit:ListPicker>
+					<phone:LongListSelector  LayoutMode="List"
+						JumpListStyle="{StaticResource AlphebetList}"
+						GroupHeaderTemplate="{StaticResource AlphabetGroupHeaderTemplate}"
+						IsGroupingEnabled="true"
+						HideEmptyGroups ="true" 
+						HorizontalAlignment="Left" 
+						x:Name="MyShowsList" Grid.Row="2" 
+						ItemsSource="{Binding ShowItems}"
+						Margin="12 10 0 45" 
+						Width="420"  
+						MaxWidth="880">
+						<phone:LongListSelector.ItemTemplate>
+							<DataTemplate>
+								<Canvas Margin="-9,6,0,6" Height="103" Tap="Canvas_Tap">
+									<Grid VerticalAlignment="Top">
+										<Grid.RowDefinitions>
+											<RowDefinition Height="Auto" />
+											<RowDefinition Height="Auto" />
+											<RowDefinition Height="Auto" />
+											<RowDefinition Height="Auto" />
+										</Grid.RowDefinitions>
+										<TextBlock Grid.Row="0"  VerticalAlignment="Top" Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" HorizontalAlignment="Stretch" />
+										<ProgressBar IsHitTestVisible="True" Grid.Row="1" Height="10"  Width="300" HorizontalAlignment="Left" VerticalAlignment="Bottom"  Value="{Binding Progress}" Maximum="100" SmallChange="1" LargeChange="10" BorderBrush="{StaticResource PhoneAccentBrush}" />
+										<TextBlock Grid.Row="2" Margin="14 0" VerticalAlignment="Top" Text="{Binding GenreString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+										<TextBlock Grid.Row="3" Margin="14 0" VerticalAlignment="Top" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />      
+									</Grid>
+								</Canvas>
+							</DataTemplate>
+						</phone:LongListSelector.ItemTemplate>
+					</phone:LongListSelector>
+				</Grid>
+			</phone:PanoramaItem>
+			<phone:PanoramaItem Orientation="Horizontal" Margin="0 -25">
+                <StackPanel>
+                    <TextBlock Grid.Row="0" Text="Suggestions" FontSize="40" />
+					<ListBox Margin="0 5" ItemsSource="{Binding SuggestItems}" Width="700" x:Name="ListSuggestions" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+						<ListBox.ItemsPanel>
+							<ItemsPanelTemplate>
+								<toolkit:WrapPanel ItemWidth="170" ItemHeight="250" x:Name="WrapPanelTrending"/>
+							</ItemsPanelTemplate>
+						</ListBox.ItemsPanel>
+						<ListBox.ItemTemplate >
+							<DataTemplate>
+								<Grid>
+									<Image Source="{Binding MediumImage}" Width="160" Height="250" Tap="Image_Tap" VerticalAlignment="Top" />
+								</Grid>
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+					</ListBox>
+				</StackPanel>
+			</phone:PanoramaItem>
+		</phone:Panorama>
+	</Grid>
+</phone:PhoneApplicationPage>

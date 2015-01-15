@@ -1,0 +1,105 @@
+﻿<phone:PhoneApplicationPage 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    x:Class="WPtrakt.Friend" BackKeyPress="PhoneApplicationPage_BackKeyPress"
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"  
+    shell:SystemTray.IsVisible="True" Loaded="PhoneApplicationPage_Loaded">
+
+    <Grid x:Name="LayoutRoot" >
+        <!-- Header-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="7"/>
+
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid x:Name="TitlePanel" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Row="0" Grid.Column="0" Source="/WPtrakt;component/Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
+        </Grid>
+        <Border Grid.Row="1" Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+        <!-- Header end-->
+        <phone:Panorama x:Name="MainPanorama"  Margin="0,0,0,-39" SelectionChanged="MainPanorama_SelectionChanged" Grid.Row="3">
+            <phone:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
+                <StackPanel HorizontalAlignment="Left" Name="MainMenuStackpanel">
+                    <StackPanel Margin="0,0,0,17"  Width="480" Height="90" Orientation="Horizontal" Name="AvatarPanel" HorizontalAlignment="Center">
+                        <Image Width="60" Height="60" Margin="40 0 10 5" Source="{Binding UserAvatar}"/>
+                        <StackPanel Margin="0,2,0,17"  Width="400" Height="90" Orientation="Vertical" HorizontalAlignment="Center">
+                            <TextBlock Text="{Binding UserName}" TextWrapping="Wrap" Style="{StaticResource PhoneTextLargeStyle}" Height="40" />
+                            <TextBlock Text="{Binding UserAbout}" TextWrapping="Wrap" Margin="12,0,12,0" Style="{StaticResource PhoneTextSubtleStyle}" Height="45" />
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBlock Text="Collection" FontSize="27" Foreground="{StaticResource PhoneAccentBrush}"/>
+                    <TextBlock Text="{Binding Collection}"  Margin="0 -5 0 0" FontSize="21" />
+                    
+                    <TextBlock Padding="0, 15" Text="Watched" FontSize="27" Foreground="{StaticResource PhoneAccentBrush}"/>
+                    <TextBlock Text="{Binding Watched}"  Margin="0 -15 0 0" FontSize="21" />
+
+                    <TextBlock Padding="0, 15" Text="Opinion" FontSize="27" Foreground="{StaticResource PhoneAccentBrush}"/>
+                    <TextBlock Text="{Binding Opinion}" Margin="0 -15 0 0" FontSize="21" Height="Auto" TextWrapping="Wrap" />
+                </StackPanel>
+            </phone:PanoramaItem>
+
+            <phone:PanoramaItem Margin="0 -25" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
+                <Grid Name="HistoryGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" FontWeight="SemiBold" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Text="NEWS FEED"/>
+  
+                    <phone:LongListSelector  Grid.Row="2" Height="Auto" Margin="0 0 0 60" HorizontalAlignment="Left" Width="420"  ItemsSource="{Binding HistoryItems}" Name="HistoryList" ItemRealized="HistoryList_ItemRealized" ItemUnrealized="HistoryList_ItemUnrealized">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel  Height="Auto" VerticalAlignment="Stretch"  >
+                                    <Grid Visibility="{Binding HeaderVisibility}" Margin="0 0 0 5" Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
+                                        <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding Header}"/>
+                                    </Grid>
+                                    <Grid Margin="0 5"  Tap="Grid_Tap_1" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Name="HistoryImage" Grid.Column="0" Source="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="1 8 0 0" Stretch="UniformToFill"  />
+                                        <Grid Grid.Column="2" Height="Auto">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="30"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                            <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTimeString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </Grid>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                    </phone:LongListSelector>
+                </Grid>
+            </phone:PanoramaItem>
+        </phone:Panorama>
+    </Grid>
+</phone:PhoneApplicationPage>

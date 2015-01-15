@@ -1,0 +1,65 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="WPtrakt.SearchUsers"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True" Loaded="PhoneApplicationPage_Loaded" BackKeyPress="PhoneApplicationPage_BackKeyPress_1">
+    <Grid x:Name="LayoutRoot">
+        <!-- Header-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="7"/>
+            <RowDefinition Height="7"/>
+            <RowDefinition Height="75"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid x:Name="TitlePanel" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Row="0" Grid.Column="0" Source="/WPtrakt;component/Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
+        </Grid>
+        <Border Grid.Row="2" Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+        <!-- Header end-->
+        <TextBox Grid.Row="3" Text="Search..." InputScope="Text"  Height="75"  VerticalAlignment="Top" Name="SearchText" GotFocus="SearchText_GotFocus" LostFocus="SearchText_LostFocus" KeyDown="SearchText_KeyDown" />
+        <Button Grid.Row="3" HorizontalAlignment="Right" Width="75" Height="75" BorderBrush="Transparent" Click="Button_Click">
+            <Button.Background>
+                <ImageBrush Stretch="Fill" ImageSource="/Images/appbar.search.rest.black.png"/>
+            </Button.Background>
+        </Button>
+        <ProgressBar Grid.Row="4" HorizontalAlignment="Left" Width="400" Name="progressBar" Visibility="Collapsed" IsIndeterminate="True" />
+
+        <phone:LongListSelector Grid.Row="5" ItemsSource="{Binding ResultItems}"  Margin="10,0,10,10" LayoutMode="Grid"  
+                                    GridCellSize="138,138">
+            <phone:LongListSelector.ItemTemplate>
+                <DataTemplate>
+                    <Grid Tap="Grid_Tap">
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                      
+                        <Image Grid.Row="0" Margin="5,5,0,0" MaxHeight="138" Source="{Binding ImageSource}" />
+                        <Grid Grid.Row="0" VerticalAlignment="Bottom" Width="138" Height="Auto" Background="Black" Opacity="0.7" >
+                            <TextBlock HorizontalAlignment="Center" Foreground="White" VerticalAlignment="Bottom"  Height="Auto" Width="100" TextWrapping="Wrap" Text="{Binding Name}" Style="{StaticResource PhoneTextSubtleStyle}" FontSize="18"  />
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </phone:LongListSelector.ItemTemplate>
+        </phone:LongListSelector>
+
+    </Grid>
+</phone:PhoneApplicationPage>

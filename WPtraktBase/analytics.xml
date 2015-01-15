@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--More info at https://developers.google.com/analytics/devguides/collection/android/v2/parameters-->
+<analytics xmlns="http://googleanalyticssdk.codeplex.com/ns/easytracker">
+  <!--Replace placeholder ID with your tracking ID-->
+  <trackingId>UA-51322718-1</trackingId>
+  <appName>WPTrakt</appName>
+  <useSecure>true</useSecure>
+</analytics>

@@ -1,0 +1,32 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="WPtrakt.Search"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True" Loaded="PhoneApplicationPage_Loaded" BackKeyPress="PhoneApplicationPage_BackKeyPress_1">
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="75"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0" Text="Search..." InputScope="Text"  Height="75"  VerticalAlignment="Top" Name="SearchText" GotFocus="SearchText_GotFocus" LostFocus="SearchText_LostFocus" KeyDown="SearchText_KeyDown" />
+        <Button Grid.Row="0" HorizontalAlignment="Right" Width="75" Height="75" BorderBrush="Transparent" Click="Button_Click">
+            <Button.Background>
+                <ImageBrush Stretch="Fill" ImageSource="/Images/appbar.search.rest.black.png"/>
+            </Button.Background>
+        </Button>
+        <ProgressBar Grid.Row="1" HorizontalAlignment="Left" Width="400" Name="progressBar" Visibility="Collapsed" IsIndeterminate="True" />
+
+        <phone:LongListSelector Grid.Row="2" ItemsSource="{Binding ResultItems}"  Margin="10,0,10,10" LayoutMode="Grid" GridCellSize="138,207" ItemRealized="LongListSelector_ItemRealized" ItemUnrealized="LongListSelector_ItemUnrealized">
+            <phone:LongListSelector.ItemTemplate>
+                <DataTemplate>
+                    <Image Margin="5,5,0,0" MaxHeight="207" Source="{Binding PosterImage}" Tap="MovieCanvas_Tap" />
+                </DataTemplate>
+            </phone:LongListSelector.ItemTemplate>
+        </phone:LongListSelector>
+    </Grid>
+</phone:PhoneApplicationPage>

@@ -1,0 +1,128 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="WPtrakt.Friends"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="True" Loaded="PhoneApplicationPage_Loaded" BackKeyPress="PhoneApplicationPage_BackKeyPress_1">
+    <Grid x:Name="LayoutRoot">
+        <!-- Header-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="7"/>
+            <RowDefinition Height="7"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid x:Name="TitlePanel" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Row="0" Grid.Column="0" Source="/WPtrakt;component/Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
+        </Grid>
+        <Border Grid.Row="1" Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+        <!-- Header end-->
+
+        <ProgressBar Grid.Row="2" HorizontalAlignment="Left" Width="400" Name="progressBar" Visibility="Collapsed" IsIndeterminate="True" />
+        <phone:Panorama x:Name="MainPanorama" Grid.Row="3" Margin="0 -20 0 0">
+            <phone:PanoramaItem Name="FriendsPanoramaitem" Width="460">
+                <Grid  HorizontalAlignment="Stretch" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="10,0,0,0" Grid.Row="0" CacheMode="BitmapCache"  Text="friends"  FontSize="20" FontFamily="Segoe WP SemiBold"/>
+
+                    <phone:LongListSelector Grid.Row="1" ItemsSource="{Binding ResultItems}"  Margin="10,0,10,10" LayoutMode="Grid"  
+                                    GridCellSize="138,138">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Tap="Grid_Tap">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <Image Grid.Row="0" Margin="5,5,0,0" MaxHeight="138" Source="{Binding ImageSource}" />
+                                    <Grid Grid.Row="0" VerticalAlignment="Bottom" Width="138" Height="Auto" Background="Black" Opacity="0.7" >
+                                        <TextBlock HorizontalAlignment="Center" Foreground="White" VerticalAlignment="Bottom"  Height="Auto" Width="100" TextWrapping="Wrap" Text="{Binding Name}" Style="{StaticResource PhoneTextSubtleStyle}" FontSize="18"  />
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                    </phone:LongListSelector>
+                </Grid>
+            </phone:PanoramaItem>
+            <phone:PanoramaItem Name="FollowingPanoramaitem" Width="460">
+                <Grid  HorizontalAlignment="Stretch" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock  Margin="10,0,0,0" Grid.Row="0" CacheMode="BitmapCache"  Text="following"  FontSize="20" FontFamily="Segoe WP SemiBold"/>
+
+                    <phone:LongListSelector Grid.Row="1" ItemsSource="{Binding FollowingResultItems}"  Margin="10,0,10,10" LayoutMode="Grid"  
+                                    GridCellSize="138,138">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Tap="Grid_Tap">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <Image Grid.Row="0" Margin="5,5,0,0" MaxHeight="138" Source="{Binding ImageSource}" />
+                                    <Grid Grid.Row="0" VerticalAlignment="Bottom" Width="138" Height="Auto" Background="Black" Opacity="0.7" >
+                                        <TextBlock HorizontalAlignment="Center" Foreground="White" VerticalAlignment="Bottom"  Height="Auto" Width="100" TextWrapping="Wrap" Text="{Binding Name}" Style="{StaticResource PhoneTextSubtleStyle}" FontSize="18"  />
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                    </phone:LongListSelector>
+                </Grid>
+            </phone:PanoramaItem>
+            <phone:PanoramaItem Name="FollowersPanoramaitem" Width="460">
+                <Grid  HorizontalAlignment="Stretch" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock  Margin="10,0,0,0" Grid.Row="0" CacheMode="BitmapCache"  Text="followers"  FontSize="20" FontFamily="Segoe WP SemiBold"/>
+
+                    <phone:LongListSelector Grid.Row="1" ItemsSource="{Binding FollowersResultItems}"  Margin="10,0,10,10" LayoutMode="Grid"  
+                                    GridCellSize="138,138">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Tap="Grid_Tap2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <Image Grid.Row="0" Margin="5,5,0,0" MaxHeight="138" Source="{Binding ImageSource}" />
+                                    <Grid Grid.Row="0" VerticalAlignment="Bottom" Width="138" Height="Auto" Background="Black" Opacity="0.7" >
+                                        <TextBlock HorizontalAlignment="Center" Foreground="White" VerticalAlignment="Bottom"  Height="Auto" Width="100" TextWrapping="Wrap" Text="{Binding Name}" Style="{StaticResource PhoneTextSubtleStyle}" FontSize="18"  />
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                    </phone:LongListSelector>
+                </Grid>
+            </phone:PanoramaItem>
+        </phone:Panorama>
+    </Grid>
+            
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="Images/appbar.search.rest.png" Text="Search" Click="ApplicationBarIconButton_Click" />
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+</phone:PhoneApplicationPage>

@@ -1,0 +1,252 @@
+﻿<local:ViewWithHistory
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:local="clr-namespace:WPtrakt.Views"
+    x:Class="WPtrakt.Main"
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"  
+    shell:SystemTray.IsVisible="True">
+
+    <Grid x:Name="LayoutRoot" >
+        <!-- Header-->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="7"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid x:Name="TitlePanel" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Image Grid.Row="0" Grid.Column="0" Source="/WPtrakt;component/Images/fulllogo.png" Height="40" Margin="10 0 5 0"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" CacheMode="BitmapCache"  Text="trakt"  FontSize="33" FontFamily="Segoe WP SemiBold"/>
+        </Grid>
+        <Border Grid.Row="1" Margin="0 2"  Height="3" Background="{StaticResource PhoneAccentBrush}" CacheMode="BitmapCache"/>
+        <!-- Header end-->
+        <phone:Panorama x:Name="MainPanorama" SelectionChanged="MainPanorama_SelectionChanged" Grid.Row="3">
+            <phone:PanoramaItem Margin="0 -25" Name="ProfilePanoramaItem">
+                <ScrollViewer ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="0 0 0 25">
+                    <Grid Name="HomeGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" FontWeight="SemiBold" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Text="MY TRAKT"/>
+                        <StackPanel Grid.Row="1" VerticalAlignment="Stretch">
+                            <TextBlock Margin="0 20 0 0" Text="shows" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Name="ShowText" Tap="ShowText_Tap"/>
+                            <TextBlock Margin="0 14 0 0" Text="movies" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Name="MovieText" Tap="MovieText_Tap"/>
+                            <TextBlock Margin="0 14 0 0" Text="upcoming" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Name="UpcommingText" Tap="UpcommingText_Tap"/>
+                            <TextBlock Margin="0 14 0 0" Text="network" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Name="NetworkText" Tap="FriendsMenuItem_Click_1" />
+                            <TextBlock Margin="0 14 0 0" Text="checkins" TextWrapping="Wrap" Style="{StaticResource PhoneTextExtraLargeStyle}" Name="CheckinHistoryText" Tap="CheckinHistoryMenuItem_Click_1"/>
+                            <Grid Name="WatchingNowGrid" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="1" Visibility="Collapsed" DataContext="{Binding WatchingNow}" Width="480" Margin="0 10 0 0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="110"/>
+                                    <RowDefinition Height="10"/>
+                                    <RowDefinition Height="15"/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Width="480" Height="Auto"  Opacity="0.9" Tap="WatchingNowGrid_Tap_1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="160"/>
+                                        <ColumnDefinition Width="320"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Grid.Row="0" Source="{Binding ScreenImage}" HorizontalAlignment="Right"  Height="90"/>
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" Margin="0 10" >
+                                        <TextBlock Text="Watching now"  Style="{StaticResource PhoneTextSubtleStyle}"/>
+                                        <TextBlock FontSize="25"   Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                        <TextBlock   Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                    </StackPanel>
+                                    <toolkit:ContextMenuService.ContextMenu>
+                                        <toolkit:ContextMenu Name="NextEpisodesContextMenu">
+                                            <toolkit:MenuItem Header="View" Name="ViewEpisodeNow" Click="ViewEpisodeNow_Click" />
+                                            <toolkit:MenuItem Header="Rate" Name="EpisodeRate" Click="WatchingRate_Click" />
+                                            <toolkit:MenuItem Header="Check in history" Name="RecentlyWatched" Click="RecentlyWatched_Click_1" />
+                                            <toolkit:MenuItem Header="Cancel check in" Name="CancelCheckinEpisode" Click="CancelCheckinEpisode_Click_1" />
+                                        </toolkit:ContextMenu>
+                                    </toolkit:ContextMenuService.ContextMenu>
+                                </Grid>
+                                <ProgressBar Margin="-15 0" Grid.Row="1" Name="WatchingCompletion"  Value="{Binding WatchedCompletion}" IsIndeterminate="False" Height="10" Width="480" HorizontalAlignment="Left" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+            </phone:PanoramaItem>
+            <phone:PanoramaItem  Margin="0 -25" x:Name="Recent" Orientation="Horizontal">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="65" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" FontWeight="SemiBold" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Text="RECENTLY VIEWED" Margin="7 0 0 0"/>
+                    <ScrollViewer Grid.Row="1" Margin="0 0 0 24" HorizontalAlignment="Stretch">
+                        <StackPanel HorizontalAlignment="Left">
+                            <ListBox  Margin="0 0 0 24" Name="ListRecent" ItemsSource="{Binding RecentItems}" ScrollViewer.VerticalScrollBarVisibility="Disabled" Width="420" HorizontalAlignment="Stretch">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <toolkit:WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate >
+                                    <DataTemplate>
+                                        <Image Margin="10 0 0 10" Source="{Binding PosterImage}" Width="120" VerticalAlignment="Top" Tap="Image_Tap"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <TextBlock Text="Nothing recently viewed..." Style="{StaticResource PhoneTextLargeStyle}" Visibility="Collapsed" Name="EmptyRecent"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </phone:PanoramaItem>
+            <phone:PanoramaItem  Margin="0 -25" x:Name="TrendingPanoramaItem" Orientation="Horizontal">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="65" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" FontWeight="SemiBold" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Text="TRENDING" Margin="7 0 0 0"/>
+                    <ScrollViewer Grid.Row="1" Margin="0 0 0 80" HorizontalAlignment="Stretch">
+                        <StackPanel HorizontalAlignment="Left">
+                            <ListBox  Margin="0 0 0 80" Name="ListTrending" ItemsSource="{Binding TrendingItems}" ScrollViewer.VerticalScrollBarVisibility="Disabled" Width="420" HorizontalAlignment="Stretch">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <toolkit:WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate >
+                                    <DataTemplate>
+                                        <Image Margin="10 0 0 10" Source="{Binding TrendingImage}" Width="{Binding ImageWidth}" Tap="TrendingImage_Tap" VerticalAlignment="Top" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <TextBlock  Text="more..." Tap="MoreTrending_Tap_1" FontSize="40" Margin="10 -70 0 30" Visibility="Collapsed" Name="MoreTrending" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </phone:PanoramaItem>
+            <phone:PanoramaItem Margin="0 -25" x:Name="HistoryPanoramaItem" Orientation="Horizontal">
+                <Grid Name="HistoryGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" FontWeight="SemiBold" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Text="NEWS FEED"/>
+                    <toolkit:ListPicker Background="Transparent" BorderBrush="Transparent" ExpansionMode="FullscreenOnly" Margin="0 -20 0 0" Height="50" Foreground="{StaticResource PhoneAccentBrush}"  Name="Filter" SelectionChanged="Filter_SelectionChanged" Grid.Row="1" Visibility="Collapsed">
+                        <sys:String>All</sys:String>
+                        <sys:String>My friends</sys:String>
+                        <sys:String>Just me</sys:String>
+                        <sys:String>-----</sys:String>
+                        <sys:String>Watchlist</sys:String>
+                        <sys:String>Rating</sys:String>
+                        <sys:String>Checkin</sys:String>
+                        <sys:String>Scrobble</sys:String>
+                        <sys:String>Shout</sys:String>
+                        <toolkit:ListPicker.FullModeItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="16 21 0 20">
+                                    <TextBlock Text="{Binding}"
+                                       Margin="0 0 0 0"
+                                       FontSize="43" 
+                                       FontFamily="{StaticResource PhoneFontFamilyLight}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </toolkit:ListPicker.FullModeItemTemplate>
+                    </toolkit:ListPicker>
+                    <TextBlock Margin="0,0,0,0" Grid.Row="1" Name="AllText" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="all" Foreground="{StaticResource PhoneAccentBrush}"/>
+                        <Run Text="updates"/>
+                    </TextBlock>
+                    <TextBlock Name="FriendsText"  Margin="0,0,0,0" Visibility="Collapsed" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="your friends" Foreground="{StaticResource PhoneAccentBrush}"/>
+                        <Run Text="activities"/>
+                    </TextBlock>
+                    <TextBlock Name="MeText"  Margin="0,0,0,0" Visibility="Collapsed" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="my" Foreground="{StaticResource PhoneAccentBrush}"/>
+                        <Run Text="activities"/>
+                    </TextBlock>
+                    <TextBlock Margin="0,0,0,0" Grid.Row="1" Visibility="Collapsed" Name="WatchlistText" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="watchlist" Foreground="{StaticResource PhoneAccentBrush}"/>
+                        <Run Text="updates"/>
+                    </TextBlock>
+                    <TextBlock Name="RatingText"  Margin="0,0,0,0" Visibility="Collapsed" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="rating" Foreground="{StaticResource PhoneAccentBrush}"/>
+                        <Run Text="updates"/>
+                    </TextBlock>
+                    <TextBlock Margin="0,0,0,0" Visibility="Collapsed" Grid.Row="1" Name="CheckinText" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="checkins" Foreground="{StaticResource PhoneAccentBrush}"/>
+                    </TextBlock>
+                    <TextBlock Name="ScrobbleText"  Margin="0,0,0,0" Visibility="Collapsed" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="latest scrobbles" Foreground="{StaticResource PhoneAccentBrush}"/>
+                    </TextBlock>
+                    <TextBlock Name="ShoutText"  Margin="0,0,0,0" Visibility="Collapsed" Grid.Row="1" FontFamily="{StaticResource PhoneFontFamilyLight}" FontSize="23" Tap="AllText_Tap">
+                        <Run Text="showing"/>
+                        <Run Text="latest shouts" Foreground="{StaticResource PhoneAccentBrush}"/>
+                    </TextBlock>
+                    <phone:LongListSelector  Grid.Row="2" Height="Auto" Margin="0 0 0 20"  HorizontalAlignment="Stretch"   ItemsSource="{Binding HistoryItems, Mode=TwoWay}" Name="HistoryList" ItemRealized="HistoryList_ItemRealized" ItemUnrealized="HistoryList_ItemUnrealized">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel  Height="Auto" VerticalAlignment="Stretch"  >
+                                    <Grid Visibility="{Binding HeaderVisibility}" Margin="0 0 0 5" Background="{StaticResource PhoneAccentBrush}" Grid.Column="0" Grid.Row="0">
+                                        <TextBlock Margin="20 5" Foreground="White" FontSize="30"  Text="{Binding Header}"/>
+                                    </Grid>
+                                    <Grid Margin="0 5"  Tap="Grid_Tap_1" Height="Auto" VerticalAlignment="Stretch"  Name="ActivityGrid">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Name="HistoryImage" Grid.Column="0" Source="{Binding ScreenImage}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="1 8 0 0" Stretch="UniformToFill"  />
+                                        <Grid Grid.Column="1" Height="Auto">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"></RowDefinition>
+                                                <RowDefinition Height="30"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Width="Auto" Height="Auto" Grid.Column="1" Grid.Row="0"  VerticalAlignment="Top"  HorizontalAlignment="Left"  TextWrapping="Wrap" Text="{Binding Activity}" Style="{StaticResource PhoneTextSubtleStyle}" Foreground="{StaticResource PhoneForegroundBrush}" />
+                                            <TextBlock Grid.Column="1" Grid.Row="1" VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding DateTimeString}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </Grid>
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Rate" Name="HistoryRate" Click="HistoryRate_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                    </phone:LongListSelector>
+                </Grid>
+            </phone:PanoramaItem>
+        </phone:Panorama>
+    </Grid>
+    <local:ViewWithHistory.ApplicationBar>
+        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="Images/appbar.feature.settings.rest.png" Text="Settings" Click="ApplicationBarSettingsButton_Click" />
+            <shell:ApplicationBarIconButton IconUri="Images/appbar.refresh.rest.png" Text="Refresh" Click="ApplicationBarRefreshButton_Click" />
+            <shell:ApplicationBarIconButton IconUri="Images/appbar.search.rest.png" Text="Search" Click="Search_Click" />
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem x:Name="LogoutMenuItem" Text="Logout" Click="LogoutMenuItem_Click_1"></shell:ApplicationBarMenuItem>
+                <shell:ApplicationBarMenuItem x:Name="RateApp" Text="Rate and Review" Click="RateApp_Click_1"></shell:ApplicationBarMenuItem>
+            </shell:ApplicationBar.MenuItems>
+        </shell:ApplicationBar>
+    </local:ViewWithHistory.ApplicationBar>
+</local:ViewWithHistory>

@@ -1,0 +1,59 @@
+﻿<phone:PhoneApplicationPage
+    x:Class="WPtrakt.Login"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait" shell:SystemTray.IsVisible="True"
+    mc:Ignorable="d">
+   
+            <!--LayoutRoot is the root grid where all page content is placed-->
+    <Grid x:Name="LayoutRoot" Opacity="0">
+        <Grid.Background>
+            <ImageBrush ImageSource="Images/login1.png" Stretch="UniformToFill"/>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="300"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0"></StackPanel>
+        <Grid Name="EmailGrid" Grid.Row="1" Visibility="Collapsed" Background="Black" Opacity="0.9"></Grid>
+        <StackPanel Name="EmailStackPanel" Visibility="Collapsed" Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="480">
+            <TextBlock Name="LabelMail" Width="165" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" Style="{StaticResource PhoneTextLargeStyle}"   FontFamily="/WPtrakt;component/Fonts/DroidSans-Bold.ttf#Droid Sans">
+            	<Run FontSize="36" Text="e-mail" FontStyle="Normal" FontFamily=".\Fonts\DroidSans.ttf#Droid Sans" />
+            </TextBlock>
+            <TextBox   FontSize="21" Name="MailBox" Width="280" Height="64"/>
+        </StackPanel>
+        <Grid  Name="LoginGrid" Margin="0 5" Grid.Row="2" Background="Black" Opacity="0.9"></Grid>
+        <StackPanel Grid.Row="2" Margin="0 5" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="480">
+            <TextBlock Name="LabelLogin" Width="165" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" Style="{StaticResource PhoneTextLargeStyle}"   FontFamily="/WPtrakt;component/Fonts/DroidSans-Bold.ttf#Droid Sans">
+            	<Run FontSize="36" Text="login" FontStyle="Normal" FontFamily=".\Fonts\DroidSans.ttf#Droid Sans" />
+            </TextBlock>
+            <TextBox  FontSize="21" Name="LoginBox" Width="280" Height="64"/>
+        </StackPanel>
+        <Grid Name="PasswordGrid" Margin="0 5" Grid.Row="3" Background="Black" Opacity="0.9"></Grid>
+        <StackPanel Margin="0 5"  Grid.Row="3" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Width="480">
+            <TextBlock Name="LabelPassword" Width="165"   HorizontalAlignment="Right" Foreground="White"  Text="password" Style="{StaticResource PhoneTextLargeStyle}" FontSize="36" VerticalAlignment="Center" FontFamily=".\Fonts\DroidSans.ttf#Droid Sans" />
+            <PasswordBox FontSize="21" Height="64" Name="PasswordBox" Width="280" KeyDown="PasswordBox_KeyDown"/>
+        </StackPanel>
+        <StackPanel Margin="0 5"  Grid.Row="4" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" >
+            <Button Content="join trakt" Name="JoinButton" Click="JoinButton_Click_1" Foreground="Black"  Background="#d1e751" BorderThickness="0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="200" Opacity="0.8" FontFamily=".\Fonts\DroidSans.ttf#Droid Sans"/>
+            <Button Content="sign in" Name="SigninButton" Click="SigninButton_Click_1" Background="Black" Foreground="White" BorderThickness="0" VerticalAlignment="Center"  HorizontalAlignment="Center" Width="200" RenderTransformOrigin="1.091,0.444" Opacity="0.8" FontFamily=".\Fonts\DroidSans.ttf#Droid Sans"/>
+            <Button Content="cancel" Visibility="Collapsed" Foreground="White" Name="Cancelbutton" Click="Cancelbutton_Click_1" Background="Black" BorderThickness="0" VerticalAlignment="Center"  HorizontalAlignment="Center" Width="200" RenderTransformOrigin="1.091,0.444" Opacity="0.8" FontFamily=".\Fonts\DroidSans.ttf#Droid Sans"/>
+            <Button Content="create" Click="CreateButton_Click_1" Name="CreateButton" Foreground="Black" Background="#d1e751" BorderThickness="0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="200" Opacity="0.8" Visibility="Collapsed" FontFamily=".\Fonts\DroidSans.ttf#Droid Sans"/>
+        </StackPanel>
+        <StackPanel Grid.Row="6">
+            <ProgressBar Name="progressBar" IsIndeterminate="True" Visibility="Collapsed" />
+         </StackPanel>
+    </Grid>
+
+</phone:PhoneApplicationPage>

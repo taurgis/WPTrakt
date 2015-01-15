@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Deployment xmlns="http://schemas.microsoft.com/windowsphone/2014/deployment" AppPlatformVersion="8.1">
+  <DefaultLanguage xmlns="" code="en-US" />
+  <App xmlns="" ProductID="{869dc9ec-f67d-4f36-b334-86b8bc0405a9}" Title="WPtrakt" RuntimeType="Silverlight" Version="1.7.6.3" Genre="apps.normal" Author="MiniTech Reloaded" Description="A Trakt client for WP" Publisher="MiniTech Reloaded" BitsPerPixel="32" PublisherID="{CF6E40E3-24BE-4390-84C5-132FE729C1CC}">
+    <IconPath IsRelative="true" IsResource="false">ApplicationIcon.png</IconPath>
+    <Capabilities>
+      <Capability Name="ID_CAP_NETWORKING" />
+      <Capability Name="ID_CAP_CONTACTS" />
+    </Capabilities>
+    <Tasks>
+      <DefaultTask Name="_default" NavigationPage="MainPage.xaml" ActivationPolicy="Resume" />
+      <ExtendedTask Name="BackgroundTask">
+        <BackgroundServiceAgent Specifier="ScheduledTaskAgent" Name="WPtraktLiveTile" Source="WPtraktLiveTile" Type="WPtraktLiveTile.ScheduledAgent" />
+      </ExtendedTask>
+    </Tasks>
+    <Tokens>
+      <PrimaryToken TokenID="WPtraktToken" TaskName="_default">
+        <TemplateFlip>
+          <SmallImageURI IsResource="false" IsRelative="true">Background.png</SmallImageURI>
+          <Count>0</Count>
+          <BackgroundImageURI IsResource="false" IsRelative="true">Background.png</BackgroundImageURI>
+          <Title>
+          </Title>
+          <BackContent>
+          </BackContent>
+          <BackBackgroundImageURI>
+          </BackBackgroundImageURI>
+          <BackTitle>
+          </BackTitle>
+          <LargeBackgroundImageURI IsRelative="true" IsResource="false">WideBackground.png</LargeBackgroundImageURI>
+          <LargeBackContent />
+          <LargeBackBackgroundImageURI IsRelative="true" IsResource="false">
+          </LargeBackBackgroundImageURI>
+          <DeviceLockImageURI>
+          </DeviceLockImageURI>
+          <HasLarge>True</HasLarge>
+        </TemplateFlip>
+      </PrimaryToken>
+    </Tokens>
+    <Extensions>
+      <Extension ExtensionName="LockScreen_Background" ConsumerID="{111DFF24-AA15-4A96-8006-2BFF8122084F}" TaskID="WPtrakt" />
+      <Extension ExtensionName="LockScreen_Notification_TextField" ConsumerID="{111DFF24-AA15-4A96-8006-2BFF8122084F}" TaskID="WPtrakt" />
+      <!-- The "People_Connect" extension below is required to show connect tile information on 
+      pre-existent phone contacts in the people hub -->
+      <Extension ExtensionName="People_Connect" ConsumerID="{bedab396-3404-490c-822e-13309c687e97}" TaskID="_default" />
+      <!-- The "People_Connect_Manual" extension is optional and offers the phone user the 
+      ability to manually request a binding from your app for a contact that couldn't be automatically linked.
+      See ManualConnect.xaml for an example on how to let the user select which binding to link -->
+      <Extension ExtensionName="People_Connect_Manual" ConsumerID="{bedab396-3404-490c-822e-13309c687e97}" TaskID="_default" />
+    </Extensions>
+    <ScreenResolutions>
+      <ScreenResolution Name="ID_RESOLUTION_WVGA" />
+      <ScreenResolution Name="ID_RESOLUTION_WXGA" />
+      <ScreenResolution Name="ID_RESOLUTION_HD720P" />
+    </ScreenResolutions>
+  </App>
+</Deployment>

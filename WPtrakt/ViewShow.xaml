@@ -1,0 +1,295 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="WPtrakt.ViewShow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    SupportedOrientations="PortraitOrLandscape"  Orientation="Portrait"
+    shell:SystemTray.IsVisible="False" BackKeyPress="PhoneApplicationPage_BackKeyPress" Loaded="PhoneApplicationPage_Loaded">
+    <Grid x:Name="LayoutRoot">
+        <ProgressBar VerticalAlignment="Top" HorizontalAlignment="Left" Width="400" Visibility="Collapsed" Name="progressBarLoading" IsIndeterminate="True" />
+        <phone:Pivot  Title="{Binding Name}" Name="ShowPanorama" SelectionChanged="MoviePanorama_SelectionChanged">
+            <phone:PivotItem Header="Overview" >
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ListBox Grid.Column="1" Margin="0,0,0,-3" HorizontalAlignment="Stretch" Visibility="{Binding DetailVisibility}" SizeChanged="ListBox_SizeChanged">
+                        <ListBoxItem Height="Auto">
+                            <Grid HorizontalAlignment="Stretch">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Image VerticalAlignment="Top" Source="{Binding WallPaper}" Grid.Column="0" Height="265"/>
+                                <Image VerticalAlignment="Top" Grid.Row="0" Grid.Column="0" Name="RatingIcon"  HorizontalAlignment="Right" Width="40" Height="40"  Source="{Binding RatingImage}"/>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding Year}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
+                                    <TextBlock Text="{Binding Runtime}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}"  />
+                                    <TextBlock Margin="10 15 0 0" Text="{Binding GenreString}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"   />
+                                    <StackPanel  Margin="10 15 0 0" Orientation="Horizontal">
+                                        <Image Source="{Binding AllRatingImage}"  Height="25" Margin="0,0,3,0" />
+                                        <TextBlock Text="{Binding RatingString}" Margin="0 -2 0 0" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
+                                    </StackPanel>
+                                    <TextBlock Margin="10 3 0 0" Text="{Binding VotesString}" FontSize="20" Foreground="Gray" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" TextWrapping="Wrap"  />
+                                </StackPanel>
+                                <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Margin="0 10 0 0" Text="{Binding Overview}" FontSize="27" VerticalAlignment="Bottom" Style="{StaticResource PhoneTextLargeStyle}" Height="Auto" TextWrapping="Wrap" />
+                            </Grid>
+                        </ListBoxItem>
+                        <ListBoxItem>
+                            <StackPanel Margin="-10 0" Orientation="Horizontal" Height="150">
+                                <TextBlock Text="IMDB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="ImdbButton" Tap="ImdbButton_Tap" />
+                                <TextBlock Text="TVDB" FontSize="30" Style="{StaticResource PhoneTextLargeStyle}" TextDecorations="Underline" Name="TvdbButton" Tap="TvdbButton_Tap" />
+                            </StackPanel>
+                        </ListBoxItem>
+                    </ListBox>
+                </Grid>
+            </phone:PivotItem>
+            <phone:PivotItem Header="Episodes">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <phone:LongListSelector Grid.Row="0" ItemsSource="{Binding EpisodeItems}" Margin="0, 0, 0, 30" Name="EpisodeList" ItemRealized="EpisodeList_ItemRealized" ItemUnrealized="EpisodeList_ItemUnrealized">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.Triggers>
+                                        <!--Show a nice animation to fade the minimal content into the full content-->
+                                        <EventTrigger RoutedEvent="Grid.Loaded">
+                                            <BeginStoryboard>
+                                                <BeginStoryboard.Storyboard>
+                                                    <Storyboard x:Name="Animation">
+                                                        <DoubleAnimation Storyboard.TargetName="LeftMarker" Storyboard.TargetProperty="Opacity" From="0.5" To="0" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                        <DoubleAnimation Storyboard.TargetName="WatchlistIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                        <DoubleAnimation Storyboard.TargetName="SeenIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                        <DoubleAnimation Storyboard.TargetName="RatingIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                        <DoubleAnimation Storyboard.TargetName="EpisodeImage" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                            <DoubleAnimation.EasingFunction>
+                                                                <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                            </DoubleAnimation.EasingFunction>
+                                                        </DoubleAnimation>
+                                                    </Storyboard>
+                                                </BeginStoryboard.Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Grid.Triggers>
+
+                                    <Grid  Margin="0 3" Width="5" Name="LeftMarker" HorizontalAlignment="Left" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
+                                    <Grid  Margin="0 3" Width="{Binding NumberWidth}" VerticalAlignment="Top" HorizontalAlignment="Left" Height="84">
+                                        <TextBlock Grid.Row="0" FontSize="60" FontWeight="ExtraBold" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Episode}"  Style="{StaticResource PhoneTextLargeStyle}"/>
+                                    </Grid>
+                                    <StackPanel  Orientation="Horizontal" Tap="StackPanel_Tap">
+                                        <Grid Width="{Binding NumberWidth}" Visibility="{Binding ScreenVisibility}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Name="EpisodeImage" VerticalAlignment="Top" Margin="0 3" Opacity="0"  Grid.Column="0" Source="{Binding ScreenImage, Mode=TwoWay}"  HorizontalAlignment="Right"  Height="84" Visibility="{Binding ScreenVisibility}"/>
+                                            <Image Margin="0 3" Opacity="0" Name="WatchlistIcon" Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
+                                            <Image Margin="0 3" Opacity="0" Name="SeenIcon" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
+                                            <Image Margin="0 3" Opacity="0" Name="RatingIcon" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
+                                        </Grid>
+
+                                        <StackPanel Orientation="Vertical" Margin="{Binding TextMarginForEpisodeLoaded}">
+                                            <TextBlock  Height="Auto" MaxWidth="{Binding MaxEpisodeWidth}"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" FontSize="20" TextWrapping="Wrap" />
+                                            <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                        </StackPanel>
+
+                                        <toolkit:ContextMenuService.ContextMenu>
+                                            <toolkit:ContextMenu>
+                                                <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinEpisode_Click" />
+                                                <toolkit:MenuItem Header="Mark as seen" Visibility="{Binding ContextMarkAsWatchedVisibility}" Name="SeenEpisode" Click="SeenEpisode_Click" />
+                                                <toolkit:MenuItem Header="Unmark as seen" Visibility="{Binding ContextUnMarkAsWatchedVisibility}" Name="UnSeenEpisode" Click="UnSeenEpisode_Click" />
+                                                <toolkit:MenuItem Header="Add to watchlist" Visibility="{Binding ContextWatchlist}" Name="WatchlistEpisode" Click="WatchlistEpisode_Click" />
+                                                <toolkit:MenuItem Header="Remove from watchlist" Visibility="{Binding ContextUnWatchlist}" Name="RemoveWatchlistEpisode" Click="RemoveWatchlistEpisode_Click" />
+                                            </toolkit:ContextMenu>
+                                        </toolkit:ContextMenuService.ContextMenu>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                    </phone:LongListSelector>
+
+                    <Grid Grid.Row="0"  Name="SeasonGrid" Visibility="Collapsed">
+                        <ListBox ItemsSource="{Binding SeasonItems}" Name="SeasonsList" Width="400">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <toolkit:WrapPanel ItemWidth="200" ItemHeight="200"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="SeasonPanel" Background="{StaticResource PhoneAccentBrush}" Orientation="Horizontal" Margin="0,0,0,17"  Height="150" Width="150" Tap="SeasonPanel_Tap">
+                                        <TextBlock TextAlignment="Center" HorizontalAlignment="Center" Width="150" VerticalAlignment="Center" Text="{Binding}" Foreground="{StaticResource PhoneContrastBackgroundBrush}" FontSize="100" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Grid>
+            </phone:PivotItem>
+            <phone:PivotItem  Header="Unwatched" >
+                <Grid>
+                    <TextBlock  Name="NoUnWatchedEpisodes" Text="No unwatched episodes!" Visibility="Collapsed"  FontSize="30" HorizontalAlignment="Center"/>
+
+
+                    <phone:LongListSelector Grid.Row="1" ItemsSource="{Binding UnWatchedEpisodeItems}" x:Name="ListUnwatched" Margin="0,0, 0, 30" ItemRealized="EpisodeList_ItemRealized" ItemUnrealized="EpisodeList_ItemUnrealized">
+                        <phone:LongListSelector.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <Grid Background="{StaticResource PhoneAccentBrush}" Visibility="{Binding HeaderVisibility}">
+                                        <TextBlock Foreground="White" Margin="20 5" FontSize="30"  Text="{Binding Header}"/>
+                                    </Grid>
+
+                                    <Grid>
+                                        <Grid.Triggers>
+                                            <!--Show a nice animation to fade the minimal content into the full content-->
+                                            <EventTrigger RoutedEvent="Grid.Loaded">
+                                                <BeginStoryboard>
+                                                    <BeginStoryboard.Storyboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetName="LeftMarker" Storyboard.TargetProperty="Opacity" From="0.5" To="0" Duration="0:0:0.6">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+
+                                                            <DoubleAnimation Storyboard.TargetName="WatchlistIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+
+                                                            <DoubleAnimation Storyboard.TargetName="SeenIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+
+                                                            <DoubleAnimation Storyboard.TargetName="RatingIcon" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6">
+                                                                <DoubleAnimation.EasingFunction>
+                                                                    <PowerEase EasingMode="EaseIn" Power="3"/>
+                                                                </DoubleAnimation.EasingFunction>
+                                                            </DoubleAnimation>
+                                                        </Storyboard>
+                                                    </BeginStoryboard.Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Grid.Triggers>
+
+                                        <Grid  Margin="0 3" Width="5" Name="LeftMarker" HorizontalAlignment="Left" Grid.Column="0" Background="{StaticResource PhoneAccentBrush}" Opacity="0.5" />
+                                        <Grid  Margin="0 3" Width="{Binding NumberWidth}" VerticalAlignment="Top" HorizontalAlignment="Left" Height="84">
+                                            <TextBlock Grid.Row="0" FontSize="60" FontWeight="ExtraBold" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Episode}"  Style="{StaticResource PhoneTextLargeStyle}"/>
+                                        </Grid>
+                                        <StackPanel  Orientation="Horizontal" Tap="StackPanel_Tap">
+                                            <Grid Width="{Binding NumberWidth}" Visibility="{Binding ScreenVisibility}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image VerticalAlignment="Top" Margin="0 3"  Grid.Column="0" Source="{Binding ScreenImage}"  HorizontalAlignment="Right"  Height="84" Visibility="{Binding ScreenVisibility}"/>
+                                                <Image Margin="0 3" Opacity="0" Name="WatchlistIcon" Visibility="{Binding WatchlistVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Left" Width="25" Height="40"  Grid.Column="0" Source="Images/watchlist.png"/>
+                                                <Image Margin="0 3" Opacity="0" Name="SeenIcon" Visibility="{Binding SeenVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="50" Height="50"  Grid.Column="0" Source="Images/episode-watched.png"/>
+                                                <Image Margin="0 3" Opacity="0" Name="RatingIcon" Visibility="{Binding RatingVisibility}"  VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"  Grid.Column="0" Source="{Binding RatingImage}"/>
+                                            </Grid>
+
+                                            <StackPanel Orientation="Vertical" Margin="{Binding TextMarginForEpisodeLoaded}">
+                                                <TextBlock  Height="Auto" MaxWidth="{Binding MaxEpisodeWidth}"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" FontSize="20" TextWrapping="Wrap" />
+                                                <TextBlock  Height="50"  Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}" />
+                                            </StackPanel>
+
+                                            <toolkit:ContextMenuService.ContextMenu>
+                                                <toolkit:ContextMenu>
+                                                    <toolkit:MenuItem Header="Check In" Name="CheckinEpisode" Click="CheckinEpisode_Click" />
+                                                    <toolkit:MenuItem Header="Mark as seen" Visibility="{Binding ContextMarkAsWatchedVisibility}" Name="SeenEpisode" Click="SeenEpisode_Click" />
+                                                    <toolkit:MenuItem Header="Unmark as seen" Visibility="{Binding ContextUnMarkAsWatchedVisibility}" Name="UnSeenEpisode" Click="UnSeenEpisode_Click" />
+                                                    <toolkit:MenuItem Header="Add to watchlist" Visibility="{Binding ContextWatchlist}" Name="WatchlistEpisode" Click="WatchlistEpisode_Click" />
+                                                    <toolkit:MenuItem Header="Remove from watchlist" Visibility="{Binding ContextUnWatchlist}" Name="RemoveWatchlistEpisode" Click="RemoveWatchlistEpisode_Click" />
+                                                </toolkit:ContextMenu>
+                                            </toolkit:ContextMenuService.ContextMenu>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </phone:LongListSelector.ItemTemplate>
+                        
+                    </phone:LongListSelector>
+                </Grid>
+            </phone:PivotItem>
+            <phone:PivotItem Header="Similar">
+                <Grid>
+                    <ScrollViewer Grid.Row="1" Margin="0 0 0 80" HorizontalAlignment="Stretch">
+                        <StackPanel HorizontalAlignment="Left">
+                            <ListBox  Margin="0 0 0 80" Name="ListRecent" ItemsSource="{Binding RelatedShows}" ScrollViewer.VerticalScrollBarVisibility="Disabled" Width="420" HorizontalAlignment="Stretch">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <toolkit:WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate >
+                                    <DataTemplate>
+                                        <Image Margin="10 0 0 10" Source="{Binding PosterImage}" Width="120" VerticalAlignment="Top" Name="RelatedImage" Tap="RelatedImage_Tap"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <TextBlock Text="Nothing recently viewed..." Style="{StaticResource PhoneTextLargeStyle}" Visibility="Collapsed" Name="EmptyRecent"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </phone:PivotItem>
+            <phone:PivotItem Header="Shouts" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="75" />
+                    </Grid.RowDefinitions>
+                    <ListBox  Grid.Row="0" ItemsSource="{Binding ShoutItems}" Name="ShoutList" HorizontalAlignment="Stretch">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid  Margin="0,0,0,17" Height="Auto" VerticalAlignment="Stretch" Name="CommentGrid" Tap="CommentGrid_Tap">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="1" Source="{Binding ImageSource}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-60 12" Height="60"/>
+                                    <StackPanel Grid.Column="2" Orientation="Vertical" Height="Auto">
+                                        <TextBlock VerticalAlignment="Top" HorizontalAlignment="Left"  Height="50"  Text="{Binding Name}" Style="{StaticResource PhoneTextLargeStyle}" />
+                                        <TextBlock VerticalAlignment="Top"  HorizontalAlignment="Left" Height="Auto" TextWrapping="Wrap" Text="{Binding SubItemText}" Style="{StaticResource PhoneTextSubtleStyle}"  Name="ShoutText" MaxWidth="550" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBox Grid.Row="1" InputScope="Text" Name="ShoutText" HorizontalAlignment="Stretch" />
+                </Grid>
+            </phone:PivotItem>
+        </phone:Pivot>
+    </Grid>
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar    IsVisible="False" IsMenuEnabled="True">
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+</phone:PhoneApplicationPage>
